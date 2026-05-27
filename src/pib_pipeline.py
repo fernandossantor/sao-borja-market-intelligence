@@ -1,12 +1,12 @@
 import os
 import pandas as pd
 
-from src.robust_file_loader import (
+from robust_file_loader import (
     load_csv_robust,
     load_excel_robust
 )
 
-from src.territorial_filter import (
+from territorial_filter import (
     filter_sao_borja
 )
 

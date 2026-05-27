@@ -7,9 +7,9 @@ from datetime import datetime
 # CONFIG
 # =====================================
 
-BASE_PATH = "/content/drive/Meu Drive/Colab Notebooks/_sao_borja/raw"
+BASE_PATH = "/content/drive/MyDrive/Colab Notebooks/_sao_borja/raw"
 
-EXPORT_PATH = "/content/drive/Meu Drive/Colab Notebooks/_sao_borja/exports"
+EXPORT_PATH = "/content/drive/MyDrive/Colab Notebooks/_sao_borja/exports"
 
 VALID_EXTENSIONS = [
     "csv",

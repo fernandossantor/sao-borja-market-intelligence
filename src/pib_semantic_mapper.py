@@ -109,6 +109,18 @@ def detect_domain(column_name):
         return "year"
 
     # =====================================
+    # METADATA / GARBAGE
+    # =====================================
+
+    if (
+        "TABELA" in normalized
+        or "UNNAMED" in normalized
+    ):
+        return "structural_noise"
+
+    return "unmapped"
+
+    # =====================================
     # PIB
     # =====================================
 
@@ -148,18 +160,6 @@ def detect_domain(column_name):
 
     if "IMPOSTOS" in normalized:
         return "taxes"
-
-    # =====================================
-    # METADATA / GARBAGE
-    # =====================================
-
-    if (
-        "TABELA" in normalized
-        or "UNNAMED" in normalized
-    ):
-        return "structural_noise"
-
-    return "unmapped"
 
 # =========================================
 # LOAD DATA

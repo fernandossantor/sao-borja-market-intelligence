@@ -16,7 +16,7 @@ TARGET_ALIASES = [
 ]
 
 # =========================================
-# NORMALIZATION
+# TEXT NORMALIZATION
 # =========================================
 
 def normalize_text(text):
@@ -39,7 +39,7 @@ def normalize_text(text):
     return text.strip()
 
 # =========================================
-# PREFILTER DETECTION
+# PREFILTERED DATASET DETECTION
 # =========================================
 
 def detect_prefiltered_dataset(file_name):
@@ -54,7 +54,7 @@ def detect_prefiltered_dataset(file_name):
     return False
 
 # =========================================
-# COLUMN DETECTION
+# TERRITORIAL COLUMN DETECTION
 # =========================================
 
 def detect_territorial_columns(df):
@@ -67,20 +67,40 @@ def detect_territorial_columns(df):
 
         normalized = normalize_text(col)
 
-        # Municipality
-        if any(x in normalized for x in [
-            "MUNICIP",
+        # ---------------------------------
+        # IBGE IDENTIFIER
+        # ---------------------------------
+
+        if (
+            "CODIGO" in normalized
+            and "MUNIC" in normalized
+        ):
+
+            ibge_cols.append(col)
+
+        elif "IBGE" in normalized:
+
+            ibge_cols.append(col)
+
+        # ---------------------------------
+        # MUNICIPALITY NAME
+        # ---------------------------------
+
+        elif any(x in normalized for x in [
+            "NOME DO MUNICIPIO",
+            "MUNICIPIO",
             "CIDADE"
         ]):
+
             municipality_cols.append(col)
 
+        # ---------------------------------
         # UF
-        if "UF" in normalized:
-            uf_cols.append(col)
+        # ---------------------------------
 
-        # IBGE
-        if "IBGE" in normalized:
-            ibge_cols.append(col)
+        elif "UF" in normalized:
+
+            uf_cols.append(col)
 
     return {
         "municipality": municipality_cols,
@@ -89,14 +109,89 @@ def detect_territorial_columns(df):
     }
 
 # =========================================
-# FILTER FUNCTION
+# FILTER BY MUNICIPALITY
+# =========================================
+
+def filter_by_municipality(df, municipality_cols, uf_cols):
+
+    col = municipality_cols[0]
+
+    filtered_df = df[
+        df[col]
+        .astype(str)
+        .apply(normalize_text)
+        == TARGET_CITY
+    ]
+
+    print(
+        f"[INFO] filtro município -> {col}"
+    )
+
+    # -------------------------------------
+    # UF VALIDATION
+    # -------------------------------------
+
+    if uf_cols:
+
+        uf_col = uf_cols[0]
+
+        filtered_df = filtered_df[
+            filtered_df[uf_col]
+            .astype(str)
+            .apply(normalize_text)
+            == TARGET_UF
+        ]
+
+        print(
+            f"[INFO] filtro UF -> {uf_col}"
+        )
+
+    return filtered_df
+
+# =========================================
+# FILTER BY IBGE
+# =========================================
+
+def filter_by_ibge(df, ibge_cols):
+
+    col = ibge_cols[0]
+
+    normalized_ibge = (
+        df[col]
+        .astype(str)
+        .str.replace(".0", "", regex=False)
+        .str.replace(".", "", regex=False)
+        .str.strip()
+    )
+
+    filtered_df = df[
+        normalized_ibge == TARGET_IBGE
+    ]
+
+    print(
+        f"[INFO] filtro IBGE -> {col}"
+    )
+
+    return filtered_df
+
+# =========================================
+# MAIN FILTER FUNCTION
 # =========================================
 
 def filter_sao_borja(df, file_name):
 
-    # -------------------------------------
+    # =====================================
+    # REMOVE EMPTY COLUMNS
+    # =====================================
+
+    df = df.dropna(
+        axis=1,
+        how="all"
+    )
+
+    # =====================================
     # PREFILTERED DATASET
-    # -------------------------------------
+    # =====================================
 
     if detect_prefiltered_dataset(file_name):
 
@@ -106,9 +201,9 @@ def filter_sao_borja(df, file_name):
 
         return df, "prefiltered_dataset"
 
-    # -------------------------------------
+    # =====================================
     # DETECT COLUMNS
-    # -------------------------------------
+    # =====================================
 
     cols = detect_territorial_columns(df)
 
@@ -116,71 +211,63 @@ def filter_sao_borja(df, file_name):
     uf_cols = cols["uf"]
     ibge_cols = cols["ibge"]
 
-    filtered_df = df.copy()
+    print(
+        f"[DEBUG] municipality_cols={municipality_cols}"
+    )
 
-    # -------------------------------------
-    # FILTER BY MUNICIPALITY
-    # -------------------------------------
+    print(
+        f"[DEBUG] uf_cols={uf_cols}"
+    )
+
+    print(
+        f"[DEBUG] ibge_cols={ibge_cols}"
+    )
+
+    # =====================================
+    # PRIORITY 1:
+    # MUNICIPALITY + UF
+    # =====================================
 
     if municipality_cols:
 
-        col = municipality_cols[0]
-
-        filtered_df = filtered_df[
-            filtered_df[col]
-            .astype(str)
-            .apply(normalize_text)
-            .isin(TARGET_ALIASES)
-        ]
-
-        print(
-            f"[INFO] filtro por município -> {col}"
+        filtered_df = filter_by_municipality(
+            df,
+            municipality_cols,
+            uf_cols
         )
 
-        # UF validation
-        if uf_cols:
+        if len(filtered_df) > 0:
 
-            uf_col = uf_cols[0]
-
-            filtered_df = filtered_df[
-                filtered_df[uf_col]
-                .astype(str)
-                .apply(normalize_text)
-                == TARGET_UF
-            ]
-
-            print(
-                f"[INFO] filtro UF -> {uf_col}"
+            return (
+                filtered_df,
+                "filtered_by_city"
             )
 
-        return filtered_df, "filtered_by_city"
-
-    # -------------------------------------
-    # FILTER BY IBGE
-    # -------------------------------------
+    # =====================================
+    # PRIORITY 2:
+    # IBGE
+    # =====================================
 
     if ibge_cols:
 
-        col = ibge_cols[0]
-
-        filtered_df = filtered_df[
-            filtered_df[col]
-            .astype(str)
-            .str.contains(TARGET_IBGE, na=False)
-        ]
-
-        print(
-            f"[INFO] filtro por IBGE -> {col}"
+        filtered_df = filter_by_ibge(
+            df,
+            ibge_cols
         )
 
-        return filtered_df, "filtered_by_ibge"
+        if len(filtered_df) > 0:
 
-    # -------------------------------------
-    # NO FILTER FOUND
-    # -------------------------------------
+            return (
+                filtered_df,
+                "filtered_by_ibge"
+            )
+
+    # =====================================
+    # NO TERRITORIAL MATCH
+    # =====================================
 
     print(
-        "[WARNING] Nenhum filtro territorial encontrado"
+        "[WARNING] Nenhum registro territorial encontrado"
     )
 
-    return df, "no_territorial_filter"
+    return df.iloc[0:0], "no_match"

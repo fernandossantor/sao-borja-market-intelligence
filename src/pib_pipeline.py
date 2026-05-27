@@ -6,6 +6,8 @@ from robust_file_loader import (
     load_excel_robust
 )
 
+df = df.dropna(axis=1, how="all")
+
 from territorial_filter import (
     filter_sao_borja
 )

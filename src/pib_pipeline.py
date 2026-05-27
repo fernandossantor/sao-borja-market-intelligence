@@ -148,15 +148,15 @@ if all_dataframes:
         "pib_consolidated.csv"
     )
 
-    parquet_path = os.path.join(
-        EXPORT_PATH,
-        "pib_consolidated.parquet"
-    )
+   # parquet_path = os.path.join(
+#     EXPORT_PATH,
+#     "pib_consolidated.parquet"
+# )
 
-    pib_df.to_csv(
-        csv_path,
-        index=False
-    )
+# pib_df.to_parquet(
+#     parquet_path,
+#     index=False
+# )
 
     pib_df.to_parquet(
         parquet_path,

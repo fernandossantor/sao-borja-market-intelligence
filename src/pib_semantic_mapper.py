@@ -96,36 +96,44 @@ def detect_domain(column_name):
     normalized = normalize_text(column_name)
 
     # =====================================
-    # HIGH PRIORITY EXACT MATCHES
+    # STRUCTURAL NOISE (HIGHEST PRIORITY)
     # =====================================
 
-    if "CODIGO DO MUNICIPIO" in normalized:
-        return "ibge_code"
-
-    if "NOME DO MUNICIPIO" in normalized:
-        return "municipality"
-
-    if "ANO DE REFERENCIA" in normalized:
-        return "year"
+    if any(x in normalized for x in [
+        "TABELA ",
+        "UNNAMED",
+        "VARIAVEL -",
+        "_SOURCE_FILE",
+        "_TERRITORIAL_METHOD"
+    ]):
+        return "structural_noise"
 
     # =====================================
-    # METADATA / GARBAGE
+    # IDENTIFIERS
     # =====================================
 
     if (
-        "TABELA" in normalized
-        or "UNNAMED" in normalized
+        "CODIGO" in normalized
+        and "MUNIC" in normalized
     ):
-        return "structural_noise"
+        return "ibge_code"
 
-    return "unmapped"
+    if (
+        "NOME" in normalized
+        and "MUNIC" in normalized
+    ):
+        return "municipality"
+
+    if "ANO" in normalized:
+        return "year"
 
     # =====================================
     # PIB
     # =====================================
 
     if (
-        "PIB PER CAPITA" in normalized
+        "PIB" in normalized
+        and "PER CAPITA" in normalized
     ):
         return "pib_per_capita"
 
@@ -139,27 +147,38 @@ def detect_domain(column_name):
     # VAB
     # =====================================
 
-    if "AGROPECUARIA" in normalized:
+    if "AGROPECU" in normalized:
         return "vab_agro"
 
-    if "INDUSTRIA" in normalized:
+    if "INDUSTR" in normalized:
         return "vab_industria"
 
-    if "SERVICOS" in normalized:
+    if "SERVIC" in normalized:
         return "vab_servicos"
 
     if (
-        "ADMINISTRACAO" in normalized
-        or "SEGURIDADE SOCIAL" in normalized
+        "ADMINISTRAC" in normalized
+        or "SEGURIDADE" in normalized
     ):
         return "vab_publico"
+
+    if (
+        "VAB TOTAL" in normalized
+    ):
+        return "vab_total"
 
     # =====================================
     # TAXES
     # =====================================
 
-    if "IMPOSTOS" in normalized:
+    if "IMPOST" in normalized:
         return "taxes"
+
+    # =====================================
+    # UNKNOWN
+    # =====================================
+
+    return "unmapped"
 
 # =========================================
 # LOAD DATA

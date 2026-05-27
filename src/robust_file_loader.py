@@ -1,6 +1,6 @@
 import pandas as pd
 import csv
-from src.brazilian_data_rules import (
+from brazilian_data_rules import (
     SUPPORTED_ENCODINGS,
     SUPPORTED_DELIMITERS
 )

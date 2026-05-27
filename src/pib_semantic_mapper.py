@@ -95,12 +95,69 @@ def detect_domain(column_name):
 
     normalized = normalize_text(column_name)
 
-    for domain, keywords in DOMAIN_RULES.items():
+    # =====================================
+    # HIGH PRIORITY EXACT MATCHES
+    # =====================================
 
-        for keyword in keywords:
+    if "CODIGO DO MUNICIPIO" in normalized:
+        return "ibge_code"
 
-            if keyword in normalized:
-                return domain
+    if "NOME DO MUNICIPIO" in normalized:
+        return "municipality"
+
+    if "ANO DE REFERENCIA" in normalized:
+        return "year"
+
+    # =====================================
+    # PIB
+    # =====================================
+
+    if (
+        "PIB PER CAPITA" in normalized
+    ):
+        return "pib_per_capita"
+
+    if (
+        "PIB" in normalized
+        and "PER CAPITA" not in normalized
+    ):
+        return "pib_total"
+
+    # =====================================
+    # VAB
+    # =====================================
+
+    if "AGROPECUARIA" in normalized:
+        return "vab_agro"
+
+    if "INDUSTRIA" in normalized:
+        return "vab_industria"
+
+    if "SERVICOS" in normalized:
+        return "vab_servicos"
+
+    if (
+        "ADMINISTRACAO" in normalized
+        or "SEGURIDADE SOCIAL" in normalized
+    ):
+        return "vab_publico"
+
+    # =====================================
+    # TAXES
+    # =====================================
+
+    if "IMPOSTOS" in normalized:
+        return "taxes"
+
+    # =====================================
+    # METADATA / GARBAGE
+    # =====================================
+
+    if (
+        "TABELA" in normalized
+        or "UNNAMED" in normalized
+    ):
+        return "structural_noise"
 
     return "unmapped"
 

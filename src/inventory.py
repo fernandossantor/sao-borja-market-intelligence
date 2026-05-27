@@ -24,31 +24,74 @@ VALID_EXTENSIONS = [
 # =====================================
 
 def infer_category(path):
+
     path_lower = path.lower()
 
+    # PIB
     if "pib" in path_lower:
         return "pib"
 
-    elif "rais" in path_lower:
+    # RAIS / trabalho / empresas
+    elif (
+        "rais" in path_lower or
+        "empreg" in path_lower or
+        "empresa" in path_lower or
+        "cbo" in path_lower or
+        "cnae" in path_lower
+    ):
         return "rais"
 
-    elif "agro" in path_lower:
+    # Agro
+    elif (
+        "agro" in path_lower or
+        "pecu" in path_lower or
+        "silvic" in path_lower or
+        "lavoura" in path_lower or
+        "rebanho" in path_lower
+    ):
         return "agro"
 
-    elif "social" in path_lower:
+    # Social
+    elif (
+        "bolsa" in path_lower or
+        "social" in path_lower or
+        "suas" in path_lower or
+        "cadunico" in path_lower
+    ):
         return "social"
 
-    elif "fiscal" in path_lower:
+    # Fiscal
+    elif (
+        "fpm" in path_lower or
+        "fundeb" in path_lower or
+        "itr" in path_lower or
+        "royalt" in path_lower or
+        "compensa" in path_lower or
+        "fiscal" in path_lower or
+        "orcament" in path_lower
+    ):
         return "fiscal"
 
-    elif "institutional" in path_lower:
+    # Institutional
+    elif (
+        "servid" in path_lower or
+        "remuner" in path_lower or
+        "aposent" in path_lower or
+        "pens" in path_lower or
+        "militar" in path_lower or
+        "cadastro" in path_lower or
+        "afast" in path_lower or
+        "observ" in path_lower or
+        "bacen" in path_lower
+    ):
         return "institutional"
 
+    # PDFs
     elif "pdf" in path_lower:
         return "pdf_context"
 
     return "unknown"
-
+    
 # =====================================
 # INVENTORY
 # =====================================

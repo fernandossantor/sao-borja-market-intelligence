@@ -119,26 +119,6 @@ def filter_sao_borja(df, file_name):
     filtered_df = df.copy()
 
     # -------------------------------------
-    # FILTER BY IBGE
-    # -------------------------------------
-
-    if ibge_cols:
-
-        col = ibge_cols[0]
-
-        filtered_df = filtered_df[
-            filtered_df[col]
-            .astype(str)
-            .str.contains(TARGET_IBGE, na=False)
-        ]
-
-        print(
-            f"[INFO] filtro por IBGE -> {col}"
-        )
-
-        return filtered_df, "filtered_by_ibge"
-
-    # -------------------------------------
     # FILTER BY MUNICIPALITY
     # -------------------------------------
 
@@ -174,6 +154,26 @@ def filter_sao_borja(df, file_name):
             )
 
         return filtered_df, "filtered_by_city"
+
+    # -------------------------------------
+    # FILTER BY IBGE
+    # -------------------------------------
+
+    if ibge_cols:
+
+        col = ibge_cols[0]
+
+        filtered_df = filtered_df[
+            filtered_df[col]
+            .astype(str)
+            .str.contains(TARGET_IBGE, na=False)
+        ]
+
+        print(
+            f"[INFO] filtro por IBGE -> {col}"
+        )
+
+        return filtered_df, "filtered_by_ibge"
 
     # -------------------------------------
     # NO FILTER FOUND

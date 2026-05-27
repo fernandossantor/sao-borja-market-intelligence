@@ -75,6 +75,8 @@ def infer_category(path):
     # Institutional
     elif (
         "servid" in path_lower or
+        "serv_por_mun" in path_lower or
+        "tabela5881" in path_lower or
         "remuner" in path_lower or
         "aposent" in path_lower or
         "pens" in path_lower or

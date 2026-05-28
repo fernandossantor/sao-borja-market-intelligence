@@ -78,7 +78,10 @@ for _, row in pib_files.iterrows():
 
         print(f"[INFO] linhas carregadas: {len(df)}")
 
-        filtered_df, method = filter_sao_borja(df)
+        filtered_df, method = filter_sao_borja(
+        df,
+        file_name
+        )
 
         print(f"[INFO] método territorial: {method}")
         print(f"[INFO] linhas após filtro: {len(filtered_df)}")

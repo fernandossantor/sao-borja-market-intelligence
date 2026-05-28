@@ -2,11 +2,11 @@ import pandas as pd
 import os
 import glob
 
-from smart_excel_loader import (
+from loaders.smart_excel_loader import (
     load_excel_smart
 )
 
-from territorial_filter import (
+from territorial.territorial_filter import (
     filter_sao_borja
 )
 

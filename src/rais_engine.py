@@ -5,7 +5,7 @@ from loaders.smart_excel_loader import (
     load_excel_smart
 )
 
-from loaders.robust_file_loader import (
+from robust_file_loader import (
     load_csv_robust
 )
 

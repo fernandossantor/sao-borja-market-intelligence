@@ -1,5 +1,3 @@
-%%writefile src/domains/rais/semantic/rais_semantic_mapper.py
-
 import pandas as pd
 import os
 

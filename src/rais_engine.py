@@ -7,7 +7,7 @@ from robust_file_loader import (
     load_excel_robust
 )
 
-from src.territorial_filter import (
+from territorial_filter import (
     filter_sao_borja
 )
 

@@ -1,6 +1,5 @@
 import pandas as pd
 import os
-import unicodedata
 
 # =========================================
 # CONFIG
@@ -11,187 +10,79 @@ EXPORT_PATH = (
     "Colab Notebooks/_sao_borja/exports"
 )
 
-INPUT_FILE = os.path.join(
-    EXPORT_PATH,
-    "pib_consolidated.csv"
+# =========================================
+# LOAD PIB
+# =========================================
+
+pib_df = pd.read_csv(
+    f"{EXPORT_PATH}/pib_consolidated.csv"
 )
-
-# =========================================
-# NORMALIZATION
-# =========================================
-
-def normalize_text(text):
-
-    if pd.isna(text):
-        return ""
-
-    text = str(text).upper()
-
-    text = unicodedata.normalize(
-        "NFKD",
-        text
-    ).encode(
-        "ASCII",
-        "ignore"
-    ).decode(
-        "utf-8"
-    )
-
-    return text.strip()
-
-# =========================================
-# ECONOMIC DOMAINS
-# =========================================
-
-DOMAIN_RULES = {
-
-    "year": [
-        "ANO"
-    ],
-
-    "municipality": [
-        "MUNICIPIO"
-    ],
-
-    "ibge_code": [
-        "CODIGO DO MUNICIPIO"
-    ],
-
-    "pib_total": [
-        "PIB (EM R$)"
-    ],
-
-    "pib_per_capita": [
-        "PIB PER CAPITA"
-    ],
-
-    "vab_agro": [
-        "AGROPECUARIA"
-    ],
-
-    "vab_industria": [
-        "INDUSTRIA"
-    ],
-
-    "vab_servicos": [
-        "SERVICOS"
-    ],
-
-    "vab_publico": [
-        "ADMINISTRACAO",
-        "SEGURIDADE SOCIAL"
-    ],
-
-    "taxes": [
-        "IMPOSTOS"
-    ]
-}
-
-# =========================================
-# DOMAIN DETECTOR
-# =========================================
-
-def detect_domain(column_name):
-
-    normalized = normalize_text(column_name)
-
-    # =====================================
-    # STRUCTURAL NOISE (HIGHEST PRIORITY)
-    # =====================================
-
-    if any(x in normalized for x in [
-        "TABELA ",
-        "UNNAMED",
-        "VARIAVEL -",
-        "_SOURCE_FILE",
-        "_TERRITORIAL_METHOD"
-    ]):
-        return "structural_noise"
-
-    # =====================================
-    # IDENTIFIERS
-    # =====================================
-
-    if (
-        "CODIGO" in normalized
-        and "MUNIC" in normalized
-    ):
-        return "ibge_code"
-
-    if (
-        "NOME" in normalized
-        and "MUNIC" in normalized
-    ):
-        return "municipality"
-
-    if "ANO" in normalized:
-        return "year"
-
-    # =====================================
-    # PIB
-    # =====================================
-
-    if (
-        "PIB" in normalized
-        and "PER CAPITA" in normalized
-    ):
-        return "pib_per_capita"
-
-    if (
-        "PIB" in normalized
-        and "PER CAPITA" not in normalized
-    ):
-        return "pib_total"
-
-    # =====================================
-    # VAB
-    # =====================================
-
-    if "AGROPECU" in normalized:
-        return "vab_agro"
-
-    if "INDUSTR" in normalized:
-        return "vab_industria"
-
-    if "SERVIC" in normalized:
-        return "vab_servicos"
-
-    if (
-        "ADMINISTRAC" in normalized
-        or "SEGURIDADE" in normalized
-    ):
-        return "vab_publico"
-
-    if (
-        "VAB TOTAL" in normalized
-    ):
-        return "vab_total"
-
-    # =====================================
-    # TAXES
-    # =====================================
-
-    if "IMPOST" in normalized:
-        return "taxes"
-
-    # =====================================
-    # UNKNOWN
-    # =====================================
-
-    return "unmapped"
-
-# =========================================
-# LOAD DATA
-# =========================================
-
-df = pd.read_csv(INPUT_FILE)
 
 print("\n===================================")
 print("PIB CONSOLIDATED LOADED")
 print("===================================\n")
 
-print(f"Linhas: {len(df)}")
-print(f"Colunas: {len(df.columns)}")
+print(f"Linhas: {len(pib_df)}")
+print(f"Colunas: {len(pib_df.columns)}")
+
+# =========================================
+# DOMAIN RULES
+# =========================================
+
+DOMAIN_RULES = {
+
+    "year": [
+        "ano"
+    ],
+
+    "municipality": [
+        "município",
+        "municipio"
+    ],
+
+    "ibge_code": [
+        "código do município",
+        "codigo do municipio"
+    ],
+
+    "vab_agro": [
+        "agropecuária",
+        "agropecuaria"
+    ],
+
+    "vab_industria": [
+        "indústria",
+        "industria"
+    ],
+
+    "vab_servicos": [
+        "serviços",
+        "servicos"
+    ],
+
+    "vab_publico": [
+        "administração",
+        "administracao",
+        "seguridade"
+    ],
+
+    "vab_total": [
+        "vab total"
+    ],
+
+    "taxes": [
+        "impostos"
+    ],
+
+    "pib_total": [
+        "pib (em r$)",
+        "produto interno bruto"
+    ],
+
+    "pib_per_capita": [
+        "per capita"
+    ]
+}
 
 # =========================================
 # COLUMN MAPPING
@@ -199,16 +90,47 @@ print(f"Colunas: {len(df.columns)}")
 
 mapping_results = []
 
-for col in df.columns:
+for col in pib_df.columns:
 
-    domain = detect_domain(col)
+    col_lower = str(col).lower()
+
+    assigned_domain = "unmapped"
+
+    # ================================
+    # STRUCTURAL NOISE
+    # ================================
+
+    if (
+        "unnamed" in col_lower
+        or col_lower.startswith("_")
+    ):
+
+        assigned_domain = "structural_noise"
+
+    else:
+
+        for domain, keywords in DOMAIN_RULES.items():
+
+            for kw in keywords:
+
+                if kw in col_lower:
+
+                    assigned_domain = domain
+                    break
+
+            if assigned_domain != "unmapped":
+                break
 
     mapping_results.append({
+
         "column_name": col,
-        "economic_domain": domain
+        "economic_domain": assigned_domain
+
     })
 
-mapping_df = pd.DataFrame(mapping_results)
+mapping_df = pd.DataFrame(
+    mapping_results
+)
 
 # =========================================
 # OUTPUT
@@ -224,13 +146,13 @@ print(mapping_df)
 # EXPORT
 # =========================================
 
-csv_path = os.path.join(
+export_path = os.path.join(
     EXPORT_PATH,
     "pib_semantic_mapping.csv"
 )
 
 mapping_df.to_csv(
-    csv_path,
+    export_path,
     index=False
 )
 
@@ -238,4 +160,4 @@ print("\n===================================")
 print("EXPORT FINALIZADO")
 print("===================================\n")
 
-print(csv_path)
+print(export_path)

@@ -1,12 +1,12 @@
 import pandas as pd
 import os
 
-from robust_file_loader import (
-    load_csv_robust
-)
-
 from loaders.smart_excel_loader import (
     load_excel_smart
+)
+
+from loaders.robust_file_loader import (
+    load_csv_robust
 )
 
 from territorial.territorial_filter import (
@@ -17,31 +17,18 @@ from territorial.territorial_filter import (
 # CONFIG
 # =========================================
 
-BASE_PATH = (
+EXPORT_PATH = (
     "/content/drive/MyDrive/"
-    "Colab Notebooks/_sao_borja"
-)
-
-RAW_PATH = os.path.join(
-    BASE_PATH,
-    "raw"
-)
-
-EXPORT_PATH = os.path.join(
-    BASE_PATH,
-    "exports"
+    "Colab Notebooks/_sao_borja/exports"
 )
 
 # =========================================
-# INVENTORY
+# LOAD INVENTORY
 # =========================================
 
-inventory_path = os.path.join(
-    EXPORT_PATH,
-    "inventory.csv"
+inventory = pd.read_csv(
+    f"{EXPORT_PATH}/inventory.csv"
 )
-
-inventory = pd.read_csv(inventory_path)
 
 # =========================================
 # FILTER RAIS FILES
@@ -55,16 +42,18 @@ print("\n===================================")
 print("RAIS FILES DETECTED")
 print("===================================\n")
 
-print(rais_files[[
-    "file_name",
-    "full_path"
-]])
+print(
+    rais_files[[
+        "file_name",
+        "full_path"
+    ]]
+)
 
 # =========================================
-# CONSOLIDATION
+# STORAGE
 # =========================================
 
-dfs = []
+valid_dataframes = []
 
 # =========================================
 # PROCESS FILES
@@ -81,11 +70,11 @@ for _, row in rais_files.iterrows():
 
     try:
 
-        # ==========================
+        # =================================
         # LOAD
-        # ==========================
+        # =================================
 
-        if file_path.endswith(".csv"):
+        if file_name.endswith(".csv"):
 
             df = load_csv_robust(file_path)
 
@@ -94,30 +83,87 @@ for _, row in rais_files.iterrows():
             df = load_excel_smart(file_path)
 
         print(f"[INFO] linhas carregadas: {len(df)}")
+        print(f"[INFO] colunas carregadas: {len(df.columns)}")
 
-        # ==========================
-        # FILTER
-        # ==========================
+        # =================================
+        # MINIMUM STRUCTURE
+        # =================================
+
+        if len(df) < 5:
+
+            print("[SKIP] poucas linhas")
+            continue
+
+        if len(df.columns) < 2:
+
+            print("[SKIP] poucas colunas")
+            continue
+
+        # =================================
+        # TERRITORIAL FILTER
+        # =================================
 
         filtered_df, method = filter_sao_borja(
-        df,
-        file_name
+            df,
+            file_name
         )
 
         print(f"[INFO] método territorial: {method}")
         print(f"[INFO] linhas após filtro: {len(filtered_df)}")
 
+        # =================================
+        # EMPTY
+        # =================================
+
         if len(filtered_df) == 0:
+
+            print("[SKIP] sem dados territoriais")
             continue
 
-        # ==========================
-        # METADATA
-        # ==========================
+        # =================================
+        # CLEAN EMPTY
+        # =================================
+
+        filtered_df = filtered_df.dropna(
+            axis=1,
+            how="all"
+        )
+
+        # =================================
+        # REMOVE UNNAMED
+        # =================================
+
+        filtered_df = filtered_df.loc[
+            :,
+            ~filtered_df.columns.astype(str)
+            .str.contains("^Unnamed")
+        ]
+
+        # =================================
+        # REJECT HORIZONTAL GARBAGE
+        # =================================
+
+        if len(filtered_df.columns) > 40:
+
+            print("[SKIP] estrutura horizontal inválida")
+            continue
+
+        # =================================
+        # ADD METADATA
+        # =================================
 
         filtered_df["_source_file"] = file_name
         filtered_df["_territorial_method"] = method
 
-        dfs.append(filtered_df)
+        # =================================
+        # STORE
+        # =================================
+
+        valid_dataframes.append(
+            filtered_df
+        )
+
+        print("[OK] dataframe válido armazenado")
 
     except Exception as e:
 
@@ -127,32 +173,42 @@ for _, row in rais_files.iterrows():
 # FINAL CONSOLIDATION
 # =========================================
 
+if len(valid_dataframes) == 0:
+
+    raise Exception(
+        "Nenhum dataframe RAIS válido."
+    )
+
 rais_df = pd.concat(
-    dfs,
+    valid_dataframes,
     ignore_index=True
 )
+
+# =========================================
+# OUTPUT
+# =========================================
 
 print("\n===================================")
 print("RAIS CONSOLIDATED")
 print("===================================\n")
 
-print(f"Linhas: {len(rais_df)}")
-print(f"Colunas: {len(rais_df.columns)}")
+print(rais_df.shape)
 
-print("\nColunas encontradas:\n")
-print(list(rais_df.columns))
+print("\nColunas:\n")
+
+print(rais_df.columns.tolist())
 
 # =========================================
 # EXPORT
 # =========================================
 
-output_path = os.path.join(
+export_path = os.path.join(
     EXPORT_PATH,
     "rais_consolidated.csv"
 )
 
 rais_df.to_csv(
-    output_path,
+    export_path,
     index=False
 )
 
@@ -160,4 +216,4 @@ print("\n===================================")
 print("EXPORT FINALIZADO")
 print("===================================\n")
 
-print(output_path)
+print(export_path)

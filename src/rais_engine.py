@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import glob
 
-from src.robust_file_loader import (
+from robust_file_loader import (
     load_csv_robust,
     load_excel_robust
 )

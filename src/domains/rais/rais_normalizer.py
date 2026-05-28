@@ -27,7 +27,7 @@ print("===================================\n")
 print(df.shape)
 
 # =========================================
-# DETECT CNAE COLUMN
+# FIRST COLUMN
 # =========================================
 
 first_col = df.columns[0]
@@ -39,74 +39,104 @@ print("===================================\n")
 print(first_col)
 
 # =========================================
-# KEEP VALID ROWS
+# NORMALIZATION
 # =========================================
 
-valid_rows = []
+records = []
 
 for idx, row in df.iterrows():
 
-    value = str(row[first_col])
+    try:
 
-    # ================================
-    # REMOVE NOISE
-    # ================================
+        cnae_value = str(row[first_col]).strip()
 
-    if (
-        value == "nan"
-        or "fonte" in value.lower()
-        or "são borja" in value.lower()
-        or "unnamed" in value.lower()
-    ):
-        continue
+        # =================================
+        # SKIP INVALID
+        # =================================
 
-    # ================================
-    # KEEP ECONOMIC ROWS
-    # ================================
+        if (
+            cnae_value == "nan"
+            or cnae_value == ""
+            or "fonte" in cnae_value.lower()
+            or "são borja" in cnae_value.lower()
+            or "unnamed" in cnae_value.lower()
+        ):
+            continue
 
-    numeric_values = pd.to_numeric(
-        row,
-        errors="coerce"
-    )
+        # =================================
+        # FIND NUMERIC VALUES
+        # =================================
 
-    numeric_count = numeric_values.notna().sum()
+        numeric_candidates = []
 
-    if numeric_count > 0:
+        for value in row.values:
 
-        valid_rows.append({
+            try:
 
-            "cnae": value,
-            "value": numeric_values.max()
+                numeric = pd.to_numeric(
+                    value,
+                    errors="coerce"
+                )
+
+                if pd.notna(numeric):
+
+                    numeric_candidates.append(
+                        float(numeric)
+                    )
+
+            except:
+                continue
+
+        # =================================
+        # NO NUMBERS
+        # =================================
+
+        if len(numeric_candidates) == 0:
+            continue
+
+        # =================================
+        # STORE
+        # =================================
+
+        records.append({
+
+            "cnae": cnae_value,
+            "value": max(numeric_candidates)
 
         })
 
-# =========================================
-# CLEAN DATAFRAME
-# =========================================
-
-normalized_df = pd.DataFrame(valid_rows)
+    except:
+        continue
 
 # =========================================
-# CLEAN CNAE
+# BUILD DATAFRAME
 # =========================================
+
+normalized_df = pd.DataFrame(records)
+
+# =========================================
+# EMPTY CHECK
+# =========================================
+
+if len(normalized_df) == 0:
+
+    raise Exception(
+        "Nenhum registro econômico encontrado."
+    )
+
+# =========================================
+# CLEAN
+# =========================================
+
+normalized_df = normalized_df.drop_duplicates()
+
+normalized_df = normalized_df.dropna()
 
 normalized_df["cnae"] = (
     normalized_df["cnae"]
     .astype(str)
     .str.strip()
 )
-
-# =========================================
-# REMOVE DUPLICATES
-# =========================================
-
-normalized_df = normalized_df.drop_duplicates()
-
-# =========================================
-# REMOVE EMPTY
-# =========================================
-
-normalized_df = normalized_df.dropna()
 
 # =========================================
 # OUTPUT

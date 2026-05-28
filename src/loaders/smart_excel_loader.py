@@ -269,10 +269,6 @@ def load_excel_smart(file_path):
 
         print(f"\n[ANALISANDO ABA] {sheet}")
 
-        # =================================
-        # TEST HEADERS
-        # =================================
-
         for header_row in range(0, 20):
 
             try:
@@ -283,9 +279,9 @@ def load_excel_smart(file_path):
                     header=header_row
                 )
 
-                # =============================
-                # BASIC CLEANING
-                # =============================
+                # =================================
+                # CLEAN
+                # =================================
 
                 df = df.dropna(
                     axis=1,
@@ -297,18 +293,28 @@ def load_excel_smart(file_path):
                     how="all"
                 )
 
-                # =============================
-                # EMPTY DATAFRAME
-                # =============================
+                # =================================
+                # HARD FILTERS
+                # =================================
 
-                if len(df) == 0:
+                if len(df) < 15:
                     continue
 
-                # =============================
+                if len(df.columns) < 5:
+                    continue
+
+                # =================================
                 # SCORE
-                # =============================
+                # =================================
 
                 score = calculate_sheet_score(df)
+
+                # =================================
+                # MINIMUM SCORE
+                # =================================
+
+                if score < 0:
+                    continue
 
                 candidates.append({
 
@@ -339,11 +345,11 @@ def load_excel_smart(file_path):
     if len(candidates) == 0:
 
         raise Exception(
-            "Nenhuma tabela válida encontrada."
+            "Nenhuma tabela econômica válida encontrada."
         )
 
     # =====================================
-    # BEST CANDIDATE
+    # BEST TABLE
     # =====================================
 
     best = sorted(
@@ -352,6 +358,18 @@ def load_excel_smart(file_path):
         reverse=True
     )[0]
 
+    print("\n===================================")
+    print("BEST SHEET DETECTED")
+    print("===================================\n")
+
+    print(f"Aba: {best['sheet']}")
+    print(f"Header: {best['header']}")
+    print(f"Score: {round(best['score'],2)}")
+    print(f"Rows: {best['rows']}")
+    print(f"Cols: {best['cols']}")
+
+    return best["df"]
+    
     # =====================================
     # OUTPUT
     # =====================================

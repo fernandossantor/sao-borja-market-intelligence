@@ -148,6 +148,12 @@ if len(all_dataframes) > 0:
         how="all"
     )
 
+    pib_df = pib_df.loc[
+    :,
+    ~pib_df.columns.astype(str)
+    .str.contains("^Unnamed")
+    ]
+
     print("\n===================================")
     print("CONSOLIDAÇÃO FINAL")
     print("===================================\n")

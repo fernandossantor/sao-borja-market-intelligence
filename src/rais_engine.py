@@ -130,20 +130,10 @@ for _, row in rais_files.iterrows():
         )
 
         # =================================
-        # REMOVE UNNAMED
-        # =================================
-
-        filtered_df = filtered_df.loc[
-            :,
-            ~filtered_df.columns.astype(str)
-            .str.contains("^Unnamed")
-        ]
-
-        # =================================
         # REJECT HORIZONTAL GARBAGE
         # =================================
 
-        if len(filtered_df.columns) > 40:
+        if len(filtered_df.columns) > 120:
 
             print("[SKIP] estrutura horizontal inválida")
             continue

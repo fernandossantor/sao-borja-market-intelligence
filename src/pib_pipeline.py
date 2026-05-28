@@ -74,7 +74,7 @@ for _, row in pib_files.iterrows():
 
         else:
 
-            df = load_excel_robust(path)
+            df = load_excel_smart(file_path)
 
         # REMOVE COLUNAS TOTALMENTE VAZIAS
         df = df.dropna(axis=1, how="all")

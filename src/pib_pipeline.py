@@ -60,7 +60,7 @@ all_dataframes = []
 for _, row in pib_files.iterrows():
 
     file_name = row["file_name"]
-    path = row["full_path"]
+    file_path = row["full_path"]
 
     print("\n-----------------------------------")
     print(f"PROCESSANDO: {file_name}")
@@ -68,58 +68,31 @@ for _, row in pib_files.iterrows():
 
     try:
 
-        # ---------------------------------
-        # LOAD
-        # ---------------------------------
+        if file_name.endswith(".csv"):
 
-        if path.endswith(".csv"):
-
-            df = load_csv_robust(path)
+            df = load_csv_robust(file_path)
 
         else:
 
             df = load_excel_smart(file_path)
 
-        # REMOVE COLUNAS TOTALMENTE VAZIAS
-        df = df.dropna(axis=1, how="all")
+        print(f"[INFO] linhas carregadas: {len(df)}")
 
-        print(
-            f"[INFO] linhas carregadas: {len(df)}"
-        )
+        filtered_df, method = filter_sao_borja(df)
 
-        # ---------------------------------
-        # TERRITORIAL FILTER
-        # ---------------------------------
+        print(f"[INFO] método territorial: {method}")
+        print(f"[INFO] linhas após filtro: {len(filtered_df)}")
 
-        filtered_df, method = filter_sao_borja(
-            df,
-            file_name
-        )
+        if len(filtered_df) > 0:
 
-        print(
-            f"[INFO] método territorial: {method}"
-        )
+            filtered_df["_source_file"] = file_name
+            filtered_df["_territorial_method"] = method
 
-        print(
-            f"[INFO] linhas após filtro: "
-            f"{len(filtered_df)}"
-        )
-
-        # ---------------------------------
-        # METADATA
-        # ---------------------------------
-
-        filtered_df["_source_file"] = file_name
-
-        filtered_df["_territorial_method"] = method
-
-        all_dataframes.append(filtered_df)
+            consolidated.append(filtered_df)
 
     except Exception as e:
 
-        print(
-            f"[ERRO] {file_name} -> {e}"
-        )
+        print(f"[ERRO] {file_name} -> {e}")
 
 # =========================================
 # CONSOLIDATION

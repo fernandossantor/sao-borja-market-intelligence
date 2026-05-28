@@ -184,6 +184,15 @@ for col in numeric_cols:
 
     if col in canonical_df.columns:
 
+        canonical_df[col] = (
+            canonical_df[col]
+            .astype(str)
+            .str.replace("R$", "", regex=False)
+            .str.replace(".", "", regex=False)
+            .str.replace(",", ".", regex=False)
+            .str.strip()
+        )
+
         canonical_df[col] = pd.to_numeric(
             canonical_df[col],
             errors="coerce"

@@ -163,6 +163,12 @@ if len(all_dataframes) > 0:
         pib_df.columns.tolist()
     )
 
+    pib_df = pib_df.loc[
+    :,
+    ~pib_df.columns.astype(str)
+    .str.contains("^Unnamed")
+    ]
+
     # =====================================
     # EXPORT PATHS
     # =====================================

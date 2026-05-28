@@ -9,40 +9,132 @@ KEYWORDS = [
     "são borja",
     "sb",
     "pib",
-    "salário",
-    "remuneração",
+    "valor adicionado",
+    "vab",
+    "agro",
+    "indústria",
+    "serviços",
+    "setor público",
+    "impostos",
     "emprego",
     "empresa",
-    "vínculo",
-    "cnae",
-    "cbo",
-    "agro",
+    "salário",
+    "remuneração",
     "receita",
     "despesa",
-    "valor",
     "produção",
     "município",
     "ano"
 ]
 
 # =========================================
-# CONTENT SCORE
+# NEGATIVE KEYWORDS
 # =========================================
 
-def calculate_sheet_score(df):
+NEGATIVE_KEYWORDS = [
+    "nota",
+    "notas",
+    "metodologia",
+    "conceito",
+    "observação",
+    "observacoes",
+    "explicação",
+    "explicacao",
+    "fonte",
+    "glossário",
+    "glossario"
+]
+
+# =========================================
+# HEADER QUALITY
+# =========================================
+
+def calculate_header_quality(df):
 
     score = 0
 
-    # ==========================
-    # ROWS / COLS
-    # ==========================
+    valid_cols = 0
 
-    score += len(df) * 0.1
-    score += len(df.columns) * 0.2
+    for col in df.columns:
 
-    # ==========================
-    # NUMERIC DENSITY
-    # ==========================
+        col_str = str(col).strip().lower()
+
+        if (
+            "unnamed" not in col_str
+            and "nan" not in col_str
+            and len(col_str) > 1
+        ):
+            valid_cols += 1
+
+    score += valid_cols * 15
+
+    return score
+
+# =========================================
+# YEAR STRUCTURE
+# =========================================
+
+def calculate_year_score(df):
+
+    score = 0
+
+    year_count = 0
+
+    for col in df.columns:
+
+        col_str = str(col)
+
+        for y in range(1990, 2035):
+
+            if str(y) in col_str:
+
+                year_count += 1
+                break
+
+    score += year_count * 50
+
+    return score
+
+# =========================================
+# ECONOMIC COLUMN SCORE
+# =========================================
+
+def calculate_economic_column_score(df):
+
+    score = 0
+
+    economic_terms = [
+        "pib",
+        "vab",
+        "valor",
+        "salário",
+        "remuneração",
+        "emprego",
+        "receita",
+        "despesa",
+        "produção",
+        "agro",
+        "indústria",
+        "serviços"
+    ]
+
+    for col in df.columns:
+
+        col_lower = str(col).lower()
+
+        for term in economic_terms:
+
+            if term in col_lower:
+
+                score += 80
+
+    return score
+
+# =========================================
+# NUMERIC DENSITY
+# =========================================
+
+def calculate_numeric_density(df):
 
     numeric_cells = 0
 
@@ -53,107 +145,107 @@ def calculate_sheet_score(df):
             errors="coerce"
         ).notna().sum()
 
-    score += numeric_cells * 0.05
+    return numeric_cells * 0.05
 
-    # ==========================
-    # TEXT SEARCH
-    # ==========================
+# =========================================
+# MAIN SCORE FUNCTION
+# =========================================
 
-    text_blob = " ".join(
-        map(str, df.astype(str).values.flatten())
-    ).lower()
+def calculate_sheet_score(df):
+
+    score = 0
+
+    # =====================================
+    # BASIC SIZE
+    # =====================================
+
+    score += len(df) * 0.1
+    score += len(df.columns) * 0.2
+
+    # =====================================
+    # PENALIZE SMALL TABLES
+    # =====================================
+
+    if len(df) < 10:
+        score -= 500
+
+    if len(df.columns) < 5:
+        score -= 300
+
+    # =====================================
+    # HEADER QUALITY
+    # =====================================
+
+    score += calculate_header_quality(df)
+
+    # =====================================
+    # YEAR STRUCTURE
+    # =====================================
+
+    score += calculate_year_score(df)
+
+    # =====================================
+    # ECONOMIC COLUMNS
+    # =====================================
+
+    score += calculate_economic_column_score(df)
+
+    # =====================================
+    # NUMERIC DENSITY
+    # =====================================
+
+    score += calculate_numeric_density(df)
+
+    # =====================================
+    # TEXT BLOB
+    # =====================================
+
+    try:
+
+        text_blob = " ".join(
+            map(str, df.astype(str).values.flatten())
+        ).lower()
+
+    except:
+
+        text_blob = ""
+
+    # =====================================
+    # POSITIVE KEYWORDS
+    # =====================================
 
     for kw in KEYWORDS:
 
         if kw in text_blob:
             score += 20
 
-    # ==========================
+    # =====================================
+    # NEGATIVE KEYWORDS
+    # =====================================
+
+    for kw in NEGATIVE_KEYWORDS:
+
+        if kw in text_blob:
+            score -= 1000
+
+    # =====================================
     # TERRITORIAL BONUS
-    # ==========================
+    # =====================================
 
     if "são borja" in text_blob:
         score += 100
 
-    return score
-
-
-# =========================================
-# HEADER QUALITY SCORE
-# =========================================
-
-def calculate_header_quality(df):
-
-    score = 0
-
-    columns = [
-        str(c).strip().lower()
-        for c in df.columns
-    ]
-
-    joined = " ".join(columns)
-
     # =====================================
-    # SEMANTIC HEADERS
+    # HEAVY BONUS FOR REAL TABLES
     # =====================================
 
-    semantic_headers = [
+    if len(df) > 100:
+        score += 500
 
-        "município",
-        "municipio",
-        "uf",
-        "estado",
-        "ano",
-        "pib",
-        "vab",
-        "agropecuária",
-        "agropecuaria",
-        "indústria",
-        "industria",
-        "serviços",
-        "servicos",
-        "empresas",
-        "salários",
-        "salarios",
-        "emprego",
-        "cnae",
-        "vínculo",
-        "vinculo",
-        "total"
-
-    ]
-
-    for keyword in semantic_headers:
-
-        if keyword in joined:
-            score += 150
-
-    # =====================================
-    # PENALIZA unnamed
-    # =====================================
-
-    unnamed_count = sum(
-        "unnamed" in c
-        for c in columns
-    )
-
-    score -= unnamed_count * 80
-
-    # =====================================
-    # PENALIZA HEADERS NUMÉRICOS
-    # =====================================
-
-    numeric_headers = sum(
-
-        c.replace(".", "").isdigit()
-
-        for c in columns
-    )
-
-    score -= numeric_headers * 50
+    if len(df.columns) > 10:
+        score += 200
 
     return score
-
 
 # =========================================
 # SMART EXCEL LOADER
@@ -170,7 +262,7 @@ def load_excel_smart(file_path):
     candidates = []
 
     # =====================================
-    # TEST SHEETS
+    # ANALYZE SHEETS
     # =====================================
 
     for sheet in excel.sheet_names:
@@ -191,9 +283,9 @@ def load_excel_smart(file_path):
                     header=header_row
                 )
 
-                # ==========================
+                # =============================
                 # BASIC CLEANING
-                # ==========================
+                # =============================
 
                 df = df.dropna(
                     axis=1,
@@ -205,43 +297,43 @@ def load_excel_smart(file_path):
                     how="all"
                 )
 
+                # =============================
+                # EMPTY DATAFRAME
+                # =============================
+
                 if len(df) == 0:
                     continue
 
-                # ==========================
-                # SCORES
-                # ==========================
+                # =============================
+                # SCORE
+                # =============================
 
-                content_score = calculate_sheet_score(df)
-
-                header_score = calculate_header_quality(df)
-
-                score = (
-                    content_score +
-                    header_score
-                )
+                score = calculate_sheet_score(df)
 
                 candidates.append({
+
                     "sheet": sheet,
                     "header": header_row,
                     "score": score,
                     "rows": len(df),
                     "cols": len(df.columns),
                     "df": df
+
                 })
 
                 print(
                     f"[OK] "
                     f"header={header_row} "
                     f"score={round(score,2)} "
-                    f"rows={len(df)}"
+                    f"rows={len(df)} "
+                    f"cols={len(df.columns)}"
                 )
 
             except Exception:
                 continue
 
     # =====================================
-    # NO CANDIDATES
+    # NO VALID TABLES
     # =====================================
 
     if len(candidates) == 0:
@@ -259,6 +351,10 @@ def load_excel_smart(file_path):
         key=lambda x: x["score"],
         reverse=True
     )[0]
+
+    # =====================================
+    # OUTPUT
+    # =====================================
 
     print("\n===================================")
     print("BEST SHEET DETECTED")

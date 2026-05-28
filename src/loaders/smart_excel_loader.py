@@ -31,7 +31,77 @@ KEYWORDS = [
 
 def calculate_sheet_score(df):
 
+def calculate_header_quality(df):
+
     score = 0
+
+    columns = [
+        str(c).strip().lower()
+        for c in df.columns
+    ]
+
+    joined = " ".join(columns)
+
+    # =====================================
+    # COLUNAS SEMÂNTICAS IMPORTANTES
+    # =====================================
+
+    semantic_headers = [
+
+        "município",
+        "municipio",
+        "uf",
+        "estado",
+        "ano",
+        "pib",
+        "vab",
+        "agropecuária",
+        "agropecuaria",
+        "indústria",
+        "industria",
+        "serviços",
+        "servicos",
+        "empresas",
+        "salários",
+        "salarios",
+        "emprego",
+        "cnae",
+        "vínculo",
+        "vinculo",
+        "total"
+
+    ]
+
+    for keyword in semantic_headers:
+
+        if keyword in joined:
+            score += 150
+
+    # =====================================
+    # PENALIZA unnamed
+    # =====================================
+
+    unnamed_count = sum(
+        "unnamed" in c
+        for c in columns
+    )
+
+    score -= unnamed_count * 80
+
+    # =====================================
+    # PENALIZA headers numéricos
+    # =====================================
+
+    numeric_headers = sum(
+
+        c.replace(".", "").isdigit()
+
+        for c in columns
+    )
+
+    score -= numeric_headers * 50
+
+    return score
 
     # ==========================
     # ROWS / COLS
@@ -103,7 +173,7 @@ def load_excel_smart(file_path):
         # TEST HEADERS
         # =================================
 
-        for header_row in range(0, 10):
+        for header_row in range(0, 20):
 
             try:
 
@@ -134,7 +204,14 @@ def load_excel_smart(file_path):
                 # SCORE
                 # ==========================
 
-                score = calculate_sheet_score(df)
+                content_score = calculate_sheet_score(df)
+
+                header_score = calculate_header_quality(df)
+
+                score = (
+                content_score +
+                header_score
+                )
 
                 candidates.append({
                     "sheet": sheet,

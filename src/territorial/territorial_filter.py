@@ -1,273 +1,239 @@
 import pandas as pd
-import unicodedata
 
-# =========================================
-# TARGET TERRITORY
-# =========================================
 
-TARGET_CITY = "SAO BORJA"
-TARGET_UF = "RS"
-TARGET_IBGE = "4318002"
-
-TARGET_ALIASES = [
-    "SAO BORJA",
-    "SÃO BORJA",
-    "SB"
-]
-
-# =========================================
-# TEXT NORMALIZATION
-# =========================================
+# ==========================================
+# NORMALIZAÇÃO DE TEXTO
+# ==========================================
 
 def normalize_text(text):
 
     if pd.isna(text):
         return ""
 
-    text = str(text).upper()
+    text = str(text).strip().lower()
 
-    text = unicodedata.normalize(
-        "NFKD",
-        text
-    ).encode(
-        "ASCII",
-        "ignore"
-    ).decode(
-        "utf-8"
-    )
+    replacements = {
+        "ã": "a",
+        "á": "a",
+        "à": "a",
+        "â": "a",
+        "é": "e",
+        "ê": "e",
+        "í": "i",
+        "ó": "o",
+        "ô": "o",
+        "õ": "o",
+        "ú": "u",
+        "ç": "c"
+    }
 
-    return text.strip()
+    for old, new in replacements.items():
+        text = text.replace(old, new)
 
-# =========================================
-# PREFILTERED DATASET DETECTION
-# =========================================
+    return text
 
-def detect_prefiltered_dataset(file_name):
 
-    normalized = normalize_text(file_name)
+# ==========================================
+# TERRITORIAL FILTER
+# ==========================================
 
-    for alias in TARGET_ALIASES:
+def filter_sao_borja(
+    df,
+    file_name=""
+):
 
-        if alias in normalized:
-            return True
+    # ==========================================
+    # 1. DETECÇÃO SEMÂNTICA PELO NOME DO ARQUIVO
+    # ==========================================
 
-    return False
+    semantic_name = normalize_text(file_name)
 
-# =========================================
-# TERRITORIAL COLUMN DETECTION
-# =========================================
+    semantic_signals = [
+        "sao borja",
+        "sb",
+    ]
 
-def detect_territorial_columns(df):
+    if any(signal in semantic_name for signal in semantic_signals):
+
+        print(
+            "[INFO] Dataset semanticamente territorializado"
+        )
+
+        return (
+            df.copy(),
+            "semantic_prefiltered_dataset"
+        )
+
+    # ==========================================
+    # 2. NORMALIZAÇÃO DAS COLUNAS
+    # ==========================================
+
+    normalized_columns = {
+        col: normalize_text(col)
+        for col in df.columns
+    }
 
     municipality_cols = []
     uf_cols = []
     ibge_cols = []
 
-    for col in df.columns:
+    # ==========================================
+    # 3. DETECÇÃO DE COLUNAS TERRITORIAIS
+    # ==========================================
 
-        normalized = normalize_text(col)
+    for original_col, normalized_col in normalized_columns.items():
 
-        # ---------------------------------
-        # IBGE IDENTIFIER
-        # ---------------------------------
+        # MUNICÍPIO
 
-        if (
-            "CODIGO" in normalized
-            and "MUNIC" in normalized
-        ):
-
-            ibge_cols.append(col)
-
-        elif "IBGE" in normalized:
-
-            ibge_cols.append(col)
-
-        # ---------------------------------
-        # MUNICIPALITY NAME
-        # ---------------------------------
-
-        elif any(x in normalized for x in [
-            "NOME DO MUNICIPIO",
-            "MUNICIPIO",
-            "CIDADE"
-        ]):
-
-            municipality_cols.append(col)
-
-        # ---------------------------------
-        # UF
-        # ---------------------------------
-
-        elif "UF" in normalized:
-
-            uf_cols.append(col)
-
-    return {
-        "municipality": municipality_cols,
-        "uf": uf_cols,
-        "ibge": ibge_cols
-    }
-
-# =========================================
-# FILTER BY MUNICIPALITY
-# =========================================
-
-def filter_by_municipality(df, municipality_cols, uf_cols):
-
-    col = municipality_cols[0]
-
-    filtered_df = df[
-        df[col]
-        .astype(str)
-        .apply(normalize_text)
-        == TARGET_CITY
-    ]
-
-    print(
-        f"[INFO] filtro município -> {col}"
-    )
-
-    # -------------------------------------
-    # UF VALIDATION
-    # -------------------------------------
-
-    if uf_cols:
-
-        uf_col = uf_cols[0]
-
-        filtered_df = filtered_df[
-            filtered_df[uf_col]
-            .astype(str)
-            .apply(normalize_text)
-            == TARGET_UF
+        municipality_keywords = [
+            "municipio",
+            "nome do municipio",
+            "cidade",
+            "município"
         ]
 
-        print(
-            f"[INFO] filtro UF -> {uf_col}"
-        )
+        if any(
+            keyword in normalized_col
+            for keyword in municipality_keywords
+        ):
+            municipality_cols.append(original_col)
 
-    return filtered_df
+        # UF
 
-# =========================================
-# FILTER BY IBGE
-# =========================================
+        uf_keywords = [
+            "uf",
+            "estado",
+            "sigla uf"
+        ]
 
-def filter_by_ibge(df, ibge_cols):
+        if any(
+            keyword in normalized_col
+            for keyword in uf_keywords
+        ):
+            uf_cols.append(original_col)
 
-    col = ibge_cols[0]
+        # IBGE
 
-    normalized_ibge = (
-        df[col]
-        .astype(str)
-        .str.replace(".0", "", regex=False)
-        .str.replace(".", "", regex=False)
-        .str.strip()
-    )
+        ibge_keywords = [
+            "codigo do municipio",
+            "cod municipio",
+            "ibge",
+            "codigo ibge"
+        ]
 
-    filtered_df = df[
-        normalized_ibge == TARGET_IBGE
-    ]
+        if any(
+            keyword in normalized_col
+            for keyword in ibge_keywords
+        ):
+            ibge_cols.append(original_col)
 
-    print(
-        f"[INFO] filtro IBGE -> {col}"
-    )
+    print(f"[DEBUG] municipality_cols={municipality_cols}")
+    print(f"[DEBUG] uf_cols={uf_cols}")
+    print(f"[DEBUG] ibge_cols={ibge_cols}")
 
-    return filtered_df
+    # ==========================================
+    # 4. FILTRO POR MUNICÍPIO
+    # ==========================================
 
-# =========================================
-# MAIN FILTER FUNCTION
-# =========================================
+    for col in municipality_cols:
 
-def filter_sao_borja(df, file_name):
+        try:
 
-    # =====================================
-    # REMOVE EMPTY COLUMNS
-    # =====================================
-
-    df = df.dropna(
-        axis=1,
-        how="all"
-    )
-
-    # =====================================
-    # PREFILTERED DATASET
-    # =====================================
-
-    if detect_prefiltered_dataset(file_name):
-
-        print(
-            "[INFO] Dataset já territorializado"
-        )
-
-        return df, "prefiltered_dataset"
-
-    # =====================================
-    # DETECT COLUMNS
-    # =====================================
-
-    cols = detect_territorial_columns(df)
-
-    municipality_cols = cols["municipality"]
-    uf_cols = cols["uf"]
-    ibge_cols = cols["ibge"]
-
-    print(
-        f"[DEBUG] municipality_cols={municipality_cols}"
-    )
-
-    print(
-        f"[DEBUG] uf_cols={uf_cols}"
-    )
-
-    print(
-        f"[DEBUG] ibge_cols={ibge_cols}"
-    )
-
-    # =====================================
-    # PRIORITY 1:
-    # MUNICIPALITY + UF
-    # =====================================
-
-    if municipality_cols:
-
-        filtered_df = filter_by_municipality(
-            df,
-            municipality_cols,
-            uf_cols
-        )
-
-        if len(filtered_df) > 0:
-
-            return (
-                filtered_df,
-                "filtered_by_city"
+            normalized_values = (
+                df[col]
+                .astype(str)
+                .apply(normalize_text)
             )
 
-    # =====================================
-    # PRIORITY 2:
-    # IBGE
-    # =====================================
-
-    if ibge_cols:
-
-        filtered_df = filter_by_ibge(
-            df,
-            ibge_cols
-        )
-
-        if len(filtered_df) > 0:
-
-            return (
-                filtered_df,
-                "filtered_by_ibge"
+            city_mask = normalized_values.str.contains(
+                "sao borja",
+                na=False
             )
 
-    # =====================================
-    # NO TERRITORIAL MATCH
-    # =====================================
+            if city_mask.sum() > 0:
+
+                filtered_df = df[city_mask].copy()
+
+                # ==========================================
+                # FILTRO ADICIONAL POR UF
+                # ==========================================
+
+                if len(uf_cols) > 0:
+
+                    uf_col = uf_cols[0]
+
+                    uf_mask = (
+                        filtered_df[uf_col]
+                        .astype(str)
+                        .str.upper()
+                        .str.strip()
+                        == "RS"
+                    )
+
+                    filtered_df = filtered_df[uf_mask]
+
+                    print(
+                        f"[INFO] filtro UF -> {uf_col}"
+                    )
+
+                print(
+                    f"[INFO] filtro por município -> {col}"
+                )
+
+                return (
+                    filtered_df,
+                    "filtered_by_city"
+                )
+
+        except Exception as e:
+
+            print(
+                f"[WARNING] erro filtro município {col} -> {e}"
+            )
+
+    # ==========================================
+    # 5. FILTRO POR CÓDIGO IBGE
+    # ==========================================
+
+    for col in ibge_cols:
+
+        try:
+
+            ibge_mask = (
+                df[col]
+                .astype(str)
+                .str.strip()
+                == "4318002"
+            )
+
+            if ibge_mask.sum() > 0:
+
+                filtered_df = df[ibge_mask].copy()
+
+                print(
+                    f"[INFO] filtro por código IBGE -> {col}"
+                )
+
+                return (
+                    filtered_df,
+                    "filtered_by_ibge"
+                )
+
+        except Exception as e:
+
+            print(
+                f"[WARNING] erro filtro IBGE {col} -> {e}"
+            )
+
+    # ==========================================
+    # 6. SEM MATCH
+    # ==========================================
 
     print(
         "[WARNING] Nenhum registro territorial encontrado"
     )
 
-    return df.iloc[0:0], "no_match"
+    return (
+        pd.DataFrame(),
+        "no_match"
+    )

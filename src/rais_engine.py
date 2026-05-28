@@ -88,7 +88,7 @@ for _, row in rais_files.iterrows():
 
         else:
 
-            df = load_excel_smart(path)
+            df = load_excel_smart(file_path)
 
         print(f"[INFO] linhas carregadas: {len(df)}")
 

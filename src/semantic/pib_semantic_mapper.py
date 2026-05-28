@@ -36,8 +36,13 @@ DOMAIN_RULES = {
     ],
 
     "municipality": [
-        "município",
-        "municipio"
+    "nome do município",
+    "nome do municipio"
+    ],
+
+    "ibge_code": [
+    "código do município",
+    "codigo do municipio"
     ],
 
     "ibge_code": [

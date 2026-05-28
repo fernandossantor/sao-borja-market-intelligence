@@ -65,13 +65,13 @@ top_cnae = cnae_distribution.head(20)
 # PIB LAST YEAR
 # =========================================
 
-latest_year = pib_df[
-    "year"
-].max()
-
-latest_pib = pib_df[
-    pib_df["year"] == latest_year
-].iloc[0]
+latest_pib = (
+    pib_df[
+        pib_df["vab_total"].notna()
+    ]
+    .sort_values("year")
+    .iloc[-1]
+)
 
 # =========================================
 # PRODUCTIVITY

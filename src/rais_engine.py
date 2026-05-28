@@ -2,9 +2,8 @@ import pandas as pd
 import os
 import glob
 
-from robust_file_loader import (
-    load_csv_robust,
-    load_excel_robust
+from smart_excel_loader import (
+    load_excel_smart
 )
 
 from territorial_filter import (
@@ -89,7 +88,7 @@ for _, row in rais_files.iterrows():
 
         else:
 
-            df = load_excel_robust(file_path)
+            df = load_excel_smart(path)
 
         print(f"[INFO] linhas carregadas: {len(df)}")
 

@@ -22,19 +22,17 @@ EXPORT_PATH = (
     "Colab Notebooks/_sao_borja/exports"
 )
 
-PIB_KEYWORDS = [
-    "pib",
-    "valor adicionado",
-    "per capita"
-]
-
 # =========================================
-# FILE DISCOVERY
+# LOAD INVENTORY
 # =========================================
 
 inventory = pd.read_csv(
     f"{EXPORT_PATH}/inventory.csv"
 )
+
+# =========================================
+# FILTER PIB FILES
+# =========================================
 
 pib_files = inventory[
     inventory["category"] == "pib"
@@ -68,44 +66,86 @@ for _, row in pib_files.iterrows():
 
     try:
 
-        if file_name.endswith(".csv"):
+        # =================================
+        # CSV
+        # =================================
+
+        if file_name.lower().endswith(".csv"):
 
             df = load_csv_robust(file_path)
+
+        # =================================
+        # EXCEL
+        # =================================
 
         else:
 
             df = load_excel_smart(file_path)
 
-        print(f"[INFO] linhas carregadas: {len(df)}")
-
-        filtered_df, method = filter_sao_borja(
-        df,
-        file_name
+        print(
+            f"[INFO] linhas carregadas: {len(df)}"
         )
 
-        print(f"[INFO] método territorial: {method}")
-        print(f"[INFO] linhas após filtro: {len(filtered_df)}")
+        # =================================
+        # TERRITORIAL FILTER
+        # =================================
+
+        filtered_df, method = filter_sao_borja(
+            df,
+            file_name
+        )
+
+        print(
+            f"[INFO] método territorial: {method}"
+        )
+
+        print(
+            f"[INFO] linhas após filtro: "
+            f"{len(filtered_df)}"
+        )
+
+        # =================================
+        # CONSOLIDATION
+        # =================================
 
         if len(filtered_df) > 0:
 
-            filtered_df["_source_file"] = file_name
-            filtered_df["_territorial_method"] = method
+            filtered_df[
+                "_source_file"
+            ] = file_name
 
-            consolidated.append(filtered_df)
+            filtered_df[
+                "_territorial_method"
+            ] = method
+
+            all_dataframes.append(
+                filtered_df
+            )
 
     except Exception as e:
 
-        print(f"[ERRO] {file_name} -> {e}")
+        print(
+            f"[ERRO] {file_name} -> {e}"
+        )
 
 # =========================================
-# CONSOLIDATION
+# FINAL CONSOLIDATION
 # =========================================
 
-if all_dataframes:
+if len(all_dataframes) > 0:
 
     pib_df = pd.concat(
         all_dataframes,
         ignore_index=True
+    )
+
+    # =====================================
+    # CLEAN EMPTY COLUMNS
+    # =====================================
+
+    pib_df = pib_df.dropna(
+        axis=1,
+        how="all"
     )
 
     print("\n===================================")
@@ -119,26 +159,36 @@ if all_dataframes:
 
     print("\nColunas encontradas:\n")
 
-    print(pib_df.columns.tolist())
+    print(
+        pib_df.columns.tolist()
+    )
 
-    # -------------------------------------
-    # EXPORT
-    # -------------------------------------
+    # =====================================
+    # EXPORT PATHS
+    # =====================================
 
     csv_path = os.path.join(
         EXPORT_PATH,
         "pib_consolidated.csv"
     )
 
-   # parquet_path = os.path.join(
-#     EXPORT_PATH,
-#     "pib_consolidated.parquet"
-# )
+    parquet_path = os.path.join(
+        EXPORT_PATH,
+        "pib_consolidated.parquet"
+    )
 
-# pib_df.to_parquet(
-#     parquet_path,
-#     index=False
-# )
+    # =====================================
+    # EXPORT CSV
+    # =====================================
+
+    pib_df.to_csv(
+        csv_path,
+        index=False
+    )
+
+    # =====================================
+    # EXPORT PARQUET
+    # =====================================
 
     pib_df.to_parquet(
         parquet_path,
@@ -151,6 +201,10 @@ if all_dataframes:
 
     print(csv_path)
     print(parquet_path)
+
+# =========================================
+# NO DATA
+# =========================================
 
 else:
 

@@ -26,10 +26,61 @@ KEYWORDS = [
 ]
 
 # =========================================
-# SCORE FUNCTION
+# CONTENT SCORE
 # =========================================
 
 def calculate_sheet_score(df):
+
+    score = 0
+
+    # ==========================
+    # ROWS / COLS
+    # ==========================
+
+    score += len(df) * 0.1
+    score += len(df.columns) * 0.2
+
+    # ==========================
+    # NUMERIC DENSITY
+    # ==========================
+
+    numeric_cells = 0
+
+    for col in df.columns:
+
+        numeric_cells += pd.to_numeric(
+            df[col],
+            errors="coerce"
+        ).notna().sum()
+
+    score += numeric_cells * 0.05
+
+    # ==========================
+    # TEXT SEARCH
+    # ==========================
+
+    text_blob = " ".join(
+        map(str, df.astype(str).values.flatten())
+    ).lower()
+
+    for kw in KEYWORDS:
+
+        if kw in text_blob:
+            score += 20
+
+    # ==========================
+    # TERRITORIAL BONUS
+    # ==========================
+
+    if "são borja" in text_blob:
+        score += 100
+
+    return score
+
+
+# =========================================
+# HEADER QUALITY SCORE
+# =========================================
 
 def calculate_header_quality(df):
 
@@ -43,7 +94,7 @@ def calculate_header_quality(df):
     joined = " ".join(columns)
 
     # =====================================
-    # COLUNAS SEMÂNTICAS IMPORTANTES
+    # SEMANTIC HEADERS
     # =====================================
 
     semantic_headers = [
@@ -89,7 +140,7 @@ def calculate_header_quality(df):
     score -= unnamed_count * 80
 
     # =====================================
-    # PENALIZA headers numéricos
+    # PENALIZA HEADERS NUMÉRICOS
     # =====================================
 
     numeric_headers = sum(
@@ -103,49 +154,6 @@ def calculate_header_quality(df):
 
     return score
 
-    # ==========================
-    # ROWS / COLS
-    # ==========================
-
-    score += len(df) * 0.1
-    score += len(df.columns) * 0.2
-
-    # ==========================
-    # NUMERIC DENSITY
-    # ==========================
-
-    numeric_cells = 0
-
-    for col in df.columns:
-
-        numeric_cells += pd.to_numeric(
-            df[col],
-            errors="coerce"
-        ).notna().sum()
-
-    score += numeric_cells * 0.05
-
-    # ==========================
-    # TEXT SEARCH
-    # ==========================
-
-    text_blob = " ".join(
-        map(str, df.astype(str).values.flatten())
-    ).lower()
-
-    for kw in KEYWORDS:
-
-        if kw in text_blob:
-            score += 20
-
-    # ==========================
-    # TERRITORIAL BONUS
-    # ==========================
-
-    if "são borja" in text_blob:
-        score += 100
-
-    return score
 
 # =========================================
 # SMART EXCEL LOADER
@@ -201,7 +209,7 @@ def load_excel_smart(file_path):
                     continue
 
                 # ==========================
-                # SCORE
+                # SCORES
                 # ==========================
 
                 content_score = calculate_sheet_score(df)
@@ -209,8 +217,8 @@ def load_excel_smart(file_path):
                 header_score = calculate_header_quality(df)
 
                 score = (
-                content_score +
-                header_score
+                    content_score +
+                    header_score
                 )
 
                 candidates.append({

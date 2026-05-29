@@ -27,158 +27,114 @@ print("FILES LOADED")
 print("===================================\n")
 
 # =========================================
-# BASIC METRICS
+# ECONOMIC FACTS
 # =========================================
 
 row = economic.iloc[0]
 
-pib = row["pib_total"]
+facts = {
 
-jobs = row["formal_jobs"]
+    "year":
+        row["year"],
 
-salary = row["avg_salary"]
+    "pib_total":
+        row["pib_total"],
 
-prod = row["productivity_per_job"]
+    "formal_jobs":
+        row["formal_jobs"],
 
-agro = row["vab_agro"]
+    "avg_salary":
+        row["avg_salary"],
 
-industria = row["vab_industria"]
+    "median_salary":
+        row["median_salary"],
 
-servicos = row["vab_servicos"]
+    "productivity_per_job":
+        row["productivity_per_job"],
 
-publico = row["vab_publico"]
+    "vab_agro":
+        row["vab_agro"],
+
+    "vab_industria":
+        row["vab_industria"],
+
+    "vab_servicos":
+        row["vab_servicos"],
+
+    "vab_publico":
+        row["vab_publico"]
+
+}
 
 # =========================================
 # SHARES
 # =========================================
 
-share_agro = agro / pib * 100
-share_industria = industria / pib * 100
-share_servicos = servicos / pib * 100
-share_publico = publico / pib * 100
+pib = row["pib_total"]
+
+facts["share_agro_pct"] = (
+    row["vab_agro"] / pib * 100
+)
+
+facts["share_industria_pct"] = (
+    row["vab_industria"] / pib * 100
+)
+
+facts["share_servicos_pct"] = (
+    row["vab_servicos"] / pib * 100
+)
+
+facts["share_publico_pct"] = (
+    row["vab_publico"] / pib * 100
+)
 
 # =========================================
 # TOP CNAE
 # =========================================
 
-top_cnae = cnae.iloc[0]["cnae_class"]
-
-top_jobs = cnae.iloc[0]["jobs"]
-
-# =========================================
-# DIAGNOSTICS
-# =========================================
-
-diagnostics = []
-
-if share_agro >= 25:
-    diagnostics.append(
-        "Economia fortemente dependente do agro."
-    )
-
-if share_industria <= 15:
-    diagnostics.append(
-        "Baixa densidade industrial."
-    )
-
-if share_publico >= 10:
-    diagnostics.append(
-        "Forte presença da administração pública."
-    )
-
-if share_servicos >= 40:
-    diagnostics.append(
-        "Serviços representam o principal motor econômico."
-    )
-
-if prod >= 100000:
-    diagnostics.append(
-        "Produtividade econômica relativamente elevada."
-    )
-
-# =========================================
-# PROFILE
-# =========================================
-
-profile = []
-
-if share_agro >= 20:
-    profile.append("agro")
-
-if share_servicos >= 30:
-    profile.append("serviços")
-
-if share_publico >= 10:
-    profile.append("estado")
-
-profile_text = " + ".join(profile)
+top10 = cnae.head(10)
 
 # =========================================
 # OUTPUT
 # =========================================
 
 print("\n===================================")
-print("STRUCTURAL PROFILE")
+print("TERRITORIAL FACTS")
 print("===================================\n")
 
-print("Perfil:")
+for k, v in facts.items():
 
-print(profile_text)
+    print(f"{k}: {v}")
 
-print("\nIndicadores:")
+print("\n===================================")
+print("TOP CNAE")
+print("===================================\n")
 
-print(f"PIB: R$ {round(pib,2):,.0f}")
-print(f"Empregos formais: {jobs}")
-print(f"Salário médio: R$ {round(salary,2)}")
-
-print("\nParticipações:")
-
-print(f"Agro: {round(share_agro,1)}%")
-print(f"Indústria: {round(share_industria,1)}%")
-print(f"Serviços: {round(share_servicos,1)}%")
-print(f"Setor público: {round(share_publico,1)}%")
-
-print("\nDiagnósticos:")
-
-for d in diagnostics:
-    print("-", d)
-
-print("\nTop CNAE:")
-
-print(
-    f"{top_cnae} "
-    f"({top_jobs} vínculos)"
-)
+print(top10)
 
 # =========================================
-# EXPORT
+# EXPORT FACTS
 # =========================================
 
-profile_df = pd.DataFrame({
+facts_df = pd.DataFrame([facts])
 
-    "profile": [profile_text],
-
-    "share_agro": [share_agro],
-
-    "share_industria": [share_industria],
-
-    "share_servicos": [share_servicos],
-
-    "share_publico": [share_publico],
-
-    "productivity": [prod],
-
-    "avg_salary": [salary]
-
-})
-
-export_path = os.path.join(
+facts_path = os.path.join(
     EXPORT_PATH,
-    "territorial_profile.csv"
+    "territorial_facts.csv"
 )
 
-profile_df.to_csv(
-    export_path,
+facts_df.to_csv(
+    facts_path,
+    index=False
+)
+
+top_path = os.path.join(
+    EXPORT_PATH,
+    "territorial_top_cnae.csv"
+)
+
+top10.to_csv(
+    top_path,
     index=False
 )
 
@@ -186,4 +142,5 @@ print("\n===================================")
 print("EXPORT FINALIZADO")
 print("===================================\n")
 
-print(export_path)
+print(facts_path)
+print(top_path)

@@ -66,6 +66,8 @@ base_index = float(
         projection["year"] == BASE_YEAR
     ]["agro_index"]
 
+    .iloc[0]
+
 )
 
 projection[

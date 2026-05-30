@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 
 # =====================================
-# KEYWORDS
+# ECONOMIC KEYWORDS
 # =====================================
 
-KEYWORDS = [
+ECONOMIC_KEYWORDS = [
 
     "ano",
     "município",
@@ -34,6 +34,34 @@ KEYWORDS = [
 ]
 
 # =====================================
+# SOCIAL KEYWORDS
+# =====================================
+
+SOCIAL_KEYWORDS = [
+
+    "população",
+    "sexo",
+    "idade",
+    "religião",
+    "alfabetização",
+    "domicílio",
+    "raça",
+    "cor",
+    "quilombola",
+    "indígena",
+    "autismo",
+    "deficiência",
+    "favela",
+    "favelas",
+    "instrução",
+    "escolaridade",
+    "crescimento populacional",
+    "urbana",
+    "rural"
+
+]
+
+# =====================================
 # SCORE
 # =====================================
 
@@ -41,25 +69,43 @@ def calculate_table_score(df):
 
     score = 0
 
+    # =========================
+    # SIZE
+    # =========================
+
     score += len(df) * 0.1
     score += len(df.columns) * 0.5
+
+    # =========================
+    # NUMERIC DENSITY
+    # =========================
 
     numeric = 0
 
     for c in df.columns:
 
-        numeric += pd.to_numeric(
-            df[c],
-            errors="coerce"
-        ).notna().sum()
+        try:
+
+            numeric += pd.to_numeric(
+                df[c],
+                errors="coerce"
+            ).notna().sum()
+
+        except:
+
+            pass
 
     score += numeric * 0.05
+
+    # =========================
+    # TEXT BLOB
+    # =========================
 
     blob = (
         " ".join(
             map(
                 str,
-                df.head(50)
+                df.head(100)
                 .astype(str)
                 .values
                 .flatten()
@@ -68,15 +114,38 @@ def calculate_table_score(df):
         .lower()
     )
 
-    for kw in KEYWORDS:
+    # =========================
+    # ECONOMIC BONUS
+    # =========================
+
+    for kw in ECONOMIC_KEYWORDS:
 
         if kw in blob:
+
             score += 20
+
+    # =========================
+    # SOCIAL BONUS
+    # =========================
+
+    for kw in SOCIAL_KEYWORDS:
+
+        if kw in blob:
+
+            score += 20
+
+    # =========================
+    # TERRITORIAL BONUS
+    # =========================
+
+    if "são borja" in blob:
+
+        score += 100
 
     return score
 
 # =====================================
-# EXTRACT
+# EXTRACT DATASETS
 # =====================================
 
 def extract_datasets(file_path):
@@ -107,12 +176,12 @@ def extract_datasets(file_path):
                     how="all"
                 )
 
-                if len(df) < 3:
+                if len(df) < 2:
                     continue
 
                 score = calculate_table_score(df)
 
-                if score < 50:
+                if score < 20:
                     continue
 
                 results.append({

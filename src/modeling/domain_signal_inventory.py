@@ -3,6 +3,10 @@ import numpy as np
 import sys
 import os
 
+# =========================================
+# PROJECT PATH
+# =========================================
+
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(__file__)
 )
@@ -10,8 +14,16 @@ PROJECT_ROOT = os.path.dirname(
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
+# =========================================
+# LOADERS
+# =========================================
+
 from loaders.smart_dataset_extractor import (
     extract_datasets
+)
+
+from loaders.smart_csv_loader import (
+    load_csv_smart
 )
 
 # =========================================
@@ -94,61 +106,73 @@ for _, row in inventory.iterrows():
 
     ext = str(file_name).lower()
 
-    from loaders.smart_csv_loader import (
-    load_csv_smart
-    )
-
-    # EXCEL
-if (
-    ext.endswith(".xlsx")
-    or ext.endswith(".xls")
-    ):
-
-    datasets = extract_datasets(
-        full_path
-    )
-
-    # CSV
-elif ext.endswith(".csv"):
-
-    try:
-
-        df = load_csv_smart(
-            full_path
-        )
-
-        datasets = [{
-            "sheet": "csv",
-            "header": 0,
-            "score": len(df),
-            "rows": len(df),
-            "cols": len(df.columns),
-            "df": df
-        }]
-
-    except Exception as e:
-
-        print(e)
-        continue
-
-    else:
-
-    continue
-
     print("\n-----------------------------------")
     print(file_name)
     print("-----------------------------------")
 
     try:
 
-        datasets = extract_datasets(
-            full_path
-        )
+        # =================================
+        # EXCEL FILES
+        # =================================
+
+        if (
+            ext.endswith(".xlsx")
+            or ext.endswith(".xls")
+        ):
+
+            datasets = extract_datasets(
+                full_path
+            )
+
+        # =================================
+        # CSV FILES
+        # =================================
+
+        elif ext.endswith(".csv"):
+
+            df = load_csv_smart(
+                full_path
+            )
+
+            datasets = [{
+
+                "sheet":
+                    "csv",
+
+                "header":
+                    0,
+
+                "score":
+                    len(df),
+
+                "rows":
+                    len(df),
+
+                "cols":
+                    len(df.columns),
+
+                "df":
+                    df
+
+            }]
+
+        else:
+
+            print(
+                "[SKIP] formato não suportado"
+            )
+
+            continue
 
         print(
             f"datasets encontrados: "
             f"{len(datasets)}"
         )
+
+        # ================================
+        # DATASET LOOP
+        # ================================
 
         for ds in datasets[:20]:
 

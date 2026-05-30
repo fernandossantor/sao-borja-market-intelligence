@@ -3,7 +3,7 @@ from loaders.smart_csv_loader import (
 )
 
 FILE = (
-    "/CAMINHO/DE/UM/CSV/FISCAL.csv"
+    "/content/drive/MyDrive/Colab Notebooks/_sao_borja/raw/fiscal/Constitucionais e Royalties FPM 2020 - 2026.csv"
 )
 
 df = load_csv_smart(FILE)

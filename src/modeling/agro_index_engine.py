@@ -21,16 +21,12 @@ agro = pd.read_csv(
     f"{EXPORT_PATH}/agro_series.csv"
 )
 
-structure = pd.read_csv(
-    f"{EXPORT_PATH}/agro_structure.csv"
-)
-
 print("\n===================================")
 print("AGRO INDEX ENGINE")
 print("===================================\n")
 
 # =========================================
-# TOP PRODUCTS
+# PESOS OBSERVADOS
 # =========================================
 
 weights = {
@@ -44,34 +40,24 @@ weights = {
 
 print("Pesos utilizados:\n")
 
-for k, v in weights.items():
+for product, weight in weights.items():
 
     print(
-        f"{k}: {round(v*100,2)}%"
+        f"{product}: "
+        f"{round(weight*100,2)}%"
     )
 
 # =========================================
-# QUANTIDADE PRODUZIDA
+# PRODUÇÃO
 # =========================================
 
 production = agro[
 
-    (agro["variable"] == "quantidade_produzida")
-    &
-    (agro["product"].isin(
-        weights.keys()
-    ))
+    agro["variable"]
+    ==
+    "quantidade_produzida"
 
 ].copy()
-
-print(
-    f"\nRegistros produção: "
-    f"{len(production)}"
-)
-
-# =========================================
-# PIVOT
-# =========================================
 
 pivot = production.pivot_table(
 
@@ -84,38 +70,43 @@ pivot = production.pivot_table(
 
 pivot = pivot.sort_index()
 
-# =========================================
-# BASE 2021
-# =========================================
+print("\n===================================")
+print("BASE 2021")
+print("===================================\n")
 
-if BASE_YEAR not in pivot.index:
-
-    raise Exception(
-        f"Ano base {BASE_YEAR} não encontrado."
-    )
-
-base = pivot.loc[
-    BASE_YEAR
-]
+print(
+    pivot.loc[BASE_YEAR]
+)
 
 # =========================================
-# INDICES
+# PRODUCT INDICES
 # =========================================
 
-index_df = pd.DataFrame()
+index_df = pd.DataFrame(
+    index=pivot.index
+)
 
-index_df["year"] = pivot.index
-
-for product in weights:
+for product in weights.keys():
 
     if product not in pivot.columns:
+
+        print(
+            f"[WARN] Produto ausente: "
+            f"{product}"
+        )
+
         continue
+
+    base_value = pivot.loc[
+        BASE_YEAR,
+        product
+    ]
 
     index_df[product] = (
 
         pivot[product]
         /
-        base[product]
+        base_value
         *
         100
 
@@ -125,18 +116,21 @@ for product in weights:
 # AGRO INDEX
 # =========================================
 
-weighted_index = []
+agro_index = []
 
-for _, row in index_df.iterrows():
+for year in index_df.index:
 
     score = 0
 
     for product, weight in weights.items():
 
-        if product not in row:
+        if product not in index_df.columns:
             continue
 
-        value = row[product]
+        value = index_df.loc[
+            year,
+            product
+        ]
 
         if pd.isna(value):
             continue
@@ -145,12 +139,12 @@ for _, row in index_df.iterrows():
             value * weight
         )
 
-    weighted_index.append(
+    agro_index.append(
         score
     )
 
 index_df["agro_index"] = (
-    weighted_index
+    agro_index
 )
 
 # =========================================
@@ -167,6 +161,11 @@ index_df[
 
 )
 
+index_df = (
+    index_df
+    .reset_index()
+)
+
 # =========================================
 # OUTPUT
 # =========================================
@@ -178,10 +177,6 @@ print("===================================\n")
 print(
     index_df.tail(15)
 )
-
-# =========================================
-# 2021+
-# =========================================
 
 recent = index_df[
     index_df["year"] >= 2021

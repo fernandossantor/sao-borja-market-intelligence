@@ -46,7 +46,7 @@ print("===================================\n")
 all_rows = []
 
 # =========================================
-# PROCESS SHEETS
+# PROCESS
 # =========================================
 
 for sheet_name, variable in (
@@ -57,42 +57,67 @@ for sheet_name, variable in (
         f"Processando: {sheet_name}"
     )
 
-    df = pd.read_excel(
+    raw = pd.read_excel(
         AGRO_FILE,
         sheet_name=sheet_name,
-        header=0
+        header=None
     )
 
-    product_col = df.columns[0]
+    # -----------------------------
+    # Linha 1 contém os anos
+    # -----------------------------
 
-    years = []
+    years = raw.iloc[1]
 
-    for col in df.columns[1:]:
+    # -----------------------------
+    # Produtos começam na linha 2
+    # -----------------------------
 
-        try:
+    data = raw.iloc[2:].copy()
 
-            year = int(col)
-            years.append(col)
+    data.columns = years
 
-        except:
-            pass
+    product_col = data.columns[0]
 
-    for _, row in df.iterrows():
+    # -----------------------------
+    # Loop produtos
+    # -----------------------------
+
+    for _, row in data.iterrows():
 
         product = str(
             row[product_col]
-        )
+        ).strip()
 
         if (
-            pd.isna(product)
-            or product.lower()
-            == "nan"
+            product == ""
+            or product.lower() == "nan"
         ):
             continue
 
-        for year_col in years:
+        for col in data.columns[1:]:
 
-            value = row[year_col]
+            try:
+
+                year = int(col)
+
+            except:
+
+                continue
+
+            value = row[col]
+
+            if pd.isna(value):
+                continue
+
+            value = str(value).strip()
+
+            if value in [
+                "-",
+                "...",
+                ""
+            ]:
+                continue
 
             try:
 
@@ -103,12 +128,13 @@ for sheet_name, variable in (
                 )
 
             except:
+
                 continue
 
             all_rows.append({
 
                 "year":
-                    int(year_col),
+                    year,
 
                 "product":
                     product,
@@ -139,6 +165,16 @@ print(
 
 print(
     f"\nRegistros: {len(series_df)}"
+)
+
+print(
+    f"Produtos: {series_df['product'].nunique()}"
+)
+
+print(
+    f"Anos: "
+    f"{series_df['year'].min()} - "
+    f"{series_df['year'].max()}"
 )
 
 # =========================================

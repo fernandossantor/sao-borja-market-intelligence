@@ -94,11 +94,46 @@ for _, row in inventory.iterrows():
 
     ext = str(file_name).lower()
 
-    if not (
-        ext.endswith(".xlsx")
-        or ext.endswith(".xls")
+    from loaders.smart_csv_loader import (
+    load_csv_smart
+    )
+
+    # EXCEL
+if (
+    ext.endswith(".xlsx")
+    or ext.endswith(".xls")
     ):
+
+    datasets = extract_datasets(
+        full_path
+    )
+
+    # CSV
+elif ext.endswith(".csv"):
+
+    try:
+
+        df = load_csv_smart(
+            full_path
+        )
+
+        datasets = [{
+            "sheet": "csv",
+            "header": 0,
+            "score": len(df),
+            "rows": len(df),
+            "cols": len(df.columns),
+            "df": df
+        }]
+
+    except Exception as e:
+
+        print(e)
         continue
+
+    else:
+
+    continue
 
     print("\n-----------------------------------")
     print(file_name)

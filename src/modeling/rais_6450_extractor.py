@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import os
 
+# =====================================
+# CONFIG
+# =====================================
+
 FILE = (
     "/content/drive/MyDrive/"
     "Colab Notebooks/_sao_borja/raw/rais/"
@@ -20,6 +24,10 @@ SHEETS = {
     "Salários e outras remunerações": "salarios"
 }
 
+# =====================================
+# HELPERS
+# =====================================
+
 def to_number(v):
 
     if pd.isna(v):
@@ -27,22 +35,31 @@ def to_number(v):
 
     v = str(v).strip()
 
-    if v in ["-", "X", "..", "...", ""]:
+    if v in [
+        "-",
+        "X",
+        "x",
+        "..",
+        "...",
+        ""
+    ]:
         return np.nan
 
     try:
+
         return float(
             v.replace(".", "")
              .replace(",", ".")
         )
+
     except:
+
         return np.nan
 
-    xls = pd.ExcelFile(FILE)
+# =====================================
+# START
+# =====================================
 
-    print("Abas encontradas:")
-    print(xls.sheet_names)
-    
 print("\n===================================")
 print("RAIS 6450 EXTRACTOR")
 print("===================================\n")
@@ -51,31 +68,51 @@ records = []
 
 for sheet, metric in SHEETS.items():
 
-    print("Processando:", metric)
+    print(f"Processando: {metric}")
 
     df = pd.read_excel(
-    xls,
-    sheet_name=sheet,
-    header=None
-)
+        FILE,
+        sheet_name=sheet,
+        header=None
+    )
 
     current_year = None
 
     for col in range(df.shape[1]):
+
+        # -----------------------------
+        # Ano
+        # -----------------------------
 
         year = df.iloc[3, col]
 
         if pd.notna(year):
 
             try:
+
                 current_year = int(year)
+
             except:
+
                 pass
 
+        # -----------------------------
+        # CNAE
+        # -----------------------------
+
         sector = df.iloc[4, col]
+
+        # -----------------------------
+        # Valor
+        # -----------------------------
+
         value = to_number(
             df.iloc[5, col]
         )
+
+        # -----------------------------
+        # Registro
+        # -----------------------------
 
         if (
             current_year is not None
@@ -98,7 +135,23 @@ for sheet, metric in SHEETS.items():
 
             })
 
+# =====================================
+# DATAFRAME
+# =====================================
+
 result = pd.DataFrame(records)
+
+result = result.sort_values(
+    [
+        "year",
+        "metric",
+        "sector"
+    ]
+)
+
+# =====================================
+# OUTPUT
+# =====================================
 
 print("\n===================================")
 print("RESULTADO")
@@ -121,6 +174,23 @@ print(
 print(
     "Setores:",
     result.sector.nunique()
+)
+
+print(
+    "\nMétricas:"
+)
+
+print(
+    result.metric.value_counts()
+)
+
+# =====================================
+# EXPORT
+# =====================================
+
+os.makedirs(
+    EXPORT_PATH,
+    exist_ok=True
 )
 
 export_file = os.path.join(

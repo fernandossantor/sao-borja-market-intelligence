@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import sys
+import re
 
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(__file__)
@@ -31,10 +32,14 @@ files = inventory[
 ]
 
 print("\n===================================")
-print("RAIS TIMESERIES SCANNER")
+print("RAIS TIMESERIES SCANNER V2")
 print("===================================\n")
 
 results = []
+
+# =====================================
+# SCAN
+# =====================================
 
 for _, row in files.iterrows():
 
@@ -53,24 +58,32 @@ for _, row in files.iterrows():
 
             df = ds["df"]
 
-            years = []
+            blob = " ".join(
+                map(
+                    str,
+                    df.head(200)
+                    .astype(str)
+                    .values
+                    .flatten()
+                )
+            )
 
-            for col in df.columns:
+            years = set()
 
-                try:
+            for year in re.findall(
+                r"(19\d{2}|20\d{2})",
+                blob
+            ):
 
-                    val = int(col)
+                y = int(year)
 
-                    if (
-                        val >= 1980
-                        and val <= 2035
-                    ):
-                        years.append(val)
+                if (
+                    y >= 1980
+                    and y <= 2035
+                ):
+                    years.add(y)
 
-                except:
-                    pass
-
-            if len(years) < 3:
+            if len(years) < 5:
                 continue
 
             results.append({
@@ -101,13 +114,21 @@ for _, row in files.iterrows():
 
             })
 
-    except Exception:
+    except Exception as e:
 
-        continue
+        print(e)
 
 # =====================================
 # OUTPUT
 # =====================================
+
+if len(results) == 0:
+
+    print(
+        "\nNenhum dataset temporal encontrado."
+    )
+
+    raise SystemExit()
 
 result = pd.DataFrame(
     results
@@ -125,7 +146,9 @@ print("\n===================================")
 print("TOP TIMESERIES DATASETS")
 print("===================================\n")
 
-print(result.head(100))
+print(
+    result.head(100)
+)
 
 # =====================================
 # EXPORT

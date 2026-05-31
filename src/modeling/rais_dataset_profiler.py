@@ -2,6 +2,10 @@ import pandas as pd
 import os
 import sys
 
+# =========================================
+# PROJECT ROOT
+# =========================================
+
 PROJECT_ROOT = os.path.dirname(
     os.path.dirname(__file__)
 )
@@ -23,27 +27,42 @@ EXPORT_PATH = (
 )
 
 # =========================================
-# LOAD SIGNALS
+# LOAD INVENTORY
 # =========================================
 
-signals = pd.read_csv(
-    f"{EXPORT_PATH}/domain_signals.csv"
+inventory = pd.read_csv(
+    f"{EXPORT_PATH}/inventory.csv"
 )
 
-signals = signals[
-    signals["category"] == "rais"
-]
-
 files = (
-    signals[
-        ["file_name", "full_path"]
+
+    inventory[
+        inventory["category"] == "rais"
     ]
+
+    [
+        [
+            "file_name",
+            "full_path"
+        ]
+    ]
+
     .drop_duplicates()
+
 )
 
 print("\n===================================")
 print("RAIS DATASET PROFILER")
 print("===================================\n")
+
+print(
+    f"Arquivos RAIS encontrados: "
+    f"{len(files)}"
+)
+
+# =========================================
+# PROFILE
+# =========================================
 
 results = []
 
@@ -62,14 +81,19 @@ for _, row in files.iterrows():
             full_path
         )
 
+        print(
+            f"Datasets encontrados: "
+            f"{len(datasets)}"
+        )
+
         for ds in datasets[:20]:
 
-            cols = (
-                " | ".join(
-                    map(
-                        str,
-                        ds["df"].columns
-                    )
+            df = ds["df"]
+
+            cols = " | ".join(
+                map(
+                    str,
+                    df.columns
                 )
             )
 
@@ -84,21 +108,28 @@ for _, row in files.iterrows():
                 "header":
                     ds["header"],
 
+                "score":
+                    round(
+                        ds["score"],
+                        2
+                    ),
+
                 "rows":
                     ds["rows"],
 
                 "cols":
                     ds["cols"],
 
-                "score":
-                    ds["score"],
-
                 "column_names":
-                    cols[:1000]
+                    cols[:2000]
 
             })
 
     except Exception as e:
+
+        print(
+            f"[ERRO] {file_name}"
+        )
 
         print(e)
 
@@ -115,6 +146,7 @@ print("TOP DATASETS")
 print("===================================\n")
 
 print(
+
     profile[
         [
             "file_name",
@@ -124,20 +156,22 @@ print(
             "cols"
         ]
     ]
+
     .head(100)
+
 )
 
 # =========================================
 # EXPORT
 # =========================================
 
-out = os.path.join(
+output_file = os.path.join(
     EXPORT_PATH,
     "rais_dataset_profile.csv"
 )
 
 profile.to_csv(
-    out,
+    output_file,
     index=False
 )
 
@@ -145,4 +179,4 @@ print("\n===================================")
 print("EXPORT FINALIZADO")
 print("===================================\n")
 
-print(out)
+print(output_file)

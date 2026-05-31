@@ -170,6 +170,9 @@ print(
     master.sector.nunique()
 )
 
+print("\nCOLUNAS FINAIS:")
+print(master.columns.tolist())
+
 # =====================================
 # EXPORT
 # =====================================

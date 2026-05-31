@@ -38,6 +38,11 @@ def to_number(v):
     except:
         return np.nan
 
+    xls = pd.ExcelFile(FILE)
+
+    print("Abas encontradas:")
+    print(xls.sheet_names)
+    
 print("\n===================================")
 print("RAIS 6450 EXTRACTOR")
 print("===================================\n")
@@ -49,10 +54,10 @@ for sheet, metric in SHEETS.items():
     print("Processando:", metric)
 
     df = pd.read_excel(
-        FILE,
-        sheet_name=sheet,
-        header=None
-    )
+    xls,
+    sheet_name=sheet,
+    header=None
+)
 
     current_year = None
 

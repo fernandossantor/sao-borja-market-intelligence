@@ -14,8 +14,9 @@ EXPORT_PATH = (
 )
 
 SHEETS = {
-    "Número de empresas e outras ...": "empresas",
-    "Pessoal ocupado assalariado": "emprego",
+    "Número de unidades locais": "unidades_locais",
+    "Pessoal ocupado total": "emprego_total",
+    "Pessoal ocupado assalariado": "emprego_assalariado",
     "Salários e outras remunerações": "salarios"
 }
 

@@ -85,6 +85,24 @@ master = pd.merge(
     how="outer"
 )
 
+master = master.rename(
+    columns={
+
+        "emprego":
+            "emprego_assalariado_empresas",
+
+        "emprego_assalariado":
+            "emprego_assalariado_unidades",
+
+        "salarios_x":
+            "salarios_empresas",
+
+        "salarios_y":
+            "salarios_unidades"
+
+    }
+)
+
 # =====================================
 # ORGANIZAÇÃO
 # =====================================

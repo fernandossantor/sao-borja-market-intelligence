@@ -142,6 +142,10 @@ main_regime = (
 # FACTSHEET
 # --------------------------------------------------
 
+print("\nDEBUG")
+print("private_cagr =", private_cagr)
+print(type(private_cagr))
+
 factsheet = pd.DataFrame(
     [
         ["PIB 2023", pib_end],

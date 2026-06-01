@@ -68,13 +68,18 @@ pib_cagr = (
 # VAB PRIVADO CAGR
 # --------------------------------------------------
 
-private_start = vab_private.iloc[0]["vab_private"]
-private_end = vab_private.iloc[-1]["vab_private"]
+private_valid = vab_private.dropna(
+    subset=["vab_private"]
+).copy()
+
+private_start = private_valid.iloc[0]["vab_private"]
+
+private_end = private_valid.iloc[-1]["vab_private"]
 
 years_private = (
-    vab_private.iloc[-1]["year"]
+    private_valid.iloc[-1]["year"]
     -
-    vab_private.iloc[0]["year"]
+    private_valid.iloc[0]["year"]
 )
 
 private_cagr = (

@@ -169,6 +169,9 @@ factsheet = pd.DataFrame(
     ]
 )
 
+print("\nDEBUG FACTSHEET")
+print(factsheet.iloc[2])
+
 # --------------------------------------------------
 # RESULTADO
 # --------------------------------------------------

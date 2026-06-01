@@ -84,7 +84,7 @@ history = history.sort_values(
 
 history["employment_growth_pct"] = (
     history["employment_private"]
-    .pct_change()
+    .pct_change(fill_method=None)
     * 100
 )
 

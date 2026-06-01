@@ -90,13 +90,13 @@ history["employment_growth_pct"] = (
 
 history["pib_growth_pct"] = (
     history["pib_total"]
-    .pct_change()
+    .pct_change(fill_method=None)
     * 100
 )
 
 history["private_vab_growth_pct"] = (
     history["vab_private"]
-    .pct_change()
+    .pct_change(fill_method=None)
     * 100
 )
 

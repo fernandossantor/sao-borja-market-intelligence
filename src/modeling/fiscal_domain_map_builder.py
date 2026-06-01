@@ -21,6 +21,10 @@ def map_domain(name):
 
     name = name.lower()
 
+    # -------------------------
+    # EDUCAÇÃO
+    # -------------------------
+
     if any(
         x in name
         for x in [
@@ -30,10 +34,16 @@ def map_domain(name):
             "merenda",
             "pdde",
             "educação",
-            "educacao"
+            "educacao",
+            "manutenção da educação",
+            "manutencao da educacao"
         ]
     ):
         return "education"
+
+    # -------------------------
+    # SAÚDE
+    # -------------------------
 
     if any(
         x in name
@@ -42,42 +52,59 @@ def map_domain(name):
             "saude",
             "farmácia",
             "farmacia",
+            "primária",
+            "primaria",
             "mac",
             "enfermagem",
             "vigilância",
             "vigilancia",
-            "agentes"
+            "agentes",
+            "ambulatorial",
+            "hospitalar",
+            "covid"
         ]
     ):
         return "health"
+
+    # -------------------------
+    # ASSISTÊNCIA
+    # -------------------------
 
     if any(
         x in name
         for x in [
             "suas",
             "proteção",
-            "protecao"
+            "protecao",
+            "social"
         ]
     ):
         return "social_assistance"
 
-    if any(
-        x in name
-        for x in [
-            "agro"
-        ]
-    ):
+    # -------------------------
+    # AGRO
+    # -------------------------
+
+    if "agro" in name:
         return "agriculture"
+
+    # -------------------------
+    # INFRA
+    # -------------------------
 
     if any(
         x in name
         for x in [
             "urbano",
-            "investimentos",
-            "ponte"
+            "ponte",
+            "investimentos"
         ]
     ):
         return "infrastructure"
+
+    # -------------------------
+    # RECEITA GERAL
+    # -------------------------
 
     if any(
         x in name
@@ -91,7 +118,7 @@ def map_domain(name):
         return "general_revenue"
 
     return "other"
-
+    
 catalog["domain"] = (
     catalog["file"]
     .apply(map_domain)

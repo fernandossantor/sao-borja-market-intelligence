@@ -99,19 +99,23 @@ regime = factsheet.loc[
 # CONCENTRAÇÃO
 # --------------------------------------------------
 
-top5_share = concentration.loc[
-    concentration["indicator"]
-    ==
-    "Top 5 Share (%)",
-    "value"
-].iloc[0]
+top5_share = (
+    private_structure
+    .sort_values(
+        "ranking_emprego_privado"
+    )
+    .head(5)
+    ["share_emprego_privado_pct"]
+    .sum()
+)
 
-hhi = concentration.loc[
-    concentration["indicator"]
-    ==
-    "HHI",
-    "value"
-].iloc[0]
+hhi = (
+    private_structure[
+        "share_emprego_privado_pct"
+    ]
+    .pow(2)
+    .sum()
+)
 
 # --------------------------------------------------
 # LÍDERES PRIVADOS

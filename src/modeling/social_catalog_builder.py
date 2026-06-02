@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import unicodedata
 
 print("\n===================================")
 print("SOCIAL CATALOG BUILDER")
@@ -10,6 +11,10 @@ EXPORT_PATH = (
     "Colab Notebooks/_sao_borja/exports"
 )
 
+# --------------------------------------------------
+# CARREGAR INVENTÁRIO
+# --------------------------------------------------
+
 inventory = pd.read_csv(
     os.path.join(
         EXPORT_PATH,
@@ -17,16 +22,45 @@ inventory = pd.read_csv(
     )
 )
 
-# ----------------------------------
+# --------------------------------------------------
+# NORMALIZAÇÃO
+# --------------------------------------------------
+
+def normalize(text):
+
+    text = str(text)
+
+    text = unicodedata.normalize(
+        "NFKD",
+        text
+    )
+
+    text = "".join(
+        c
+        for c in text
+        if not unicodedata.combining(c)
+    )
+
+    return text.lower()
+
+# --------------------------------------------------
 # CLASSIFICAÇÃO
-# ----------------------------------
+# --------------------------------------------------
 
-def classify(name):
+def classify(filename):
 
-    name = str(name).lower()
+    name = normalize(filename)
+
+    # -------------------------
+    # Bolsa Família
+    # -------------------------
 
     if "bolsa familia" in name:
         return "income_support"
+
+    # -------------------------
+    # Índices sintéticos
+    # -------------------------
 
     if "idsc" in name:
         return "social_index"
@@ -34,43 +68,63 @@ def classify(name):
     if "ips" in name:
         return "social_index"
 
-    if any(
-        x in name
-        for x in [
-            "alfabet",
-            "instruc"
-        ]
-    ):
-        return "education"
+    # -------------------------
+    # Educação
+    # -------------------------
 
     if any(
         x in name
         for x in [
-            "domic",
+            "alfabetizacao",
+            "instrucao"
+        ]
+    ):
+        return "education"
+
+    # -------------------------
+    # Habitação
+    # -------------------------
+
+    if any(
+        x in name
+        for x in [
+            "domicilio",
+            "domicilios",
             "favela",
             "entorno"
         ]
     ):
         return "housing"
 
-    if any(
-        x in name
-        for x in [
-            "indígen",
-            "indigena",
-            "quilomb"
-        ]
-    ):
-        return "minorities"
+    # -------------------------
+    # Minorias
+    # -------------------------
 
     if any(
         x in name
         for x in [
-            "defici",
+            "indigena",
+            "quilombola"
+        ]
+    ):
+        return "minorities"
+
+    # -------------------------
+    # Saúde e inclusão
+    # -------------------------
+
+    if any(
+        x in name
+        for x in [
+            "deficiencia",
             "autismo"
         ]
     ):
         return "health_social"
+
+    # -------------------------
+    # Mobilidade
+    # -------------------------
 
     if any(
         x in name
@@ -80,34 +134,59 @@ def classify(name):
     ):
         return "mobility"
 
+    # -------------------------
+    # Demografia
+    # -------------------------
+
     return "demography"
 
-# ----------------------------------
+# --------------------------------------------------
 # APLICAR
-# ----------------------------------
+# --------------------------------------------------
 
-inventory["domain"] = (
-    inventory["file"]
+catalog = inventory.copy()
+
+catalog["domain"] = (
+    catalog["file"]
     .apply(classify)
 )
 
-print(inventory[
-    [
-        "file",
-        "domain"
-    ]
-])
+# --------------------------------------------------
+# RESULTADO
+# --------------------------------------------------
 
-# ----------------------------------
+print("\n===================================")
+print("SOCIAL CATALOG")
+print("===================================\n")
+
+print(
+    catalog[
+        [
+            "file",
+            "domain"
+        ]
+    ]
+)
+
+print("\n===================================")
+print("DISTRIBUIÇÃO")
+print("===================================\n")
+
+print(
+    catalog["domain"]
+    .value_counts()
+)
+
+# --------------------------------------------------
 # EXPORT
-# ----------------------------------
+# --------------------------------------------------
 
 export_file = os.path.join(
     EXPORT_PATH,
     "social_catalog.csv"
 )
 
-inventory.to_csv(
+catalog.to_csv(
     export_file,
     index=False
 )

@@ -52,18 +52,28 @@ dependency["dependency_class"] = pd.cut(
 # MÉDIA HISTÓRICA
 # ----------------------------------
 
+valid = dependency[
+    dependency["year"] <= 2025
+].copy()
+
 avg_programmatic = (
-    dependency[
-        "programmatic_share_pct"
-    ]
+    valid["programmatic_share_pct"]
     .mean()
 )
 
 avg_structural = (
-    dependency[
-        "structural_share_pct"
-    ]
+    valid["structural_share_pct"]
     .mean()
+)
+
+print(
+    "\nSoma:",
+    round(
+        avg_programmatic
+        +
+        avg_structural,
+        2
+    )
 )
 
 print(dependency)

@@ -37,11 +37,26 @@ domain_map = pd.read_csv(
 
 meta = (
     catalog.merge(
-        domain_map,
+        domain_map[
+            [
+                "file",
+                "domain"
+            ]
+        ],
         on="file",
         how="left"
     )
 )
+
+print("\n===================================")
+print("META AUDIT")
+print("===================================\n")
+
+print(meta.head())
+
+print("\nColunas:")
+
+print(meta.columns.tolist())
 
 # --------------------------------------------------
 # LEITOR ROBUSTO

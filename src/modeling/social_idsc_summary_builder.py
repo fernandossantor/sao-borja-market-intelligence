@@ -129,11 +129,17 @@ summary["rank"] = (
 
 def classify(score):
 
+    if score >= 80:
+        return "excelente"
+
     if score >= 70:
         return "forte"
 
     if score >= 50:
         return "intermediario"
+
+    if score >= 30:
+        return "fragil"
 
     return "critico"
 

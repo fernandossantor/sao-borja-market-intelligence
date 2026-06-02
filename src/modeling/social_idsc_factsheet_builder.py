@@ -99,9 +99,19 @@ summary = pd.read_csv(
 best_ods = summary.iloc[0]
 worst_ods = summary.iloc[-1]
 
+excellent_count = (
+    summary["classification"]
+    == "excelente"
+).sum()
+
 strong_count = (
     summary["classification"]
     == "forte"
+).sum()
+
+fragile_count = (
+    summary["classification"]
+    == "fragil"
 ).sum()
 
 critical_count = (

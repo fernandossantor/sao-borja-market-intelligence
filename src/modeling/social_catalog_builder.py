@@ -90,6 +90,7 @@ def classify(filename):
         for x in [
             "domicilio",
             "domicilios",
+            "composicao domiciliar",
             "favela",
             "entorno"
         ]

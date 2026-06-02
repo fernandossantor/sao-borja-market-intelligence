@@ -19,100 +19,98 @@ catalog = pd.read_csv(
 
 def map_domain(name):
 
-    name = name.lower()
+    name = str(name).lower()
 
-    # -------------------------
+    # --------------------------------
     # EDUCAÇÃO
-    # -------------------------
+    # --------------------------------
 
     if any(
-        x in name
-        for x in [
+        token in name
+        for token in [
             "fundeb",
-            "salário",
             "salario",
+            "educ",
             "merenda",
-            "pdde",
-            "educação",
-            "educacao",
-            "manutenção da educação",
-            "manutencao da educacao"
+            "pdde"
         ]
     ):
         return "education"
 
-    # -------------------------
+    # --------------------------------
     # SAÚDE
-    # -------------------------
+    # --------------------------------
 
     if any(
-        x in name
-        for x in [
-            "saúde",
-            "saude",
-            "farmácia",
-            "farmacia",
-            "primária",
-            "primaria",
+        token in name
+        for token in [
+            "saud",
+            "farm",
+            "prim",
             "mac",
-            "enfermagem",
-            "vigilância",
-            "vigilancia",
-            "agentes",
-            "ambulatorial",
-            "hospitalar",
+            "vigil",
+            "enferm",
+            "agente",
+            "hospital",
+            "ambulator",
             "covid"
         ]
     ):
         return "health"
 
-    # -------------------------
-    # ASSISTÊNCIA
-    # -------------------------
+    # --------------------------------
+    # ASSISTÊNCIA SOCIAL
+    # --------------------------------
 
     if any(
-        x in name
-        for x in [
+        token in name
+        for token in [
             "suas",
-            "proteção",
-            "protecao",
-            "social"
+            "social",
+            "protec"
         ]
     ):
         return "social_assistance"
 
-    # -------------------------
+    # --------------------------------
     # AGRO
-    # -------------------------
-
-    if "agro" in name:
-        return "agriculture"
-
-    # -------------------------
-    # INFRA
-    # -------------------------
+    # --------------------------------
 
     if any(
-        x in name
-        for x in [
-            "urbano",
+        token in name
+        for token in [
+            "agro"
+        ]
+    ):
+        return "agriculture"
+
+    # --------------------------------
+    # INFRAESTRUTURA
+    # --------------------------------
+
+    if any(
+        token in name
+        for token in [
+            "urban",
             "ponte",
-            "investimentos"
+            "invest",
+            "contribu"
         ]
     ):
         return "infrastructure"
 
-    # -------------------------
+    # --------------------------------
     # RECEITA GERAL
-    # -------------------------
+    # --------------------------------
 
     if any(
-        x in name
-        for x in [
+        token in name
+        for token in [
             "fpm",
             "itr",
-            "royalties",
-            "compens"
+            "royalt",
+            "compens",
+            "petrol"
         ]
     ):
         return "general_revenue"

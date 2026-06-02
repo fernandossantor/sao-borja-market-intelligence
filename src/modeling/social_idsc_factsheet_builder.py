@@ -154,14 +154,25 @@ factsheet = pd.DataFrame(
             worst_ods["score"]
         ],
         [
+            "ODS Excelentes",
+            excellent_count
+        ],
+
+        [
             "ODS Fortes",
             strong_count
         ],
+
+        [
+            "ODS Frágeis",
+            fragile_count
+        ],
+
         [
             "ODS Críticos",
             critical_count
         ]
-    ],
+            ],
     columns=[
         "indicator",
         "value"

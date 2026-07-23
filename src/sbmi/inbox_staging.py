@@ -5,14 +5,14 @@ from __future__ import annotations
 import hashlib
 import re
 import shutil
+from collections.abc import Iterable
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path, PurePosixPath
-from typing import Iterable
 
 import pandas as pd
 
-from sbmi.inbox_anomaly_review import DATE_HEADERS, _table_rows, parse_date_observation
+from sbmi import inbox_anomaly_review
 from sbmi.inbox_content_audit import canonical_value
 from sbmi.inbox_profile import normalize_label
 from sbmi.inbox_structure_triage import source_from_path
@@ -92,8 +92,14 @@ DATASET_CONTRACTS = {
         "Municipal",
         MUNICIPAL_DESPESAS_INSTITUICAO_HEADERS,
     ): "municipal_despesas_instituicao",
-    ("Municipal", MUNICIPAL_DESPESAS_ELEMENTO_HEADERS): "municipal_despesas_elemento",
-    ("Municipal", MUNICIPAL_RECEITA_ELEMENTO_HEADERS): "municipal_receita_elemento",
+    (
+        "Municipal",
+        MUNICIPAL_DESPESAS_ELEMENTO_HEADERS,
+    ): "municipal_despesas_elemento",
+    (
+        "Municipal",
+        MUNICIPAL_RECEITA_ELEMENTO_HEADERS,
+    ): "municipal_receita_elemento",
 }
 
 NUMERIC_HEADERS = {
@@ -179,9 +185,19 @@ def _excluded_paths(content_duplicates: pd.DataFrame) -> set[str]:
     }
     missing = required.difference(content_duplicates.columns)
     if missing:
-        raise ValueError(f"Colunas ausentes em content_duplicate_pairs: {sorted(missing)}")
+        raise ValueError(
+            "Colunas ausentes em content_duplicate_pairs: "
+            f"{sorted(missing)}"
+        )
+    has_suggested_path = (
+        content_duplicates["suggested_duplicate_path"]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .ne("")
+    )
     eligible = content_duplicates.loc[
-        content_duplicates["suggested_duplicate_path"].fillna("").astype(str).str.strip().ne("")
+        has_suggested_path
         & content_duplicates["suggestion_basis"].eq("COPY_SUFFIX_HEURISTIC")
         & content_duplicates["duplicate_class"].isin(
             ["CONTENT_DUPLICATE", "EXACT_DUPLICATE"]
@@ -190,7 +206,9 @@ def _excluded_paths(content_duplicates: pd.DataFrame) -> set[str]:
     return set(eligible["suggested_duplicate_path"].astype(str))
 
 
-def _duplicate_row_lookup(duplicate_rows: pd.DataFrame) -> dict[tuple[str, int], dict[str, object]]:
+def _duplicate_row_lookup(
+    duplicate_rows: pd.DataFrame,
+) -> dict[tuple[str, int], dict[str, object]]:
     if duplicate_rows.empty:
         return {}
     required = {
@@ -203,10 +221,16 @@ def _duplicate_row_lookup(duplicate_rows: pd.DataFrame) -> dict[tuple[str, int],
     }
     missing = required.difference(duplicate_rows.columns)
     if missing:
-        raise ValueError(f"Colunas ausentes em duplicate_row_groups: {sorted(missing)}")
+        raise ValueError(
+            "Colunas ausentes em duplicate_row_groups: "
+            f"{sorted(missing)}"
+        )
 
     lookup: dict[tuple[str, int], dict[str, object]] = {}
-    for group_index, row in enumerate(duplicate_rows.itertuples(index=False), start=1):
+    for group_index, row in enumerate(
+        duplicate_rows.itertuples(index=False),
+        start=1,
+    ):
         path = str(row.relative_path)
         group_id = f"duplicate-group-{group_index:04d}"
         for raw_number in str(row.source_row_numbers).split("|"):
@@ -227,8 +251,8 @@ def _reference_year_from_filename(relative_path: str) -> int | None:
 
 
 def _transform_value(header: str, value: object) -> object:
-    if header in DATE_HEADERS:
-        parsed = parse_date_observation(value)
+    if header in inbox_anomaly_review.DATE_HEADERS:
+        parsed = inbox_anomaly_review.parse_date_observation(value)
         if parsed["parsed_date"] is None:
             raise ValueError(f"Data não interpretada no campo {header}: {value!r}")
         if parsed["ambiguous"]:
@@ -248,7 +272,10 @@ def _source_table_records(
 ) -> tuple[str, list[dict[str, object]]]:
     relative_path = str(profile_row.relative_path)
     source_declared = source_from_path(relative_path)
-    headers, observations = _table_rows(snapshot_path, profile_row)
+    headers, observations = inbox_anomaly_review._table_rows(
+        snapshot_path,
+        profile_row,
+    )
     normalized_headers = tuple(normalize_label(value) for value in headers)
     dataset = classify_dataset(source_declared, headers)
 
@@ -270,7 +297,9 @@ def _source_table_records(
                 "_source_sheet": str(profile_row.sheet_name),
                 "_source_row": int(observation.source_row_number),
                 "_snapshot_id": snapshot_id,
-                "_reference_year_filename": _reference_year_from_filename(relative_path),
+                "_reference_year_filename": _reference_year_from_filename(
+                    relative_path
+                ),
                 "_row_sha256": _normalized_row_hash(observation.values),
                 "_duplicate_group_id": None,
                 "_duplicate_occurrence_count": 0,
@@ -280,7 +309,10 @@ def _source_table_records(
             }
         )
         transformed.update(
-            duplicate_lookup.get((relative_path, observation.source_row_number), {})
+            duplicate_lookup.get(
+                (relative_path, observation.source_row_number),
+                {},
+            )
         )
         records.append(transformed)
     return dataset, records
@@ -304,7 +336,10 @@ def build_staging(
 
     for profile_row in sheet_profile.itertuples(index=False):
         relative_path = str(profile_row.relative_path)
-        headers, observations = _table_rows(snapshot_path, profile_row)
+        headers, observations = inbox_anomaly_review._table_rows(
+            snapshot_path,
+            profile_row,
+        )
         source_declared = source_from_path(relative_path)
         dataset = classify_dataset(source_declared, headers)
         input_rows = len(observations)
@@ -346,9 +381,11 @@ def build_staging(
         name: pd.DataFrame(records)
         for name, records in grouped_records.items()
     }
-    manifest = pd.DataFrame(manifest_records).sort_values(
-        ["source_declared", "dataset", "relative_path"]
-    ).reset_index(drop=True)
+    manifest = (
+        pd.DataFrame(manifest_records)
+        .sort_values(["source_declared", "dataset", "relative_path"])
+        .reset_index(drop=True)
+    )
 
     duplicate_flagged_rows = sum(
         int(frame["_duplicate_group_id"].notna().sum())
@@ -389,10 +426,21 @@ def build_staging(
             len(datasets["federal_transferencias"]),
             "calculated",
         ),
-        ("icms_rows_retained", len(datasets["estadual_icms"]), "calculated"),
-        ("icms_duplicate_rows_flagged", duplicate_flagged_rows, "calculated"),
+        (
+            "icms_rows_retained",
+            len(datasets["estadual_icms"]),
+            "calculated",
+        ),
+        (
+            "icms_duplicate_rows_flagged",
+            duplicate_flagged_rows,
+            "calculated",
+        ),
     ]
-    quality_summary = pd.DataFrame(indicators, columns=["indicator", "value", "nature"])
+    quality_summary = pd.DataFrame(
+        indicators,
+        columns=["indicator", "value", "nature"],
+    )
     return StagingResult(
         datasets=datasets,
         source_manifest=manifest,
@@ -412,8 +460,14 @@ def write_staging_output(result: StagingResult, output_dir: Path) -> Path:
     try:
         for name, frame in result.datasets.items():
             frame.to_parquet(partial / f"{name}.parquet", index=False)
-        result.source_manifest.to_csv(partial / "source_manifest.csv", index=False)
-        result.quality_summary.to_csv(partial / "staging_quality_summary.csv", index=False)
+        result.source_manifest.to_csv(
+            partial / "source_manifest.csv",
+            index=False,
+        )
+        result.quality_summary.to_csv(
+            partial / "staging_quality_summary.csv",
+            index=False,
+        )
         target.parent.mkdir(parents=True, exist_ok=True)
         partial.rename(target)
     except Exception:

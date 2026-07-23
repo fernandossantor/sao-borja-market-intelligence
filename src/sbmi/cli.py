@@ -8,6 +8,12 @@ import pandas as pd
 import typer
 
 from sbmi.drive import check_remote, remote_size, snapshot_raw
+from sbmi.drive_audit import (
+    exact_duplicate_candidates,
+    extension_summary,
+    inventory_summary,
+    top_level_summary,
+)
 from sbmi.google_drive import (
     build_authorized_session,
     build_drive_inventory,
@@ -141,6 +147,39 @@ def gdrive_inventory(
     typer.echo(f"missing_size={missing_size}")
     typer.echo(f"sha256_available={sha256_available}")
     typer.echo(f"output={output.resolve()}")
+    typer.echo("status=ok")
+
+
+@app.command("gdrive-audit")
+def gdrive_audit(
+    inventory_csv: Annotated[
+        Path,
+        typer.Option(exists=True, dir_okay=False, readable=True),
+    ] = Path(".data/manifests/google_drive_inventory.csv"),
+    output_dir: Annotated[Path, typer.Option()] = Path(".data/audit"),
+) -> None:
+    """Gera resumos locais e candidatos a duplicidade sem alterar o Drive."""
+    inventory_df = pd.read_csv(inventory_csv)
+    summary = inventory_summary(inventory_df)
+    top_level = top_level_summary(inventory_df)
+    extensions = extension_summary(inventory_df)
+    duplicates = exact_duplicate_candidates(inventory_df)
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    summary.to_csv(output_dir / "drive_inventory_summary.csv", index=False)
+    top_level.to_csv(output_dir / "drive_top_level_summary.csv", index=False)
+    extensions.to_csv(output_dir / "drive_extension_summary.csv", index=False)
+    duplicates.to_csv(output_dir / "drive_exact_duplicate_candidates.csv", index=False)
+
+    indicators = dict(zip(summary["indicator"], summary["value"], strict=True))
+    typer.echo(f"entries={indicators['entries']}")
+    typer.echo(f"files={indicators['files']}")
+    typer.echo(f"folders={indicators['folders']}")
+    typer.echo(f"known_bytes={indicators['known_bytes']}")
+    typer.echo(f"files_without_sha256={indicators['files_without_sha256']}")
+    typer.echo(f"exact_duplicate_groups={indicators['exact_duplicate_groups']}")
+    typer.echo(f"exact_duplicate_rows={indicators['exact_duplicate_rows']}")
+    typer.echo(f"output_dir={output_dir.resolve()}")
     typer.echo("status=ok")
 
 

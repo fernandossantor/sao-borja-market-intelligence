@@ -60,7 +60,12 @@ def decode_service_account_info(encoded_secret: str) -> dict[str, Any]:
     try:
         raw = base64.b64decode(compact, validate=True)
         payload = json.loads(raw.decode("utf-8"))
-    except (binascii.Error, UnicodeDecodeError, json.JSONDecodeError) as exc:
+    except (
+        binascii.Error,
+        UnicodeDecodeError,
+        json.JSONDecodeError,
+        ValueError,
+    ) as exc:
         raise ValueError("A credencial não é um JSON Base64 válido.") from exc
 
     if not isinstance(payload, dict):

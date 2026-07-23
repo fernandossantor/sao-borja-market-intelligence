@@ -1,9 +1,12 @@
-.PHONY: bootstrap install doctor test lint lint-legacy format verify
+.PHONY: bootstrap install doctor test lint lint-legacy format verify drive-check drive-size drive-snapshot
+
+DRIVE_REMOTE ?= sbmi-drive
+DRIVE_PATH ?= raw
 
 bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
 	python -m pip install -e '.[dev]'
-	mkdir -p .data/raw .data/staging .data/curated artifacts manifests reports/generated
+	mkdir -p .data/raw .data/staging .data/curated .data/snapshots artifacts manifests reports/generated
 
 install: bootstrap
 
@@ -24,3 +27,12 @@ format:
 	python -m ruff check --fix src/sbmi tests
 
 verify: doctor test lint
+
+drive-check:
+	python -m sbmi.cli drive-check --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)
+
+drive-size:
+	python -m sbmi.cli drive-size --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)
+
+drive-snapshot:
+	python -m sbmi.cli drive-snapshot --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)

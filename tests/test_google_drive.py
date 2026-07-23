@@ -151,7 +151,10 @@ def test_build_drive_inventory_is_recursive_and_paginated() -> None:
         "readme.txt",
         "raw/dados.xlsx",
     ]
-    assert inventory.loc[inventory["drive_file_id"] == "nested-file", "size_bytes"].item() == 25
+    nested_size = inventory.loc[
+        inventory["drive_file_id"] == "nested-file", "size_bytes"
+    ].item()
+    assert nested_size == 25
     assert inventory.loc[
         inventory["drive_file_id"] == "nested-file", "sha256_checksum"
     ].item() == "sha256"

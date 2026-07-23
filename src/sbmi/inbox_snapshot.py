@@ -66,7 +66,8 @@ def _normalized_prefix(prefix: str) -> str:
 def _safe_relative_path(value: object) -> Path:
     text = str(value or "").strip().strip("/")
     pure = PurePosixPath(text)
-    if not text or pure.is_absolute() or any(part in {".", ".."} for part in pure.parts):
+    has_unsafe_part = any(part in {".", ".."} for part in pure.parts)
+    if not text or pure.is_absolute() or has_unsafe_part:
         raise ValueError(f"Caminho relativo inválido: {value!r}")
     return Path(*pure.parts)
 
@@ -75,14 +76,16 @@ def select_inbox_files(
     inventory: pd.DataFrame,
     inbox_prefix: str = DEFAULT_INBOX_PREFIX,
 ) -> pd.DataFrame:
-    """Seleciona somente arquivos da caixa de entrada, preservando metadados de validação."""
+    """Seleciona arquivos da caixa, preservando metadados de validação."""
     missing = REQUIRED_COLUMNS.difference(inventory.columns)
     if missing:
         raise ValueError(f"Colunas obrigatórias ausentes: {sorted(missing)}")
 
     prefix = _normalized_prefix(inbox_prefix)
     frame = inventory.copy()
-    frame["relative_path"] = frame["relative_path"].fillna("").astype(str).str.strip("/")
+    frame["relative_path"] = (
+        frame["relative_path"].fillna("").astype(str).str.strip("/")
+    )
     frame["is_folder"] = _folder_mask(frame["is_folder"])
     frame["size_bytes"] = pd.to_numeric(frame["size_bytes"], errors="coerce")
     frame["sha256_checksum"] = (
@@ -98,7 +101,10 @@ def select_inbox_files(
     if selected["drive_file_id"].fillna("").astype(str).str.strip().eq("").any():
         raise ValueError("Há arquivos sem drive_file_id na seleção.")
     if selected["size_bytes"].isna().any():
-        paths = selected.loc[selected["size_bytes"].isna(), "relative_path"].tolist()
+        paths = selected.loc[
+            selected["size_bytes"].isna(),
+            "relative_path",
+        ].tolist()
         raise ValueError(f"Há arquivos sem tamanho informado: {paths}")
 
     for relative_path in selected["relative_path"]:
@@ -119,7 +125,7 @@ def _download_file(
     expected_sha256: str,
     chunk_size: int = 1024 * 1024,
 ) -> tuple[int, str]:
-    """Baixa um arquivo binário e valida tamanho e SHA-256 antes da publicação local."""
+    """Baixa e valida tamanho e SHA-256 antes da publicação local."""
     if target.exists():
         raise FileExistsError(f"O destino já existe: {target}")
 
@@ -147,11 +153,13 @@ def _download_file(
         local_sha256 = digest.hexdigest()
         if downloaded != expected_size:
             raise ValueError(
-                f"Tamanho divergente para {target.name}: esperado={expected_size}, obtido={downloaded}"
+                "Tamanho divergente para "
+                f"{target.name}: esperado={expected_size}, obtido={downloaded}"
             )
         if expected_sha256 and local_sha256 != expected_sha256.lower():
             raise ValueError(
-                f"SHA-256 divergente para {target.name}: esperado={expected_sha256}, obtido={local_sha256}"
+                "SHA-256 divergente para "
+                f"{target.name}: esperado={expected_sha256}, obtido={local_sha256}"
             )
 
         temporary.replace(target)
@@ -169,12 +177,13 @@ def snapshot_inbox(
     snapshot_id: str | None = None,
     max_total_bytes: int = 10_000_000,
 ) -> SnapshotResult:
-    """Cria captura local imutável da caixa de entrada, sem escrever no Drive."""
+    """Cria captura local imutável da caixa, sem escrever no Drive."""
     selected = select_inbox_files(inventory, inbox_prefix)
     total_bytes = planned_bytes(selected)
     if total_bytes > max_total_bytes:
         raise ValueError(
-            f"Captura bloqueada pelo limite: planejado={total_bytes}, limite={max_total_bytes}"
+            "Captura bloqueada pelo limite: "
+            f"planejado={total_bytes}, limite={max_total_bytes}"
         )
 
     resolved_id = snapshot_id or default_snapshot_id()

@@ -1,4 +1,4 @@
-.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory drive-check drive-size drive-snapshot
+.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -6,7 +6,7 @@ DRIVE_PATH ?= raw
 bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
 	python -m pip install -e '.[dev]'
-	mkdir -p .data/raw .data/staging .data/curated .data/snapshots .data/manifests artifacts manifests reports/generated
+	mkdir -p .data/raw .data/staging .data/curated .data/snapshots .data/manifests .data/audit artifacts manifests reports/generated
 
 install: bootstrap
 
@@ -33,6 +33,9 @@ gdrive-check:
 
 gdrive-inventory:
 	python -m sbmi.cli gdrive-inventory
+
+gdrive-audit:
+	python -m sbmi.cli gdrive-audit
 
 drive-check:
 	python -m sbmi.cli drive-check --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)

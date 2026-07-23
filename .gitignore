@@ -25,6 +25,7 @@ staging/
 curated/
 artifacts/
 reports/generated/
+manifests/google_drive_inventory.csv
 manifests/*.parquet
 *.duckdb
 *.duckdb.wal

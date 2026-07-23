@@ -15,7 +15,7 @@
     "SBMI_DRIVE_REMOTE": "sbmi-drive",
     "SBMI_DRIVE_RAW_PATH": "raw"
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y rclone && make bootstrap",
+  "postCreateCommand": "make bootstrap",
   "waitFor": "postCreateCommand",
   "customizations": {
     "vscode": {

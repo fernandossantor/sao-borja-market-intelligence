@@ -74,11 +74,13 @@ Depois que a validação retornar `status=ok`:
 make gdrive-inventory
 ```
 
-O comando cria:
+O comando cria localmente:
 
 ```text
-manifests/google_drive_inventory.csv
+.data/manifests/google_drive_inventory.csv
 ```
+
+A pasta `.data/` é ignorada pelo Git. Isso evita publicar, em um repositório público, nomes internos de arquivos e identificadores do Google Drive.
 
 Campos principais:
 

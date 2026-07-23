@@ -1,0 +1,22 @@
+project:
+  name: sao-borja-market-intelligence
+
+paths:
+  data_root: "${SBMI_DATA_ROOT:-.data}"
+  raw: "${SBMI_DATA_ROOT:-.data}/raw"
+  staging: "${SBMI_DATA_ROOT:-.data}/staging"
+  curated: "${SBMI_DATA_ROOT:-.data}/curated"
+  artifacts: "artifacts"
+  manifests: "manifests"
+  reports: "reports/generated"
+
+remote:
+  provider: google_drive
+  project_folder_name: "_sao_borja"
+  raw_subfolder: "raw"
+  exports_subfolder: "exports"
+  write_enabled: false
+
+legacy:
+  colab_root: "/content/drive/MyDrive/Colab Notebooks/_sao_borja"
+  status: reference_only

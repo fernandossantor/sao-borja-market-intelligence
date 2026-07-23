@@ -2,54 +2,76 @@
 
 Pipeline reprodutível de inteligência econômica e mercadológica de São Borja/RS.
 
-## Estado atual
+## Objetivo
 
-O projeto está em fase de estabilização arquitetural. Os builders históricos permanecem em `src/modeling/` e continuam sendo a referência para os resultados já produzidos. A nova infraestrutura será incorporada gradualmente, com testes e comparação antes de qualquer substituição.
+Organizar, auditar, processar e analisar dados territoriais, econômicos, fiscais, demográficos e sociais do município, preservando fontes, períodos, unidades, abrangência geográfica e limitações metodológicas.
 
 ## Arquitetura
 
-- **Google Drive:** dados originais, dados curados, manifestos completos e exportações;
+- **Google Drive:** dados originais, dados curados e exportações;
 - **GitHub:** código, configurações sem segredos, testes e documentação;
-- **GitHub Codespaces:** ambiente principal de desenvolvimento e execução;
+- **GitHub Codespaces:** ambiente principal de desenvolvimento e validação;
 - **DuckDB:** mecanismo analítico local e reconstruível;
-- **Supabase:** reservado para futura publicação e consulta.
+- **Supabase:** camada futura de publicação e consulta.
 
-Consulte:
+Os scripts históricos do Google Colab permanecem preservados em `src/modeling/` durante a estabilização.
 
-- [`docs/architecture.md`](docs/architecture.md)
-- [`docs/data_governance.md`](docs/data_governance.md)
-- [`docs/repository_audit.md`](docs/repository_audit.md)
-- [`AGENTS.md`](AGENTS.md)
+## Ambiente
 
-## Ambiente de desenvolvimento
-
-A branch de estabilização contém um ambiente Codespaces reproduzível em `.devcontainer/devcontainer.json`.
-
-Depois de abrir o Codespace:
+O repositório utiliza Python 3.12 e possui configuração para GitHub Codespaces.
 
 ```bash
-make doctor
-make test
-make lint
+make bootstrap
+make verify
 ```
 
-## Inventário local
+A verificação executa:
 
-Depois que os dados forem sincronizados para `.data/raw` em modo controlado:
+- diagnóstico dos caminhos locais;
+- testes automatizados;
+- lint do código estabilizado.
+
+## Google Drive
+
+O acesso inicial ao Drive usa uma conta de serviço com permissão de Visualizador apenas sobre a pasta do projeto. A credencial é fornecida ao Codespace por segredo criptografado e permanece em memória durante a execução.
+
+Validação de acesso, sem download:
 
 ```bash
-sbmi inventory --root .data/raw --output manifests/local_inventory.csv
-sbmi find-exact-duplicates \
-  --inventory-csv manifests/local_inventory.csv \
-  --output reports/generated/exact_duplicates.csv
+make gdrive-check
 ```
 
-O primeiro inventário calcula SHA-256 e identifica apenas duplicidades físicas exatas. Sobreposição estrutural e conceitual será tratada em etapas posteriores.
+Inventário recursivo de metadados:
 
-## Regras principais
+```bash
+make gdrive-inventory
+```
 
-- `raw` é imutável;
-- dados extensos e credenciais não entram no Git;
-- mudanças são feitas em branches e revisadas por pull request;
-- diferenças entre resultados antigos e novos precisam ser explicadas;
-- fontes, períodos, unidades, abrangência e limitações devem ser documentados.
+O inventário é salvo em:
+
+```text
+manifests/google_drive_inventory.csv
+```
+
+Consulte [`docs/google_drive_api.md`](docs/google_drive_api.md) para configuração e limitações.
+
+## Estrutura nova
+
+```text
+.devcontainer/          ambiente Codespaces
+.github/workflows/      integração contínua
+config/                 exemplos de configuração
+src/sbmi/               infraestrutura estabilizada
+tests/                  testes automatizados
+docs/                   arquitetura, governança e auditoria
+manifests/              inventários leves de metadados
+reports/generated/      relatórios gerados localmente
+```
+
+## Segurança
+
+Dados, credenciais, arquivos Parquet, bancos DuckDB e artefatos temporários não devem ser versionados. O conteúdo de `raw` é imutável e nenhuma rotina de escrita no Drive faz parte desta etapa.
+
+## Estado
+
+A migração está em andamento na branch `stabilization/architecture-v1`. O pull request permanece em modo rascunho até a validação do inventário do Drive e da auditoria dos dados.

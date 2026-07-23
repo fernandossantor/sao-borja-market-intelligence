@@ -1,4 +1,4 @@
-.PHONY: bootstrap install doctor test lint lint-legacy format verify drive-check drive-size drive-snapshot
+.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -27,6 +27,12 @@ format:
 	python -m ruff check --fix src/sbmi tests
 
 verify: doctor test lint
+
+gdrive-check:
+	python -m sbmi.cli gdrive-check
+
+gdrive-inventory:
+	python -m sbmi.cli gdrive-inventory
 
 drive-check:
 	python -m sbmi.cli drive-check --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)

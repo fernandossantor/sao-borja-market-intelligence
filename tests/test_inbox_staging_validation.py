@@ -60,15 +60,18 @@ def _frame(dataset: str, *, rows: int = 1) -> pd.DataFrame:
             }
         )
         records.append(record)
-    return pd.DataFrame(records, columns=[*BASE_COLUMNS_BY_DATASET[dataset], *PROVENANCE_COLUMNS])
+    columns = [*BASE_COLUMNS_BY_DATASET[dataset], *PROVENANCE_COLUMNS]
+    return pd.DataFrame(records, columns=columns)
 
 
 def _write_staging(root: Path, frames: dict[str, pd.DataFrame]) -> Path:
     staging = root / SNAPSHOT_ID
     staging.mkdir(parents=True)
     manifest_records = []
+    published: dict[str, pd.DataFrame] = {}
     for dataset in EXPECTED_DATASETS:
         frame = frames.get(dataset, _frame(dataset))
+        published[dataset] = frame
         frame.to_parquet(staging / f"{dataset}.parquet", index=False)
         for source_path, group in frame.groupby("_source_path", dropna=False):
             manifest_records.append(
@@ -82,7 +85,34 @@ def _write_staging(root: Path, frames: dict[str, pd.DataFrame]) -> Path:
                     "basis": "EXPLICIT_DATA_CONTRACT",
                 }
             )
-    pd.DataFrame(manifest_records).to_csv(staging / "source_manifest.csv", index=False)
+    manifest = pd.DataFrame(manifest_records)
+    manifest.to_csv(staging / "source_manifest.csv", index=False)
+    icms = published["estadual_icms"]
+    flagged = int(icms["_duplicate_group_id"].notna().sum())
+    quality = pd.DataFrame(
+        [
+            ("source_tables_observed", len(manifest), "observed"),
+            ("source_rows_observed", int(manifest["input_rows"].sum()), "observed"),
+            ("source_files_excluded_from_staging", 0, "calculated"),
+            ("source_rows_excluded_from_staging", 0, "calculated"),
+            ("staging_datasets", len(published), "observed"),
+            (
+                "staging_rows",
+                sum(len(frame) for frame in published.values()),
+                "calculated",
+            ),
+            ("federal_source_files_included", 1, "calculated"),
+            (
+                "federal_rows",
+                len(published["federal_transferencias"]),
+                "calculated",
+            ),
+            ("icms_rows_retained", len(icms), "calculated"),
+            ("icms_duplicate_rows_flagged", flagged, "calculated"),
+        ],
+        columns=["indicator", "value", "nature"],
+    )
+    quality.to_csv(staging / "staging_quality_summary.csv", index=False)
     return staging
 
 
@@ -98,6 +128,7 @@ def test_validate_staging_reconciles_valid_contracts(tmp_path: Path) -> None:
     assert _indicator(result, "datasets_loaded") == 6
     assert _indicator(result, "rows_validated") == 6
     assert _indicator(result, "row_reconciliation_failures") == 0
+    assert _indicator(result, "quality_indicator_failures") == 0
     assert _indicator(result, "validation_errors") == 0
     assert set(result.dataset_summary["status"]) == {"OK"}
 
@@ -135,6 +166,7 @@ def test_validate_staging_counts_consistent_duplicate_groups(tmp_path: Path) -> 
     assert _indicator(result, "duplicate_groups") == 1
     assert _indicator(result, "duplicate_excess") == 2
     assert _indicator(result, "duplicate_flag_inconsistencies") == 0
+    assert _indicator(result, "quality_indicator_failures") == 0
 
 
 def test_write_validation_output_is_atomic_and_refuses_overwrite(tmp_path: Path) -> None:
@@ -147,6 +179,7 @@ def test_write_validation_output_is_atomic_and_refuses_overwrite(tmp_path: Path)
     assert written == target.resolve()
     assert (target / "dataset_validation_summary.csv").is_file()
     assert (target / "manifest_reconciliation.csv").is_file()
+    assert (target / "quality_reconciliation.csv").is_file()
     assert (target / "validation_issues.csv").is_file()
     assert (target / "staging_validation_summary.csv").is_file()
     with pytest.raises(FileExistsError):

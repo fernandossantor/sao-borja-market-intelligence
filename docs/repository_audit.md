@@ -58,6 +58,23 @@ Não foram encontrados testes automatizados nem verificações de CI no estado i
 
 Consequência: mudanças de código podem alterar resultados sem detecção automática.
 
+### 7. Integração com o Google Drive
+
+A autenticação interativa por rclone mostrou-se inadequada ao Codespace e dependente do cliente OAuth compartilhado do rclone.
+
+Decisão: o inventário inicial passa a usar diretamente a Google Drive API v3 com uma conta de serviço.
+
+Controles adotados:
+
+- a conta de serviço recebe permissão de Visualizador somente sobre `_sao_borja`;
+- o escopo da API é `drive.readonly`;
+- a credencial é armazenada como segredo do Codespaces em Base64;
+- a credencial é decodificada em memória, sem arquivo no repositório;
+- o primeiro processamento consulta somente metadados;
+- nenhuma operação de escrita no Drive foi implementada.
+
+O rclone permanece apenas como opção futura para capturas locais, não como requisito do inventário.
+
 ## Aspectos preservados
 
 A arquitetura existente possui qualidades que serão mantidas:
@@ -74,7 +91,7 @@ A arquitetura existente possui qualidades que serão mantidas:
 1. preservar `src/modeling/` sem alterações funcionais iniciais;
 2. introduzir ambiente reproduzível;
 3. introduzir caminhos portáveis e configuração externa;
-4. construir inventário com hashes;
+4. construir inventário do Drive com IDs, metadados e checksums disponíveis;
 5. auditar `raw/new_files`;
 6. criar testes de caracterização dos resultados atuais;
 7. migrar builders gradualmente;
@@ -82,4 +99,4 @@ A arquitetura existente possui qualidades que serão mantidas:
 
 ## Limitação desta auditoria
 
-Esta é uma auditoria estrutural inicial. A listagem completa de todos os arquivos e dependências será gerada no Codespace pelo inventário automatizado, após a conexão segura e somente leitura com o Google Drive.
+Esta é uma auditoria estrutural inicial. A listagem completa de todos os arquivos e dependências será gerada no Codespace pela Google Drive API após a disponibilização segura dos segredos.

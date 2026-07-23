@@ -1,17 +1,23 @@
-.PHONY: install doctor test lint format
+.PHONY: bootstrap install doctor test lint format verify
 
-install:
+bootstrap:
+	python -m pip install --upgrade pip setuptools wheel
 	python -m pip install -e '.[dev]'
+	mkdir -p .data/raw .data/staging .data/curated artifacts manifests reports/generated
+
+install: bootstrap
 
 doctor:
-	sbmi doctor
+	python -m sbmi.cli doctor
 
 test:
-	pytest
+	python -m pytest
 
 lint:
-	ruff check src tests
+	python -m ruff check src tests
 
 format:
-	ruff format src tests
-	ruff check --fix src tests
+	python -m ruff format src tests
+	python -m ruff check --fix src tests
+
+verify: doctor test lint

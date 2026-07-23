@@ -56,8 +56,27 @@ A captura só é publicada com o nome definitivo depois que todos os arquivos pa
 
 O arquivo `snapshot_manifest.csv` registra tamanho esperado, tamanho obtido, checksum esperado, checksum local e status de verificação.
 
+## Resultado validado em 23 de julho de 2026
+
+- 34 arquivos capturados;
+- 590.693 bytes;
+- tamanho validado em todos os arquivos;
+- SHA-256 validado em todos os arquivos;
+- acesso ao Drive mantido em modo somente leitura.
+
+## Perfil estrutural subsequente
+
+A captura validada pode ser perfilada localmente por:
+
+```bash
+make profile-inbox-snapshot
+```
+
+A rotina registra estrutura de arquivos, planilhas e colunas, candidatos a cabeçalho, tipos aparentes, anos observados e grupos com assinatura estrutural exata. A metodologia está documentada em `docs/new_files_structural_profile.md`.
+
 ## Limitações
 
 - identidade binária não elimina a necessidade de auditoria conceitual;
 - a captura permanece local ao Codespace e fora do Git;
-- a etapa seguinte deve examinar folhas, cabeçalhos, dimensões, períodos, unidades, abrangência geográfica e possíveis sobreposições entre as bases.
+- cabeçalhos e tipos aparentes incluem estimativas heurísticas;
+- equivalência de cabeçalhos não comprova equivalência de conteúdo, período, unidade ou abrangência geográfica.

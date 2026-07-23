@@ -1,12 +1,9 @@
 """Inventário local de arquivos com hash SHA-256."""
 
-from __future__ import annotations
-
 import hashlib
 from pathlib import Path
 
 import pandas as pd
-
 
 CHUNK_SIZE = 1024 * 1024
 

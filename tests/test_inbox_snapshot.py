@@ -95,8 +95,11 @@ def test_snapshot_inbox_downloads_and_verifies_files(tmp_path: Path) -> None:
 
     assert result.files == 2
     assert result.bytes == len(b"arquivo-a") + len(b"arquivo-b")
-    assert (result.snapshot_path / "raw/new_files/Federal/a.xlsx").read_bytes() == b"arquivo-a"
-    assert (result.snapshot_path / "raw/new_files/Municipal/b.xlsx").read_bytes() == b"arquivo-b"
+
+    federal_file = result.snapshot_path / "raw/new_files/Federal/a.xlsx"
+    municipal_file = result.snapshot_path / "raw/new_files/Municipal/b.xlsx"
+    assert federal_file.read_bytes() == b"arquivo-a"
+    assert municipal_file.read_bytes() == b"arquivo-b"
 
     manifest = pd.read_csv(result.snapshot_path / "snapshot_manifest.csv")
     assert set(manifest["verification_status"]) == {"VERIFIED"}

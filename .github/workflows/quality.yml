@@ -2,9 +2,14 @@ name: quality
 
 on:
   pull_request:
-  push:
-    branches:
-      - stabilization/architecture-v1
+  workflow_dispatch:
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   test:

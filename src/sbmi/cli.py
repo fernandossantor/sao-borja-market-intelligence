@@ -1,9 +1,9 @@
 """Interface de linha de comando do projeto."""
 
-from __future__ import annotations
-
 from pathlib import Path
+from typing import Annotated
 
+import pandas as pd
 import typer
 
 from sbmi.inventory import build_inventory, duplicate_candidates
@@ -24,8 +24,14 @@ def doctor() -> None:
 
 @app.command()
 def inventory(
-    root: Path = typer.Option(..., exists=True, file_okay=False, readable=True),
-    output: Path = typer.Option(Path("manifests/local_inventory.csv")),
+    root: Annotated[
+        Path,
+        typer.Option(exists=True, file_okay=False, readable=True),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option(),
+    ] = Path("manifests/local_inventory.csv"),
 ) -> None:
     """Gera inventário recursivo com hashes SHA-256."""
     result = build_inventory(root)
@@ -37,12 +43,16 @@ def inventory(
 
 @app.command("find-exact-duplicates")
 def find_exact_duplicates(
-    inventory_csv: Path = typer.Option(..., exists=True, dir_okay=False, readable=True),
-    output: Path = typer.Option(Path("reports/generated/exact_duplicates.csv")),
+    inventory_csv: Annotated[
+        Path,
+        typer.Option(exists=True, dir_okay=False, readable=True),
+    ],
+    output: Annotated[
+        Path,
+        typer.Option(),
+    ] = Path("reports/generated/exact_duplicates.csv"),
 ) -> None:
     """Identifica arquivos fisicamente idênticos pelo SHA-256."""
-    import pandas as pd
-
     inventory_df = pd.read_csv(inventory_csv)
     result = duplicate_candidates(inventory_df)
     output.parent.mkdir(parents=True, exist_ok=True)

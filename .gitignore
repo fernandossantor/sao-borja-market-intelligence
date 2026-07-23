@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.secrets/
+credentials/
+*service-account*.json
+*service_account*.json
+
+# Local data and generated artifacts
+.data/
+data/
+staging/
+curated/
+artifacts/
+reports/generated/
+manifests/google_drive_inventory.csv
+manifests/*.parquet
+*.duckdb
+*.duckdb.wal
+*.parquet
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors and operating systems
+.vscode/settings.json
+.DS_Store
+Thumbs.db

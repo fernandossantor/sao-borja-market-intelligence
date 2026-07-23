@@ -1,4 +1,4 @@
-.PHONY: bootstrap install doctor test lint format verify
+.PHONY: bootstrap install doctor test lint lint-legacy format verify
 
 bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
@@ -14,10 +14,13 @@ test:
 	python -m pytest
 
 lint:
-	python -m ruff check src tests
+	python -m ruff check src/sbmi tests
+
+lint-legacy:
+	python -m ruff check src --exclude sbmi
 
 format:
-	python -m ruff format src tests
-	python -m ruff check --fix src tests
+	python -m ruff format src/sbmi tests
+	python -m ruff check --fix src/sbmi tests
 
 verify: doctor test lint

@@ -114,7 +114,7 @@ def gdrive_inventory(
     root_folder_id: Annotated[str | None, typer.Option()] = None,
     secret_env: Annotated[str, typer.Option()] = "SBMI_GDRIVE_SA_B64",
     output: Annotated[Path, typer.Option()] = Path(
-        "manifests/google_drive_inventory.csv"
+        ".data/manifests/google_drive_inventory.csv"
     ),
 ) -> None:
     """Gera inventário recursivo de metadados sem copiar os conteúdos."""

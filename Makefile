@@ -6,7 +6,7 @@ DRIVE_PATH ?= raw
 bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
 	python -m pip install -e '.[dev]'
-	mkdir -p .data/raw .data/staging .data/curated .data/snapshots artifacts manifests reports/generated
+	mkdir -p .data/raw .data/staging .data/curated .data/snapshots .data/manifests artifacts manifests reports/generated
 
 install: bootstrap
 

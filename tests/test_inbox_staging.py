@@ -6,8 +6,8 @@ import pytest
 from openpyxl import Workbook
 
 from sbmi.inbox_staging import (
-    FEDERAL_HEADERS,
     ESTADUAL_ICMS_HEADERS,
+    FEDERAL_HEADERS,
     StagingResult,
     build_staging,
     classify_dataset,
@@ -16,7 +16,11 @@ from sbmi.inbox_staging import (
 )
 
 
-def _write_workbook(path: Path, headers: tuple[str, ...], rows: list[list[object]]) -> None:
+def _write_workbook(
+    path: Path,
+    headers: tuple[str, ...],
+    rows: list[list[object]],
+) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     workbook = Workbook()
     worksheet = workbook.active
@@ -57,7 +61,9 @@ def test_classify_dataset_requires_explicit_contract() -> None:
         classify_dataset("Federal", ("coluna_desconhecida",))
 
 
-def test_build_staging_excludes_content_copy_and_flags_icms_rows(tmp_path: Path) -> None:
+def test_build_staging_excludes_content_copy_and_flags_icms_rows(
+    tmp_path: Path,
+) -> None:
     federal_primary = "raw/new_files/Federal/programa.xlsx"
     federal_copy = "raw/new_files/Federal/programa(1).xlsx"
     icms = "raw/new_files/Estadual/icms.xlsx"
@@ -134,7 +140,9 @@ def test_build_staging_excludes_content_copy_and_flags_icms_rows(tmp_path: Path)
     assert dispositions[federal_copy] == "EXCLUDED_CONTENT_DUPLICATE_FROM_STAGING"
 
 
-def test_write_staging_output_is_atomic_and_refuses_overwrite(tmp_path: Path) -> None:
+def test_write_staging_output_is_atomic_and_refuses_overwrite(
+    tmp_path: Path,
+) -> None:
     result = StagingResult(
         datasets={"teste": pd.DataFrame([{"valor": 1}])},
         source_manifest=pd.DataFrame([{"relative_path": "a.xlsx"}]),

@@ -8,6 +8,12 @@ import pandas as pd
 import typer
 
 from sbmi.drive import check_remote, remote_size, snapshot_raw
+from sbmi.google_drive import (
+    build_authorized_session,
+    build_drive_inventory,
+    check_root_folder,
+    service_account_info_from_environment,
+)
 from sbmi.inventory import build_inventory, duplicate_candidates
 from sbmi.paths import ProjectPaths
 
@@ -22,6 +28,16 @@ def drive_remote_name(remote: str | None) -> str:
 def drive_raw_path(remote_path: str | None) -> str:
     """Resolve o caminho lógico da camada bruta no remote."""
     return remote_path or os.getenv("SBMI_DRIVE_RAW_PATH", "raw")
+
+
+def drive_root_folder_id(root_folder_id: str | None) -> str:
+    """Resolve o ID da pasta raiz sem incorporá-lo ao código."""
+    resolved = root_folder_id or os.getenv("SBMI_DRIVE_ROOT_FOLDER_ID")
+    if not resolved:
+        raise typer.BadParameter(
+            "Informe --root-folder-id ou defina SBMI_DRIVE_ROOT_FOLDER_ID."
+        )
+    return resolved.strip()
 
 
 @app.command()
@@ -73,12 +89,67 @@ def find_exact_duplicates(
     typer.echo(f"output={output.resolve()}")
 
 
+@app.command("gdrive-check")
+def gdrive_check(
+    root_folder_id: Annotated[str | None, typer.Option()] = None,
+    secret_env: Annotated[str, typer.Option()] = "SBMI_GDRIVE_SA_B64",
+) -> None:
+    """Valida a conta de serviço e a pasta raiz sem baixar arquivos."""
+    resolved_root = drive_root_folder_id(root_folder_id)
+    info = service_account_info_from_environment(secret_env)
+    session = build_authorized_session(info)
+    root, entries = check_root_folder(session, resolved_root)
+
+    typer.echo(f"root_name={root.get('name', '')}")
+    typer.echo(f"root_mime_type={root.get('mimeType', '')}")
+    typer.echo(f"first_level_entries={len(entries)}")
+    for entry in sorted(entries, key=lambda item: str(item.get("name", "")))[:20]:
+        typer.echo(f"{entry.get('name', '')}\t{entry.get('mimeType', '')}")
+    typer.echo("scope=drive.readonly")
+    typer.echo("status=ok")
+
+
+@app.command("gdrive-inventory")
+def gdrive_inventory(
+    root_folder_id: Annotated[str | None, typer.Option()] = None,
+    secret_env: Annotated[str, typer.Option()] = "SBMI_GDRIVE_SA_B64",
+    output: Annotated[Path, typer.Option()] = Path(
+        "manifests/google_drive_inventory.csv"
+    ),
+) -> None:
+    """Gera inventário recursivo de metadados sem copiar os conteúdos."""
+    resolved_root = drive_root_folder_id(root_folder_id)
+    info = service_account_info_from_environment(secret_env)
+    session = build_authorized_session(info)
+    result = build_drive_inventory(session, resolved_root)
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    result.to_csv(output, index=False)
+
+    folders = int(result["is_folder"].sum()) if not result.empty else 0
+    files = int((~result["is_folder"]).sum()) if not result.empty else 0
+    known_bytes = int(result["size_bytes"].fillna(0).sum()) if not result.empty else 0
+    missing_size = int(result["size_bytes"].isna().sum()) if not result.empty else 0
+    sha256_available = (
+        int(result["sha256_checksum"].notna().sum()) if not result.empty else 0
+    )
+
+    typer.echo(f"entries={len(result)}")
+    typer.echo(f"folders={folders}")
+    typer.echo(f"files={files}")
+    typer.echo(f"known_bytes={known_bytes}")
+    typer.echo(f"missing_size={missing_size}")
+    typer.echo(f"sha256_available={sha256_available}")
+    typer.echo(f"output={output.resolve()}")
+    typer.echo("status=ok")
+
+
 @app.command("drive-check")
 def drive_check(
     remote: Annotated[str | None, typer.Option()] = None,
     remote_path: Annotated[str | None, typer.Option("--path")] = None,
 ) -> None:
-    """Valida acesso somente leitura ao primeiro nível da pasta bruta."""
+    """Valida acesso pelo rclone ao primeiro nível da pasta bruta."""
     resolved_remote = drive_remote_name(remote)
     resolved_path = drive_raw_path(remote_path)
     entries = check_remote(resolved_remote, resolved_path)
@@ -95,7 +166,7 @@ def drive_size(
     remote: Annotated[str | None, typer.Option()] = None,
     remote_path: Annotated[str | None, typer.Option("--path")] = None,
 ) -> None:
-    """Calcula volume e número de objetos antes de baixar qualquer dado."""
+    """Calcula volume pelo rclone antes de baixar qualquer dado."""
     resolved_remote = drive_remote_name(remote)
     resolved_path = drive_raw_path(remote_path)
     result = remote_size(resolved_remote, resolved_path)
@@ -116,7 +187,7 @@ def drive_snapshot(
     ] = Path(".data/snapshots"),
     snapshot_id: Annotated[str | None, typer.Option()] = None,
 ) -> None:
-    """Cria captura local nova da camada bruta sem apagar nem sobrescrever o Drive."""
+    """Cria captura local nova pelo rclone, sem apagar nem sobrescrever o Drive."""
     resolved_remote = drive_remote_name(remote)
     resolved_path = drive_raw_path(remote_path)
     target = snapshot_raw(

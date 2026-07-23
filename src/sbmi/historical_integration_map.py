@@ -44,7 +44,10 @@ MANIFEST_REQUIRED_COLUMNS = {
     "dataset",
     "disposition",
 }
-COPY_SUFFIX_PATTERN = re.compile(r"(?:\s|_|-)*(?:\(\d+\)|copia|copy)$", re.IGNORECASE)
+COPY_SUFFIX_PATTERN = re.compile(
+    r"(?:\s|_|-)*(?:\(\d+\)|copia|copy)$",
+    re.IGNORECASE,
+)
 NON_ALNUM_PATTERN = re.compile(r"[^a-z0-9]+")
 
 
@@ -70,7 +73,11 @@ def normalize_file_stem(value: object) -> str:
     stem = PurePosixPath(str(value or "")).stem.strip()
     stem = COPY_SUFFIX_PATTERN.sub("", stem).strip()
     decomposed = unicodedata.normalize("NFKD", stem)
-    ascii_text = "".join(character for character in decomposed if not unicodedata.combining(character))
+    ascii_text = "".join(
+        character
+        for character in decomposed
+        if not unicodedata.combining(character)
+    )
     normalized = NON_ALNUM_PATTERN.sub(" ", ascii_text.casefold()).strip()
     return re.sub(r"\s+", " ", normalized)
 
@@ -84,7 +91,12 @@ def name_similarity(left: object, right: object) -> dict[str, float]:
     left_name = normalize_file_stem(left)
     right_name = normalize_file_stem(right)
     if not left_name or not right_name:
-        return {"jaccard": 0.0, "containment": 0.0, "sequence": 0.0, "score": 0.0}
+        return {
+            "jaccard": 0.0,
+            "containment": 0.0,
+            "sequence": 0.0,
+            "score": 0.0,
+        }
 
     left_tokens = _tokens(left_name)
     right_tokens = _tokens(right_name)
@@ -138,12 +150,14 @@ def _validate_inputs(inventory: pd.DataFrame, manifest: pd.DataFrame) -> None:
     inventory_missing = INVENTORY_REQUIRED_COLUMNS.difference(inventory.columns)
     if inventory_missing:
         raise ValueError(
-            f"Colunas obrigatórias ausentes no inventário: {sorted(inventory_missing)}"
+            "Colunas obrigatórias ausentes no inventário: "
+            f"{sorted(inventory_missing)}"
         )
     manifest_missing = MANIFEST_REQUIRED_COLUMNS.difference(manifest.columns)
     if manifest_missing:
         raise ValueError(
-            f"Colunas obrigatórias ausentes no manifesto: {sorted(manifest_missing)}"
+            "Colunas obrigatórias ausentes no manifesto: "
+            f"{sorted(manifest_missing)}"
         )
 
 
@@ -162,7 +176,10 @@ def _prepare_inventory(inventory: pd.DataFrame) -> pd.DataFrame:
     return frame
 
 
-def _active_sources(manifest: pd.DataFrame, inventory: pd.DataFrame) -> pd.DataFrame:
+def _active_sources(
+    manifest: pd.DataFrame,
+    inventory: pd.DataFrame,
+) -> pd.DataFrame:
     included = manifest.loc[
         manifest["disposition"].eq("INCLUDED_IN_STAGING"),
         ["relative_path", "dataset"],
@@ -183,23 +200,36 @@ def _active_sources(manifest: pd.DataFrame, inventory: pd.DataFrame) -> pd.DataF
         validate="one_to_one",
     )
     if sources["file_name"].isna().any():
-        missing = sorted(sources.loc[sources["file_name"].isna(), "relative_path"].astype(str))
+        missing = sorted(
+            sources.loc[
+                sources["file_name"].isna(),
+                "relative_path",
+            ].astype(str)
+        )
         raise ValueError(f"Fontes do staging ausentes no inventário: {missing}")
     return sources.sort_values(["dataset", "relative_path"]).reset_index(drop=True)
 
 
-def _scope_summary(historical: pd.DataFrame, scopes: Iterable[str]) -> pd.DataFrame:
+def _scope_summary(
+    historical: pd.DataFrame,
+    scopes: Iterable[str],
+) -> pd.DataFrame:
     records: list[dict[str, object]] = []
     for scope in scopes:
         group = historical.loc[historical["scope"].eq(scope)]
+        extensions = sorted(
+            set(group.loc[group["extension"].ne(""), "extension"])
+        )
         records.append(
             {
                 "scope": scope,
                 "files": len(group),
                 "data_like_files": int(group["is_data_like"].sum()),
                 "known_bytes": int(group["size_bytes"].fillna(0).sum()),
-                "files_with_sha256": int(group["sha256_checksum"].ne("").sum()),
-                "extensions": "|".join(sorted(set(group["extension"].loc[group["extension"].ne("")]))),
+                "files_with_sha256": int(
+                    group["sha256_checksum"].ne("").sum()
+                ),
+                "extensions": "|".join(extensions),
             }
         )
     return pd.DataFrame(records)
@@ -292,7 +322,10 @@ def _candidate_records(
     return pd.DataFrame(records, columns=columns)
 
 
-def _source_summary(sources: pd.DataFrame, candidates: pd.DataFrame) -> pd.DataFrame:
+def _source_summary(
+    sources: pd.DataFrame,
+    candidates: pd.DataFrame,
+) -> pd.DataFrame:
     records: list[dict[str, object]] = []
     for source in sources.itertuples(index=False):
         matches = candidates.loc[
@@ -308,11 +341,23 @@ def _source_summary(sources: pd.DataFrame, candidates: pd.DataFrame) -> pd.DataF
                 "source_size_bytes": source.size_bytes,
                 "source_sha256": source.sha256_checksum,
                 "candidate_count_retained": len(matches),
-                "best_candidate_class": "" if best is None else best["candidate_class"],
-                "best_candidate_score": None if best is None else best["name_score"],
-                "best_historical_scope": "" if best is None else best["historical_scope"],
-                "best_historical_path": "" if best is None else best["historical_relative_path"],
-                "mapping_status": "CANDIDATE_FOUND" if best is not None else "NO_METADATA_CANDIDATE",
+                "best_candidate_class": (
+                    "" if best is None else best["candidate_class"]
+                ),
+                "best_candidate_score": (
+                    None if best is None else best["name_score"]
+                ),
+                "best_historical_scope": (
+                    "" if best is None else best["historical_scope"]
+                ),
+                "best_historical_path": (
+                    "" if best is None else best["historical_relative_path"]
+                ),
+                "mapping_status": (
+                    "CANDIDATE_FOUND"
+                    if best is not None
+                    else "NO_METADATA_CANDIDATE"
+                ),
             }
         )
     return pd.DataFrame(records)
@@ -327,7 +372,11 @@ def _mapping_summary(
     indicators = [
         ("active_staging_source_files", len(sources), "observed"),
         ("historical_target_files", len(historical), "observed"),
-        ("historical_data_like_files", int(historical["is_data_like"].sum()), "calculated"),
+        (
+            "historical_data_like_files",
+            int(historical["is_data_like"].sum()),
+            "calculated",
+        ),
         ("candidate_pairs_retained", len(candidates), "calculated"),
         (
             "sources_with_candidates",
@@ -336,7 +385,11 @@ def _mapping_summary(
         ),
         (
             "sources_without_candidates",
-            int(source_summary["mapping_status"].eq("NO_METADATA_CANDIDATE").sum()),
+            int(
+                source_summary["mapping_status"]
+                .eq("NO_METADATA_CANDIDATE")
+                .sum()
+            ),
             "calculated",
         ),
     ]
@@ -353,7 +406,10 @@ def _mapping_summary(
                 "calculated",
             )
         )
-    return pd.DataFrame(indicators, columns=["indicator", "value", "nature"])
+    return pd.DataFrame(
+        indicators,
+        columns=["indicator", "value", "nature"],
+    )
 
 
 def build_historical_integration_map(
@@ -365,20 +421,33 @@ def build_historical_integration_map(
 ) -> HistoricalIntegrationMapResult:
     """Mapeia candidatos por metadados, sem baixar ou alterar arquivos históricos."""
     _validate_inputs(inventory, manifest)
-    normalized_scopes = tuple(dict.fromkeys(str(scope).strip("/") for scope in scopes if str(scope).strip("/")))
+    normalized_scopes = tuple(
+        dict.fromkeys(
+            str(scope).strip("/")
+            for scope in scopes
+            if str(scope).strip("/")
+        )
+    )
     if not normalized_scopes:
         raise ValueError("Ao menos um escopo histórico deve ser informado.")
 
     prepared = _prepare_inventory(inventory)
     sources = _active_sources(manifest, prepared)
-    historical = prepared.loc[prepared["scope"].isin(normalized_scopes)].copy()
+    historical = prepared.loc[
+        prepared["scope"].isin(normalized_scopes)
+    ].copy()
     candidates = _candidate_records(sources, historical, top_n=top_n)
     source_summary = _source_summary(sources, candidates)
     return HistoricalIntegrationMapResult(
         scope_summary=_scope_summary(historical, normalized_scopes),
         source_summary=source_summary,
         candidates=candidates,
-        mapping_summary=_mapping_summary(sources, historical, candidates, source_summary),
+        mapping_summary=_mapping_summary(
+            sources,
+            historical,
+            candidates,
+            source_summary,
+        ),
     )
 
 
@@ -399,10 +468,22 @@ def write_historical_integration_map(
         shutil.rmtree(partial)
     partial.mkdir(parents=True, exist_ok=False)
     try:
-        result.scope_summary.to_csv(partial / "historical_scope_summary.csv", index=False)
-        result.source_summary.to_csv(partial / "staging_source_mapping_summary.csv", index=False)
-        result.candidates.to_csv(partial / "historical_integration_candidates.csv", index=False)
-        result.mapping_summary.to_csv(partial / "historical_integration_summary.csv", index=False)
+        result.scope_summary.to_csv(
+            partial / "historical_scope_summary.csv",
+            index=False,
+        )
+        result.source_summary.to_csv(
+            partial / "staging_source_mapping_summary.csv",
+            index=False,
+        )
+        result.candidates.to_csv(
+            partial / "historical_integration_candidates.csv",
+            index=False,
+        )
+        result.mapping_summary.to_csv(
+            partial / "historical_integration_summary.csv",
+            index=False,
+        )
         target.parent.mkdir(parents=True, exist_ok=True)
         partial.rename(target)
     except Exception:

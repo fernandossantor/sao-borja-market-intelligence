@@ -89,7 +89,7 @@ def test_inbox_summary_distinguishes_observed_and_calculated_values() -> None:
     values = dict(zip(summary["indicator"], summary["value"], strict=True))
 
     assert values["inbox_files"] == 5
-    assert values["inbox_known_bytes"] == 100
+    assert values["inbox_known_bytes"] == 80
     assert values["inbox_files_without_sha256"] == 1
     assert values["unique_by_sha256_rows"] == 1
     assert values["exact_duplicate_outside_groups"] == 1

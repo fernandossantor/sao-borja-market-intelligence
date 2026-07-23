@@ -13,6 +13,10 @@ venv/
 !.env.example
 *.pem
 *.key
+.secrets/
+credentials/
+*service-account*.json
+*service_account*.json
 
 # Local data and generated artifacts
 .data/

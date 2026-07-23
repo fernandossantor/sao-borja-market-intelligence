@@ -95,6 +95,23 @@ Campos principais:
 - pasta-pai;
 - status inicial de auditoria.
 
+## Auditoria agregada
+
+Depois de gerar o inventário:
+
+```bash
+make gdrive-audit
+```
+
+A auditoria não acessa novamente o Drive. Ela processa o CSV local e grava em `.data/audit/`:
+
+- `drive_inventory_summary.csv`;
+- `drive_top_level_summary.csv`;
+- `drive_extension_summary.csv`;
+- `drive_exact_duplicate_candidates.csv`.
+
+A igualdade de SHA-256 classifica arquivos como candidatos `EXACT_DUPLICATE`, mas não autoriza exclusão. Antes de qualquer decisão devem ser avaliados origem, período, granularidade, uso nos builders e posição na arquitetura de dados.
+
 ## Limitações
 
 - arquivos dos Editores Google e atalhos podem não possuir tamanho ou checksum;

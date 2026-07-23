@@ -1,4 +1,4 @@
-.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies drive-check drive-size drive-snapshot
+.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -54,6 +54,9 @@ audit-inbox-content:
 
 review-inbox-anomalies:
 	python -m sbmi.inbox_anomaly_review_cli
+
+build-inbox-staging:
+	python -m sbmi.inbox_staging_cli
 
 drive-check:
 	python -m sbmi.cli drive-check --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)

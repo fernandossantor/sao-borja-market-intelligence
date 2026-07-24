@@ -116,7 +116,12 @@ def refine_files(files: pd.DataFrame) -> pd.DataFrame:
     )
 
     for primary, matched, prefixes, basis in CALIBRATION_RULES:
-        rule_mask = paths.map(lambda path: _matches_any(path, prefixes))
+        rule_mask = paths.map(
+            lambda path, rule_prefixes=prefixes: _matches_any(
+                path,
+                rule_prefixes,
+            )
+        )
         _apply_classification(
             refined,
             rule_mask,

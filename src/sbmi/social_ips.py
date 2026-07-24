@@ -13,7 +13,11 @@ from pathlib import Path
 
 import pandas as pd
 
-from sbmi.ips_web_snapshot import SUMMARY_LABELS, visible_text
+from sbmi.ips_web_snapshot import (
+    SUMMARY_LABELS,
+    normalize_rendered_text,
+    score_candidates,
+)
 
 DEFAULT_IBGE_CODE = "4318002"
 DEFAULT_MUNICIPALITY = "São Borja"
@@ -61,7 +65,8 @@ def normalize_label(value: object) -> str:
 def parse_published_number(value: object) -> str | None:
     """Converte a representação brasileira para decimal canônico textual."""
     text = str(value).strip().replace("\xa0", " ")
-    text = text.replace("%", "").replace("R$", "").replace(" ", "")
+    text = text.replace("%", "").replace("R$", "")
+    text = re.sub(r"\s+", "", text)
     if text.lower() in {"", "-", "--", "n/a", "na", "null"}:
         return None
     if "," in text:
@@ -89,26 +94,6 @@ def indicator_level(label: str) -> str:
     raise ValueError(f"Rótulo agregado inesperado: {label!r}")
 
 
-def _decimal_pattern() -> re.Pattern[str]:
-    return re.compile(
-        r"(?<!\d)(\d{1,3}(?:\s*\.\s*\d{3})*\s*[,\.]\s*\d{1,3})(?!\d)"
-    )
-
-
-def _score_candidates(segment: str) -> list[str]:
-    """Retém apenas decimais que podem representar uma pontuação de 0 a 100."""
-    candidates: list[str] = []
-    for match in _decimal_pattern().finditer(segment):
-        raw = match.group(1)
-        canonical = parse_published_number(raw)
-        if canonical is None:
-            continue
-        value = Decimal(canonical)
-        if Decimal("0") <= value <= Decimal("100"):
-            candidates.append(raw)
-    return candidates
-
-
 def _all_occurrences(text: str, value: str) -> tuple[int, ...]:
     folded = text.casefold()
     needle = value.casefold()
@@ -123,7 +108,7 @@ def _nearest_summary_boundary(text: str, start: int) -> int:
         position = folded.find(label.casefold(), start)
         if position >= 0:
             boundaries.append(position)
-    return min(boundaries) if boundaries else min(start + 8000, len(text))
+    return min(boundaries) if boundaries else min(start + 8_000, len(text))
 
 
 def _unique_observed_score(candidates: list[str], *, context: str) -> str:
@@ -143,7 +128,7 @@ def _unique_observed_score(candidates: list[str], *, context: str) -> str:
 
 
 def _extract_index_score(text: str, year: int) -> str:
-    """Extrai o índice geral sem depender da renderização literal de '/ 100'."""
+    """Extrai o índice geral no texto final publicado pelo LiveView."""
     marker = re.compile(rf"IPS\s+BRASIL\s+{year}\b", flags=re.IGNORECASE)
     marker_positions = [match.end() for match in marker.finditer(text)]
     if not marker_positions:
@@ -152,7 +137,7 @@ def _extract_index_score(text: str, year: int) -> str:
     candidates: list[str] = []
     for start in marker_positions:
         end = _nearest_summary_boundary(text, start)
-        scores = _score_candidates(text[start:end])
+        scores = score_candidates(text[start:end])
         if scores:
             candidates.append(scores[0])
 
@@ -169,7 +154,7 @@ def _extract_label_score(text: str, label: str) -> str:
         segment = text[start:end]
         if scorecard_header.search(segment) is not None:
             continue
-        scores = _score_candidates(segment)
+        scores = score_candidates(segment)
         if scores:
             candidates.append(scores[0])
 
@@ -177,20 +162,19 @@ def _extract_label_score(text: str, label: str) -> str:
 
 
 def extract_scorecard_summary(
-    html_text: str,
+    rendered_text: str,
     *,
     year: int,
-    ibge_code: str,
     municipality: str,
     source_url: str,
-    source_sha256: str,
+    source_html_sha256: str,
+    source_text_sha256: str,
+    ibge_code: str = DEFAULT_IBGE_CODE,
 ) -> pd.DataFrame:
-    """Extrai índice, três dimensões e doze componentes do scorecard."""
-    text = visible_text(html_text)
+    """Extrai índice, três dimensões e doze componentes do texto renderizado."""
+    text = normalize_rendered_text(rendered_text)
     if municipality.casefold() not in text.casefold():
         raise ValueError(f"Município inesperado no scorecard de {year}.")
-    if ibge_code not in html_text:
-        raise ValueError(f"Código IBGE ausente no scorecard de {year}.")
 
     labels = (INDEX_LABEL, *SUMMARY_LABELS)
     values = [_extract_index_score(text, year)]
@@ -214,7 +198,8 @@ def extract_scorecard_summary(
                 "unit": "score_0_100",
                 "nature": "observed",
                 "source_url": source_url,
-                "source_sha256": source_sha256,
+                "source_html_sha256": source_html_sha256,
+                "source_text_sha256": source_text_sha256,
             }
         )
     return pd.DataFrame(records)
@@ -228,13 +213,18 @@ def _manifest(snapshot_path: Path) -> pd.DataFrame:
     required = {
         "reference_year",
         "requested_url",
-        "sha256",
+        "html_sha256",
+        "text_sha256",
         "ibge_code",
-        "local_file",
+        "local_html_file",
+        "local_text_file",
+        "capture_mode",
     }
     missing = sorted(required.difference(frame.columns))
     if missing:
         raise ValueError(f"Colunas obrigatórias ausentes no manifesto: {missing}")
+    if not frame["capture_mode"].eq("PLAYWRIGHT_RENDERED_LIVEVIEW_DOM").all():
+        raise ValueError("O manifesto não contém exclusivamente DOMs LiveView renderizados.")
     return frame
 
 
@@ -256,18 +246,27 @@ def build_published_ips(
     source_rows: list[dict[str, object]] = []
     for record in manifest.sort_values("reference_year").to_dict("records"):
         year = int(record["reference_year"])
-        local_path = root / str(record["local_file"])
-        content = local_path.read_bytes()
-        digest = hashlib.sha256(content).hexdigest()
-        if digest != str(record["sha256"]):
-            raise ValueError(f"SHA-256 divergente na captura de {year}.")
+        html_path = root / str(record["local_html_file"])
+        text_path = root / str(record["local_text_file"])
+        html_content = html_path.read_bytes()
+        text_content = text_path.read_bytes()
+        html_digest = hashlib.sha256(html_content).hexdigest()
+        text_digest = hashlib.sha256(text_content).hexdigest()
+        if html_digest != str(record["html_sha256"]):
+            raise ValueError(f"SHA-256 do HTML divergente na captura de {year}.")
+        if text_digest != str(record["text_sha256"]):
+            raise ValueError(f"SHA-256 do texto divergente na captura de {year}.")
+        if ibge_code not in html_content.decode("utf-8"):
+            raise ValueError(f"Código IBGE ausente no HTML renderizado de {year}.")
+
         summary = extract_scorecard_summary(
-            content.decode("utf-8"),
+            text_content.decode("utf-8"),
             year=year,
             ibge_code=ibge_code,
             municipality=municipality,
             source_url=str(record["requested_url"]),
-            source_sha256=digest,
+            source_html_sha256=html_digest,
+            source_text_sha256=text_digest,
         )
         if len(summary) != 16:
             raise ValueError(f"Agregados inesperados em {year}: observados={len(summary)}")
@@ -276,7 +275,9 @@ def build_published_ips(
             {
                 "reference_year": year,
                 "source_url": str(record["requested_url"]),
-                "source_sha256": digest,
+                "source_html_sha256": html_digest,
+                "source_text_sha256": text_digest,
+                "capture_mode": str(record["capture_mode"]),
                 "summary_scores_observed": len(summary),
             }
         )
@@ -290,6 +291,7 @@ def build_published_ips(
         "geographic_scope": "municipality",
         "reference_years": list(years),
         "edition_type": "published_original",
+        "capture_mode": "PLAYWRIGHT_RENDERED_LIVEVIEW_DOM",
         "published_summary_rows_observed": len(published),
         "summary_2026_rows_observed": len(summary_2026),
         "sources": source_rows,
@@ -298,14 +300,14 @@ def build_published_ips(
         "comparability_status": "NOT_STRICTLY_COMPARABLE_ACROSS_EDITIONS",
         "temporal_change_calculated": False,
         "individual_indicator_values_status": (
-            "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML"
+            "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_RENDERED_SCORECARD"
         ),
-        "harmonized_series_status": "NOT_INCLUDED_REQUIRES_LIVEVIEW_EVENT",
+        "harmonized_series_status": "NOT_INCLUDED_REQUIRES_SEPARATE_LIVEVIEW_FLOW",
         "limitations": [
             "Os anos preservam as edições originalmente publicadas.",
             "Não são calculadas variações entre edições metodologicamente não comparáveis.",
             "O produto contém somente o índice, três dimensões e doze componentes.",
-            "Os indicadores individuais aparecem por nome, sem valores numéricos no HTML.",
+            "Os valores dependem da renderização pública do Phoenix LiveView.",
             "A série harmonizada 2024–2026 será construída em módulo separado.",
         ],
     }

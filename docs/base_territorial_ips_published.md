@@ -17,18 +17,25 @@ Este módulo incorpora o perfil municipal de São Borja nas edições originalme
 
 A plataforma atual é uma aplicação Phoenix LiveView. O botão de download depende do evento `open_download_modal`, e a série harmonizada depende de interações LiveView. A tabela pública, porém, permanece disponível como HTML paginado por parâmetros de consulta.
 
-O módulo usa páginas ordenadas por código IBGE:
+O módulo solicita páginas ordenadas por código IBGE:
 
 ```text
 https://ipsbrasil.org.br/explore/data
-?page=499
+?page=<PÁGINA>
 &per_page=10
 &sort_by=code
 &sort_order=asc
 &year=<ANO>
 ```
 
-A rotina exige que o código `4318002` esteja presente na página. Caso a paginação oficial mude, a captura é interrompida sem publicar resultados parciais.
+A página do município não é presumida como estável entre as edições. A rotina tenta primeiro a posição histórica mais provável e, quando necessário, executa busca binária pelos limites dos códigos IBGE observados em cada página. O manifesto registra a página encontrada, o número de requisições e os bytes transferidos.
+
+A captura é interrompida sem publicar resultados parciais quando:
+
+- a tabela não está ordenada por código IBGE;
+- o código `4318002` não é localizado dentro do limite auditado;
+- o conteúdo não é HTML;
+- o limite de transferência é excedido.
 
 ## Captura
 
@@ -49,9 +56,11 @@ Saída padrão:
 Controles:
 
 - somente páginas públicas;
-- código IBGE validado no conteúdo;
+- código IBGE validado na tabela municipal;
+- ordenação dos códigos validada;
 - status HTTP e tipo de conteúdo validados;
 - SHA-256 e tamanho registrados;
+- páginas e volume de busca registrados;
 - publicação atômica;
 - nenhuma operação no Google Drive.
 
@@ -77,7 +86,7 @@ Saída padrão:
 - rótulos das colunas;
 - município e UF apresentados;
 - anos das edições;
-- URLs, tamanhos e hashes das páginas.
+- URLs, páginas, tamanhos e hashes das páginas.
 
 ### Dados calculados
 

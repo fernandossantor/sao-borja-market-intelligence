@@ -51,7 +51,9 @@ O comando instala:
 
 A instalação usa o modo oficial `playwright install --with-deps chromium`. No Codespace, a etapa de dependências do sistema pode acionar `apt` por meio de `sudo` e produzir uma saída extensa. O GitHub Actions continua executando os testes com renderizadores simulados e não baixa um navegador.
 
-Um Chromium baixado sem as bibliotecas do sistema não é suficiente. Erros como `libatk-1.0.so.0: cannot open shared object file` indicam que o navegador foi instalado, mas suas dependências Linux ainda não foram instaladas; executar novamente `make bootstrap-browser` após a correção do Makefile resolve essa preparação.
+Um Chromium baixado sem as bibliotecas do sistema não é suficiente. Erros como `libatk-1.0.so.0: cannot open shared object file` indicam que o navegador foi instalado, mas suas dependências Linux ainda não foram instaladas.
+
+Algumas imagens de Codespaces incluem repositórios APT de terceiros. Caso uma dessas fontes esteja inválida, como ocorreu com `dl.yarnpkg.com`, o script `scripts/install_playwright_chromium.sh` desativa temporariamente apenas os arquivos de configuração que apontam para essa origem, instala as dependências oficiais do Chromium e restaura os arquivos ao terminar. A fonte externa não é apagada nem alterada permanentemente.
 
 ## Captura
 

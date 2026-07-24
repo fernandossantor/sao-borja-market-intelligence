@@ -2,9 +2,7 @@ import pandas as pd
 
 from sbmi.base_territorial_coverage import build_coverage_map
 from sbmi.base_territorial_coverage_refinement import refine_coverage_map
-from sbmi.base_territorial_secondary_coverage import (
-    apply_secondary_topic_coverage,
-)
+from sbmi.base_territorial_secondary_coverage import apply_secondary_topic_coverage
 
 
 def _inventory(path: str) -> pd.DataFrame:

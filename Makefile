@@ -1,4 +1,4 @@
-.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published drive-check drive-size drive-snapshot
+.PHONY: bootstrap bootstrap-browser install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -7,6 +7,10 @@ bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
 	python -m pip install -e '.[dev]'
 	mkdir -p .data/raw .data/staging .data/curated .data/snapshots .data/manifests .data/audit artifacts manifests reports/generated
+
+bootstrap-browser:
+	python -m pip install -e '.[dev,browser]'
+	python -m playwright install chromium
 
 install: bootstrap
 

@@ -5,9 +5,10 @@ import pandas as pd
 import pytest
 
 from sbmi.ips_web_snapshot import (
-    extract_table_ibge_codes,
-    published_data_url,
+    SUMMARY_LABELS,
+    scorecard_url,
     snapshot_published_ips_pages,
+    validate_scorecard_html,
 )
 
 
@@ -24,70 +25,53 @@ class FakeResponse:
 
 
 class FakeSession:
-    def __init__(self, page_factory) -> None:
-        self.page_factory = page_factory
+    def __init__(self, contents: dict[int, bytes]) -> None:
+        self.contents = contents
         self.urls: list[str] = []
 
     def get(self, url: str, **_kwargs: object) -> FakeResponse:
         self.urls.append(url)
-        query = parse_qs(urlparse(url).query)
-        year = int(query["year"][0])
-        page = int(query["page"][0])
-        return FakeResponse(self.page_factory(year, page), url)
+        year = int(parse_qs(urlparse(url).query)["year"][0])
+        return FakeResponse(self.contents[year], url)
 
 
-def _html(year: int, codes: list[int]) -> bytes:
-    rows = []
-    for code in codes:
-        municipality = "São Borja (RS)" if code == 4318002 else f"Município {code}"
-        rows.append(
-            f"<tr><td>{code}</td><td>{municipality}</td><td>RS</td>"
-            f"<td>{60 + year % 10},50</td></tr>"
-        )
+def _html(year: int, *, municipality: str = "São Borja") -> bytes:
+    sections = "".join(
+        f"<section><h2>{label}</h2><div class='score'>61,25</div></section>"
+        for label in SUMMARY_LABELS
+    )
     return (
-        "<html><body><table>"
-        "<tr><th>Código IBGE</th><th>Município</th><th>UF</th>"
-        "<th>Índice de Progresso Social</th></tr>"
-        + "".join(rows)
-        + "</table></body></html>"
+        "<html><body>"
+        f"<a href='/explore/scorecard/4318002?year={year}'>fonte</a>"
+        f"<h1>{municipality}</h1><div>IPS BRASIL {year}</div>"
+        "<strong>62,40 / 100</strong>"
+        f"{sections}</body></html>"
     ).encode()
 
 
-def _monotonic_page(year: int, page: int, *, include_target: bool = True) -> bytes:
-    if page < 5:
-        codes = [1_000_000 + page * 10 + offset for offset in range(3)]
-    elif page > 5:
-        codes = [5_000_000 + page * 10 + offset for offset in range(3)]
-    elif include_target:
-        codes = [4_317_999, 4_318_002, 4_318_003]
-    else:
-        codes = [4_318_000, 4_318_001, 4_318_003]
-    return _html(year, codes)
-
-
-def test_published_data_url_is_explicit() -> None:
-    url = published_data_url(2026, page=499, per_page=10)
-    assert "page=499" in url
-    assert "per_page=10" in url
-    assert "sort_by=code" in url
+def test_scorecard_url_is_explicit() -> None:
+    url = scorecard_url(2026, ibge_code="4318002")
+    assert "/explore/scorecard/4318002" in url
     assert "year=2026" in url
 
 
-def test_extracts_only_codes_from_the_municipal_table() -> None:
-    html = _html(2026, [4_317_999, 4_318_002, 4_318_003]).decode()
-    assert extract_table_ibge_codes(html) == (4_317_999, 4_318_002, 4_318_003)
+def test_validates_year_municipality_and_aggregates() -> None:
+    source = _html(2026).decode()
+    labels = validate_scorecard_html(
+        source,
+        year=2026,
+        ibge_code="4318002",
+        municipality="São Borja",
+    )
+    assert labels == 15
 
 
-def test_snapshot_captures_three_verified_pages(tmp_path: Path) -> None:
-    contents = {
-        year: _html(year, [4_317_999, 4_318_002, 4_318_003])
-        for year in (2024, 2025, 2026)
-    }
-    session = FakeSession(lambda year, _page: contents[year])
+def test_snapshot_captures_three_verified_scorecards(tmp_path: Path) -> None:
+    contents = {year: _html(year) for year in (2024, 2025, 2026)}
     result = snapshot_published_ips_pages(
         tmp_path,
         snapshot_id="ips-test",
-        session=session,
+        session=FakeSession(contents),
     )
 
     assert result.pages == 3
@@ -96,39 +80,30 @@ def test_snapshot_captures_three_verified_pages(tmp_path: Path) -> None:
     assert result.transferred_bytes == result.bytes
     manifest = pd.read_csv(result.snapshot_path / "web_manifest.csv")
     assert list(manifest["reference_year"]) == [2024, 2025, 2026]
-    assert list(manifest["page_found"]) == [499, 499, 499]
-    assert manifest["ibge_code_present"].all()
+    assert set(manifest["summary_labels_observed"]) == {15}
+    assert manifest["year_marker_confirmed"].all()
     assert all((result.snapshot_path / name).is_file() for name in manifest["local_file"])
 
 
-def test_snapshot_finds_page_by_binary_search(tmp_path: Path) -> None:
-    session = FakeSession(lambda year, page: _monotonic_page(year, page))
-    result = snapshot_published_ips_pages(
-        tmp_path,
-        snapshot_id="ips-test",
-        years=(2024,),
-        initial_page=9,
-        max_page=10,
-        session=session,
-    )
-
-    assert result.requests == 2
-    manifest = pd.read_csv(result.snapshot_path / "web_manifest.csv")
-    assert int(manifest.loc[0, "page_found"]) == 5
-    assert int(manifest.loc[0, "search_requests"]) == 2
-
-
-def test_snapshot_refuses_search_without_municipality(tmp_path: Path) -> None:
-    session = FakeSession(
-        lambda year, page: _monotonic_page(year, page, include_target=False)
-    )
-    with pytest.raises(ValueError, match="não foi encontrado"):
+def test_snapshot_refuses_wrong_edition(tmp_path: Path) -> None:
+    contents = {2024: _html(2025)}
+    with pytest.raises(ValueError, match="não foi confirmada"):
         snapshot_published_ips_pages(
             tmp_path,
             snapshot_id="ips-test",
             years=(2024,),
-            initial_page=9,
-            max_page=10,
-            session=session,
+            session=FakeSession(contents),
+        )
+    assert not (tmp_path / ".ips-test.partial").exists()
+
+
+def test_snapshot_refuses_missing_municipality(tmp_path: Path) -> None:
+    contents = {2024: _html(2024, municipality="Outro Município")}
+    with pytest.raises(ValueError, match="Município ausente"):
+        snapshot_published_ips_pages(
+            tmp_path,
+            snapshot_id="ips-test",
+            years=(2024,),
+            session=FakeSession(contents),
         )
     assert not (tmp_path / ".ips-test.partial").exists()

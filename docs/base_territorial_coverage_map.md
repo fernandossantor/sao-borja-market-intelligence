@@ -80,7 +80,7 @@ A cobertura registrada é técnica. Ainda faltam:
 
 - família de origem derivada do caminho;
 - bloco analítico primário;
-- blocos adicionais encontrados por palavras-chave;
+- blocos adicionais encontrados por palavras-chave ou revisão de conteúdo;
 - contagens de arquivos, famílias e bytes;
 - status técnico de cobertura;
 - classe de lacuna operacional.
@@ -170,6 +170,34 @@ Foram excluídos da contagem analítica:
 - `warehouse/sao_borja.duckdb`, por ser contêiner técnico de armazenamento;
 - inventários, auditorias, catálogos, registros de premissas e documentação de datasets.
 
+## Cobertura temática primária e secundária
+
+Um arquivo pode ser multitemático. Para não perder essa informação, a síntese final distingue:
+
+```text
+primary_candidate_files
+secondary_candidate_files
+```
+
+A classificação primária indica o objeto principal da fonte. As relações secundárias indicam temas efetivamente cobertos, mas que não constituem o foco central do documento.
+
+Exemplo: um relatório municipal multitemático pode conter dados de educação sem ser uma fonte educacional dedicada. Nesse caso:
+
+- o relatório conta como candidato secundário de educação;
+- não é promovido a fonte primária de educação;
+- o bloco recebe `SECONDARY_TOPIC_CANDIDATES_PRESENT` quando não há fonte dedicada mais madura.
+
+Essa distinção evita dois erros:
+
+1. declarar que não existe qualquer cobertura porque o tema aparece somente em fonte multitemática;
+2. tratar uma menção secundária como equivalente a uma base específica, validada e dedicada ao tema.
+
+A lógica está isolada em:
+
+```text
+src/sbmi/base_territorial_secondary_coverage.py
+```
+
 ## Status de cobertura
 
 O mapa pode atribuir:
@@ -180,6 +208,7 @@ STAGING_VALIDATED_PRESENT
 DERIVED_PRODUCTS_AUDITED_PRESENT
 RAW_SOURCES_PRESENT
 METADATA_CANDIDATES_PRESENT
+SECONDARY_TOPIC_CANDIDATES_PRESENT
 NO_CANDIDATE_IDENTIFIED
 ```
 
@@ -190,8 +219,9 @@ A ordem representa maturidade técnica, não qualidade substantiva.
 - `CURATED_VALIDATED_PRESENT`: há módulo curado e validado, mas a cobertura pode não ser exaustiva;
 - `STAGING_VALIDATED_PRESENT`: estrutura e proveniência foram validadas, mas falta curadoria temática;
 - `DERIVED_PRODUCTS_AUDITED_PRESENT`: produtos históricos existem e são legíveis, sem validação metodológica concluída;
-- `RAW_SOURCES_PRESENT`: há fonte bruta candidata;
-- `METADATA_CANDIDATES_PRESENT`: a evidência ainda é apenas classificatória;
+- `RAW_SOURCES_PRESENT`: há fonte bruta primária candidata;
+- `METADATA_CANDIDATES_PRESENT`: há candidato primário, ainda sustentado principalmente por metadados;
+- `SECONDARY_TOPIC_CANDIDATES_PRESENT`: o tema aparece em fontes multitemáticas, mas nenhuma fonte primária dedicada foi identificada;
 - `NO_CANDIDATE_IDENTIFIED`: nenhuma ocorrência foi encontrada pelas regras atuais, sem provar ausência absoluta.
 
 ## Entradas padrão
@@ -233,7 +263,7 @@ Registra um arquivo por linha, com estágio, família, bloco, método, base e co
 
 ### `coverage_source_family_summary.csv`
 
-Resume arquivos, bytes, extensões e métodos de classificação por família e bloco.
+Resume arquivos, bytes, extensões e métodos de classificação por família e bloco primário.
 
 ### `coverage_evidence_register.csv`
 
@@ -241,11 +271,11 @@ Reúne contratos de staging, famílias históricas auditadas e módulos curados 
 
 ### `coverage_block_summary.csv`
 
-Consolida a maturidade técnica por bloco e indica a próxima ação recomendada.
+Consolida a maturidade técnica por bloco e separa candidatos primários e secundários. Também indica a próxima ação recomendada.
 
 ### `coverage_gap_register.csv`
 
-Distingue lacunas de integração, curadoria, revisão metodológica, auditoria estrutural e ausência de candidato identificado pelas regras atuais.
+Distingue lacunas de integração, curadoria, revisão metodológica, auditoria estrutural, falta de fonte dedicada e ausência de qualquer candidato identificado.
 
 ### `coverage_map_summary.csv`
 
@@ -258,6 +288,7 @@ Preserva indicadores gerais e a natureza observada ou calculada de cada medida.
 - a classificação de famílias históricas usa caminhos e metadados, não revalida o conteúdo;
 - referências nacionais ou regionais não substituem dados municipais;
 - a classificação temática não prova atualidade, comparabilidade ou suficiência da fonte;
+- uma relação temática secundária não substitui fonte dedicada;
 - os módulos IDSC e IPS são detectados localmente e continuam sujeitos às limitações documentadas em seus próprios contratos;
 - nenhuma ausência definitiva deve ser declarada somente com base neste mapa;
 - nenhuma inferência causal é produzida.

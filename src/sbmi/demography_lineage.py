@@ -1,4 +1,4 @@
-"""Revisão de linhagem entre fontes brutas e produtos demográficos derivados."""
+"""Revisão de linhagem entre fontes brutas e produtos censitários derivados."""
 
 from __future__ import annotations
 
@@ -9,6 +9,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+
+from sbmi.base_territorial_census_refinement import (
+    CENSUS_PROFILE_PATH,
+    CENSUS_SCOPE_TOKENS,
+    CENSUS_TOPIC_RULES,
+)
 
 REQUIRED_COLUMNS = {
     "relative_path",
@@ -70,6 +76,30 @@ def _candidate_kind(path: object) -> str:
     if normalized in TECHNICAL_PROFILE_PATHS:
         return "TECHNICAL_CENSUS_PROFILE"
     return "OTHER"
+
+
+def _reviewed_classification(
+    path: object,
+) -> tuple[str, str, bool, str] | None:
+    normalized = normalize_text(path)
+    if normalized == CENSUS_PROFILE_PATH:
+        return (
+            "governanca_documentacao",
+            "governanca_documentacao",
+            False,
+            "CENSUS_PROFILE_IS_TECHNICAL_METADATA",
+        )
+    if not all(token in normalized for token in CENSUS_SCOPE_TOKENS):
+        return None
+    for token, primary, matched, basis in CENSUS_TOPIC_RULES:
+        if token in normalized:
+            return primary, "|".join(matched), True, basis
+    return (
+        "transversal_multitematico",
+        "transversal_multitematico|demografia",
+        True,
+        "CENSUS_2022_TOPIC_REVIEW_REQUIRED",
+    )
 
 
 def select_lineage_candidates(coverage_files: pd.DataFrame) -> pd.DataFrame:
@@ -152,30 +182,54 @@ def build_lineage_register(source_candidates: pd.DataFrame) -> pd.DataFrame:
                 "nature": "calculated_diagnostic",
             }
         )
+    if not records:
+        return pd.DataFrame(
+            columns=[
+                "dataset_identity",
+                "raw_source_count",
+                "processed_product_count",
+                "raw_source_paths",
+                "processed_product_paths",
+                "lineage_match_status",
+                "lineage_evidence_basis",
+                "content_equivalence_status",
+                "source_authority_status",
+                "period_status",
+                "unit_status",
+                "geographic_scope_status",
+                "comparability_status",
+                "next_action",
+                "what_cannot_be_concluded",
+                "nature",
+            ]
+        )
     return pd.DataFrame(records).sort_values("dataset_identity").reset_index(drop=True)
 
 
 def build_classification_corrections(
     source_candidates: pd.DataFrame,
 ) -> pd.DataFrame:
-    """Propõe correções explícitas ao mapa, sem aplicá-las silenciosamente."""
+    """Compara a classe atual com a revisão temática explícita do Censo."""
     records: list[dict[str, object]] = []
     for row in source_candidates.itertuples(index=False):
-        if row.candidate_kind == "RAW_CENSUS_SOURCE":
-            proposed_primary = "demografia"
-            proposed_matched = "demografia"
-            proposed_eligible = True
-            reason = "RAW_CENSUS_SOURCE_EXACT_TITLE_FAMILY"
-        elif row.candidate_kind == "TECHNICAL_CENSUS_PROFILE":
-            proposed_primary = "governanca_documentacao"
-            proposed_matched = "governanca_documentacao"
-            proposed_eligible = False
-            reason = "TECHNICAL_PROFILE_NOT_SUBSTANTIVE_DATA"
-        else:
+        reviewed = _reviewed_classification(row.relative_path)
+        if reviewed is None:
             proposed_primary = row.primary_block
             proposed_matched = row.matched_blocks
             proposed_eligible = bool(row.currently_analytical_candidate)
-            reason = "KEEP_PROCESSED_DERIVED_CLASSIFICATION"
+            reason = "NO_CENSUS_TOPIC_RULE"
+        else:
+            (
+                proposed_primary,
+                proposed_matched,
+                proposed_eligible,
+                reason,
+            ) = reviewed
+        changed = (
+            str(row.primary_block) != proposed_primary
+            or str(row.matched_blocks) != proposed_matched
+            or bool(row.currently_analytical_candidate) != proposed_eligible
+        )
         records.append(
             {
                 "relative_path": row.relative_path,
@@ -187,7 +241,9 @@ def build_classification_corrections(
                 "proposed_matched_blocks": proposed_matched,
                 "proposed_analytical_candidate": proposed_eligible,
                 "correction_reason": reason,
-                "application_status": "PROPOSED_NOT_APPLIED",
+                "application_status": (
+                    "PROPOSED_NOT_APPLIED" if changed else "ALREADY_APPLIED"
+                ),
                 "nature": "diagnostic_recommendation",
             }
         )
@@ -203,6 +259,7 @@ def build_summary(
 ) -> pd.DataFrame:
     kinds = source_candidates["candidate_kind"]
     status = lineage_register["lineage_match_status"]
+    changed = corrections["application_status"].eq("PROPOSED_NOT_APPLIED")
     indicators = [
         ("lineage_candidates", len(source_candidates), "calculated"),
         (
@@ -235,16 +292,12 @@ def build_summary(
         ),
         (
             "proposed_classification_corrections",
-            int(
-                (
-                    corrections["current_primary_block"]
-                    != corrections["proposed_primary_block"]
-                ).sum()
-                + (
-                    corrections["current_analytical_candidate"]
-                    != corrections["proposed_analytical_candidate"]
-                ).sum()
-            ),
+            int(changed.sum()),
+            "calculated",
+        ),
+        (
+            "classification_reviews_already_applied",
+            int((~changed).sum()),
             "calculated",
         ),
         ("content_equivalence_tests_completed", 0, "observed"),

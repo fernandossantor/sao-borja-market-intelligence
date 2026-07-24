@@ -61,8 +61,7 @@ def _is_missing(value: object) -> bool:
 def _decimal_text(value: Decimal) -> str:
     if value == value.to_integral_value():
         return str(value.quantize(Decimal(1)))
-    normalized = value.normalize()
-    text = format(normalized, "f")
+    text = format(value.normalize(), "f")
     return text.rstrip("0").rstrip(".") if "." in text else text
 
 
@@ -73,12 +72,10 @@ def _parse_numeric_text(value: str) -> Decimal | None:
     if NUMERIC_BR.fullmatch(text):
         text = text.replace(".", "").replace(",", ".")
     elif NUMERIC_SIMPLE.fullmatch(text):
-        if text.count(",") == 1:
-            text = text.replace(",", ".")
+        text = text.replace(",", ".")
     else:
         return None
-    digits = text.lstrip("+-")
-    integer_part = digits.split(".", maxsplit=1)[0]
+    integer_part = text.lstrip("+-").split(".", maxsplit=1)[0]
     if len(integer_part) > 1 and integer_part.startswith("0"):
         return None
     try:
@@ -111,56 +108,57 @@ def canonical_value(value: object) -> tuple[str, str]:
 
 
 def _canonical_frame(frame: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
-    normalized_headers = [normalize_header(column) for column in frame.columns]
-    if any(not header for header in normalized_headers):
+    headers = [normalize_header(column) for column in frame.columns]
+    if any(not header for header in headers):
         raise ValueError("Cabeçalho vazio após normalização.")
-    if len(set(normalized_headers)) != len(normalized_headers):
+    if len(set(headers)) != len(headers):
         duplicates = sorted(
-            header
-            for header, count in Counter(normalized_headers).items()
-            if count > 1
+            header for header, count in Counter(headers).items() if count > 1
         )
         raise ValueError(f"Cabeçalhos duplicados após normalização: {duplicates}")
     canonical = pd.DataFrame(index=range(len(frame)))
-    for source_column, normalized in zip(frame.columns, normalized_headers, strict=True):
-        canonical[normalized] = frame[source_column].map(canonical_value)
-    return canonical, normalized_headers
+    for source_column, header in zip(frame.columns, headers, strict=True):
+        canonical[header] = frame[source_column].map(canonical_value)
+    return canonical, headers
+
+
+def _rows(frame: pd.DataFrame, columns: list[str]) -> list[tuple[object, ...]]:
+    return [
+        tuple(row)
+        for row in frame[columns].itertuples(index=False, name=None)
+    ]
 
 
 def _frame_hash(columns: list[str], rows: list[tuple[object, ...]]) -> str:
-    payload = {
-        "columns": columns,
-        "rows": rows,
-    }
-    encoded = json.dumps(
-        payload,
+    payload = json.dumps(
+        {"columns": columns, "rows": rows},
         ensure_ascii=False,
         separators=(",", ":"),
         default=str,
     ).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()
+    return hashlib.sha256(payload).hexdigest()
 
 
 def _read_raw_xlsx(path: Path) -> tuple[pd.DataFrame, str, int]:
-    workbook = pd.ExcelFile(path)
-    if not workbook.sheet_names:
-        raise ValueError("Planilha sem abas.")
-    if len(workbook.sheet_names) != 1:
-        raise ValueError(
-            "Quantidade de abas inesperada para o par nominal: "
-            f"{len(workbook.sheet_names)}"
-        )
-    sheet = workbook.sheet_names[0]
-    frame = pd.read_excel(path, sheet_name=sheet)
+    with pd.ExcelFile(path) as workbook:
+        sheets = workbook.sheet_names
+        if not sheets:
+            raise ValueError("Planilha sem abas.")
+        if len(sheets) != 1:
+            raise ValueError(
+                "Quantidade de abas inesperada para o par nominal: "
+                f"{len(sheets)}"
+            )
+        sheet = sheets[0]
+        frame = pd.read_excel(workbook, sheet_name=sheet)
     frame = frame.dropna(axis=0, how="all").dropna(axis=1, how="all")
-    return frame.reset_index(drop=True), sheet, len(workbook.sheet_names)
+    return frame.reset_index(drop=True), sheet, len(sheets)
 
 
 def _read_processed_parquet(path: Path) -> pd.DataFrame:
     frame = pd.read_parquet(path)
-    return frame.dropna(axis=0, how="all").dropna(axis=1, how="all").reset_index(
-        drop=True
-    )
+    frame = frame.dropna(axis=0, how="all").dropna(axis=1, how="all")
+    return frame.reset_index(drop=True)
 
 
 def _resolve_snapshot_file(root: Path, relative_path: str) -> Path:
@@ -179,7 +177,9 @@ def _split_single_path(value: object, expected_count: object, label: str) -> str
     count = int(expected_count)
     paths = [part for part in str(value or "").split("|") if part]
     if count != 1 or len(paths) != 1:
-        raise ValueError(f"{label} não é um caminho único: count={count}, paths={paths}")
+        raise ValueError(
+            f"{label} não é um caminho único: count={count}, paths={paths}"
+        )
     return paths[0]
 
 
@@ -187,12 +187,9 @@ def _column_register(
     dataset_identity: str,
     raw: pd.DataFrame,
     processed: pd.DataFrame,
-    raw_columns: list[str],
-    processed_columns: list[str],
 ) -> list[dict[str, object]]:
     records: list[dict[str, object]] = []
-    all_columns = sorted(set(raw_columns) | set(processed_columns))
-    for column in all_columns:
+    for column in sorted(set(raw.columns) | set(processed.columns)):
         raw_present = column in raw.columns
         processed_present = column in processed.columns
         raw_values = raw[column].tolist() if raw_present else []
@@ -203,7 +200,9 @@ def _column_register(
                 "column": column,
                 "raw_present": raw_present,
                 "processed_present": processed_present,
-                "raw_nonmissing": sum(kind != "missing" for kind, _ in raw_values),
+                "raw_nonmissing": sum(
+                    kind != "missing" for kind, _ in raw_values
+                ),
                 "processed_nonmissing": sum(
                     kind != "missing" for kind, _ in processed_values
                 ),
@@ -231,8 +230,7 @@ def _difference_register(
     limit: int,
 ) -> list[dict[str, object]]:
     records: list[dict[str, object]] = []
-    maximum_rows = max(len(raw), len(processed))
-    for row_index in range(maximum_rows):
+    for row_index in range(max(len(raw), len(processed))):
         for column in common_columns:
             raw_value = raw.at[row_index, column] if row_index < len(raw) else None
             processed_value = (
@@ -261,6 +259,40 @@ def _difference_register(
     return records
 
 
+def _read_error_record(
+    dataset_identity: str,
+    raw_relative_path: str,
+    processed_relative_path: str,
+    exc: Exception,
+) -> dict[str, object]:
+    return {
+        "dataset_identity": dataset_identity,
+        "raw_relative_path": raw_relative_path,
+        "processed_relative_path": processed_relative_path,
+        "raw_sheet": "",
+        "raw_sheet_count": 0,
+        "raw_rows": 0,
+        "processed_rows": 0,
+        "raw_columns": 0,
+        "processed_columns": 0,
+        "header_set_match": False,
+        "column_order_match": False,
+        "row_count_match": False,
+        "missing_values_match": False,
+        "canonical_sequence_match": False,
+        "canonical_row_multiset_match": False,
+        "raw_canonical_sha256": "",
+        "processed_canonical_sha256": "",
+        "difference_cells_observed": 0,
+        "content_equivalence_status": "READ_ERROR",
+        "error_type": type(exc).__name__,
+        "error_message": str(exc)[:500],
+        "source_authority_status": "NOT_ASSESSED",
+        "conceptual_validation_status": "NOT_VALIDATED",
+        "nature": "observed_and_calculated",
+    }
+
+
 def compare_dataset_pair(
     *,
     dataset_identity: str,
@@ -270,74 +302,47 @@ def compare_dataset_pair(
     processed_relative_path: str,
     difference_limit: int = 100,
 ) -> tuple[dict[str, object], list[dict[str, object]], list[dict[str, object]]]:
-    """Compara um par, distinguindo equivalência de conteúdo de validade conceitual."""
+    """Compara um par sem confundir equivalência com validade conceitual."""
     try:
         raw_frame, raw_sheet, raw_sheet_count = _read_raw_xlsx(raw_path)
         processed_frame = _read_processed_parquet(processed_path)
         raw, raw_columns = _canonical_frame(raw_frame)
         processed, processed_columns = _canonical_frame(processed_frame)
     except Exception as exc:  # noqa: BLE001
-        record = {
-            "dataset_identity": dataset_identity,
-            "raw_relative_path": raw_relative_path,
-            "processed_relative_path": processed_relative_path,
-            "raw_sheet": "",
-            "raw_sheet_count": 0,
-            "raw_rows": 0,
-            "processed_rows": 0,
-            "raw_columns": 0,
-            "processed_columns": 0,
-            "header_set_match": False,
-            "column_order_match": False,
-            "row_count_match": False,
-            "missing_values_match": False,
-            "canonical_sequence_match": False,
-            "canonical_row_multiset_match": False,
-            "raw_canonical_sha256": "",
-            "processed_canonical_sha256": "",
-            "difference_cells_observed": 0,
-            "content_equivalence_status": "READ_ERROR",
-            "error_type": type(exc).__name__,
-            "error_message": str(exc)[:500],
-            "source_authority_status": "NOT_ASSESSED",
-            "conceptual_validation_status": "NOT_VALIDATED",
-            "nature": "observed_and_calculated",
-        }
-        return record, [], []
+        return (
+            _read_error_record(
+                dataset_identity,
+                raw_relative_path,
+                processed_relative_path,
+                exc,
+            ),
+            [],
+            [],
+        )
 
     header_set_match = set(raw_columns) == set(processed_columns)
     column_order_match = raw_columns == processed_columns
     row_count_match = len(raw) == len(processed)
-    common_columns = [column for column in raw_columns if column in processed.columns]
-    raw_aligned = raw[common_columns]
-    processed_aligned = processed[common_columns]
-    raw_rows = [tuple(row) for row in raw_aligned.itertuples(index=False, name=None)]
-    processed_rows = [
-        tuple(row) for row in processed_aligned.itertuples(index=False, name=None)
+    common_columns = [
+        column for column in raw_columns if column in processed.columns
     ]
+    raw_rows = _rows(raw, common_columns)
+    processed_rows = _rows(processed, common_columns)
     sequence_match = header_set_match and row_count_match and raw_rows == processed_rows
     multiset_match = header_set_match and Counter(raw_rows) == Counter(processed_rows)
-    raw_missing = sum(
-        kind == "missing" for row in raw_rows for kind, _ in row
-    )
+    raw_missing = sum(kind == "missing" for row in raw_rows for kind, _ in row)
     processed_missing = sum(
         kind == "missing" for row in processed_rows for kind, _ in row
     )
     missing_match = header_set_match and raw_missing == processed_missing
     differences = _difference_register(
         dataset_identity,
-        raw_aligned,
-        processed_aligned,
+        raw,
+        processed,
         common_columns,
         limit=difference_limit,
     )
-    columns = _column_register(
-        dataset_identity,
-        raw_aligned,
-        processed_aligned,
-        raw_columns,
-        processed_columns,
-    )
+    columns = _column_register(dataset_identity, raw, processed)
 
     if sequence_match:
         status = "EXACT_AFTER_CANONICALIZATION"
@@ -367,7 +372,10 @@ def compare_dataset_pair(
         "canonical_sequence_match": sequence_match,
         "canonical_row_multiset_match": multiset_match,
         "raw_canonical_sha256": _frame_hash(common_columns, raw_rows),
-        "processed_canonical_sha256": _frame_hash(common_columns, processed_rows),
+        "processed_canonical_sha256": _frame_hash(
+            common_columns,
+            processed_rows,
+        ),
         "difference_cells_observed": len(differences),
         "content_equivalence_status": status,
         "error_type": "",
@@ -377,6 +385,21 @@ def compare_dataset_pair(
         "nature": "observed_and_calculated",
     }
     return record, columns, differences
+
+
+def _empty_differences() -> pd.DataFrame:
+    return pd.DataFrame(
+        columns=[
+            "dataset_identity",
+            "row_number_1_based",
+            "column",
+            "raw_kind",
+            "raw_value",
+            "processed_kind",
+            "processed_value",
+            "nature",
+        ]
+    )
 
 
 def compare_census_lineage(
@@ -389,7 +412,9 @@ def compare_census_lineage(
     """Compara todos os pares nominais um-para-um registrados na linhagem."""
     missing = LINEAGE_REQUIRED_COLUMNS.difference(lineage_register.columns)
     if missing:
-        raise ValueError(f"Colunas obrigatórias ausentes na linhagem: {sorted(missing)}")
+        raise ValueError(
+            f"Colunas obrigatórias ausentes na linhagem: {sorted(missing)}"
+        )
     raw_root = raw_snapshot_root.expanduser().resolve()
     derived_root = derived_snapshot_root.expanduser().resolve()
     dataset_records: list[dict[str, object]] = []
@@ -398,7 +423,7 @@ def compare_census_lineage(
 
     matched = lineage_register.loc[
         lineage_register["lineage_match_status"].eq(MATCHED_STATUS)
-    ].copy()
+    ]
     for row in matched.itertuples(index=False):
         raw_relative = _split_single_path(
             row.raw_source_paths,
@@ -411,7 +436,10 @@ def compare_census_lineage(
             "Produto processado",
         )
         raw_path = _resolve_snapshot_file(raw_root, raw_relative)
-        processed_path = _resolve_snapshot_file(derived_root, processed_relative)
+        processed_path = _resolve_snapshot_file(
+            derived_root,
+            processed_relative,
+        )
         dataset, columns, differences = compare_dataset_pair(
             dataset_identity=str(row.dataset_identity),
             raw_path=raw_path,
@@ -426,21 +454,16 @@ def compare_census_lineage(
 
     datasets = pd.DataFrame(dataset_records)
     columns = pd.DataFrame(column_records)
-    differences = pd.DataFrame(difference_records)
-    if differences.empty:
-        differences = pd.DataFrame(
-            columns=[
-                "dataset_identity",
-                "row_number_1_based",
-                "column",
-                "raw_kind",
-                "raw_value",
-                "processed_kind",
-                "processed_value",
-                "nature",
-            ]
-        )
-    statuses = datasets["content_equivalence_status"] if not datasets.empty else pd.Series()
+    differences = (
+        pd.DataFrame(difference_records)
+        if difference_records
+        else _empty_differences()
+    )
+    statuses = (
+        datasets["content_equivalence_status"]
+        if not datasets.empty
+        else pd.Series(dtype="object")
+    )
     summary = pd.DataFrame(
         [
             ("lineage_pairs_compared", len(datasets), "calculated"),

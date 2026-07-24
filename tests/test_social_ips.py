@@ -14,50 +14,48 @@ from sbmi.social_ips import (
 )
 
 
-def _score_html(score: str, *, fragmented: bool = False) -> str:
-    if not fragmented:
-        return score
-    integer, decimal = score.split(",", 1)
-    return f"<span>{integer}</span><span>,</span><span>{decimal}</span>"
-
-
-def _html(year: int, index_score: str, *, fragmented: bool = False) -> bytes:
-    menu = "".join(f"<button>{label}</button>" for label in SUMMARY_LABELS)
+def _rendered_text(year: int, index_score: str, *, fragmented: bool = False) -> str:
+    score_value = index_score.replace(",", " , ") if fragmented else index_score
+    menu = " ".join(SUMMARY_LABELS)
     sections = []
     for position, label in enumerate(SUMMARY_LABELS, start=1):
         score = f"{60 + position},{position % 10}"
-        sections.append(
-            f"<section><h2>{label}</h2>"
-            "<div class='metadata'>posição</div>"
-            f"<strong>{_score_html(score, fragmented=fragmented)}</strong></section>"
-        )
+        if fragmented:
+            score = score.replace(",", " , ")
+        sections.append(f"{label} posição {score}")
     return (
-        "<html><body>"
-        f"<a href='/explore/scorecard/4318002?year={year}'>fonte</a>"
-        f"<nav>{menu}</nav>"
-        "<h1>São Borja</h1>"
-        f"<div>IPS BRASIL {year}</div>"
-        f"<strong>{_score_html(index_score, fragmented=fragmented)}</strong>"
-        "<span class='scale'>pontuação de zero a cem</span>"
-        + "".join(sections)
-        + "</body></html>"
-    ).encode()
+        f"{menu} São Borja IPS BRASIL {year} {score_value} "
+        "pontuação de zero a cem "
+        + " ".join(sections)
+    )
 
 
 def _snapshot(root: Path) -> Path:
     root.mkdir(parents=True)
     rows = []
     for year, score in ((2024, "59,10"), (2025, "61,38"), (2026, "62,40")):
-        content = _html(year, score)
-        filename = f"ips_brasil_scorecard_{year}.html"
-        (root / filename).write_bytes(content)
+        text = _rendered_text(year, score)
+        html = (
+            "<html><body>"
+            f"<a href='/explore/scorecard/4318002?year={year}'>fonte</a>"
+            f"<main>{text}</main></body></html>"
+        )
+        html_bytes = html.encode()
+        text_bytes = text.encode()
+        html_filename = f"ips_brasil_scorecard_{year}.html"
+        text_filename = f"ips_brasil_scorecard_{year}.txt"
+        (root / html_filename).write_bytes(html_bytes)
+        (root / text_filename).write_bytes(text_bytes)
         rows.append(
             {
                 "reference_year": year,
                 "requested_url": f"https://example.test/scorecard/4318002?year={year}",
-                "sha256": hashlib.sha256(content).hexdigest(),
+                "html_sha256": hashlib.sha256(html_bytes).hexdigest(),
+                "text_sha256": hashlib.sha256(text_bytes).hexdigest(),
                 "ibge_code": "4318002",
-                "local_file": filename,
+                "local_html_file": html_filename,
+                "local_text_file": text_filename,
+                "capture_mode": "PLAYWRIGHT_RENDERED_LIVEVIEW_DOM",
             }
         )
     pd.DataFrame(rows).to_csv(root / "web_manifest.csv", index=False)
@@ -80,15 +78,16 @@ def test_classifies_structural_levels() -> None:
         indicator_level("Indicador individual")
 
 
-def test_extracts_realistic_scorecard_without_literal_scale() -> None:
-    content = _html(2024, "59,10")
+def test_extracts_rendered_scorecard_text() -> None:
+    text = _rendered_text(2024, "59,10")
     result = extract_scorecard_summary(
-        content.decode(),
+        text,
         year=2024,
         ibge_code="4318002",
         municipality="São Borja",
         source_url="https://example.test/scorecard/4318002?year=2024",
-        source_sha256=hashlib.sha256(content).hexdigest(),
+        source_html_sha256="a" * 64,
+        source_text_sha256=hashlib.sha256(text.encode()).hexdigest(),
     )
 
     assert len(result) == 16
@@ -97,15 +96,16 @@ def test_extracts_realistic_scorecard_without_literal_scale() -> None:
     assert result["value_numeric"].notna().all()
 
 
-def test_extracts_scores_fragmented_by_html_elements() -> None:
-    content = _html(2024, "59,10", fragmented=True)
+def test_extracts_scores_fragmented_in_rendered_text() -> None:
+    text = _rendered_text(2024, "59,10", fragmented=True)
     result = extract_scorecard_summary(
-        content.decode(),
+        text,
         year=2024,
         ibge_code="4318002",
         municipality="São Borja",
         source_url="https://example.test/scorecard/4318002?year=2024",
-        source_sha256=hashlib.sha256(content).hexdigest(),
+        source_html_sha256="a" * 64,
+        source_text_sha256=hashlib.sha256(text.encode()).hexdigest(),
     )
 
     assert len(result) == 16
@@ -120,6 +120,7 @@ def test_builds_published_summaries_without_temporal_change(tmp_path: Path) -> N
     assert set(result.published_summary_long["reference_year"]) == {2024, 2025, 2026}
     assert len(result.published_summary_long) == 48
     assert len(result.summary_2026) == 16
+    assert result.metadata["capture_mode"] == "PLAYWRIGHT_RENDERED_LIVEVIEW_DOM"
     assert result.metadata["temporal_change_calculated"] is False
     assert (
         result.metadata["comparability_status"]
@@ -127,7 +128,7 @@ def test_builds_published_summaries_without_temporal_change(tmp_path: Path) -> N
     )
     assert (
         result.metadata["individual_indicator_values_status"]
-        == "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML"
+        == "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_RENDERED_SCORECARD"
     )
     current_index = result.summary_2026.loc[
         result.summary_2026["indicator_level"].eq("index"),
@@ -136,10 +137,17 @@ def test_builds_published_summaries_without_temporal_change(tmp_path: Path) -> N
     assert current_index == "62.40"
 
 
-def test_rejects_hash_divergence(tmp_path: Path) -> None:
+def test_rejects_html_hash_divergence(tmp_path: Path) -> None:
     snapshot = _snapshot(tmp_path / "snapshot")
     (snapshot / "ips_brasil_scorecard_2025.html").write_text("alterado")
-    with pytest.raises(ValueError, match="SHA-256 divergente"):
+    with pytest.raises(ValueError, match="HTML divergente"):
+        build_published_ips(snapshot)
+
+
+def test_rejects_text_hash_divergence(tmp_path: Path) -> None:
+    snapshot = _snapshot(tmp_path / "snapshot")
+    (snapshot / "ips_brasil_scorecard_2025.txt").write_text("alterado")
+    with pytest.raises(ValueError, match="texto divergente"):
         build_published_ips(snapshot)
 
 

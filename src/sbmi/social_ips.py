@@ -90,7 +90,9 @@ def indicator_level(label: str) -> str:
 
 
 def _decimal_pattern() -> re.Pattern[str]:
-    return re.compile(r"(?<!\d)(\d{1,3}(?:\.\d{3})*,\d{1,3}|\d{1,3}\.\d{1,3})(?!\d)")
+    return re.compile(
+        r"(?<!\d)(\d{1,3}(?:\s*\.\s*\d{3})*\s*[,\.]\s*\d{1,3})(?!\d)"
+    )
 
 
 def _score_candidates(segment: str) -> list[str]:

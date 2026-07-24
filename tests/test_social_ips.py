@@ -14,21 +14,30 @@ from sbmi.social_ips import (
 )
 
 
-def _html(year: int, index_score: str) -> bytes:
+def _score_html(score: str, *, fragmented: bool = False) -> str:
+    if not fragmented:
+        return score
+    integer, decimal = score.split(",", 1)
+    return f"<span>{integer}</span><span>,</span><span>{decimal}</span>"
+
+
+def _html(year: int, index_score: str, *, fragmented: bool = False) -> bytes:
     menu = "".join(f"<button>{label}</button>" for label in SUMMARY_LABELS)
     sections = []
     for position, label in enumerate(SUMMARY_LABELS, start=1):
         score = f"{60 + position},{position % 10}"
         sections.append(
             f"<section><h2>{label}</h2>"
-            f"<div class='metadata'>posição</div><strong>{score}</strong></section>"
+            "<div class='metadata'>posição</div>"
+            f"<strong>{_score_html(score, fragmented=fragmented)}</strong></section>"
         )
     return (
         "<html><body>"
         f"<a href='/explore/scorecard/4318002?year={year}'>fonte</a>"
         f"<nav>{menu}</nav>"
         "<h1>São Borja</h1>"
-        f"<div>IPS BRASIL {year}</div><strong>{index_score}</strong>"
+        f"<div>IPS BRASIL {year}</div>"
+        f"<strong>{_score_html(index_score, fragmented=fragmented)}</strong>"
         "<span class='scale'>pontuação de zero a cem</span>"
         + "".join(sections)
         + "</body></html>"
@@ -58,6 +67,7 @@ def _snapshot(root: Path) -> Path:
 def test_parses_brazilian_numbers_without_rounding() -> None:
     assert parse_published_number("1.234,56") == "1234.56"
     assert parse_published_number("61,38") == "61.38"
+    assert parse_published_number("61 , 38") == "61.38"
     assert parse_published_number("1.234") == "1234"
     assert parse_published_number("-") is None
 
@@ -72,6 +82,23 @@ def test_classifies_structural_levels() -> None:
 
 def test_extracts_realistic_scorecard_without_literal_scale() -> None:
     content = _html(2024, "59,10")
+    result = extract_scorecard_summary(
+        content.decode(),
+        year=2024,
+        ibge_code="4318002",
+        municipality="São Borja",
+        source_url="https://example.test/scorecard/4318002?year=2024",
+        source_sha256=hashlib.sha256(content).hexdigest(),
+    )
+
+    assert len(result) == 16
+    index = result.loc[result["indicator_level"].eq("index"), "value_numeric"].iloc[0]
+    assert index == "59.10"
+    assert result["value_numeric"].notna().all()
+
+
+def test_extracts_scores_fragmented_by_html_elements() -> None:
+    content = _html(2024, "59,10", fragmented=True)
     result = extract_scorecard_summary(
         content.decode(),
         year=2024,

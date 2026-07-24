@@ -90,37 +90,84 @@ def indicator_level(label: str) -> str:
 
 
 def _decimal_pattern() -> re.Pattern[str]:
-    return re.compile(r"(?<!\d)(\d{1,3}[,.]\d{1,3})(?!\d)")
+    return re.compile(r"(?<!\d)(\d{1,3}(?:\.\d{3})*,\d{1,3}|\d{1,3}\.\d{1,3})(?!\d)")
+
+
+def _score_candidates(segment: str) -> list[str]:
+    """Retém apenas decimais que podem representar uma pontuação de 0 a 100."""
+    candidates: list[str] = []
+    for match in _decimal_pattern().finditer(segment):
+        raw = match.group(1)
+        canonical = parse_published_number(raw)
+        if canonical is None:
+            continue
+        value = Decimal(canonical)
+        if Decimal("0") <= value <= Decimal("100"):
+            candidates.append(raw)
+    return candidates
+
+
+def _all_occurrences(text: str, value: str) -> tuple[int, ...]:
+    folded = text.casefold()
+    needle = value.casefold()
+    return tuple(match.start() for match in re.finditer(re.escape(needle), folded))
+
+
+def _nearest_summary_boundary(text: str, start: int) -> int:
+    """Encontra o próximo agregado para limitar a busca de uma pontuação."""
+    folded = text.casefold()
+    boundaries: list[int] = []
+    for label in SUMMARY_LABELS:
+        position = folded.find(label.casefold(), start)
+        if position >= 0:
+            boundaries.append(position)
+    return min(boundaries) if boundaries else min(start + 8000, len(text))
+
+
+def _unique_observed_score(candidates: list[str], *, context: str) -> str:
+    canonical_to_raw: dict[str, str] = {}
+    for raw in candidates:
+        canonical = parse_published_number(raw)
+        if canonical is not None:
+            canonical_to_raw.setdefault(canonical, raw)
+    if not canonical_to_raw:
+        raise ValueError(f"Pontuação não encontrada em {context}.")
+    if len(canonical_to_raw) > 1:
+        raise ValueError(
+            f"Pontuações conflitantes em {context}: "
+            f"observadas={sorted(canonical_to_raw)}"
+        )
+    return next(iter(canonical_to_raw.values()))
 
 
 def _extract_index_score(text: str, year: int) -> str:
-    match = re.search(
-        rf"IPS\s+BRASIL\s+{year}\b.*?(\d{{1,3}}[,.]\d{{1,3}})\s*/\s*100",
-        text,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    if match is None:
-        raise ValueError(f"Pontuação geral do IPS não encontrada no scorecard de {year}.")
-    return match.group(1)
+    """Extrai o índice geral sem depender da renderização literal de '/ 100'."""
+    marker = re.compile(rf"IPS\s+BRASIL\s+{year}\b", flags=re.IGNORECASE)
+    marker_positions = [match.end() for match in marker.finditer(text)]
+    if not marker_positions:
+        raise ValueError(f"Marcador do IPS Brasil {year} não encontrado no scorecard.")
+
+    candidates: list[str] = []
+    for start in marker_positions:
+        end = _nearest_summary_boundary(text, start)
+        scores = _score_candidates(text[start:end])
+        if scores:
+            candidates.append(scores[0])
+
+    return _unique_observed_score(candidates, context=f"scorecard de {year}")
 
 
-def _extract_label_score(text: str, label: str, next_labels: tuple[str, ...]) -> str:
-    folded = text.casefold()
-    start = folded.find(label.casefold())
-    if start < 0:
-        raise ValueError(f"Rótulo ausente no scorecard: {label!r}")
-    segment_start = start + len(label)
-    boundaries = [
-        folded.find(candidate.casefold(), segment_start)
-        for candidate in next_labels
-        if folded.find(candidate.casefold(), segment_start) >= 0
-    ]
-    segment_end = min(boundaries) if boundaries else min(segment_start + 8000, len(text))
-    segment = text[segment_start:segment_end]
-    match = _decimal_pattern().search(segment)
-    if match is None:
-        raise ValueError(f"Pontuação não encontrada após o rótulo {label!r}.")
-    return match.group(1)
+def _extract_label_score(text: str, label: str) -> str:
+    """Ignora ocorrências de menu e retém seções que publicam pontuação."""
+    candidates: list[str] = []
+    for position in _all_occurrences(text, label):
+        start = position + len(label)
+        end = _nearest_summary_boundary(text, start)
+        scores = _score_candidates(text[start:end])
+        if scores:
+            candidates.append(scores[0])
+
+    return _unique_observed_score(candidates, context=f"rótulo {label!r}")
 
 
 def extract_scorecard_summary(
@@ -140,9 +187,8 @@ def extract_scorecard_summary(
         raise ValueError(f"Código IBGE ausente no scorecard de {year}.")
 
     labels = (INDEX_LABEL, *SUMMARY_LABELS)
-    values: list[str] = [_extract_index_score(text, year)]
-    for index, label in enumerate(SUMMARY_LABELS):
-        values.append(_extract_label_score(text, label, SUMMARY_LABELS[index + 1 :]))
+    values = [_extract_index_score(text, year)]
+    values.extend(_extract_label_score(text, label) for label in SUMMARY_LABELS)
 
     records: list[dict[str, object]] = []
     for order, (label, value_text) in enumerate(zip(labels, values, strict=True), start=1):
@@ -245,7 +291,9 @@ def build_published_ips(
         "unit": "score_0_100",
         "comparability_status": "NOT_STRICTLY_COMPARABLE_ACROSS_EDITIONS",
         "temporal_change_calculated": False,
-        "individual_indicator_values_status": "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML",
+        "individual_indicator_values_status": (
+            "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML"
+        ),
         "harmonized_series_status": "NOT_INCLUDED_REQUIRES_LIVEVIEW_EVENT",
         "limitations": [
             "Os anos preservam as edições originalmente publicadas.",

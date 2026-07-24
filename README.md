@@ -74,15 +74,21 @@ Dados, credenciais, arquivos Parquet, bancos DuckDB e artefatos temporários nã
 
 ## Estado
 
-A auditoria de estabilização foi concluída em 24 de julho de 2026.
+A estabilização técnica inicial foi concluída em 24 de julho de 2026. A Base Territorial Comum já incorpora os módulos portáteis do IDSC-BR 2025 e das edições originalmente publicadas do IPS Brasil em 2024, 2025 e 2026.
 
-Resultados principais:
+Última validação completa:
 
-- inventário do acervo do Google Drive concluído;
-- `raw/new_files` auditado e convertido em seis datasets de staging validados;
-- produtos existentes em `processed`, `exports` e `warehouse` capturados e auditados sem reconstrução;
-- 58 testes automatizados aprovados;
-- nenhuma evidência de corrupção generalizada ou necessidade de reconstrução completa do acervo;
-- riscos remanescentes localizados e documentados para revisão sob demanda.
+- 80 testes automatizados aprovados;
+- Ruff aprovado;
+- GitHub Actions aprovado;
+- inventário e auditoria estrutural do acervo concluídos;
+- seis datasets de staging construídos e validados;
+- produtos históricos auditados sem reconstrução integral;
+- nenhuma evidência de corrupção generalizada do acervo;
+- riscos remanescentes localizados e documentados.
 
-Consulte [`docs/stabilization_audit_closure_20260724.md`](docs/stabilization_audit_closure_20260724.md) para o encerramento formal, as decisões de governança e as limitações.
+Consulte:
+
+- [`docs/project_status_20260724.md`](docs/project_status_20260724.md) para o ponto de situação, pendências e sequência recomendada;
+- [`docs/stabilization_audit_closure_20260724.md`](docs/stabilization_audit_closure_20260724.md) para o encerramento formal da estabilização;
+- [`docs/base_territorial_ips_published.md`](docs/base_territorial_ips_published.md) para o módulo IPS Brasil publicado.

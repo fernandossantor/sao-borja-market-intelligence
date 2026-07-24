@@ -1,4 +1,4 @@
-"""Comando para revisar a linhagem dos produtos demográficos."""
+"""Comando para revisar a linhagem dos produtos censitários."""
 
 from __future__ import annotations
 
@@ -98,6 +98,7 @@ def main() -> None:
         "processed_only",
         "ambiguous_lineage",
         "proposed_classification_corrections",
+        "classification_reviews_already_applied",
         "content_equivalence_tests_completed",
         "conceptually_validated_datasets",
     ):
@@ -120,28 +121,28 @@ def main() -> None:
     print("\n=== CORREÇÕES PROPOSTAS AO MAPA ===")
     corrections = result.classification_corrections
     changed = corrections.loc[
-        (corrections["current_primary_block"] != corrections["proposed_primary_block"])
-        | (
-            corrections["current_analytical_candidate"]
-            != corrections["proposed_analytical_candidate"]
-        )
+        corrections["application_status"].eq("PROPOSED_NOT_APPLIED")
     ]
-    print(
-        changed[
-            [
-                "relative_path",
-                "candidate_kind",
-                "current_primary_block",
-                "proposed_primary_block",
-                "current_analytical_candidate",
-                "proposed_analytical_candidate",
-                "correction_reason",
-            ]
-        ].to_string(index=False)
-    )
+    if changed.empty:
+        print("nenhuma correção temática pendente")
+    else:
+        print(
+            changed[
+                [
+                    "relative_path",
+                    "candidate_kind",
+                    "current_primary_block",
+                    "proposed_primary_block",
+                    "current_analytical_candidate",
+                    "proposed_analytical_candidate",
+                    "correction_reason",
+                ]
+            ].to_string(index=False)
+        )
 
     print(f"\noutput_dir={target}")
     print("lineage_evidence=normalized_filename_and_stage")
+    print("census_topic_review=explicit")
     print("content_equivalence_claimed=0")
     print("new_external_sources_collected=0")
     print("raw_files_modified=0")

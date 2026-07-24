@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -127,7 +127,7 @@ def main() -> None:
         derived_families=derived_families,
         local_modules=local_modules,
     )
-    run_id = args.run_id or datetime.now(timezone.utc).strftime(
+    run_id = args.run_id or datetime.now(UTC).strftime(
         "coverage-map-%Y%m%d"
     )
     output_dir = (

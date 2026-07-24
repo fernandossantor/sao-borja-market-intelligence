@@ -7,6 +7,7 @@ import pytest
 from sbmi.ips_web_snapshot import SUMMARY_LABELS
 from sbmi.social_ips import (
     build_published_ips,
+    extract_scorecard_summary,
     indicator_level,
     parse_published_number,
     write_published_ips,
@@ -14,6 +15,7 @@ from sbmi.social_ips import (
 
 
 def _html(year: int, index_score: str) -> bytes:
+    menu = "".join(f"<button>{label}</button>" for label in SUMMARY_LABELS)
     sections = []
     for position, label in enumerate(SUMMARY_LABELS, start=1):
         score = f"{60 + position},{position % 10}"
@@ -24,8 +26,10 @@ def _html(year: int, index_score: str) -> bytes:
     return (
         "<html><body>"
         f"<a href='/explore/scorecard/4318002?year={year}'>fonte</a>"
+        f"<nav>{menu}</nav>"
         "<h1>São Borja</h1>"
-        f"<div>IPS BRASIL {year}</div><strong>{index_score} / 100</strong>"
+        f"<div>IPS BRASIL {year}</div><strong>{index_score}</strong>"
+        "<span class='scale'>pontuação de zero a cem</span>"
         + "".join(sections)
         + "</body></html>"
     ).encode()
@@ -64,6 +68,23 @@ def test_classifies_structural_levels() -> None:
     assert indicator_level("Água e Saneamento") == "component"
     with pytest.raises(ValueError, match="Rótulo agregado inesperado"):
         indicator_level("Indicador individual")
+
+
+def test_extracts_realistic_scorecard_without_literal_scale() -> None:
+    content = _html(2024, "59,10")
+    result = extract_scorecard_summary(
+        content.decode(),
+        year=2024,
+        ibge_code="4318002",
+        municipality="São Borja",
+        source_url="https://example.test/scorecard/4318002?year=2024",
+        source_sha256=hashlib.sha256(content).hexdigest(),
+    )
+
+    assert len(result) == 16
+    index = result.loc[result["indicator_level"].eq("index"), "value_numeric"].iloc[0]
+    assert index == "59.10"
+    assert result["value_numeric"].notna().all()
 
 
 def test_builds_published_summaries_without_temporal_change(tmp_path: Path) -> None:

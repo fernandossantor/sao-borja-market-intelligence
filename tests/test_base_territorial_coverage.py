@@ -269,6 +269,133 @@ def test_refinement_maps_economic_and_labor_exports() -> None:
     )
 
 
+def test_institutional_review_separates_data_from_notes() -> None:
+    inventory = _inventory(
+        [
+            {
+                "relative_path": "raw/institucional/202601_Servidores_SIAPE/202601_Cadastro.csv",
+                "file_name": "202601_Cadastro.csv",
+                "extension": "csv",
+            },
+            {
+                "relative_path": "raw/institucional/202601_Servidores_SIAPE/202601_Observacoes.csv",
+                "file_name": "202601_Observacoes.csv",
+                "extension": "csv",
+            },
+            {
+                "relative_path": "processed/institucional/tabela5881_Tabela 1.parquet",
+                "file_name": "tabela5881_Tabela 1.parquet",
+                "extension": "parquet",
+            },
+            {
+                "relative_path": "processed/institucional/tabela5881_Notas.parquet",
+                "file_name": "tabela5881_Notas.parquet",
+                "extension": "parquet",
+            },
+        ]
+    )
+    refined = refine_files(prepare_inventory(inventory)).set_index("relative_path")
+
+    assert (
+        refined.loc[
+            "raw/institucional/202601_Servidores_SIAPE/202601_Cadastro.csv",
+            "primary_block",
+        ]
+        == "renda_emprego_trabalho"
+    )
+    assert not bool(
+        refined.loc[
+            "raw/institucional/202601_Servidores_SIAPE/202601_Observacoes.csv",
+            "analytical_candidate",
+        ]
+    )
+    assert (
+        refined.loc[
+            "processed/institucional/tabela5881_Tabela 1.parquet",
+            "primary_block",
+        ]
+        == "renda_emprego_trabalho"
+    )
+    assert not bool(
+        refined.loc[
+            "processed/institucional/tabela5881_Notas.parquet",
+            "analytical_candidate",
+        ]
+    )
+
+
+def test_reviewed_pdfs_receive_explicit_blocks() -> None:
+    inventory = _inventory(
+        [
+            {
+                "relative_path": "raw/pdfs/PlanoDiretorMAPA.pdf",
+                "file_name": "PlanoDiretorMAPA.pdf",
+                "extension": "pdf",
+            },
+            {
+                "relative_path": "raw/pdfs/Sistema_motorizado.pdf",
+                "file_name": "Sistema_motorizado.pdf",
+                "extension": "pdf",
+            },
+            {
+                "relative_path": "raw/pdfs/Plano_Municipal_de_Sade_2014_2017.pdf",
+                "file_name": "Plano_Municipal_de_Sade_2014_2017.pdf",
+                "extension": "pdf",
+            },
+            {
+                "relative_path": "raw/pdfs/admin,+1.pdf",
+                "file_name": "admin,+1.pdf",
+                "extension": "pdf",
+            },
+        ]
+    )
+    refined = refine_files(prepare_inventory(inventory)).set_index("relative_path")
+
+    assert (
+        refined.loc["raw/pdfs/PlanoDiretorMAPA.pdf", "primary_block"]
+        == "ambiente_politico_regulatorio"
+    )
+    assert (
+        refined.loc["raw/pdfs/Sistema_motorizado.pdf", "primary_block"]
+        == "infraestrutura_conectividade"
+    )
+    assert (
+        refined.loc[
+            "raw/pdfs/Plano_Municipal_de_Sade_2014_2017.pdf",
+            "primary_block",
+        ]
+        == "saude_condicoes_sociais"
+    )
+    assert not bool(
+        refined.loc["raw/pdfs/admin,+1.pdf", "analytical_candidate"]
+    )
+    assert (
+        refined.loc["raw/pdfs/admin,+1.pdf", "primary_block"]
+        == "fora_do_escopo_territorial"
+    )
+
+
+def test_dashboard_and_warehouse_are_not_independent_coverage() -> None:
+    inventory = _inventory(
+        [
+            {
+                "relative_path": "exports/dashboard_dataset.csv",
+                "file_name": "dashboard_dataset.csv",
+                "extension": "csv",
+            },
+            {
+                "relative_path": "warehouse/sao_borja.duckdb",
+                "file_name": "sao_borja.duckdb",
+                "extension": "duckdb",
+            },
+        ]
+    )
+    refined = refine_files(prepare_inventory(inventory))
+
+    assert not refined["analytical_candidate"].any()
+    assert set(refined["primary_block"]) == {"governanca_documentacao"}
+
+
 def test_refinement_recalculates_block_summary() -> None:
     inventory = _inventory(
         [

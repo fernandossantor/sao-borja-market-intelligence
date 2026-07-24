@@ -103,7 +103,7 @@ O mapa registra o método e a base de classificação de cada arquivo para permi
 - `raw/social/*` → saúde e condições sociais;
 - `governance/*` → documentação não contabilizada como candidato analítico.
 
-Os demais arquivos são classificados por regras de palavras-chave. Arquivos não reconhecidos permanecem como `nao_classificado` e devem ser revisados antes de concluir que há uma lacuna.
+Os demais arquivos são inicialmente classificados por regras de palavras-chave. Casos não reconhecidos são submetidos a revisão antes de qualquer conclusão sobre lacunas.
 
 ## Calibração após revisão manual
 
@@ -119,7 +119,7 @@ A calibração foi separada das regras heurísticas gerais em:
 src/sbmi/base_territorial_coverage_refinement.py
 ```
 
-As regras explicitamente justificadas são:
+As primeiras regras explicitamente justificadas foram:
 
 - `exports/economic_*`, `exports/sector_*`, `exports/private_vab_*`, `exports/public_vab_*`, `exports/public_sector_*`, `exports/public_structural_*` e `exports/structural_analysis*` → economia e estrutura produtiva;
 - `exports/labor_market_*` e `exports/private_employment_*` → renda, emprego e trabalho, com relação secundária com economia;
@@ -129,14 +129,46 @@ As regras explicitamente justificadas são:
 
 Essas regras não alteram os arquivos originais e não validam o conteúdo substantivo. Elas apenas corrigem falsos negativos e retiram falsos candidatos evidentes.
 
-Permanecem deliberadamente sem regra automática:
+## Segunda revisão: fontes institucionais e PDFs
 
-- `raw/institucional/*`;
-- `raw/pdfs/*`;
-- `processed/institucional/*`;
-- produtos de nome genérico, como `dashboard_dataset.csv`.
+A segunda execução reduziu os candidatos não classificados de 131 para 43. Todos os 43 foram então revisados nominalmente e, quando necessário, pelo conteúdo disponível no Drive ou por inspeção visual dos PDFs.
 
-Esses grupos exigem revisão nominal e, quando necessário, inspeção de conteúdo antes de qualquer classificação.
+### Dados institucionais
+
+Os arquivos de pessoal público foram classificados no bloco **Renda, emprego e trabalho**, com relação secundária com economia:
+
+- cadastros de servidores, aposentados, pensionistas, militares e reserva/reforma;
+- registros de afastamentos;
+- `serv_por_mun_exerc_202512`;
+- Tabelas 1 e 2 da tabela IBGE 5881, sobre pessoal ocupado na administração direta e indireta segundo o vínculo empregatício.
+
+Arquivos denominados `Observacoes` e `tabela5881_Notas` foram tratados como documentação de suporte e não como cobertura analítica independente.
+
+### PDFs territoriais e contextuais
+
+Foram classificados por revisão de conteúdo:
+
+- Plano Estratégico de Desenvolvimento do COREDE Fronteira Oeste 2022-2030 → ambiente político e regulatório, com relações econômicas, infraestruturais e transversais;
+- mapa do COREDE Fronteira Oeste → ambiente sociocultural e territorial;
+- dissertações e dossiês sobre o patrimônio arqueológico, histórico e missioneiro de São Borja → ambiente sociocultural e territorial;
+- apresentação municipal de agricultura e meio ambiente → economia e estrutura produtiva, com dimensões demográficas e territoriais;
+- estudo nacional da FGV Social sobre classes econômicas → renda, emprego e trabalho, como referência contextual nacional;
+- Perfil das Cidades Gaúchas de São Borja → transversal e multitemático;
+- mapa do Plano Diretor → ambiente político e regulatório, com relação com infraestrutura e território;
+- Plano Municipal de Saúde 2014-2017 → saúde e condições sociais, com natureza de planejamento público;
+- relatório municipal multitemático de São Borja → transversal e multitemático;
+- mapa do sistema viário motorizado → infraestrutura e conectividade;
+- Perfil Socioeconômico do COREDE Fronteira Oeste de 2025 → transversal e multitemático.
+
+O artigo `admin,+1.pdf`, dedicado à historiografia de Santa Catarina e sem objeto territorial pertinente a São Borja ou à sua região de influência, foi marcado como **fora do escopo territorial**.
+
+### Produtos que não contam como cobertura independente
+
+Foram excluídos da contagem analítica:
+
+- `exports/dashboard_dataset.csv`, por ser produto integrado de apresentação e não fonte independente;
+- `warehouse/sao_borja.duckdb`, por ser contêiner técnico de armazenamento;
+- inventários, auditorias, catálogos, registros de premissas e documentação de datasets.
 
 ## Status de cobertura
 
@@ -222,9 +254,10 @@ Preserva indicadores gerais e a natureza observada ou calculada de cada medida.
 ## Limitações
 
 - o mapa depende da atualização do inventário do Drive;
-- arquivos com nomes genéricos podem permanecer não classificados;
 - um arquivo pode conter múltiplos temas, embora apenas um bloco seja primário;
 - a classificação de famílias históricas usa caminhos e metadados, não revalida o conteúdo;
+- referências nacionais ou regionais não substituem dados municipais;
+- a classificação temática não prova atualidade, comparabilidade ou suficiência da fonte;
 - os módulos IDSC e IPS são detectados localmente e continuam sujeitos às limitações documentadas em seus próprios contratos;
 - nenhuma ausência definitiva deve ser declarada somente com base neste mapa;
 - nenhuma inferência causal é produzida.

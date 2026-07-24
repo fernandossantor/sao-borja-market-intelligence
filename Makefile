@@ -10,7 +10,7 @@ bootstrap:
 
 bootstrap-browser:
 	python -m pip install -e '.[dev,browser]'
-	python -m playwright install --with-deps chromium
+	bash scripts/install_playwright_chromium.sh
 
 install: bootstrap
 

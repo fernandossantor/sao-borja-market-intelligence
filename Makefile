@@ -1,4 +1,4 @@
-.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration snapshot-derived-products audit-derived-products drive-check drive-size drive-snapshot
+.PHONY: bootstrap install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -69,6 +69,12 @@ snapshot-derived-products:
 
 audit-derived-products:
 	python -m sbmi.derived_products_audit_cli
+
+snapshot-social-idsc-source:
+	python -m sbmi.social_idsc_snapshot_cli
+
+build-social-idsc:
+	python -m sbmi.social_idsc_cli
 
 drive-check:
 	python -m sbmi.cli drive-check --remote $(DRIVE_REMOTE) --path $(DRIVE_PATH)

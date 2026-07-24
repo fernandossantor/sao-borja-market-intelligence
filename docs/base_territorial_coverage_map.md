@@ -105,6 +105,39 @@ O mapa registra o método e a base de classificação de cada arquivo para permi
 
 Os demais arquivos são classificados por regras de palavras-chave. Arquivos não reconhecidos permanecem como `nao_classificado` e devem ser revisados antes de concluir que há uma lacuna.
 
+## Calibração após revisão manual
+
+A primeira execução real identificou 131 candidatos não classificados e 53 arquivos associados a mais de um bloco. A revisão mostrou três situações distintas:
+
+1. produtos analíticos em inglês, especialmente arquivos econômicos e de mercado de trabalho;
+2. cadastros processados de servidores, aposentados, pensionistas e militares;
+3. arquivos técnicos de inventário, auditoria, catálogo e registro sem conteúdo substantivo próprio.
+
+A calibração foi separada das regras heurísticas gerais em:
+
+```text
+src/sbmi/base_territorial_coverage_refinement.py
+```
+
+As regras explicitamente justificadas são:
+
+- `exports/economic_*`, `exports/sector_*`, `exports/private_vab_*`, `exports/public_vab_*`, `exports/public_sector_*`, `exports/public_structural_*` e `exports/structural_analysis*` → economia e estrutura produtiva;
+- `exports/labor_market_*` e `exports/private_employment_*` → renda, emprego e trabalho, com relação secundária com economia;
+- `processed/202601_aposentados_*`, `processed/202601_pensionistas_*`, `processed/202601_servidores_*`, `processed/202601_militares/*` e `processed/202601_reserva_reforma_militares/*` → renda, emprego e trabalho;
+- `exports/census_*` → demografia;
+- arquivos `exports/domain_*`, `exports/inventory.*`, `exports/semantic_*`, catálogos, perfis técnicos, mapas de domínio e registros de premissas → artefatos técnicos não contabilizados como cobertura analítica.
+
+Essas regras não alteram os arquivos originais e não validam o conteúdo substantivo. Elas apenas corrigem falsos negativos e retiram falsos candidatos evidentes.
+
+Permanecem deliberadamente sem regra automática:
+
+- `raw/institucional/*`;
+- `raw/pdfs/*`;
+- `processed/institucional/*`;
+- produtos de nome genérico, como `dashboard_dataset.csv`.
+
+Esses grupos exigem revisão nominal e, quando necessário, inspeção de conteúdo antes de qualquer classificação.
+
 ## Status de cobertura
 
 O mapa pode atribuir:

@@ -13,6 +13,7 @@ from sbmi.base_territorial_coverage import (
     detect_local_module_evidence,
     write_coverage_map,
 )
+from sbmi.base_territorial_coverage_refinement import refine_coverage_map
 from sbmi.inbox_staging_validation_cli import latest_staging
 
 
@@ -102,6 +103,7 @@ def main() -> None:
             f"Inventário do Drive não encontrado: {inventory_path}"
         )
 
+    inventory = pd.read_csv(inventory_path)
     staging_path = _resolve_staging(args)
     manifest = (
         _optional_csv(staging_path / "source_manifest.csv")
@@ -121,12 +123,13 @@ def main() -> None:
     local_modules = detect_local_module_evidence(args.curated_root)
 
     result = build_coverage_map(
-        pd.read_csv(inventory_path),
+        inventory,
         manifest=manifest,
         dataset_validation=dataset_validation,
         derived_families=derived_families,
         local_modules=local_modules,
     )
+    result = refine_coverage_map(result, inventory)
     run_id = args.run_id or datetime.now(UTC).strftime(
         "coverage-map-%Y%m%d"
     )
@@ -175,6 +178,7 @@ def main() -> None:
             f"\tstatus={row.coverage_status}"
         )
     print(f"output_dir={target}")
+    print("classification_calibration=applied")
     print("external_sources_collected=0")
     print("raw_files_modified=0")
     print("drive_write_operations=0")

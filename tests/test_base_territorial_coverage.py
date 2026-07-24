@@ -10,6 +10,10 @@ from sbmi.base_territorial_coverage import (
     prepare_inventory,
     write_coverage_map,
 )
+from sbmi.base_territorial_coverage_refinement import (
+    refine_coverage_map,
+    refine_files,
+)
 
 
 def _inventory(rows: list[dict[str, object]]) -> pd.DataFrame:
@@ -200,6 +204,99 @@ def test_derived_products_remain_structural_evidence_only() -> None:
         ]
         == "DERIVED_PRODUCTS_AUDITED_PRESENT"
     )
+
+
+def test_refinement_excludes_technical_exports() -> None:
+    inventory = _inventory(
+        [
+            {
+                "relative_path": "exports/domain_coverage_summary.csv",
+                "file_name": "domain_coverage_summary.csv",
+                "extension": "csv",
+            }
+        ]
+    )
+    files = prepare_inventory(inventory)
+    refined = refine_files(files).iloc[0]
+
+    assert refined["primary_block"] == "governanca_documentacao"
+    assert refined["classification_method"] == "EXPLICIT_NON_ANALYTICAL_ARTIFACT"
+    assert not bool(refined["analytical_candidate"])
+
+
+def test_refinement_maps_economic_and_labor_exports() -> None:
+    inventory = _inventory(
+        [
+            {
+                "relative_path": "exports/economic_factsheet.csv",
+                "file_name": "economic_factsheet.csv",
+                "extension": "csv",
+            },
+            {
+                "relative_path": "exports/private_employment_calibrated.csv",
+                "file_name": "private_employment_calibrated.csv",
+                "extension": "csv",
+            },
+            {
+                "relative_path": "processed/202601_servidores_siape/202601_Cadastro.parquet",
+                "file_name": "202601_Cadastro.parquet",
+                "extension": "parquet",
+            },
+        ]
+    )
+    refined = refine_files(prepare_inventory(inventory)).set_index("relative_path")
+
+    assert (
+        refined.loc[
+            "exports/economic_factsheet.csv",
+            "primary_block",
+        ]
+        == "economia_estrutura_produtiva"
+    )
+    assert (
+        refined.loc[
+            "exports/private_employment_calibrated.csv",
+            "primary_block",
+        ]
+        == "renda_emprego_trabalho"
+    )
+    assert (
+        refined.loc[
+            "processed/202601_servidores_siape/202601_Cadastro.parquet",
+            "primary_block",
+        ]
+        == "renda_emprego_trabalho"
+    )
+
+
+def test_refinement_recalculates_block_summary() -> None:
+    inventory = _inventory(
+        [
+            {
+                "relative_path": "exports/economic_factsheet.csv",
+                "file_name": "economic_factsheet.csv",
+                "extension": "csv",
+            },
+            {
+                "relative_path": "exports/domain_signal_audit.csv",
+                "file_name": "domain_signal_audit.csv",
+                "extension": "csv",
+            },
+        ]
+    )
+    coarse = build_coverage_map(inventory)
+    refined = refine_coverage_map(coarse, inventory)
+    blocks = refined.block_summary.set_index("block")
+    summary = refined.summary.set_index("indicator")
+
+    assert int(
+        blocks.loc[
+            "economia_estrutura_produtiva",
+            "candidate_files",
+        ]
+    ) == 1
+    assert int(summary.loc["analytical_candidate_files", "value"]) == 1
+    assert int(summary.loc["unclassified_candidate_files", "value"]) == 0
 
 
 def test_write_coverage_map_is_atomic_and_refuses_overwrite(

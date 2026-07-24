@@ -14,6 +14,9 @@ from sbmi.base_territorial_coverage import (
     write_coverage_map,
 )
 from sbmi.base_territorial_coverage_refinement import refine_coverage_map
+from sbmi.base_territorial_secondary_coverage import (
+    apply_secondary_topic_coverage,
+)
 from sbmi.inbox_staging_validation_cli import latest_staging
 
 
@@ -130,6 +133,7 @@ def main() -> None:
         local_modules=local_modules,
     )
     result = refine_coverage_map(result, inventory)
+    result = apply_secondary_topic_coverage(result, inventory)
     run_id = args.run_id or datetime.now(UTC).strftime(
         "coverage-map-%Y%m%d"
     )
@@ -171,6 +175,8 @@ def main() -> None:
         print(
             f"block={row.block}"
             f"\tfiles={row.candidate_files}"
+            f"\tprimary={row.primary_candidate_files}"
+            f"\tsecondary={row.secondary_candidate_files}"
             f"\traw={row.raw_files}"
             f"\tstaging={row.staging_datasets}"
             f"\tcurated={row.curated_modules}"
@@ -179,6 +185,7 @@ def main() -> None:
         )
     print(f"output_dir={target}")
     print("classification_calibration=applied")
+    print("secondary_topic_coverage=preserved")
     print("external_sources_collected=0")
     print("raw_files_modified=0")
     print("drive_write_operations=0")

@@ -101,7 +101,7 @@ def main() -> None:
     derived_snapshot_path = _resolve_optional_or_latest(
         args.derived_snapshot_path,
         args.derived_snapshot_root,
-        "source_manifest.csv",
+        "snapshot_manifest.csv",
     )
     lineage = pd.read_csv(lineage_path / "demography_lineage_register.csv")
     result = compare_census_lineage(

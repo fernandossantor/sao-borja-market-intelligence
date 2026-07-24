@@ -2,40 +2,31 @@
 
 ## Objeto
 
-Este módulo incorpora o perfil municipal de São Borja nas edições originalmente publicadas do IPS Brasil em 2024, 2025 e 2026.
+Este módulo incorpora os agregados municipais de São Borja nas edições originalmente publicadas do IPS Brasil em 2024, 2025 e 2026.
 
 ## Delimitação
 
-- fonte: tabela pública do site oficial do IPS Brasil;
+- fonte: scorecard municipal público do site oficial do IPS Brasil;
 - município: São Borja;
 - código IBGE: `4318002`;
 - período: edições de 2024, 2025 e 2026;
-- unidade: preservada conforme cada campo publicado;
+- unidade: pontuação de 0 a 100;
+- conteúdo: índice geral, três dimensões e doze componentes;
 - finalidade: registrar o retrato de 2026 e preservar as edições anteriores sem produzir comparações temporais metodologicamente indevidas.
 
 ## Contrato técnico observado
 
-A plataforma atual é uma aplicação Phoenix LiveView. O botão de download depende do evento `open_download_modal`, e a série harmonizada depende de interações LiveView. A tabela pública, porém, permanece disponível como HTML paginado por parâmetros de consulta.
+A plataforma atual é uma aplicação Phoenix LiveView. O botão de download depende do evento `open_download_modal`, e a série harmonizada depende de interações LiveView.
 
-O módulo solicita páginas ordenadas por código IBGE:
+A paginação da tabela geral não se mostrou reproduzível por requisições HTTP simples. Em testes reais, o parâmetro `page` não expôs São Borja em 2024, embora o município estivesse disponível na plataforma.
+
+O contrato adotado passa a ser o scorecard municipal direto:
 
 ```text
-https://ipsbrasil.org.br/explore/data
-?page=<PÁGINA>
-&per_page=10
-&sort_by=code
-&sort_order=asc
-&year=<ANO>
+https://ipsbrasil.org.br/explore/scorecard/4318002?year=<ANO>
 ```
 
-A página do município não é presumida como estável entre as edições. A rotina tenta primeiro a posição histórica mais provável e, quando necessário, executa busca binária pelos limites dos códigos IBGE observados em cada página. O manifesto registra a página encontrada, o número de requisições e os bytes transferidos.
-
-A captura é interrompida sem publicar resultados parciais quando:
-
-- a tabela não está ordenada por código IBGE;
-- o código `4318002` não é localizado dentro do limite auditado;
-- o conteúdo não é HTML;
-- o limite de transferência é excedido.
+As três edições retornaram páginas distintas, contendo o município, o código IBGE, o marcador explícito do ano, três dimensões e doze componentes.
 
 ## Captura
 
@@ -47,20 +38,20 @@ Saída padrão:
 
 ```text
 .data/snapshots/web/social_ips/ips-brasil-published-2024-2026/
-├── ips_brasil_published_2024.html
-├── ips_brasil_published_2025.html
-├── ips_brasil_published_2026.html
+├── ips_brasil_scorecard_2024.html
+├── ips_brasil_scorecard_2025.html
+├── ips_brasil_scorecard_2026.html
 └── web_manifest.csv
 ```
 
 Controles:
 
 - somente páginas públicas;
-- código IBGE validado na tabela municipal;
-- ordenação dos códigos validada;
+- município e código IBGE validados;
+- marcador da edição validado;
+- presença das quinze dimensões e componentes validada;
 - status HTTP e tipo de conteúdo validados;
 - SHA-256 e tamanho registrados;
-- páginas e volume de busca registrados;
 - publicação atômica;
 - nenhuma operação no Google Drive.
 
@@ -74,31 +65,41 @@ Saída padrão:
 
 ```text
 .data/curated/base_territorial/social/ips/published_2024_2026/
-├── ips_published_editions_long.csv
-├── ips_2026_full_profile.csv
+├── ips_published_summary_2024_2026.csv
 ├── ips_2026_summary.csv
 └── ips_metadata.json
 ```
 
 ### Dados observados
 
-- valores publicados na linha municipal;
-- rótulos das colunas;
-- município e UF apresentados;
+- pontuação geral do IPS;
+- pontuações das três dimensões;
+- pontuações dos doze componentes;
+- município e código IBGE;
 - anos das edições;
-- URLs, páginas, tamanhos e hashes das páginas.
+- URLs, tamanhos e hashes das páginas.
 
 ### Dados calculados
 
-- formato longo da tabela;
+- formato longo dos agregados;
 - chaves normalizadas para integração técnica;
-- classificação estrutural em metadado, índice, dimensão, componente e indicador.
+- classificação estrutural em índice, dimensão e componente.
 
 Essa classificação estrutural serve à organização interna e não substitui a nomenclatura metodológica oficial.
 
+## Indicadores individuais
+
+Os nomes dos indicadores individuais aparecem no scorecard, mas seus valores numéricos não estão publicados no HTML capturado. Por isso, o módulo registra:
+
+```text
+individual_indicator_values_status=NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML
+```
+
+Nenhum valor individual será inferido a partir de cor, classe visual, posição relativa ou outra característica gráfica.
+
 ## Comparabilidade
 
-O próprio IPS Brasil informa que as edições originalmente publicadas em 2024, 2025 e 2026 não são estritamente comparáveis devido a mudanças de indicadores e tratamentos estatísticos.
+O IPS Brasil informa que as edições originalmente publicadas não são estritamente comparáveis devido a mudanças de indicadores e tratamentos estatísticos.
 
 Por isso, o módulo registra:
 
@@ -111,7 +112,7 @@ Não são calculadas taxas de crescimento, diferenças ou tendências entre essa
 
 ## Série harmonizada
 
-A série temporal oficial recalcula 2024 e 2025 com os 57 indicadores e parâmetros de 2026. Ela é conceitualmente diferente das edições originalmente publicadas e será construída em módulo separado.
+A série temporal oficial recalcula 2024 e 2025 com os indicadores e parâmetros de 2026. Ela é conceitualmente diferente das edições originalmente publicadas e será construída em módulo separado.
 
 Situação atual:
 
@@ -121,8 +122,8 @@ harmonized_series_status=NOT_INCLUDED_REQUIRES_LIVEVIEW_EVENT
 
 ## Limitações
 
-- a paginação HTML é um contrato público observado, mas pode mudar;
-- as unidades ainda precisam ser vinculadas ao catálogo metodológico oficial;
+- a estrutura HTML do scorecard pode mudar;
+- o produto não contém valores dos indicadores individuais;
 - a captura municipal não substitui a base nacional integral;
 - o retrato atual e a série harmonizada não devem ser misturados;
 - nenhum resultado autoriza inferência causal.

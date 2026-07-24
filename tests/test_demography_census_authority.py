@@ -4,8 +4,8 @@ import pandas as pd
 import pytest
 
 from sbmi.demography_census_authority import (
-    CIDADES_URL,
     DOWNLOADS_URL,
+    MUNICIPALITY_API_URL,
     PANORAMA_URL,
     SOURCE_REGISTRY,
     audit_census_authority,
@@ -78,7 +78,11 @@ def _pages() -> dict[str, bytes]:
     return {
         PANORAMA_URL: f"<html>{panorama_topics}</html>".encode(),
         DOWNLOADS_URL: f"<html>{download_products}</html>".encode(),
-        CIDADES_URL: b"<html>Sao Borja Codigo: 4318002</html>",
+        MUNICIPALITY_API_URL: (
+            b'{"id":4318002,"nome":"Sao Borja","regiao-imediata":'
+            b'{"regiao-intermediaria":{"UF":{"id":43,"sigla":"RS",'
+            b'"nome":"Rio Grande do Sul"}}}}'
+        ),
     }
 
 
@@ -131,7 +135,7 @@ def test_authority_snapshot_and_outputs_are_written(tmp_path: Path) -> None:
 
     assert (result.snapshot_path / "panorama.html").is_file()
     assert (result.snapshot_path / "downloads.html").is_file()
-    assert (result.snapshot_path / "municipality.html").is_file()
+    assert (result.snapshot_path / "municipality.json").is_file()
     assert (result.snapshot_path / "official_page_manifest.csv").is_file()
     assert (
         result.output_path / "demography_census_authority_verification.csv"
@@ -155,6 +159,30 @@ def test_incomplete_official_page_is_not_confirmed(tmp_path: Path) -> None:
         run_id="audit-test",
     )
 
+    assert set(result.verification["external_authority_status"]) == {
+        "OFFICIAL_VERIFICATION_INCOMPLETE"
+    }
+
+
+def test_inconsistent_official_municipality_is_not_confirmed(
+    tmp_path: Path,
+) -> None:
+    pages = _pages()
+    pages[MUNICIPALITY_API_URL] = pages[MUNICIPALITY_API_URL].replace(
+        b"4318002", b"4318101"
+    )
+
+    result = audit_census_authority(
+        FakeSession(pages),
+        _quality(),
+        _provenance(),
+        snapshots_root=tmp_path / "snapshots",
+        audit_root=tmp_path / "audit",
+        snapshot_id="authority-test",
+        run_id="audit-test",
+    )
+
+    assert not result.verification["official_municipality_code_confirmed"].any()
     assert set(result.verification["external_authority_status"]) == {
         "OFFICIAL_VERIFICATION_INCOMPLETE"
     }

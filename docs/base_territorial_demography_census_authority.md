@@ -27,15 +27,15 @@ https://censo2022.ibge.gov.br/panorama/?localidade=4318002
 Catálogo de tabelas e publicações do Censo 2022
 https://censo2022.ibge.gov.br/panorama/downloads.html?localidade=4318002
 
-Cidades e Estados: São Borja (RS)
-https://www.ibge.gov.br/cidades-e-estados/rs/sao-borja.html
+API de Localidades: município de São Borja (RS)
+https://servicodados.ibge.gov.br/api/v1/localidades/municipios/4318002
 ```
 
 Somente os domínios oficiais abaixo são aceitos pelo comando:
 
 ```text
 censo2022.ibge.gov.br
-www.ibge.gov.br
+servicodados.ibge.gov.br
 ```
 
 ## Registro temático
@@ -66,7 +66,7 @@ O primeiro estado significa que foram localizados:
 - o tema no Panorama;
 - o produto no catálogo oficial;
 - a data de divulgação;
-- o município e o código 4318002 na página oficial do IBGE.
+- o município, a UF e o código 4318002 na API oficial de Localidades do IBGE.
 
 ### Origem do arquivo local
 
@@ -105,7 +105,7 @@ python -m sbmi.demography_census_authority_cli --replace
 └── census-authority-AAAAMMDD/
     ├── panorama.html
     ├── downloads.html
-    ├── municipality.html
+    ├── municipality.json
     └── official_page_manifest.csv
 ```
 
@@ -126,6 +126,9 @@ O manifesto registra URL, status HTTP, tipo de conteúdo, tamanho e SHA-256.
 
 - a presença de um tema na página oficial não prova equivalência dos valores locais;
 - o parâmetro de localidade na URL não substitui a conferência dos valores municipais;
+- a página Cidades e Estados é protegida por desafio automatizado do Cloudflare e
+  retornou HTTP 403 na execução de 24 de julho de 2026; por isso, a identificação
+  municipal usa a API oficial de Localidades do IBGE;
 - datas de divulgação não são necessariamente datas de referência dos dados;
 - produtos do universo e da amostra utilizam bases metodológicas diferentes;
 - o catálogo oficial pode ser atualizado após a captura;

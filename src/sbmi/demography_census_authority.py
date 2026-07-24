@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import html
+import json
 import re
 import shutil
 from dataclasses import dataclass
@@ -23,8 +24,13 @@ PANORAMA_URL = (
 DOWNLOADS_URL = (
     "https://censo2022.ibge.gov.br/panorama/downloads.html?localidade=4318002"
 )
-CIDADES_URL = "https://www.ibge.gov.br/cidades-e-estados/rs/sao-borja.html"
-ALLOWED_DOMAINS = {"censo2022.ibge.gov.br", "www.ibge.gov.br"}
+MUNICIPALITY_API_URL = (
+    "https://servicodados.ibge.gov.br/api/v1/localidades/municipios/4318002"
+)
+ALLOWED_DOMAINS = {
+    "censo2022.ibge.gov.br",
+    "servicodados.ibge.gov.br",
+}
 QUALITY_REQUIRED_COLUMNS = {
     "dataset_identity",
     "processed_reuse_status",
@@ -199,7 +205,7 @@ def build_source_registry() -> pd.DataFrame:
                 "official_result_basis": result_basis,
                 "official_panorama_url": PANORAMA_URL,
                 "official_download_catalog_url": DOWNLOADS_URL,
-                "official_municipality_url": CIDADES_URL,
+                "official_municipality_url": MUNICIPALITY_API_URL,
                 "nature": "externally_observed_registry",
             }
         )
@@ -260,6 +266,21 @@ def _contains(text: str, value: object) -> bool:
     return normalize_text(value) in text
 
 
+def _municipality_confirmed(page: OfficialPage) -> bool:
+    try:
+        payload = json.loads(page.content)
+        state = payload["regiao-imediata"]["regiao-intermediaria"]["UF"]
+    except (json.JSONDecodeError, KeyError, TypeError):
+        return False
+    return (
+        str(payload.get("id")) == LOCALITY_CODE
+        and normalize_text(payload.get("nome")) == normalize_text("São Borja")
+        and state.get("id") == 43
+        and state.get("sigla") == "RS"
+        and normalize_text(state.get("nome")) == normalize_text("Rio Grande do Sul")
+    )
+
+
 def _quality_lookup(quality: pd.DataFrame) -> dict[str, object]:
     missing = QUALITY_REQUIRED_COLUMNS.difference(quality.columns)
     if missing:
@@ -308,11 +329,7 @@ def verify_registry(
     provenance_by_id = _provenance_lookup(provenance)
     panorama_text = _visible_text(pages["panorama"].content)
     downloads_text = _visible_text(pages["downloads"].content)
-    municipality_text = _visible_text(pages["municipality"].content)
-    municipality_confirmed = (
-        _contains(municipality_text, "São Borja")
-        and _contains(municipality_text, LOCALITY_CODE)
-    )
+    municipality_confirmed = _municipality_confirmed(pages["municipality"])
 
     records: list[dict[str, object]] = []
     for row in registry.itertuples(index=False):
@@ -388,7 +405,8 @@ def _write_snapshot(
     records = []
     try:
         for page_id, page in sorted(pages.items()):
-            file_name = f"{page_id}.html"
+            suffix = ".json" if page_id == "municipality" else ".html"
+            file_name = f"{page_id}{suffix}"
             (partial / file_name).write_bytes(page.content)
             records.append(
                 {
@@ -532,7 +550,7 @@ def audit_census_authority(
         "municipality": _fetch_page(
             session,
             "municipality",
-            CIDADES_URL,
+            MUNICIPALITY_API_URL,
             timeout_seconds=timeout_seconds,
             max_bytes=max_page_bytes,
         ),

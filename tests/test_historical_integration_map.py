@@ -121,7 +121,10 @@ def test_build_map_reports_source_without_metadata_candidate() -> None:
     )
 
     assert result.candidates.empty
-    assert result.source_summary.loc[0, "mapping_status"] == "NO_METADATA_CANDIDATE"
+    assert (
+        result.source_summary.loc[0, "mapping_status"]
+        == "NO_METADATA_CANDIDATE"
+    )
     summary = result.mapping_summary.set_index("indicator")
     assert int(summary.loc["sources_without_candidates", "value"]) == 1
 
@@ -132,7 +135,13 @@ def test_write_mapping_is_atomic_and_refuses_overwrite(tmp_path: Path) -> None:
         source_summary=pd.DataFrame([{"source_relative_path": "a.xlsx"}]),
         candidates=pd.DataFrame(),
         mapping_summary=pd.DataFrame(
-            [{"indicator": "active_staging_source_files", "value": 1, "nature": "observed"}]
+            [
+                {
+                    "indicator": "active_staging_source_files",
+                    "value": 1,
+                    "nature": "observed",
+                }
+            ]
         ),
     )
     target = tmp_path / "mapping"

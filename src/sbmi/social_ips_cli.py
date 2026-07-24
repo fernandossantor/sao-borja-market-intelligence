@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from sbmi.ips_web_snapshot import DEFAULT_SNAPSHOT_ID
 from sbmi.social_ips import build_published_ips, write_published_ips
 
 
@@ -18,10 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--snapshot-path",
         type=Path,
-        default=Path(
-            ".data/snapshots/web/social_ips/"
-            "ips-brasil-published-2024-2026"
-        ),
+        default=Path(".data/snapshots/web/social_ips") / DEFAULT_SNAPSHOT_ID,
     )
     parser.add_argument(
         "--output-dir",
@@ -58,6 +56,7 @@ def main() -> None:
     print(f"published_summary_rows_observed={len(result.published_summary_long)}")
     print(f"summary_2026_rows_observed={len(result.summary_2026)}")
     print("summary_contract=index_1|dimensions_3|components_12")
+    print(f"capture_mode={result.metadata['capture_mode']}")
     print(
         "comparability_status="
         f"{result.metadata['comparability_status']}"

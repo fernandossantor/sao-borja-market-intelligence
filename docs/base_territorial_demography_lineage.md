@@ -1,30 +1,78 @@
-# Revisão de linhagem demográfica
+# Revisão temática e de linhagem do Censo 2022
 
 ## Objetivo
 
-Relacionar as planilhas brutas do Censo 2022 armazenadas no Drive aos produtos `parquet` existentes em `processed/social`, antes de qualquer reutilização analítica.
+Relacionar as planilhas brutas do Censo 2022 armazenadas no Drive aos produtos `parquet` existentes em `processed/social`, corrigir a classificação temática e preparar uma captura local verificada antes de qualquer reutilização analítica.
 
-A revisão usa identidade nominal normalizada e estágio do arquivo. Portanto, ela identifica correspondências prováveis, mas não comprova equivalência de conteúdo.
+A revisão distingue três questões diferentes:
 
-## Motivação
+1. **classificação temática:** qual bloco da Base Territorial Comum é o principal para cada tabela;
+2. **linhagem nominal:** qual fonte bruta provavelmente originou cada produto processado;
+3. **equivalência de conteúdo:** se valores, dimensões, unidades e notas foram preservados.
 
-A auditoria inicial encontrou:
+Somente as duas primeiras questões são tratadas nesta etapa. A equivalência de conteúdo continua pendente.
 
-- 17 produtos processados do Censo 2022;
+## Evidência observada na auditoria inicial
+
+A primeira execução do módulo demográfico encontrou:
+
+- 17 produtos processados associados ao Censo 2022;
 - um arquivo `exports/census_profile.csv`;
 - quatro relatórios PDF com relação demográfica secundária;
-- nenhuma fonte bruta do Censo entre os candidatos selecionados pelo mapa.
+- nenhuma planilha bruta dedicada entre os candidatos selecionados.
 
-A ausência das planilhas brutas na seleção ocorreu porque `raw/social/*` havia sido classificado genericamente no bloco social. A revisão de linhagem não depende dessa classificação temática e procura explicitamente arquivos com o padrão:
+Essa ausência não significava falta das fontes no Drive. As planilhas estavam em `raw/social`, mas a regra genérica desse caminho havia prevalecido sobre o conteúdo específico dos títulos.
+
+## Revisão temática explícita
+
+Os arquivos com o padrão abaixo passam por revisão específica antes da síntese de cobertura:
 
 ```text
-raw/social/Censo 2022 - *.xlsx
-processed/social/Censo 2022 - *_Sheet1.parquet
+raw/**/Censo 2022 - * - São Borja (RS).xlsx
+processed/**/Censo 2022 - * - São Borja (RS)_Sheet1.parquet
+```
+
+A classificação principal é definida pelo assunto da tabela, e não apenas pela pasta `social` ou pela palavra `Censo`.
+
+### Demografia como bloco principal
+
+- composição domiciliar;
+- crescimento populacional;
+- pirâmide etária;
+- população indígena;
+- população por cor ou raça;
+- população por sexo;
+- população por situação do domicílio;
+- população quilombola;
+- população residente em favelas;
+- território.
+
+### Outros blocos principais com relação demográfica secundária
+
+- **educação:** alfabetização e nível de instrução;
+- **infraestrutura e conectividade:** características do entorno, características dos domicílios e meios de transporte mais usados;
+- **saúde e condições sociais:** deficiência e autismo;
+- **ambiente sociocultural e territorial:** população por religião.
+
+Essa hierarquia evita dois erros:
+
+- tratar toda tabela censitária como demografia primária;
+- retirar da base demográfica variáveis que continuam relevantes como relações secundárias.
+
+## Perfil técnico
+
+`exports/census_profile.csv` registra nomes de arquivos, abas, dimensões e primeiras linhas. Ele é documentação técnica produzida por um perfilador histórico, não uma fonte substantiva independente.
+
+Sua classificação correta é:
+
+```text
+primary_block=governanca_documentacao
+analytical_candidate=false
 ```
 
 ## Identidade de dataset
 
-A identidade é calculada a partir do nome do arquivo:
+A identidade nominal é calculada a partir do nome do arquivo:
 
 1. remove-se a extensão;
 2. remove-se o sufixo `_Sheet<numero>` dos produtos processados;
@@ -55,32 +103,26 @@ Ele não comprova:
 - igualdade de células;
 - transformação correta;
 - preservação de unidades;
-- fonte oficial;
+- autoridade da fonte;
 - período de referência;
 - abrangência geográfica;
 - comparabilidade temporal.
 
-## Correções propostas ao mapa
+## Execução da revisão
 
-A revisão gera uma tabela de recomendações, sem alterar silenciosamente o mapa de cobertura:
-
-- planilhas `raw/social/Censo 2022 - *.xlsx` devem ser tratadas como fontes primárias do bloco demográfico;
-- `exports/census_profile.csv` deve ser tratado como perfil técnico, e não como base demográfica substantiva;
-- os produtos `processed/social/*.parquet` permanecem derivados até comparação com as fontes brutas.
-
-## Execução
+Primeiro, reconstrua o mapa com a revisão temática:
 
 ```bash
-make audit-base-territorial-demography-lineage
+python -m sbmi.base_territorial_coverage_cli --replace
 ```
 
-Para substituir uma execução do mesmo dia:
+Depois, gere o registro de linhagem:
 
 ```bash
 python -m sbmi.demography_lineage_cli --replace
 ```
 
-## Saídas
+Saídas:
 
 ```text
 .data/audit/base_territorial/demography_lineage/demography-lineage-AAAAMMDD/
@@ -90,9 +132,44 @@ python -m sbmi.demography_lineage_cli --replace
 └── demography_lineage_summary.csv
 ```
 
+## Captura seletiva das fontes brutas
+
+A seleção exige simultaneamente:
+
+- caminho iniciado por `raw/`;
+- extensão `.xlsx`;
+- título contendo `Censo 2022`;
+- título contendo `São Borja (RS)`;
+- caminho e chave temática sem duplicidade;
+- quantidade esperada explicitamente validada.
+
+Execução:
+
+```bash
+make snapshot-base-territorial-demography-census
+```
+
+Destino padrão:
+
+```text
+.data/snapshots/sources/demography_census/
+└── census-2022-sao-borja-sources-20260724/
+    ├── raw/...
+    └── source_manifest.csv
+```
+
+A captura:
+
+- usa a conta de serviço em modo somente leitura;
+- seleciona caminhos exatos do inventário;
+- valida tamanho e SHA-256 quando disponível;
+- não transforma as planilhas;
+- não modifica arquivos brutos;
+- não escreve no Google Drive.
+
 ## Próxima etapa
 
-Para os pares nominais um-para-um, a próxima etapa é capturar seletivamente as planilhas brutas e comparar:
+Para os pares nominais um-para-um, a etapa seguinte será comparar:
 
 - nomes e quantidade de abas;
 - quantidade de linhas e colunas;
@@ -104,14 +181,15 @@ Para os pares nominais um-para-um, a próxima etapa é capturar seletivamente as
 - identificadores geográficos;
 - transformação aplicada entre `xlsx` e `parquet`.
 
-Somente depois dessa comparação uma série poderá avançar para curadoria.
+Somente depois dessa comparação uma tabela poderá avançar para curadoria.
 
 ## Limitações
 
 - a revisão depende do inventário atual do Drive;
 - nomes iguais podem ocultar versões diferentes;
 - nomes diferentes podem representar o mesmo conteúdo;
-- a correspondência é estrutural e nominal;
+- a correspondência atual é estrutural e nominal;
+- os sinais de cabeçalho não substituem metadados oficiais;
 - nenhuma nova fonte externa é coletada;
 - nenhum arquivo bruto é modificado;
 - nenhuma escrita é realizada no Drive;

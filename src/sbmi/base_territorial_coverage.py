@@ -191,6 +191,8 @@ KEYWORD_RULES = (
     (
         "economia_estrutura_produtiva",
         (
+            "economia",
+            "economico",
             "pib",
             "empresa",
             "empresas",
@@ -340,14 +342,14 @@ def classify_path(relative_path: object, file_name: object = "") -> dict[str, ob
 
     text = normalize_text(f"{path} {file_name}")
     matched: list[str] = []
-    matched_keywords: list[str] = []
+    bases: list[str] = []
     for block, keywords in KEYWORD_RULES:
         block_matches = [
             keyword for keyword in keywords if _contains_keyword(text, keyword)
         ]
         if block_matches:
             matched.append(block)
-            matched_keywords.extend(
+            bases.extend(
                 f"{block}:{normalize_text(keyword)}" for keyword in block_matches
             )
 
@@ -356,7 +358,7 @@ def classify_path(relative_path: object, file_name: object = "") -> dict[str, ob
             "primary_block": matched[0],
             "matched_blocks": "|".join(dict.fromkeys(matched)),
             "classification_method": "KEYWORD_RULE",
-            "classification_basis": "|".join(matched_keywords),
+            "classification_basis": "|".join(bases),
             "classification_confidence": "MEDIUM",
             "coverage_eligible": True,
         }
@@ -390,7 +392,6 @@ def prepare_inventory(inventory: pd.DataFrame) -> pd.DataFrame:
     frame["analytical_extension"] = frame["extension"].isin(
         ANALYTICAL_EXTENSIONS
     )
-
     classifications = pd.DataFrame(
         [
             classify_path(row.relative_path, row.file_name)
@@ -404,10 +405,11 @@ def prepare_inventory(inventory: pd.DataFrame) -> pd.DataFrame:
         frame["coverage_eligible"] & frame["analytical_extension"]
     )
 
-    sha_column = "sha256_checksum"
-    if sha_column not in frame.columns:
-        frame[sha_column] = ""
-    frame[sha_column] = frame[sha_column].fillna("").astype(str)
+    if "sha256_checksum" not in frame.columns:
+        frame["sha256_checksum"] = ""
+    frame["sha256_checksum"] = (
+        frame["sha256_checksum"].fillna("").astype(str)
+    )
     if "audit_status" not in frame.columns:
         frame["audit_status"] = ""
 
@@ -427,22 +429,22 @@ def prepare_inventory(inventory: pd.DataFrame) -> pd.DataFrame:
         "coverage_eligible",
         "analytical_extension",
         "analytical_candidate",
-        sha_column,
+        "sha256_checksum",
         "audit_status",
     ]
-    optional = [
+    columns.extend(
         column
         for column in ("created_at_utc", "modified_at_utc", "mime_type")
         if column in frame.columns
-    ]
-    return frame[columns + optional].sort_values(
+    )
+    return frame[columns].sort_values(
         ["source_stage", "source_family", "relative_path"]
     ).reset_index(drop=True)
 
 
 def build_source_family_summary(files: pd.DataFrame) -> pd.DataFrame:
     """Agrega candidatos analíticos por família e bloco primário."""
-    eligible = files.loc[files["analytical_candidate"]].copy()
+    eligible = files.loc[files["analytical_candidate"]]
     columns = [
         "source_stage",
         "source_family",
@@ -474,8 +476,12 @@ def build_source_family_summary(files: pd.DataFrame) -> pd.DataFrame:
                 "block_label": label,
                 "files": len(group),
                 "known_bytes": int(group["size_bytes"].sum()),
-                "files_with_sha256": int(group["sha256_checksum"].ne("").sum()),
-                "extensions": "|".join(sorted(set(group["extension"]) - {""})),
+                "files_with_sha256": int(
+                    group["sha256_checksum"].ne("").sum()
+                ),
+                "extensions": "|".join(
+                    sorted(set(group["extension"]) - {""})
+                ),
                 "classification_methods": "|".join(
                     sorted(set(group["classification_method"]))
                 ),
@@ -514,7 +520,7 @@ def staging_evidence(
 
     included = manifest.loc[
         manifest["disposition"].eq("INCLUDED_IN_STAGING")
-    ].copy()
+    ]
     records: list[dict[str, object]] = []
     for dataset, group in included.groupby("dataset", sort=True):
         dataset_name = str(dataset)
@@ -523,7 +529,9 @@ def staging_evidence(
         period = ""
         status = "STAGING_PRESENT_NOT_VALIDATED_BY_COVERAGE_MAP"
         observed_rows = int(
-            pd.to_numeric(group["output_rows"], errors="coerce").fillna(0).sum()
+            pd.to_numeric(group["output_rows"], errors="coerce")
+            .fillna(0)
+            .sum()
         )
         source_files = int(group["relative_path"].nunique())
         limitation = (
@@ -536,7 +544,9 @@ def staging_evidence(
             period = (
                 date_min
                 if date_min and date_min == date_max
-                else " a ".join(value for value in (date_min, date_max) if value)
+                else " a ".join(
+                    value for value in (date_min, date_max) if value
+                )
             )
             status = (
                 "STRUCTURAL_VALIDATION_OK"
@@ -544,8 +554,12 @@ def staging_evidence(
                 else "STRUCTURAL_VALIDATION_REVIEW_REQUIRED"
             )
             observed_rows = int(getattr(validation, "rows", observed_rows))
-            source_files = int(getattr(validation, "source_files", source_files))
-            flagged = int(getattr(validation, "duplicate_flagged_rows", 0))
+            source_files = int(
+                getattr(validation, "source_files", source_files)
+            )
+            flagged = int(
+                getattr(validation, "duplicate_flagged_rows", 0)
+            )
             if flagged:
                 limitation += (
                     f" Há {flagged} linhas sinalizadas para revisão de "
@@ -728,7 +742,7 @@ def _status_for_block(
 
 
 def _next_action(status: str) -> str:
-    actions = {
+    return {
         "CURATED_VALIDATED_PRESENT": (
             "Integrar o módulo à síntese comum e avaliar lacunas de cobertura."
         ),
@@ -747,8 +761,7 @@ def _next_action(status: str) -> str:
         "NO_CANDIDATE_IDENTIFIED": (
             "Revisar arquivos não classificados antes de buscar nova fonte externa."
         ),
-    }
-    return actions[status]
+    }[status]
 
 
 def build_block_summary(
@@ -756,7 +769,7 @@ def build_block_summary(
     evidence: pd.DataFrame,
 ) -> pd.DataFrame:
     """Resume cobertura técnica sem tratá-la como validade substantiva."""
-    eligible = files.loc[files["analytical_candidate"]].copy()
+    eligible = files.loc[files["analytical_candidate"]]
     records: list[dict[str, object]] = []
     for block in BLOCKS:
         file_group = eligible.loc[eligible["primary_block"].eq(block)]
@@ -765,7 +778,9 @@ def build_block_summary(
         validated_staging = int(
             staging["validation_status"].eq("STRUCTURAL_VALIDATION_OK").sum()
         )
-        curated = int(evidence_group["layer"].eq("curated_local_module").sum())
+        curated = int(
+            evidence_group["layer"].eq("curated_local_module").sum()
+        )
         derived = int(
             evidence_group["layer"].eq("historical_derived_product").sum()
         )
@@ -784,7 +799,9 @@ def build_block_summary(
                 "block_label": BLOCK_LABELS[block],
                 "candidate_files": candidate_files,
                 "known_bytes": int(file_group["size_bytes"].sum()),
-                "source_families": int(file_group["source_family"].nunique()),
+                "source_families": int(
+                    file_group["source_family"].nunique()
+                ),
                 "raw_files": raw_files,
                 "processed_files": int(
                     file_group["source_stage"].eq("processed").sum()
@@ -811,7 +828,7 @@ def build_block_summary(
 
 
 def build_gap_register(block_summary: pd.DataFrame) -> pd.DataFrame:
-    """Classifica lacunas operacionais sem afirmar ausência definitiva de dados."""
+    """Classifica lacunas sem afirmar ausência definitiva de dados."""
     gap_by_status = {
         "CURATED_VALIDATED_PRESENT": (
             "INTEGRATION_AND_SYNTHESIS_PENDING",
@@ -892,7 +909,9 @@ def build_summary(
         ),
         (
             "blocks_with_validated_staging",
-            int(block_summary["validated_staging_datasets"].gt(0).sum()),
+            int(
+                block_summary["validated_staging_datasets"].gt(0).sum()
+            ),
             "calculated",
         ),
         (
@@ -905,7 +924,10 @@ def build_summary(
             "calculated",
         ),
     ]
-    return pd.DataFrame(indicators, columns=["indicator", "value", "nature"])
+    return pd.DataFrame(
+        indicators,
+        columns=["indicator", "value", "nature"],
+    )
 
 
 def build_coverage_map(
@@ -961,20 +983,16 @@ def write_coverage_map(
         shutil.rmtree(partial)
     partial.mkdir(parents=True, exist_ok=False)
     try:
-        result.files.to_csv(partial / "coverage_file_inventory.csv", index=False)
-        result.source_families.to_csv(
-            partial / "coverage_source_family_summary.csv", index=False
-        )
-        result.evidence_register.to_csv(
-            partial / "coverage_evidence_register.csv", index=False
-        )
-        result.block_summary.to_csv(
-            partial / "coverage_block_summary.csv", index=False
-        )
-        result.gap_register.to_csv(
-            partial / "coverage_gap_register.csv", index=False
-        )
-        result.summary.to_csv(partial / "coverage_map_summary.csv", index=False)
+        outputs = {
+            "coverage_file_inventory.csv": result.files,
+            "coverage_source_family_summary.csv": result.source_families,
+            "coverage_evidence_register.csv": result.evidence_register,
+            "coverage_block_summary.csv": result.block_summary,
+            "coverage_gap_register.csv": result.gap_register,
+            "coverage_map_summary.csv": result.summary,
+        }
+        for file_name, frame in outputs.items():
+            frame.to_csv(partial / file_name, index=False)
         target.parent.mkdir(parents=True, exist_ok=True)
         partial.rename(target)
     except Exception:

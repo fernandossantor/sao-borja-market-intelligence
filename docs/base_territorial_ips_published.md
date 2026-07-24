@@ -43,7 +43,15 @@ A dependência do navegador é opcional porque os demais módulos do projeto nã
 make bootstrap-browser
 ```
 
-O comando instala o pacote Python do Playwright e o Chromium dentro do ambiente do Codespace. O GitHub Actions continua executando os testes com renderizadores simulados e não baixa um navegador.
+O comando instala:
+
+- o pacote Python do Playwright;
+- o Chromium compatível com a versão do Playwright;
+- as bibliotecas de sistema exigidas pelo Chromium no Linux.
+
+A instalação usa o modo oficial `playwright install --with-deps chromium`. No Codespace, a etapa de dependências do sistema pode acionar `apt` por meio de `sudo` e produzir uma saída extensa. O GitHub Actions continua executando os testes com renderizadores simulados e não baixa um navegador.
+
+Um Chromium baixado sem as bibliotecas do sistema não é suficiente. Erros como `libatk-1.0.so.0: cannot open shared object file` indicam que o navegador foi instalado, mas suas dependências Linux ainda não foram instaladas; executar novamente `make bootstrap-browser` após a correção do Makefile resolve essa preparação.
 
 ## Captura
 

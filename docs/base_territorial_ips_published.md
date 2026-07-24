@@ -16,17 +16,34 @@ Este módulo incorpora os agregados municipais de São Borja nas edições origi
 
 ## Contrato técnico observado
 
-A plataforma atual é uma aplicação Phoenix LiveView. O botão de download depende do evento `open_download_modal`, e a série harmonizada depende de interações LiveView.
+A plataforma atual é uma aplicação Phoenix LiveView. O HTML recebido por uma requisição HTTP simples contém o município, o ano e os rótulos estruturais, mas não contém as pontuações numéricas dos agregados. Os valores são publicados somente depois que o navegador estabelece a conexão LiveView.
 
-A paginação da tabela geral não se mostrou reproduzível por requisições HTTP simples. Em testes reais, o parâmetro `page` não expôs São Borja em 2024, embora o município estivesse disponível na plataforma.
+A paginação da tabela geral também não se mostrou reproduzível por requisições HTTP simples. Em testes reais, o parâmetro `page` não expôs São Borja em 2024, embora o município estivesse disponível na plataforma.
 
-O contrato adotado passa a ser o scorecard municipal direto:
+O contrato adotado é o scorecard municipal direto, renderizado em Chromium:
 
 ```text
 https://ipsbrasil.org.br/explore/scorecard/4318002?year=<ANO>
 ```
 
-As três edições retornaram páginas distintas, contendo o município, o código IBGE, o marcador explícito do ano, três dimensões e doze componentes.
+A captura só é concluída quando o DOM renderizado contém:
+
+- São Borja;
+- o marcador explícito da edição;
+- os quinze rótulos de dimensões e componentes;
+- uma pontuação para cada um desses quinze rótulos;
+- uma pontuação geral do IPS;
+- ao menos dezesseis candidatos numéricos válidos na escala de 0 a 100.
+
+## Preparação do navegador
+
+A dependência do navegador é opcional porque os demais módulos do projeto não precisam de Chromium.
+
+```bash
+make bootstrap-browser
+```
+
+O comando instala o pacote Python do Playwright e o Chromium dentro do ambiente do Codespace. O GitHub Actions continua executando os testes com renderizadores simulados e não baixa um navegador.
 
 ## Captura
 
@@ -37,12 +54,17 @@ make snapshot-social-ips-published
 Saída padrão:
 
 ```text
-.data/snapshots/web/social_ips/ips-brasil-published-2024-2026/
+.data/snapshots/web/social_ips/ips-brasil-rendered-published-2024-2026/
 ├── ips_brasil_scorecard_2024.html
+├── ips_brasil_scorecard_2024.txt
 ├── ips_brasil_scorecard_2025.html
+├── ips_brasil_scorecard_2025.txt
 ├── ips_brasil_scorecard_2026.html
+├── ips_brasil_scorecard_2026.txt
 └── web_manifest.csv
 ```
+
+O arquivo HTML preserva o DOM final. O TXT preserva o texto efetivamente visível no navegador e é a entrada usada pelo builder.
 
 Controles:
 
@@ -50,10 +72,12 @@ Controles:
 - município e código IBGE validados;
 - marcador da edição validado;
 - presença das quinze dimensões e componentes validada;
-- status HTTP e tipo de conteúdo validados;
-- SHA-256 e tamanho registrados;
+- presença das dezesseis pontuações validada;
+- HTML e texto registrados separadamente com tamanho e SHA-256;
 - publicação atômica;
 - nenhuma operação no Google Drive.
+
+A captura HTTP estática anterior, quando existir localmente em `ips-brasil-published-2024-2026`, deve ser preservada apenas como evidência técnica de que o HTML desconectado não contém o contrato numérico. Ela não é aceita pelo builder.
 
 ## Construção
 
@@ -77,7 +101,7 @@ Saída padrão:
 - pontuações dos doze componentes;
 - município e código IBGE;
 - anos das edições;
-- URLs, tamanhos e hashes das páginas.
+- URLs, tamanhos e hashes do DOM e do texto renderizados.
 
 ### Dados calculados
 
@@ -89,10 +113,10 @@ Essa classificação estrutural serve à organização interna e não substitui 
 
 ## Indicadores individuais
 
-Os nomes dos indicadores individuais aparecem no scorecard, mas seus valores numéricos não estão publicados no HTML capturado. Por isso, o módulo registra:
+Os nomes dos indicadores individuais aparecem no scorecard, mas seus valores numéricos não estão publicados no texto renderizado. Por isso, o módulo registra:
 
 ```text
-individual_indicator_values_status=NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML
+individual_indicator_values_status=NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_RENDERED_SCORECARD
 ```
 
 Nenhum valor individual será inferido a partir de cor, classe visual, posição relativa ou outra característica gráfica.
@@ -117,12 +141,13 @@ A série temporal oficial recalcula 2024 e 2025 com os indicadores e parâmetros
 Situação atual:
 
 ```text
-harmonized_series_status=NOT_INCLUDED_REQUIRES_LIVEVIEW_EVENT
+harmonized_series_status=NOT_INCLUDED_REQUIRES_SEPARATE_LIVEVIEW_FLOW
 ```
 
 ## Limitações
 
-- a estrutura HTML do scorecard pode mudar;
+- a estrutura renderizada do scorecard pode mudar;
+- a captura depende de Chromium e da conexão LiveView pública;
 - o produto não contém valores dos indicadores individuais;
 - a captura municipal não substitui a base nacional integral;
 - o retrato atual e a série harmonizada não devem ser misturados;

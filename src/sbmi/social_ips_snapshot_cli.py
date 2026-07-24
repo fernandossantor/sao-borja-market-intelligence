@@ -11,7 +11,7 @@ from sbmi.ips_web_snapshot import snapshot_published_ips_pages
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Captura as edições publicadas do IPS Brasil para São Borja, "
+            "Localiza e captura as edições publicadas do IPS Brasil para São Borja, "
             "sem executar download integral da base."
         )
     )
@@ -25,9 +25,10 @@ def build_parser() -> argparse.ArgumentParser:
         default="ips-brasil-published-2024-2026",
     )
     parser.add_argument("--ibge-code", default="4318002")
-    parser.add_argument("--page", type=int, default=499)
+    parser.add_argument("--initial-page", type=int, default=499)
+    parser.add_argument("--max-page", type=int, default=700)
     parser.add_argument("--per-page", type=int, default=10)
-    parser.add_argument("--max-total-bytes", type=int, default=10_000_000)
+    parser.add_argument("--max-total-bytes", type=int, default=25_000_000)
     return parser
 
 
@@ -37,15 +38,19 @@ def main() -> None:
         snapshots_root=args.snapshots_root,
         snapshot_id=args.snapshot_id,
         ibge_code=args.ibge_code,
-        page=args.page,
+        initial_page=args.initial_page,
+        max_page=args.max_page,
         per_page=args.per_page,
         max_total_bytes=args.max_total_bytes,
     )
     print(f"snapshot_path={result.snapshot_path}")
     print(f"years={'|'.join(str(year) for year in result.years)}")
-    print(f"pages={result.pages}")
-    print(f"bytes={result.bytes}")
+    print(f"pages_captured={result.pages}")
+    print(f"stored_bytes={result.bytes}")
+    print(f"search_requests={result.requests}")
+    print(f"transferred_bytes={result.transferred_bytes}")
     print(f"ibge_code={args.ibge_code}")
+    print("search_strategy=INITIAL_PAGE_THEN_BINARY_SEARCH_BY_IBGE_CODE")
     print("capture=PUBLIC_HTML_TABLE_PAGES")
     print("temporal_series=NOT_INCLUDED")
     print("drive_operations=0")

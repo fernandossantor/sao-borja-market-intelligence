@@ -14,7 +14,7 @@ Organizar, auditar, processar e analisar dados territoriais, econômicos, fiscai
 - **DuckDB:** mecanismo analítico local e reconstruível;
 - **Supabase:** camada futura de publicação e consulta.
 
-Os scripts históricos do Google Colab permanecem preservados em `src/modeling/` durante a estabilização.
+Os scripts históricos do Google Colab permanecem preservados em `src/modeling/` e serão revisados somente quando cada família temática for retomada.
 
 ## Ambiente
 
@@ -33,7 +33,7 @@ A verificação executa:
 
 ## Google Drive
 
-O acesso inicial ao Drive usa uma conta de serviço com permissão de Visualizador apenas sobre a pasta do projeto. A credencial é fornecida ao Codespace por segredo criptografado e permanece em memória durante a execução.
+O acesso ao Drive usa uma conta de serviço com permissão de Visualizador apenas sobre a pasta do projeto. A credencial é fornecida ao Codespace por segredo criptografado e permanece em memória durante a execução.
 
 Validação de acesso, sem download:
 
@@ -47,15 +47,15 @@ Inventário recursivo de metadados:
 make gdrive-inventory
 ```
 
-O inventário é salvo em:
+O inventário local é salvo em:
 
 ```text
-manifests/google_drive_inventory.csv
+.data/manifests/google_drive_inventory.csv
 ```
 
 Consulte [`docs/google_drive_api.md`](docs/google_drive_api.md) para configuração e limitações.
 
-## Estrutura nova
+## Estrutura estabilizada
 
 ```text
 .devcontainer/          ambiente Codespaces
@@ -64,14 +64,25 @@ config/                 exemplos de configuração
 src/sbmi/               infraestrutura estabilizada
 tests/                  testes automatizados
 docs/                   arquitetura, governança e auditoria
-manifests/              inventários leves de metadados
+manifests/               inventários leves de metadados
 reports/generated/      relatórios gerados localmente
 ```
 
 ## Segurança
 
-Dados, credenciais, arquivos Parquet, bancos DuckDB e artefatos temporários não devem ser versionados. O conteúdo de `raw` é imutável e nenhuma rotina de escrita no Drive faz parte desta etapa.
+Dados, credenciais, arquivos Parquet, bancos DuckDB e artefatos temporários não devem ser versionados. O conteúdo de `raw` é imutável e as rotinas de auditoria usam o Google Drive em modo somente leitura.
 
 ## Estado
 
-A migração está em andamento na branch `stabilization/architecture-v1`. O pull request permanece em modo rascunho até a validação do inventário do Drive e da auditoria dos dados.
+A auditoria de estabilização foi concluída em 24 de julho de 2026.
+
+Resultados principais:
+
+- inventário do acervo do Google Drive concluído;
+- `raw/new_files` auditado e convertido em seis datasets de staging validados;
+- produtos existentes em `processed`, `exports` e `warehouse` capturados e auditados sem reconstrução;
+- 58 testes automatizados aprovados;
+- nenhuma evidência de corrupção generalizada ou necessidade de reconstrução completa do acervo;
+- riscos remanescentes localizados e documentados para revisão sob demanda.
+
+Consulte [`docs/stabilization_audit_closure_20260724.md`](docs/stabilization_audit_closure_20260724.md) para o encerramento formal, as decisões de governança e as limitações.

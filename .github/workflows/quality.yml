@@ -30,7 +30,18 @@ jobs:
           python -m pip install -e '.[dev]'
 
       - name: Lint stabilized package
-        run: python -m ruff check src/sbmi tests
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m ruff check src/sbmi tests | tee ruff.log
+
+      - name: Upload ruff log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruff-log
+          path: ruff.log
+          if-no-files-found: ignore
 
       - name: Test
         run: python -m pytest

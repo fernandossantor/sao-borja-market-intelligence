@@ -1,4 +1,4 @@
-.PHONY: bootstrap bootstrap-browser install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published drive-check drive-size drive-snapshot
+.PHONY: bootstrap bootstrap-browser install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration map-base-territorial-coverage snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -67,6 +67,9 @@ validate-inbox-staging:
 
 map-historical-integration:
 	python -m sbmi.historical_integration_map_cli
+
+map-base-territorial-coverage:
+	python -m sbmi.base_territorial_coverage_cli
 
 snapshot-derived-products:
 	python -m sbmi.derived_products_snapshot_cli

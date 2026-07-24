@@ -77,13 +77,13 @@ def main() -> None:
         max_total_bytes=args.max_total_bytes,
     )
 
-    selected.to_csv(result.snapshot_path / "census_source_selection.csv", index=False)
     print(f"inventory_path={inventory_path}")
     print(f"snapshot_path={result.snapshot_path}")
     print(f"selected_sources={len(selected)}")
     print(f"files={result.files}")
     print(f"bytes={result.bytes}")
     print(f"topic_keys={selected['topic_key'].nunique()}")
+    print("selection_manifest=source_manifest.csv")
     print("verification=SIZE_AND_SHA256_WHEN_AVAILABLE")
     print("selection_rule=RAW_XLSX_EXACT_CENSUS_2022_SAO_BORJA_TITLE")
     print("transformation=NONE")

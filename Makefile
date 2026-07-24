@@ -1,4 +1,4 @@
-.PHONY: bootstrap bootstrap-browser install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration map-base-territorial-coverage audit-base-territorial-demography snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published drive-check drive-size drive-snapshot
+.PHONY: bootstrap bootstrap-browser install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration map-base-territorial-coverage audit-base-territorial-demography audit-base-territorial-demography-lineage snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published drive-check drive-size drive-snapshot
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -73,6 +73,9 @@ map-base-territorial-coverage:
 
 audit-base-territorial-demography:
 	python -m sbmi.demography_audit_cli
+
+audit-base-territorial-demography-lineage:
+	python -m sbmi.demography_lineage_cli
 
 snapshot-derived-products:
 	python -m sbmi.derived_products_snapshot_cli

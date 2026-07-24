@@ -160,10 +160,14 @@ def _extract_index_score(text: str, year: int) -> str:
 def _extract_label_score(text: str, label: str) -> str:
     """Ignora ocorrências de menu e retém seções que publicam pontuação."""
     candidates: list[str] = []
+    scorecard_header = re.compile(r"\bIPS\s+BRASIL\s+\d{4}\b", flags=re.IGNORECASE)
     for position in _all_occurrences(text, label):
         start = position + len(label)
         end = _nearest_summary_boundary(text, start)
-        scores = _score_candidates(text[start:end])
+        segment = text[start:end]
+        if scorecard_header.search(segment) is not None:
+            continue
+        scores = _score_candidates(segment)
         if scores:
             candidates.append(scores[0])
 

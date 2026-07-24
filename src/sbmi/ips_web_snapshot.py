@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import shutil
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
 
@@ -143,7 +143,7 @@ def snapshot_published_ips_pages(
                     "sha256": digest,
                     "ibge_code": ibge_code,
                     "ibge_code_present": True,
-                    "retrieved_at_utc": datetime.now(timezone.utc).isoformat(),
+                    "retrieved_at_utc": datetime.now(UTC).isoformat(),
                     "local_file": filename,
                 }
             )

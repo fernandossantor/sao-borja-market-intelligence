@@ -1,4 +1,4 @@
-"""Comando para construir os produtos publicados do IPS Brasil."""
+"""Comando para construir os agregados publicados do IPS Brasil."""
 
 from __future__ import annotations
 
@@ -11,8 +11,8 @@ from sbmi.social_ips import build_published_ips, write_published_ips
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Constrói o perfil de São Borja nas edições publicadas do IPS Brasil "
-            "sem calcular variação entre anos não comparáveis."
+            "Constrói índice, dimensões e componentes de São Borja nas edições "
+            "publicadas do IPS Brasil, sem comparar anos não equivalentes."
         )
     )
     parser.add_argument(
@@ -55,9 +55,9 @@ def main() -> None:
         "reference_years="
         f"{'|'.join(str(year) for year in result.metadata['reference_years'])}"
     )
-    print(f"published_rows_observed={len(result.published_long)}")
-    print(f"profile_2026_rows_observed={len(result.profile_2026)}")
+    print(f"published_summary_rows_observed={len(result.published_summary_long)}")
     print(f"summary_2026_rows_observed={len(result.summary_2026)}")
+    print("summary_contract=index_1|dimensions_3|components_12")
     print(
         "comparability_status="
         f"{result.metadata['comparability_status']}"
@@ -65,6 +65,10 @@ def main() -> None:
     print(
         "temporal_change_calculated="
         f"{int(bool(result.metadata['temporal_change_calculated']))}"
+    )
+    print(
+        "individual_indicator_values_status="
+        f"{result.metadata['individual_indicator_values_status']}"
     )
     print(
         "harmonized_series_status="

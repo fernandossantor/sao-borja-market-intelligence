@@ -105,5 +105,6 @@ def test_snapshot_blocks_volume_over_limit(tmp_path: Path) -> None:
             inventory=inventory,
             snapshots_root=tmp_path,
             snapshot_id="derived-test",
+            scopes=("processed",),
             max_total_bytes=4,
         )

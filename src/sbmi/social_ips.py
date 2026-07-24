@@ -1,4 +1,4 @@
-"""Builder portátil das edições publicadas do IPS Brasil para São Borja."""
+"""Builder portátil dos scorecards publicados do IPS Brasil para São Borja."""
 
 from __future__ import annotations
 
@@ -9,16 +9,16 @@ import shutil
 import unicodedata
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
-from html.parser import HTMLParser
 from pathlib import Path
 
 import pandas as pd
 
+from sbmi.ips_web_snapshot import SUMMARY_LABELS, visible_text
+
 DEFAULT_IBGE_CODE = "4318002"
 DEFAULT_MUNICIPALITY = "São Borja"
 DEFAULT_YEARS = (2024, 2025, 2026)
-
-INDEX_LABELS = {"indice de progresso social", "ips brasil"}
+INDEX_LABEL = "Índice de Progresso Social"
 DIMENSION_LABELS = {
     "necessidades humanas basicas",
     "fundamentos do bem estar",
@@ -38,73 +38,19 @@ COMPONENT_LABELS = {
     "inclusao social",
     "acesso a educacao superior",
 }
-METADATA_LABELS = {
-    "codigo ibge",
-    "municipio",
-    "uf",
-    "area km2",
-    "area km",
-    "populacao 2025",
-    "populacao",
-    "pib per capita",
-}
 
 
 @dataclass(frozen=True)
 class IpsPublishedResult:
-    """Produtos derivados das páginas publicadas do IPS Brasil."""
+    """Produtos derivados dos scorecards publicados."""
 
-    published_long: pd.DataFrame
-    profile_2026: pd.DataFrame
+    published_summary_long: pd.DataFrame
     summary_2026: pd.DataFrame
     metadata: dict[str, object]
 
 
-class _TableParser(HTMLParser):
-    """Extrai tabelas HTML sem dependências externas."""
-
-    def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
-        self.tables: list[list[list[str]]] = []
-        self._table: list[list[str]] | None = None
-        self._row: list[str] | None = None
-        self._cell_parts: list[str] | None = None
-        self._table_depth = 0
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        del attrs
-        if tag == "table":
-            self._table_depth += 1
-            if self._table_depth == 1:
-                self._table = []
-        elif self._table_depth == 1 and tag == "tr":
-            self._row = []
-        elif self._table_depth == 1 and tag in {"th", "td"}:
-            self._cell_parts = []
-
-    def handle_data(self, data: str) -> None:
-        if self._cell_parts is not None:
-            self._cell_parts.append(data)
-
-    def handle_endtag(self, tag: str) -> None:
-        if self._table_depth == 1 and tag in {"th", "td"}:
-            if self._row is not None and self._cell_parts is not None:
-                value = re.sub(r"\s+", " ", " ".join(self._cell_parts)).strip()
-                self._row.append(value)
-            self._cell_parts = None
-        elif self._table_depth == 1 and tag == "tr":
-            if self._table is not None and self._row:
-                self._table.append(self._row)
-            self._row = None
-        elif tag == "table" and self._table_depth:
-            if self._table_depth == 1 and self._table is not None:
-                self.tables.append(self._table)
-                self._table = None
-            self._table_depth -= 1
-
-
 def normalize_label(value: object) -> str:
-    """Normaliza rótulos apenas para comparação estrutural."""
+    """Normaliza rótulos apenas para integração técnica."""
     text = unicodedata.normalize("NFKD", str(value))
     text = "".join(character for character in text if not unicodedata.combining(character))
     text = text.lower().replace("²", "2")
@@ -118,7 +64,6 @@ def parse_published_number(value: object) -> str | None:
     text = text.replace("%", "").replace("R$", "").replace(" ", "")
     if text.lower() in {"", "-", "--", "n/a", "na", "null"}:
         return None
-
     if "," in text:
         canonical = text.replace(".", "").replace(",", ".")
     elif re.fullmatch(r"-?\d{1,3}(\.\d{3})+", text):
@@ -133,52 +78,94 @@ def parse_published_number(value: object) -> str | None:
 
 
 def indicator_level(label: str) -> str:
-    """Classifica o nível estrutural sem criar nomenclatura oficial nova."""
+    """Classifica índice, dimensões e componentes do scorecard."""
     normalized = normalize_label(label)
-    if normalized in METADATA_LABELS:
-        return "metadata"
-    if normalized in INDEX_LABELS:
+    if normalized == normalize_label(INDEX_LABEL):
         return "index"
     if normalized in DIMENSION_LABELS:
         return "dimension"
     if normalized in COMPONENT_LABELS:
         return "component"
-    return "indicator"
+    raise ValueError(f"Rótulo agregado inesperado: {label!r}")
 
 
-def _extract_code_table(html_text: str, ibge_code: str) -> tuple[list[str], list[str]]:
-    parser = _TableParser()
-    parser.feed(html_text)
-    candidates: list[tuple[list[str], list[str]]] = []
+def _decimal_pattern() -> re.Pattern[str]:
+    return re.compile(r"(?<!\d)(\d{1,3}[,.]\d{1,3})(?!\d)")
 
-    for table in parser.tables:
-        header_index = None
-        headers: list[str] | None = None
-        for index, row in enumerate(table):
-            normalized = {normalize_label(cell) for cell in row}
-            if "codigo ibge" in normalized and "municipio" in normalized:
-                header_index = index
-                headers = row
-                break
-        if headers is None or header_index is None:
-            continue
-        for row in table[header_index + 1 :]:
-            if ibge_code in {cell.strip() for cell in row}:
-                candidates.append((headers, row))
 
-    if not candidates:
-        raise ValueError(f"O município {ibge_code} não foi encontrado nas tabelas HTML.")
-    if len(candidates) > 1:
-        raise ValueError(
-            f"Foram encontradas {len(candidates)} linhas para o município {ibge_code}."
+def _extract_index_score(text: str, year: int) -> str:
+    match = re.search(
+        rf"IPS\s+BRASIL\s+{year}\b.*?(\d{{1,3}}[,.]\d{{1,3}})\s*/\s*100",
+        text,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if match is None:
+        raise ValueError(f"Pontuação geral do IPS não encontrada no scorecard de {year}.")
+    return match.group(1)
+
+
+def _extract_label_score(text: str, label: str, next_labels: tuple[str, ...]) -> str:
+    folded = text.casefold()
+    start = folded.find(label.casefold())
+    if start < 0:
+        raise ValueError(f"Rótulo ausente no scorecard: {label!r}")
+    segment_start = start + len(label)
+    boundaries = [
+        folded.find(candidate.casefold(), segment_start)
+        for candidate in next_labels
+        if folded.find(candidate.casefold(), segment_start) >= 0
+    ]
+    segment_end = min(boundaries) if boundaries else min(segment_start + 8000, len(text))
+    segment = text[segment_start:segment_end]
+    match = _decimal_pattern().search(segment)
+    if match is None:
+        raise ValueError(f"Pontuação não encontrada após o rótulo {label!r}.")
+    return match.group(1)
+
+
+def extract_scorecard_summary(
+    html_text: str,
+    *,
+    year: int,
+    ibge_code: str,
+    municipality: str,
+    source_url: str,
+    source_sha256: str,
+) -> pd.DataFrame:
+    """Extrai índice, três dimensões e doze componentes do scorecard."""
+    text = visible_text(html_text)
+    if municipality.casefold() not in text.casefold():
+        raise ValueError(f"Município inesperado no scorecard de {year}.")
+    if ibge_code not in html_text:
+        raise ValueError(f"Código IBGE ausente no scorecard de {year}.")
+
+    labels = (INDEX_LABEL, *SUMMARY_LABELS)
+    values: list[str] = [_extract_index_score(text, year)]
+    for index, label in enumerate(SUMMARY_LABELS):
+        values.append(_extract_label_score(text, label, SUMMARY_LABELS[index + 1 :]))
+
+    records: list[dict[str, object]] = []
+    for order, (label, value_text) in enumerate(zip(labels, values, strict=True), start=1):
+        records.append(
+            {
+                "reference_year": year,
+                "edition_type": "published_original",
+                "comparability_status": "NOT_STRICTLY_COMPARABLE_ACROSS_EDITIONS",
+                "ibge_code": ibge_code,
+                "municipality_observed": municipality,
+                "indicator_order": order,
+                "indicator_label": label,
+                "indicator_key": normalize_label(label).replace(" ", "_"),
+                "indicator_level": indicator_level(label),
+                "value_text": value_text,
+                "value_numeric": parse_published_number(value_text),
+                "unit": "score_0_100",
+                "nature": "observed",
+                "source_url": source_url,
+                "source_sha256": source_sha256,
+            }
         )
-    headers, row = candidates[0]
-    if len(headers) != len(row):
-        raise ValueError(
-            "A linha municipal não possui a mesma largura do cabeçalho: "
-            f"headers={len(headers)}, cells={len(row)}"
-        )
-    return headers, row
+    return pd.DataFrame(records)
 
 
 def _manifest(snapshot_path: Path) -> pd.DataFrame:
@@ -199,49 +186,6 @@ def _manifest(snapshot_path: Path) -> pd.DataFrame:
     return frame
 
 
-def _municipality_fields(headers: list[str], row: list[str]) -> tuple[str, str]:
-    pairs = dict(zip((normalize_label(header) for header in headers), row, strict=True))
-    municipality = str(pairs.get("municipio", "")).strip()
-    uf = str(pairs.get("uf", "")).strip()
-    return municipality, uf
-
-
-def _profile_for_year(
-    *,
-    year: int,
-    headers: list[str],
-    row: list[str],
-    source_url: str,
-    source_sha256: str,
-    ibge_code: str,
-) -> pd.DataFrame:
-    municipality, uf = _municipality_fields(headers, row)
-    records: list[dict[str, object]] = []
-    for order, (label, value_text) in enumerate(zip(headers, row, strict=True), start=1):
-        level = indicator_level(label)
-        records.append(
-            {
-                "reference_year": year,
-                "edition_type": "published_original",
-                "comparability_status": "NOT_STRICTLY_COMPARABLE_ACROSS_EDITIONS",
-                "ibge_code": ibge_code,
-                "municipality_observed": municipality,
-                "uf_observed": uf,
-                "indicator_order": order,
-                "indicator_label": label,
-                "indicator_key": normalize_label(label).replace(" ", "_"),
-                "indicator_level": level,
-                "value_text": value_text,
-                "value_numeric": parse_published_number(value_text),
-                "unit_status": "AS_PUBLISHED_NOT_VALIDATED",
-                "nature": "observed",
-                "source_url": source_url,
-                "source_sha256": source_sha256,
-            }
-        )
-    return pd.DataFrame(records)
-
-
 def build_published_ips(
     snapshot_path: Path,
     *,
@@ -249,14 +193,14 @@ def build_published_ips(
     municipality: str = DEFAULT_MUNICIPALITY,
     expected_years: tuple[int, ...] = DEFAULT_YEARS,
 ) -> IpsPublishedResult:
-    """Constrói perfis anuais sem calcular variação entre edições não comparáveis."""
+    """Constrói agregados anuais sem calcular variação entre edições."""
     root = snapshot_path.expanduser().resolve()
     manifest = _manifest(root)
     years = tuple(sorted(int(value) for value in manifest["reference_year"].tolist()))
     if years != tuple(sorted(expected_years)):
         raise ValueError(f"Anos inesperados no manifesto: observados={years}")
 
-    profiles: list[pd.DataFrame] = []
+    summaries: list[pd.DataFrame] = []
     source_rows: list[dict[str, object]] = []
     for record in manifest.sort_values("reference_year").to_dict("records"):
         year = int(record["reference_year"])
@@ -265,62 +209,54 @@ def build_published_ips(
         digest = hashlib.sha256(content).hexdigest()
         if digest != str(record["sha256"]):
             raise ValueError(f"SHA-256 divergente na captura de {year}.")
-        headers, row = _extract_code_table(content.decode("utf-8"), ibge_code)
-        profile = _profile_for_year(
+        summary = extract_scorecard_summary(
+            content.decode("utf-8"),
             year=year,
-            headers=headers,
-            row=row,
+            ibge_code=ibge_code,
+            municipality=municipality,
             source_url=str(record["requested_url"]),
             source_sha256=digest,
-            ibge_code=ibge_code,
         )
-        observed_name = str(profile["municipality_observed"].iloc[0])
-        if municipality.casefold() not in observed_name.casefold():
-            raise ValueError(
-                f"Município inesperado em {year}: observado={observed_name!r}"
-            )
-        profiles.append(profile)
+        if len(summary) != 16:
+            raise ValueError(f"Agregados inesperados em {year}: observados={len(summary)}")
+        summaries.append(summary)
         source_rows.append(
             {
                 "reference_year": year,
                 "source_url": str(record["requested_url"]),
                 "source_sha256": digest,
-                "table_columns_observed": len(headers),
-                "municipality_cells_observed": len(row),
+                "summary_scores_observed": len(summary),
             }
         )
 
-    published = pd.concat(profiles, ignore_index=True)
-    profile_2026 = published.loc[published["reference_year"].eq(2026)].copy()
-    summary_2026 = profile_2026.loc[
-        profile_2026["indicator_level"].isin({"index", "dimension", "component"})
-    ].reset_index(drop=True)
-
+    published = pd.concat(summaries, ignore_index=True)
+    summary_2026 = published.loc[published["reference_year"].eq(2026)].reset_index(drop=True)
     metadata: dict[str, object] = {
-        "dataset": "IPS Brasil — edições originalmente publicadas",
+        "dataset": "IPS Brasil — scorecards das edições originalmente publicadas",
         "municipality": municipality,
         "ibge_code": ibge_code,
         "geographic_scope": "municipality",
         "reference_years": list(years),
         "edition_type": "published_original",
-        "published_rows_observed": len(published),
-        "profile_2026_rows_observed": len(profile_2026),
+        "published_summary_rows_observed": len(published),
         "summary_2026_rows_observed": len(summary_2026),
         "sources": source_rows,
         "data_nature": "observed",
+        "unit": "score_0_100",
         "comparability_status": "NOT_STRICTLY_COMPARABLE_ACROSS_EDITIONS",
         "temporal_change_calculated": False,
+        "individual_indicator_values_status": "NOT_PUBLISHED_AS_NUMERIC_VALUES_IN_SCORECARD_HTML",
         "harmonized_series_status": "NOT_INCLUDED_REQUIRES_LIVEVIEW_EVENT",
         "limitations": [
-            "Os anos 2024, 2025 e 2026 preservam as edições originalmente publicadas.",
+            "Os anos preservam as edições originalmente publicadas.",
             "Não são calculadas variações entre edições metodologicamente não comparáveis.",
-            "As unidades são preservadas conforme a tabela e ainda exigem catálogo metodológico.",
+            "O produto contém somente o índice, três dimensões e doze componentes.",
+            "Os indicadores individuais aparecem por nome, sem valores numéricos no HTML.",
             "A série harmonizada 2024–2026 será construída em módulo separado.",
         ],
     }
     return IpsPublishedResult(
-        published_long=published,
-        profile_2026=profile_2026,
+        published_summary_long=published,
         summary_2026=summary_2026,
         metadata=metadata,
     )
@@ -343,11 +279,10 @@ def write_published_ips(
         shutil.rmtree(partial)
     partial.mkdir(parents=True, exist_ok=False)
     try:
-        result.published_long.to_csv(
-            partial / "ips_published_editions_long.csv",
+        result.published_summary_long.to_csv(
+            partial / "ips_published_summary_2024_2026.csv",
             index=False,
         )
-        result.profile_2026.to_csv(partial / "ips_2026_full_profile.csv", index=False)
         result.summary_2026.to_csv(partial / "ips_2026_summary.csv", index=False)
         (partial / "ips_metadata.json").write_text(
             json.dumps(result.metadata, ensure_ascii=False, indent=2),

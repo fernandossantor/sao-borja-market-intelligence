@@ -5,8 +5,8 @@ from __future__ import annotations
 import pandas as pd
 
 from sbmi.base_territorial_coverage import (
-    BLOCKS,
     BLOCK_LABELS,
+    BLOCKS,
     CoverageMapResult,
     build_summary,
 )

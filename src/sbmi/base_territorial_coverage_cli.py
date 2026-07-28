@@ -8,6 +8,9 @@ from pathlib import Path
 
 import pandas as pd
 
+from sbmi.base_territorial_census_refinement import (
+    apply_census_topic_refinement,
+)
 from sbmi.base_territorial_coverage import (
     build_coverage_map,
     detect_local_module_evidence,
@@ -131,6 +134,7 @@ def main() -> None:
         local_modules=local_modules,
     )
     result = refine_coverage_map(result, inventory)
+    result = apply_census_topic_refinement(result)
     result = apply_secondary_topic_coverage(result, inventory)
     run_id = args.run_id or datetime.now(UTC).strftime(
         "coverage-map-%Y%m%d"
@@ -183,6 +187,7 @@ def main() -> None:
         )
     print(f"output_dir={target}")
     print("classification_calibration=applied")
+    print("census_topic_refinement=applied")
     print("secondary_topic_coverage=preserved")
     print("external_sources_collected=0")
     print("raw_files_modified=0")

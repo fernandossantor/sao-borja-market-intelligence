@@ -88,7 +88,8 @@ camada seguinte sem validação proporcional ao risco.
 
 1. Nunca alterar, sobrescrever, mover ou excluir arquivos brutos ou históricos,
    inclusive nas camadas `raw`, `processed` e `exports`.
-2. Nunca escrever no Google Drive.
+2. Nunca escrever no Google Drive, exceto na autorização estrita descrita em
+   **Exceção de escrita no Drive — coleta SIDRA histórica**.
 3. Nunca sobrescrever snapshots existentes.
 4. Novas execuções devem usar identificadores próprios ou falhar de forma
    segura quando o destino já existir.
@@ -371,7 +372,47 @@ Também devem ser informados:
 
 - Usar GitHub Codespaces Secrets para credenciais necessárias.
 - Configurar acesso ao Drive fora do repositório.
-- Não executar escrita, sincronização, exclusão ou movimentação no Drive.
+- Não executar escrita, sincronização, exclusão ou movimentação no Drive, exceto
+  na autorização estrita descrita abaixo.
+
+### Exceção de escrita no Drive — coleta SIDRA histórica
+
+O responsável pelo projeto autoriza escrita, movimentação e sincronização no
+Drive exclusivamente para a coleta histórica do SIDRA/IBGE referente a São
+Borja, com intervalo-alvo de 1996 a 2026 e somente para dimensões já existentes
+no projeto.
+
+Escopo autorizado:
+
+- pasta raiz declarada: `_sao_borja`;
+- ID imutável da pasta raiz autorizada:
+  `14O39dWi2Wq4HATj_xLkHQ7y5OzX44z6C`;
+- destino exclusivo: pasta descendente chamada `new_files`;
+- antes da primeira escrita, resolver e registrar o ID próprio de `new_files`,
+  confirmando que seu pai possui o ID autorizado acima;
+- permitir criação de novas subpastas e arquivos, upload, sincronização e
+  movimentação somente de artefatos criados por esta coleta e somente dentro
+  de `new_files`;
+- usar identificadores de execução próprios, nomes determinísticos e manifestos
+  com IDs do Drive, caminhos, datas de obtenção, períodos de referência,
+  tamanhos, hashes SHA-256 e fontes oficiais;
+- executar inventário prévio do destino e falhar com segurança em qualquer
+  colisão de nome, ID, hash ou caminho.
+
+Continuam proibidos, inclusive dentro de `new_files`:
+
+- excluir, sobrescrever, renomear ou mover arquivos e pastas preexistentes;
+- escrever fora de `new_files` ou usar pasta homônima cujo pai não tenha o ID
+  autorizado;
+- sincronização destrutiva, espelhamento com exclusão ou opção equivalente;
+- substituir uma execução anterior, mesmo quando o conteúdo parecer idêntico;
+- mover artefatos históricos para dentro ou para fora do escopo autorizado;
+- ampliar a coleta para novas dimensões sem nova autorização explícita.
+
+Cada etapa com escrita externa ainda deve apresentar previamente objetivo,
+escopo, volume, destinos, riscos e validações. A autorização desta exceção não
+elimina as exigências de proveniência, saídas atômicas, comparação e relato.
+
 - Não acessar serviços externos sem apresentar objetivo, escopo, volume,
   riscos e obter autorização.
 - Preferir endpoints oficiais, documentados e verificáveis.

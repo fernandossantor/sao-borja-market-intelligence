@@ -6,6 +6,7 @@ import pytest
 
 from sbmi.sidra_historical_discovery import (
     ALLOWED_DIMENSIONS,
+    QUERY_SPECS,
     TABLE_SPECS,
     discover_sidra_historical_metadata,
 )
@@ -32,6 +33,7 @@ class Session:
         availability = {
             "156": "1991, 2000, 2010",
             "289": "1986 a 2025",
+            "291": "1986 a 2025",
             "3939": "1974 a 2025",
             "5457": "1974 a 2025",
             "5938": "2002 a 2023",
@@ -40,6 +42,10 @@ class Session:
             "6579": "2001 a 2006, 2008 a 2009, 2011 a 2021, 2024 a 2025",
             "9514": "2022",
         }[table_id]
+        query_spec = QUERY_SPECS.get(table_id)
+        variable_ids = query_spec["variable_ids"] if query_spec else (table_id,)
+        classification_id = query_spec["classification_id"] if query_spec else "1"
+        category_ids = query_spec["category_ids"] if query_spec else ("0",)
         document = {
             "Id": int(table_id),
             "Nome": f"Tabela {table_id}",
@@ -49,19 +55,27 @@ class Session:
             "NiveisTerritoriais": [{"Nome": "Brasil"}, {"Nome": "Município"}],
             "Variaveis": [
                 {
-                    "Id": int(table_id),
+                    "Id": int(variable_id),
                     "Nome": "Variável",
                     "UnidadeDeMedida": [{"Unidade": "Unidade", "Periodo": availability}],
                     "VariaveisDerivadas": [],
                 }
+                for variable_id in variable_ids
             ],
             "Classificacoes": [
                 {
-                    "Id": 1,
+                    "Id": int(classification_id),
                     "Nome": "Classe",
                     "IndiceTotal": 0,
                     "AdmiteTotal": True,
-                    "Categorias": [{"Id": 0, "Nome": "Total", "Disponibilidade": availability}],
+                    "Categorias": [
+                        {
+                            "Id": int(category_id),
+                            "Nome": "Categoria",
+                            "Disponibilidade": availability,
+                        }
+                        for category_id in category_ids
+                    ],
                 }
             ],
         }
@@ -81,7 +95,7 @@ def run(tmp_path, session=None):
 def test_metadata_only_and_hashes(tmp_path: Path):
     session = Session()
     result = run(tmp_path, session)
-    assert len(session.calls) == 9
+    assert len(session.calls) == 10
     assert all("/values" not in url for url in session.calls)
     assert set(result.tables.table_id) == set(TABLE_SPECS)
     for row in result.manifest.itertuples(index=False):
@@ -92,6 +106,7 @@ def test_metadata_only_and_hashes(tmp_path: Path):
 def test_period_expansion_is_limited_to_target_interval(tmp_path: Path):
     result = run(tmp_path)
     years = result.periods.groupby("table_id").reference_year.agg(["min", "max", "count"])
+    assert tuple(years.loc["291"]) == (1996, 2025, 30)
     assert tuple(years.loc["5457"]) == (1996, 2025, 30)
     assert tuple(years.loc["5938"]) == (2002, 2023, 22)
     assert tuple(years.loc["6579"]) == (2001, 2025, 21)
@@ -109,12 +124,17 @@ def test_only_existing_dimensions_and_no_conceptual_claim(tmp_path: Path):
     summary = result.summary.set_index("indicator").value
     assert int(summary["values_requests"]) == 0
     assert int(summary["conceptually_validated_tables"]) == 0
+    assert int(summary["queries_prepared"]) == 3
+    assert int(summary["planned_max_value_rows"]) == 2580
+    assert set(result.query_plans.execution_status) == {"PREPARED_NOT_EXECUTED"}
+    assert set(result.query_plans.table_id) == set(QUERY_SPECS)
 
 
 def test_outputs_are_atomic_and_refuse_overwrite(tmp_path: Path):
     result = run(tmp_path)
     assert (result.output_path / "sidra_historical_table_register.csv").is_file()
     assert (result.output_path / "sidra_historical_limitation_register.csv").is_file()
+    assert (result.output_path / "sidra_historical_query_plan.csv").is_file()
     with pytest.raises(FileExistsError):
         run(tmp_path)
 

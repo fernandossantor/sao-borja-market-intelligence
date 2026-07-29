@@ -89,7 +89,7 @@ camada seguinte sem validação proporcional ao risco.
 1. Nunca alterar, sobrescrever, mover ou excluir arquivos brutos ou históricos,
    inclusive nas camadas `raw`, `processed` e `exports`.
 2. Nunca escrever no Google Drive, exceto na autorização estrita descrita em
-   **Exceção de escrita no Drive — coleta SIDRA histórica**.
+   **Exceção de escrita no Drive — coletas autorizadas para São Borja**.
 3. Nunca sobrescrever snapshots existentes.
 4. Novas execuções devem usar identificadores próprios ou falhar de forma
    segura quando o destino já existir.
@@ -375,12 +375,17 @@ Também devem ser informados:
 - Não executar escrita, sincronização, exclusão ou movimentação no Drive, exceto
   na autorização estrita descrita abaixo.
 
-### Exceção de escrita no Drive — coleta SIDRA histórica
+### Exceção de escrita no Drive — coletas autorizadas para São Borja
 
 O responsável pelo projeto autoriza escrita, movimentação e sincronização no
-Drive exclusivamente para a coleta histórica do SIDRA/IBGE referente a São
-Borja, com intervalo-alvo de 1996 a 2026 e somente para dimensões já existentes
-no projeto.
+Drive exclusivamente para dados referentes a São Borja provenientes das fontes
+abaixo e somente para dimensões já existentes no projeto:
+
+- SIDRA/IBGE, incluindo a coleta histórica com intervalo-alvo de 1996 a 2026;
+- Panorama do Censo 2022/IBGE;
+- panorama municipal do IBGE Cidades;
+- Observatório Setorial Territorial do Sebrae/Datawheel;
+- explorador de dados do IPS Brasil.
 
 Escopo autorizado:
 
@@ -391,12 +396,18 @@ Escopo autorizado:
   `14O39dWi2Wq4HATj_xLkHQ7y5OzX44z6C`;
 - antes de cada escrita, confirmar que `new_files` mantém como pai a pasta
   `_sao_borja` com o ID autorizado acima;
-- permitir criação de novas subpastas e arquivos, upload, sincronização e
-  movimentação somente de artefatos criados por esta coleta e somente dentro
-  de `new_files`;
+- permitir criação de novas subpastas e arquivos, upload, sincronização,
+  movimentação, organização e transformação somente de artefatos criados por
+  essas coletas e somente dentro de `new_files`;
+- manter cada captura bruta imutável e realizar manipulações apenas em novas
+  camadas `staging`, `curated`, `exports` e `audit`, sem alterar a entrada;
 - usar identificadores de execução próprios, nomes determinísticos e manifestos
   com IDs do Drive, caminhos, datas de obtenção, períodos de referência,
-  tamanhos, hashes SHA-256 e fontes oficiais;
+  tamanhos, hashes SHA-256, instituição, autoria declarada, URLs de origem,
+  datas de publicação quando disponíveis e fontes oficiais;
+- identificar explicitamente a natureza de cada resultado como observado,
+  calculado, estimado, interpretado ou recomendado e preservar notas de método
+  e comparabilidade publicadas pela fonte;
 - executar inventário prévio do destino e falhar com segurança em qualquer
   colisão de nome, ID, hash ou caminho.
 

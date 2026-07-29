@@ -30,11 +30,17 @@ PAGE_SPECS = {
         "Sebrae/Datawheel",
         "SECONDARY_AGGREGATOR",
     ),
+    "ips_brasil_explorer": (
+        "https://ipsbrasil.org.br/explore/data",
+        "IPS Brasil",
+        "PUBLISHED_COMPOSITE_INDEX",
+    ),
 }
 ALLOWED_PAGE_HOSTS = {
     "censo2022.ibge.gov.br",
     "cidades.ibge.gov.br",
     "observatorio.sebrae.com.br",
+    "ipsbrasil.org.br",
 }
 QUERY_HOST = "apiv2-observatorio.sebrae.com.br"
 
@@ -238,6 +244,9 @@ def build_complementary_source_inventory(
          "Indicadores heterogêneos exigem registro por pesquisa e período."),
         ("sebrae_observatorio_profile", "SECONDARY_AGGREGATOR",
          "Preferir a fonte primária quando houver endpoint oficial equivalente."),
+        ("ips_brasil_explorer", "PARTIAL_OVERLAP_AND_COMPARABILITY_WARNING",
+         "Comparar com o módulo IPS local; edições 2024 a 2026 não são "
+         "estritamente comparáveis segundo a fonte."),
         ("all", "VALUES_NOT_REQUESTED",
          "Nenhuma URL extraída foi executada nesta etapa."),
     ], columns=["scope", "limitation_code", "description"])

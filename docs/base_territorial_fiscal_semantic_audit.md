@@ -25,12 +25,21 @@ normalizações são aplicadas à chave de comparação:
 Essas normalizações não alteram os arquivos. O resultado registra sobreposição
 por ano e arquivo, linhas exclusivas de cada conjunto e duplicidades históricas.
 
+Os 10 grupos estaduais sinalizados contêm 29 ocorrências de IPVA e 19
+ocorrências excedentes sob igualdade estrita dos campos observados. Como não há
+chave transacional, a política é `PRESERVE_OCCURRENCES_BLOCK_AGGREGATION`:
+
+- preservar todas as ocorrências e linhas de origem;
+- não deduplicar nem somar silenciosamente;
+- bloquear agregações não qualificadas;
+- admitir somente análises de sensibilidade explicitamente rotuladas.
+
 ## Bloqueios
 
 - federal: autoridade e atualização da fonte ainda não comprovadas;
 - o contrato `estadual_icms` também contém rubricas não ICMS, como IPVA, e seu
   nome precisa ser revisto antes da curadoria;
-- duplicidades estaduais sinalizadas exigem validação da fonte;
+- repetições estaduais são preservadas e permanecem bloqueadas para agregação;
 - transferências estaduais: fases da despesa não podem ser somadas entre si;
 - tabelas municipais: período de referência e unidade não estão comprovados;
 - nomes de arquivos não são aceitos como classificação substantiva.
@@ -45,6 +54,7 @@ Cada execução cria um destino exclusivo com:
 - `federal_overlap_by_year.csv`;
 - `federal_overlap_by_source.csv`;
 - `historical_duplicate_groups.csv`;
+- `state_repetition_decisions.csv`;
 - `semantic_issues.csv`;
 - `fiscal_semantic_summary.csv`;
 - `fiscal_semantic_manifest.csv`.

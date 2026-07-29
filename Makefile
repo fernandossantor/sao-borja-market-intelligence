@@ -1,5 +1,6 @@
 .PHONY: bootstrap bootstrap-browser install doctor test lint lint-legacy format verify gdrive-check gdrive-inventory gdrive-audit gdrive-audit-inbox gdrive-snapshot-inbox profile-inbox-snapshot triage-inbox-structure audit-inbox-content review-inbox-anomalies build-inbox-staging validate-inbox-staging map-historical-integration map-base-territorial-coverage audit-base-territorial-demography audit-base-territorial-demography-lineage snapshot-base-territorial-demography-census compare-base-territorial-demography-census review-base-territorial-demography-census-quality audit-base-territorial-demography-census-provenance verify-base-territorial-demography-census-authority discover-base-territorial-demography-census-official-products discover-base-territorial-demography-census-sidra-metadata snapshot-base-territorial-demography-census-sidra-values rebuild-base-territorial-demography-census-products snapshot-derived-products audit-derived-products snapshot-social-idsc-source build-social-idsc snapshot-social-ips-published build-social-ips-published build-canonical-territorial-model drive-check drive-size drive-snapshot
 .PHONY: audit-base-territorial-fiscal-semantics
+.PHONY: audit-base-territorial-rais-semantics
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -74,6 +75,9 @@ map-base-territorial-coverage:
 
 audit-base-territorial-fiscal-semantics:
 	python -m sbmi.fiscal_semantic_audit_cli
+
+audit-base-territorial-rais-semantics:
+	python -m sbmi.rais_semantic_audit_cli
 
 audit-base-territorial-demography:
 	python -m sbmi.demography_audit_cli

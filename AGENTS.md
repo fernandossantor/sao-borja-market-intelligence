@@ -386,10 +386,11 @@ Escopo autorizado:
 
 - pasta raiz declarada: `_sao_borja`;
 - ID imutável da pasta raiz autorizada:
+  `1or8_CYJYYWPjU3cIAmzgYPLRhKTGv91V`;
+- destino exclusivo: pasta filha `new_files`, com ID imutável
   `14O39dWi2Wq4HATj_xLkHQ7y5OzX44z6C`;
-- destino exclusivo: pasta descendente chamada `new_files`;
-- antes da primeira escrita, resolver e registrar o ID próprio de `new_files`,
-  confirmando que seu pai possui o ID autorizado acima;
+- antes de cada escrita, confirmar que `new_files` mantém como pai a pasta
+  `_sao_borja` com o ID autorizado acima;
 - permitir criação de novas subpastas e arquivos, upload, sincronização e
   movimentação somente de artefatos criados por esta coleta e somente dentro
   de `new_files`;

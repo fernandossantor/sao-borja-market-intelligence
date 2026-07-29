@@ -33,6 +33,7 @@ class FiscalSemanticAuditResult:
     overlap_by_year: pd.DataFrame
     overlap_by_source: pd.DataFrame
     historical_duplicates: pd.DataFrame
+    state_repetitions: pd.DataFrame
     issues: pd.DataFrame
     summary: pd.DataFrame
     inputs: tuple[Path, ...]
@@ -76,7 +77,10 @@ def _contract_rows(datasets: dict[str, pd.DataFrame]) -> pd.DataFrame:
         elif name == "estadual_icms":
             flagged = int(frame["_duplicate_group_id"].notna().sum())
             status = "BLOCKED"
-            blocker = "PENDING_SOURCE_DUPLICATE_VALIDATION" if flagged else "SEMANTIC_REVIEW"
+            blocker = (
+                "REPETITIONS_PRESERVED_AGGREGATION_BLOCKED"
+                if flagged else "SEMANTIC_REVIEW"
+            )
         elif name == "estadual_transferencias":
             status, blocker = "BLOCKED", "EXPENDITURE_PHASE_SEPARATION_REQUIRED"
         else:
@@ -94,6 +98,45 @@ def _contract_rows(datasets: dict[str, pd.DataFrame]) -> pd.DataFrame:
             "nature": "observed_and_calculated",
         })
     return pd.DataFrame(records)
+
+
+def _state_repetition_decisions(frame: pd.DataFrame) -> pd.DataFrame:
+    _require_columns(
+        frame, {"_duplicate_group_id", "valor", "descricao"},
+        "estadual_icms_repetitions",
+    )
+    flagged = frame.loc[frame["_duplicate_group_id"].notna()].copy()
+    rows = []
+    for group_id, group in flagged.groupby("_duplicate_group_id", sort=True):
+        values = pd.to_numeric(group["valor"], errors="raise")
+        occurrences = len(group)
+        observed_value = float(values.sum())
+        one_occurrence_value = float(values.iloc[0])
+        source_rows = (
+            "|".join(str(value) for value in sorted(group["_source_row"].astype(int)))
+            if "_source_row" in group else ""
+        )
+        rows.append({
+            "duplicate_group_id": str(group_id),
+            "description": "|".join(sorted(group["descricao"].astype(str).unique())),
+            "occurrences": occurrences,
+            "excess_occurrences": occurrences - 1,
+            "observed_value_sum": observed_value,
+            "one_occurrence_value": one_occurrence_value,
+            "potential_deduplication_difference": observed_value - one_occurrence_value,
+            "source_rows": source_rows,
+            "evidence_class": "STRICT_EXACT_ROW",
+            "decision": "PRESERVE_OCCURRENCES_BLOCK_AGGREGATION",
+            "aggregation_allowed": 0,
+            "justification": "TRANSACTIONAL_KEY_NOT_OBSERVED",
+            "nature": "observed_calculated_and_recommended",
+        })
+    return pd.DataFrame(rows, columns=[
+        "duplicate_group_id", "description", "occurrences", "excess_occurrences",
+        "observed_value_sum", "one_occurrence_value",
+        "potential_deduplication_difference", "source_rows", "evidence_class",
+        "decision", "aggregation_allowed", "justification", "nature",
+    ])
 
 
 def audit_fiscal_semantics(staging_root: Path, historical_root: Path) -> FiscalSemanticAuditResult:
@@ -186,6 +229,7 @@ def audit_fiscal_semantics(staging_root: Path, historical_root: Path) -> FiscalS
 
     issues = []
     icms = datasets["estadual_icms"]
+    state_repetitions = _state_repetition_decisions(icms)
     non_icms = icms.loc[~icms["descricao"].astype(str).str.upper().eq("ICMS")]
     if len(non_icms):
         issues.append({
@@ -224,11 +268,17 @@ def audit_fiscal_semantics(staging_root: Path, historical_root: Path) -> FiscalS
         ("historical_only_rows", len(historical) - overlap, "calculated"),
         ("historical_duplicate_excess", sum(max(v - 1, 0) for v in historical_counter.values()),
          "calculated"),
+        ("state_repetition_groups", len(state_repetitions), "calculated"),
+        ("state_repetition_occurrences", int(state_repetitions["occurrences"].sum()),
+         "calculated"),
+        ("state_repetition_excess", int(state_repetitions["excess_occurrences"].sum()),
+         "calculated"),
+        ("state_repetition_aggregation_allowed", 0, "recommended_decision"),
         ("promotion_allowed", 0, "recommended_decision"),
     ], columns=["indicator", "value", "nature"])
     return FiscalSemanticAuditResult(
         _contract_rows(datasets), overlap_by_year, overlap_by_source,
-        historical_duplicates, issues_frame, summary,
+        historical_duplicates, state_repetitions, issues_frame, summary,
         tuple(staging_files + historical_files),
     )
 
@@ -246,6 +296,7 @@ def write_fiscal_semantic_audit(result: FiscalSemanticAuditResult, output_dir: P
             "federal_overlap_by_year.csv": result.overlap_by_year,
             "federal_overlap_by_source.csv": result.overlap_by_source,
             "historical_duplicate_groups.csv": result.historical_duplicates,
+            "state_repetition_decisions.csv": result.state_repetitions,
             "semantic_issues.csv": result.issues,
             "fiscal_semantic_summary.csv": result.summary,
         }

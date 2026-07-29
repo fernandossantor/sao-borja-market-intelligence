@@ -48,8 +48,10 @@ def _inputs(tmp_path: Path) -> tuple[Path, Path]:
         "municipal_despesas_elemento": pd.DataFrame({"elemento": ["A"]}),
         "municipal_receita_elemento": pd.DataFrame({"instituicao": ["A"]}),
         "estadual_icms": pd.DataFrame({
-            "data": ["2024-01-01"], "valor": [1], "descricao": ["IPVA"],
-            "_duplicate_group_id": ["group-1"],
+            "data": ["2024-01-01"] * 3, "valor": [10, 10, 20],
+            "descricao": ["IPVA"] * 3,
+            "_duplicate_group_id": ["group-1", "group-1", None],
+            "_source_row": [4, 7, 8],
         }),
     }
     for name, frame in simple.items():
@@ -70,11 +72,24 @@ def test_audit_classifies_overlap_and_blockers(tmp_path: Path) -> None:
     assert years.loc[2026, "classification"] == "UNIQUE"
     contracts = result.contracts.set_index("dataset")
     assert contracts.loc["estadual_icms", "promotion_blocker"] == (
-        "PENDING_SOURCE_DUPLICATE_VALIDATION"
+        "REPETITIONS_PRESERVED_AGGREGATION_BLOCKED"
     )
     assert contracts.loc["estadual_transferencias", "promotion_blocker"] == (
         "EXPENDITURE_PHASE_SEPARATION_REQUIRED"
     )
+
+
+def test_state_repetitions_preserve_occurrences_and_block_aggregation(tmp_path: Path) -> None:
+    result = audit_fiscal_semantics(*_inputs(tmp_path))
+    row = result.state_repetitions.iloc[0]
+    assert row["duplicate_group_id"] == "group-1"
+    assert int(row["occurrences"]) == 2
+    assert int(row["excess_occurrences"]) == 1
+    assert float(row["observed_value_sum"]) == 20
+    assert float(row["potential_deduplication_difference"]) == 10
+    assert row["source_rows"] == "4|7"
+    assert row["decision"] == "PRESERVE_OCCURRENCES_BLOCK_AGGREGATION"
+    assert int(row["aggregation_allowed"]) == 0
 
 
 def test_audit_detects_filename_content_mismatch(tmp_path: Path) -> None:
@@ -91,6 +106,7 @@ def test_write_is_atomic_and_refuses_overwrite(tmp_path: Path) -> None:
     target = tmp_path / "audit" / "run-1"
     assert write_fiscal_semantic_audit(result, target) == target.resolve()
     assert (target / "fiscal_semantic_manifest.csv").is_file()
+    assert (target / "state_repetition_decisions.csv").is_file()
     assert not (target.parent / ".run-1.partial").exists()
     with pytest.raises(FileExistsError):
         write_fiscal_semantic_audit(result, target)

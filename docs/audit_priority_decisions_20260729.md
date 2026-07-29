@@ -30,7 +30,7 @@ idênticos e a comparação foi classificada como `IDENTICAL`. O encerramento es
 documentado em
 [`base_territorial_demography_census_integration.md`](base_territorial_demography_census_integration.md).
 
-## 2. Decidir regra de curadoria — prioridade média
+## 2. Regra de curadoria das repetições estaduais — resolvida
 
 O arquivo estadual de repasses municipais contém 10 grupos de linhas
 estritamente idênticas, com 29 ocorrências e 19 ocorrências excedentes. Todos os
@@ -40,11 +40,16 @@ A igualdade de todos os campos observados não comprova lançamento indevido,
 pois não foi observada chave transacional capaz de distinguir repasses
 legítimos iguais. Decisão atual:
 
-- preservar todas as linhas no staging;
-- manter a sinalização de duplicidade;
-- não somar silenciosamente ocorrências repetidas em produto curado;
-- definir, antes da curadoria, se o produto deve conservar ocorrências ou usar
-  uma visão deduplicada identificada explicitamente.
+- preservar todas as linhas e sua proveniência;
+- manter a sinalização de repetição estrita;
+- aplicar `PRESERVE_OCCURRENCES_BLOCK_AGGREGATION`;
+- não deduplicar nem somar silenciosamente;
+- permitir somente análises de sensibilidade explicitamente rotuladas;
+- manter `promotion_allowed=0` enquanto os demais bloqueios fiscais não forem
+  resolvidos.
+
+A auditoria registra a decisão por grupo em
+`state_repetition_decisions.csv`.
 
 ## 3. Encerrar como duplicidade de conteúdo — resolvido
 
@@ -70,6 +75,5 @@ não contam como evidência analítica própria.
 
 ## Ordem recomendada atualizada
 
-1. definir a política de ocorrências repetidas do ICMS quando esse dataset for
-   promovido para curadoria;
-2. não gastar nova etapa com duplicidades auxiliares já classificadas.
+1. não gastar nova etapa com duplicidades auxiliares já classificadas;
+2. manter os contratos fiscais bloqueados até resolver seus bloqueios próprios.

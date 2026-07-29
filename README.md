@@ -95,7 +95,8 @@ repetir investigação externa de origem na ausência de inconsistência concret
 Consulte:
 
 - [`docs/audit_operating_premise_20260728.md`](docs/audit_operating_premise_20260728.md) para a premissa operacional e o modo de auditoria enxuto;
-- [`docs/project_status_20260729.md`](docs/project_status_20260729.md) para o ponto de situação atual, pendências e sequência recomendada;
+- [`docs/project_status_20260729_closure.md`](docs/project_status_20260729_closure.md) para o fechamento atual do ciclo e os critérios da próxima etapa;
+- [`docs/project_status_20260729.md`](docs/project_status_20260729.md) para o registro histórico anterior aos PRs #18 a #21;
 - [`docs/base_territorial_demography_census_integration.md`](docs/base_territorial_demography_census_integration.md) para o encerramento verificável da integração dos produtos censitários reconstruídos;
 - [`docs/project_status_20260724.md`](docs/project_status_20260724.md) para o registro histórico do encerramento da estabilização inicial;
 - [`docs/stabilization_audit_closure_20260724.md`](docs/stabilization_audit_closure_20260724.md) para o encerramento formal da estabilização;

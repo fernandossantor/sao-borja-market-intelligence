@@ -52,6 +52,7 @@ def test_captures_pages_but_does_not_execute_candidate_queries(tmp_path):
     session = Session()
     result = _run(tmp_path, session)
     assert session.calls == [spec[0] for spec in PAGE_SPECS.values()]
+    assert len(result.pages) == 4
     assert len(result.queries) == 2
     assert set(result.queries.execution_status) == {"PREPARED_NOT_EXECUTED"}
     assert set(result.queries.dimension) == {
@@ -61,6 +62,8 @@ def test_captures_pages_but_does_not_execute_candidate_queries(tmp_path):
         "IBGE", "Ministério do Trabalho/RAIS",
     }
     assert not any("apiv2-observatorio" in call for call in session.calls)
+    ips = result.pages.set_index("source_id").loc["ips_brasil_explorer"]
+    assert ips.authority_role == "PUBLISHED_COMPOSITE_INDEX"
 
 
 def test_preserves_page_hashes_and_refuses_overwrite(tmp_path):

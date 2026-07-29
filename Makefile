@@ -3,6 +3,7 @@
 .PHONY: audit-base-territorial-rais-semantics
 .PHONY: audit-base-territorial-rais-lineage
 .PHONY: discover-base-territorial-sidra-historical-metadata
+.PHONY: audit-complementary-temporal-matrix
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
@@ -113,6 +114,9 @@ discover-base-territorial-demography-census-sidra-metadata:
 
 discover-base-territorial-sidra-historical-metadata:
 	python -m sbmi.sidra_historical_discovery_cli
+
+audit-complementary-temporal-matrix:
+	python -m sbmi.complementary_temporal_matrix_cli
 
 snapshot-base-territorial-demography-census-sidra-values:
 	python -m sbmi.demography_census_sidra_values_cli

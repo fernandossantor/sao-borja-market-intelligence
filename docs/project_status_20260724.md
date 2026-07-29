@@ -4,6 +4,13 @@
 
 Este documento registra o estado técnico, metodológico e analítico do projeto no encerramento da estabilização inicial e da incorporação dos primeiros módulos sociais da Base Territorial Comum.
 
+> Atualização operacional de 28 de julho de 2026: os arquivos existentes são
+> tratados como originais por premissa declarada pelo responsável. O trabalho
+> subsequente prioriza duplicidades, sobreposições, interpretação conceitual e
+> validade das transformações. A decisão está registrada em
+> `docs/audit_operating_premise_20260728.md` e não altera os resultados
+> históricos documentados abaixo.
+
 Referência do repositório no momento deste registro:
 
 ```text

@@ -69,6 +69,10 @@ def test_builds_reconciled_canonical_model(tmp_path: Path):
 
 def test_records_exclusions(tmp_path: Path):
     decisions = _run(tmp_path).reconciliation.set_index("dataset")
+    assert decisions.loc["census_household_composition", "rows_promoted"] == 3
+    assert decisions.loc["census_territory", "rows_promoted"] == 2
+    assert decisions.loc["census_household_composition", "evidence_sha256"]
+    assert decisions.loc["census_territory", "evidence_sha256"]
     assert decisions.loc["ips_2026_summary", "overlap_classification"] == "CONTENT_DUPLICATE"
     assert decisions.loc["ips_2026_summary", "decision"] == "EXCLUDE"
     assert decisions.loc["idsc_factsheet", "overlap_classification"] == "COMPLEMENTARY"

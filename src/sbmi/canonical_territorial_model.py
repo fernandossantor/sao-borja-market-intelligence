@@ -214,8 +214,10 @@ def build_canonical_territorial_model(*, census_root: Path, idsc_root: Path,
         idsc_root = idsc_root.expanduser().resolve()
         ips_root = ips_root.expanduser().resolve()
         reconciliation = pd.DataFrame([
-            ("census_curated", 5, 5, "UNIQUE", "PROMOTE",
+            ("census_household_composition", 3, 3, "UNIQUE", "PROMOTE",
              census_root / "household_composition.parquet"),
+            ("census_territory", 2, 2, "UNIQUE", "PROMOTE",
+             census_root / "territory.parquet"),
             ("idsc_summary", 17, 17, "UNIQUE", "PROMOTE",
              idsc_root / "social_idsc_summary.csv"),
             ("ips_published_2024_2026", 48, 48, "UNIQUE", "PROMOTE",

@@ -22,6 +22,8 @@ são complementares e não geram fatos.
 A duplicidade do resumo IPS 2026 é verificada por igualdade de esquema e
 conteúdo com o recorte de 2026 da série completa. Os produtos excluídos são
 registrados no manifesto e na reconciliação com caminho e SHA-256.
+As entradas censitárias de composição domiciliar e território possuem registros
+de reconciliação separados, preservando a evidência imediata de cada fato.
 
 ## Produtos e segurança
 

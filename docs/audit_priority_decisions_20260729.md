@@ -6,7 +6,7 @@ Este registro consolida somente decisões ainda úteis para o projeto. Estados
 diagnósticos antigos de origem ou autoridade não são tratados como pendências
 quando não afetam duplicidade, interpretação ou transformação.
 
-## 1. Correção reconstruída — concluída
+## 1. Correção reconstruída e integrada — concluída
 
 A execução `demography-census-rebuild-20260729-001426` reconstruiu os dois
 produtos em novos destinos de staging e curated. Os históricos permanecem
@@ -22,6 +22,13 @@ Os dois produtos processados históricos apresentam:
 Os outros 15 pares censitários são equivalentes após canonicalização e não
 precisam de nova investigação de conteúdo. A reconstrução deve criar novos
 produtos, comparar com os históricos e manter os históricos preservados.
+
+O modelo canônico consome os dois produtos reconstruídos. A execução
+`canonical-territorial-20260729-153151` foi comparada com
+`canonical-territorial-20260729-025938`: os seis produtos possuem hashes
+idênticos e a comparação foi classificada como `IDENTICAL`. O encerramento está
+documentado em
+[`base_territorial_demography_census_integration.md`](base_territorial_demography_census_integration.md).
 
 ## 2. Decidir regra de curadoria — prioridade média
 
@@ -63,8 +70,6 @@ não contam como evidência analítica própria.
 
 ## Ordem recomendada atualizada
 
-1. integrar os dois produtos censitários reconstruídos aos consumidores da Base
-   Territorial, sem substituir os históricos;
-2. definir a política de ocorrências repetidas do ICMS quando esse dataset for
+1. definir a política de ocorrências repetidas do ICMS quando esse dataset for
    promovido para curadoria;
-3. não gastar nova etapa com duplicidades auxiliares já classificadas.
+2. não gastar nova etapa com duplicidades auxiliares já classificadas.

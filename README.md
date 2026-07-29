@@ -95,6 +95,7 @@ repetir investigação externa de origem na ausência de inconsistência concret
 Consulte:
 
 - [`docs/audit_operating_premise_20260728.md`](docs/audit_operating_premise_20260728.md) para a premissa operacional e o modo de auditoria enxuto;
-- [`docs/project_status_20260724.md`](docs/project_status_20260724.md) para o ponto de situação, pendências e sequência recomendada;
+- [`docs/project_status_20260729.md`](docs/project_status_20260729.md) para o ponto de situação atual, pendências e sequência recomendada;
+- [`docs/project_status_20260724.md`](docs/project_status_20260724.md) para o registro histórico do encerramento da estabilização inicial;
 - [`docs/stabilization_audit_closure_20260724.md`](docs/stabilization_audit_closure_20260724.md) para o encerramento formal da estabilização;
 - [`docs/base_territorial_ips_published.md`](docs/base_territorial_ips_published.md) para o módulo IPS Brasil publicado.

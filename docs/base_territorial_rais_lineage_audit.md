@@ -33,6 +33,14 @@ perdido, valor processado adicionado e outras diferenças.
 - nenhum arquivo histórico é removido ou substituído;
 - `promotion_allowed=0`.
 
+## Mapa de prioridade
+
+O mapa explícito dos pares está documentado em
+[`base_territorial_rais_priority_map.md`](base_territorial_rais_priority_map.md).
+A decisão atual é não reconstruir: o único par declarado explicitamente já é
+`CONTENT_EQUIVALENT`, e os demais não possuem simultaneamente necessidade de
+reconstrução, proveniência suficiente e contrato conceitual validado.
+
 ## Produtos
 
 - `rais_raw_inventory.csv`;

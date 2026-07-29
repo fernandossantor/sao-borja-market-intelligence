@@ -73,7 +73,22 @@ Esses arquivos não devem ser apagados. Para fins de cobertura e seleção de
 indicadores, cada grupo conta no máximo uma vez e arquivos meramente técnicos
 não contam como evidência analítica própria.
 
+## 5. Reconstrução RAIS — encerrada sem promoção
+
+O mapa explícito classificou `RAIS SB 2024` como
+`CONTENT_EQUIVALENT_NO_REBUILD`, nove candidatos analíticos equivalentes como
+`HOLD_NOMINAL_LINEAGE_ONLY`, sete abas de notas como
+`NON_ANALYTICAL_EVIDENCE` e todos os produtos sem proveniência ou com diferenças
+como `BLOCK_REBUILD`.
+
+A execução `rais-lineage-20260729-174813` reproduziu os cinco produtos
+analíticos da execução anterior com classificação `IDENTICAL`. Não há produto
+que reúna necessidade de reconstrução, proveniência suficiente e contrato
+conceitual validado. O registro completo está em
+[`base_territorial_rais_priority_map.md`](base_territorial_rais_priority_map.md).
+
 ## Ordem recomendada atualizada
 
 1. não gastar nova etapa com duplicidades auxiliares já classificadas;
-2. manter os contratos fiscais bloqueados até resolver seus bloqueios próprios.
+2. manter os contratos fiscais e RAIS bloqueados até surgir evidência nova ou
+   necessidade concreta de consumo.

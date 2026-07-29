@@ -17,6 +17,7 @@ MUNICIPALITY_CODE = "4318002"
 TARGET_START_YEAR = 1996
 TARGET_END_YEAR = 2026
 ALLOWED_HOSTS = {"sidra.ibge.gov.br"}
+VALUES_API_BASE = "https://apisidra.ibge.gov.br/values"
 ALLOWED_DIMENSIONS = {
     "demografia",
     "economia_estrutura_produtiva",
@@ -32,6 +33,7 @@ ALLOWED_DIMENSIONS = {
 TABLE_SPECS = {
     "156": ("demografia|ambiente_sociocultural_territorial", "Censo Demográfico"),
     "289": ("economia_estrutura_produtiva", "PEVS"),
+    "291": ("economia_estrutura_produtiva", "PEVS"),
     "3939": ("economia_estrutura_produtiva", "PPM"),
     "5457": ("economia_estrutura_produtiva", "PAM"),
     "5938": ("economia_estrutura_produtiva", "PIB dos Municípios"),
@@ -39,6 +41,51 @@ TABLE_SPECS = {
     "6450": ("economia_estrutura_produtiva|renda_emprego_trabalho", "CEMPRE"),
     "6579": ("demografia", "Estimativas de População"),
     "9514": ("demografia|ambiente_sociocultural_territorial", "Censo Demográfico"),
+}
+QUERY_SPECS = {
+    "5457": {
+        "variable_ids": ("8331", "216", "214", "112", "215"),
+        "classification_id": "782",
+        "category_ids": (
+            "40102",
+            "40104",
+            "40112",
+            "40114",
+            "40151",
+            "40119",
+            "40120",
+            "40121",
+            "40122",
+            "40265",
+            "40268",
+            "40124",
+            "40127",
+            "40274",
+        ),
+        "selection_basis": "EXACT_LOCAL_PRODUCT_AND_MEASURE_MATCH",
+    },
+    "3939": {
+        "variable_ids": ("105",),
+        "classification_id": "79",
+        "category_ids": (
+            "2670",
+            "2675",
+            "2672",
+            "32794",
+            "32795",
+            "2681",
+            "2677",
+            "32796",
+            "32793",
+        ),
+        "selection_basis": "CURRENT_LOCAL_CATEGORY_MATCH",
+    },
+    "291": {
+        "variable_ids": ("142",),
+        "classification_id": "194",
+        "category_ids": ("3455", "33247", "3456", "33250", "3457", "3459", "33256"),
+        "selection_basis": "EXACT_LOCAL_2024_CATEGORY_AND_MEASURE_MATCH",
+    },
 }
 
 
@@ -51,6 +98,7 @@ class Result:
     classifications: pd.DataFrame
     categories: pd.DataFrame
     limitations: pd.DataFrame
+    query_plans: pd.DataFrame
     summary: pd.DataFrame
     snapshot_path: Path
     output_path: Path
@@ -246,6 +294,58 @@ def _records(documents: dict[str, dict]):
     )
 
 
+def _query_plans(documents: dict[str, dict]) -> pd.DataFrame:
+    periods = tuple(range(TARGET_START_YEAR, 2026))
+    rows = []
+    for table_id, spec in QUERY_SPECS.items():
+        document = documents[table_id]
+        available_variables = {
+            str(variable.get("Id")) for variable in document.get("Variaveis", [])
+        }
+        if not set(spec["variable_ids"]).issubset(available_variables):
+            raise ValueError(f"Variável planejada ausente no descritor {table_id}")
+        classifications = {str(item.get("Id")): item for item in document.get("Classificacoes", [])}
+        classification_id = spec["classification_id"]
+        if classification_id not in classifications:
+            raise ValueError(f"Classificação planejada ausente no descritor {table_id}")
+        available_categories = {
+            str(category.get("Id"))
+            for category in classifications[classification_id].get("Categorias", [])
+        }
+        if not set(spec["category_ids"]).issubset(available_categories):
+            raise ValueError(f"Categoria planejada ausente no descritor {table_id}")
+        period_text = ",".join(str(year) for year in periods)
+        variable_text = ",".join(spec["variable_ids"])
+        category_text = ",".join(spec["category_ids"])
+        url = (
+            f"{VALUES_API_BASE}/t/{table_id}/n6/{MUNICIPALITY_CODE}"
+            f"/p/{period_text}/v/{variable_text}/c{classification_id}/{category_text}"
+        )
+        rows.append(
+            {
+                "query_id": f"agro_{table_id}_1996_2025",
+                "table_id": table_id,
+                "municipality_code": MUNICIPALITY_CODE,
+                "period_start": periods[0],
+                "period_end": periods[-1],
+                "period_count": len(periods),
+                "variable_ids": variable_text,
+                "variable_count": len(spec["variable_ids"]),
+                "classification_id": classification_id,
+                "category_ids": category_text,
+                "category_count": len(spec["category_ids"]),
+                "expected_max_rows": (
+                    len(periods) * len(spec["variable_ids"]) * len(spec["category_ids"])
+                ),
+                "selection_basis": spec["selection_basis"],
+                "url": url,
+                "execution_status": "PREPARED_NOT_EXECUTED",
+                "nature": "recommended",
+            }
+        )
+    return pd.DataFrame(rows).sort_values("table_id").reset_index(drop=True)
+
+
 def discover_sidra_historical_metadata(
     session,
     *,
@@ -269,6 +369,7 @@ def discover_sidra_historical_metadata(
     documents = {table_id: item[0] for table_id, item in fetched.items()}
     manifests = [item[1] for item in fetched.values()]
     tables, periods, variables, classifications, categories, limitations = _records(documents)
+    query_plans = _query_plans(documents)
     obtained_at = datetime.now(UTC).isoformat()
     manifest = pd.DataFrame(
         [
@@ -284,6 +385,8 @@ def discover_sidra_historical_metadata(
             ("variables_identified", len(variables), "calculated"),
             ("classifications_identified", len(classifications), "calculated"),
             ("categories_identified", len(categories), "calculated"),
+            ("queries_prepared", len(query_plans), "calculated"),
+            ("planned_max_value_rows", int(query_plans.expected_max_rows.sum()), "calculated"),
             (
                 "dimensions_used",
                 len({d for value in tables.mapped_dimensions for d in value.split("|")}),
@@ -307,6 +410,7 @@ def discover_sidra_historical_metadata(
             ("sidra_historical_classification_register", classifications),
             ("sidra_historical_category_register", categories),
             ("sidra_historical_limitation_register", limitations),
+            ("sidra_historical_query_plan", query_plans),
             ("sidra_historical_summary", summary),
         ):
             frame.to_csv(output_partial / f"{name}.csv", index=False)
@@ -326,6 +430,7 @@ def discover_sidra_historical_metadata(
         classifications,
         categories,
         limitations,
+        query_plans,
         summary,
         snapshot_path,
         output_path,

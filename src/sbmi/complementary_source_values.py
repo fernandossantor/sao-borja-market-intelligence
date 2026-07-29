@@ -217,7 +217,14 @@ def _fetch(session, row, timeout: float, per_response_limit: int) -> tuple[bytes
 def _numeric(value: object) -> float | None:
     if value is None or str(value).strip() in {"", "-", "..", "...", "X"}:
         return None
-    text = str(value).strip().replace(".", "").replace(",", ".")
+    text = str(value).strip().replace(" ", "")
+    if "," in text and "." in text:
+        if text.rfind(",") > text.rfind("."):
+            text = text.replace(".", "").replace(",", ".")
+        else:
+            text = text.replace(",", "")
+    elif "," in text:
+        text = text.replace(",", ".")
     try:
         return float(text)
     except ValueError:
@@ -378,6 +385,9 @@ def collect_complementary_source_values(
     values = pd.DataFrame(records)
     if values.empty:
         raise ValueError("Nenhum valor normalizado")
+    values["reference_year"] = pd.to_numeric(
+        values["reference_year"], errors="coerce"
+    ).astype("Int64")
     manifest = pd.DataFrame(metadata for _, metadata in fetched)
     source_counts = values.groupby("source_id").size()
     missing_sources = sorted(set(SOURCE_META).difference(source_counts.index))

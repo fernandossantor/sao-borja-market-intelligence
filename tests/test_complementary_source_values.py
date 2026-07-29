@@ -7,9 +7,25 @@ import pytest
 from sbmi.complementary_source_values import (
     CENSO_INDICATOR_GROUPS,
     IPS_EDITIONS,
+    _numeric,
     _query_plan,
     collect_complementary_source_values,
 )
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("60,83", 60.83),
+        ("60.83", 60.83),
+        ("3.616,69", 3616.69),
+        ("3,616.69", 3616.69),
+    ],
+)
+def test_numeric_supports_brazilian_and_international_formats(
+    raw: str, expected: float
+) -> None:
+    assert _numeric(raw) == expected
 
 
 class FakeResponse:
@@ -99,6 +115,7 @@ def test_collection_publishes_five_immutable_layers(tmp_path: Path) -> None:
     assert len(session.urls) == len(CENSO_INDICATOR_GROUPS) + 5
     assert set(result.values.source_id) == set(result.manifest.source_id)
     assert result.values.reference_year.dropna().between(1996, 2026).all()
+    assert str(result.values.reference_year.dtype) == "Int64"
     ips = result.values.loc[result.values.source_id.eq("ips_brasil_explorer")]
     assert not ips.raw_value.astype(str).str.contains("Outro").any()
     assert (result.snapshot_path / "manifest.csv").is_file()

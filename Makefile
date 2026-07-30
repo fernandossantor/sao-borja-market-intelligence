@@ -4,6 +4,7 @@
 .PHONY: audit-base-territorial-rais-lineage
 .PHONY: discover-base-territorial-sidra-historical-metadata
 .PHONY: audit-complementary-temporal-matrix
+.PHONY: audit-public-funds-temporal-coverage
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw

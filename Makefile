@@ -5,9 +5,30 @@
 .PHONY: discover-base-territorial-sidra-historical-metadata
 .PHONY: audit-complementary-temporal-matrix
 .PHONY: audit-public-funds-temporal-coverage
+.PHONY: snapshot-base-territorial-demography-historical-values
+.PHONY: snapshot-base-territorial-demography-census-series
+.PHONY: snapshot-base-territorial-economy-gdp-series
+.PHONY: build-base-territorial-business-employment-series
+.PHONY: build-base-territorial-education-series
+.PHONY: build-base-territorial-public-finance-series
+.PHONY: snapshot-base-territorial-siconfi-dca
+.PHONY: build-base-territorial-siconfi-dca-series
+.PHONY: build-canonical-territorial-model-series
 
 DRIVE_REMOTE ?= sbmi-drive
 DRIVE_PATH ?= raw
+EXECUTION_TIMESTAMP = $(shell date -u +%Y%m%d-%H%M%S)
+PUBLIC_FINANCE_SOURCE_DIR ?= .data/snapshots/web/complementary_source_values/complementary-source-values-20260729-220618/sebrae_observatorio_profile
+SICONFI_DCA_SNAPSHOT_ID ?= siconfi-dca-4318002-2019-2025-$(EXECUTION_TIMESTAMP)
+SICONFI_DCA_SNAPSHOT_DIR ?=
+CANONICAL_SERIES_BASE_ROOT ?=
+CANONICAL_DEMOGRAPHY_HISTORICAL_PATH ?=
+CANONICAL_DEMOGRAPHY_CENSUS_PATH ?=
+CANONICAL_ECONOMY_GDP_PATH ?=
+CANONICAL_BUSINESS_EMPLOYMENT_PATH ?=
+CANONICAL_EDUCATION_PATH ?=
+CANONICAL_PUBLIC_FINANCE_PATH ?=
+CANONICAL_SICONFI_DCA_PATH ?=
 
 bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
@@ -121,6 +142,55 @@ audit-complementary-temporal-matrix:
 
 snapshot-base-territorial-demography-census-sidra-values:
 	python -m sbmi.demography_census_sidra_values_cli
+
+snapshot-base-territorial-demography-historical-values:
+	python -m sbmi.demography_historical_values_cli
+
+snapshot-base-territorial-demography-census-series:
+	python -m sbmi.demography_census_series_cli
+
+snapshot-base-territorial-economy-gdp-series:
+	python -m sbmi.economy_gdp_series_cli
+
+build-base-territorial-business-employment-series:
+	python -m sbmi.business_employment_series_cli
+
+build-base-territorial-education-series:
+	python -m sbmi.education_series_cli
+
+build-base-territorial-public-finance-series:
+	python -m sbmi.public_finance_series_cli \
+		--execution-id public-finance-series-$(EXECUTION_TIMESTAMP) \
+		--source-dir $(PUBLIC_FINANCE_SOURCE_DIR)
+
+snapshot-base-territorial-siconfi-dca:
+	python -m sbmi.siconfi_dca_snapshot_cli --snapshot-id $(SICONFI_DCA_SNAPSHOT_ID)
+
+build-base-territorial-siconfi-dca-series:
+	test -n "$(SICONFI_DCA_SNAPSHOT_DIR)" || \
+		(printf '%s\n' 'SICONFI_DCA_SNAPSHOT_DIR is required' >&2; exit 2)
+	python -m sbmi.siconfi_dca_series_cli \
+		--execution-id siconfi-dca-series-$(EXECUTION_TIMESTAMP) \
+		--snapshot-dir $(SICONFI_DCA_SNAPSHOT_DIR)
+
+build-canonical-territorial-model-series:
+	test -n "$(CANONICAL_SERIES_BASE_ROOT)" || (printf '%s\n' 'CANONICAL_SERIES_BASE_ROOT is required' >&2; exit 2)
+	test -n "$(CANONICAL_DEMOGRAPHY_HISTORICAL_PATH)" || (printf '%s\n' 'CANONICAL_DEMOGRAPHY_HISTORICAL_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_DEMOGRAPHY_CENSUS_PATH)" || (printf '%s\n' 'CANONICAL_DEMOGRAPHY_CENSUS_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_ECONOMY_GDP_PATH)" || (printf '%s\n' 'CANONICAL_ECONOMY_GDP_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_BUSINESS_EMPLOYMENT_PATH)" || (printf '%s\n' 'CANONICAL_BUSINESS_EMPLOYMENT_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_EDUCATION_PATH)" || (printf '%s\n' 'CANONICAL_EDUCATION_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_PUBLIC_FINANCE_PATH)" || (printf '%s\n' 'CANONICAL_PUBLIC_FINANCE_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_SICONFI_DCA_PATH)" || (printf '%s\n' 'CANONICAL_SICONFI_DCA_PATH is required' >&2; exit 2)
+	python -m sbmi.canonical_territorial_model_series_cli \
+		--base-root $(CANONICAL_SERIES_BASE_ROOT) \
+		--demography-historical-path $(CANONICAL_DEMOGRAPHY_HISTORICAL_PATH) \
+		--demography-census-path $(CANONICAL_DEMOGRAPHY_CENSUS_PATH) \
+		--economy-gdp-path $(CANONICAL_ECONOMY_GDP_PATH) \
+		--business-employment-path $(CANONICAL_BUSINESS_EMPLOYMENT_PATH) \
+		--education-path $(CANONICAL_EDUCATION_PATH) \
+		--public-finance-path $(CANONICAL_PUBLIC_FINANCE_PATH) \
+		--siconfi-dca-path $(CANONICAL_SICONFI_DCA_PATH)
 
 rebuild-base-territorial-demography-census-products:
 	python -m sbmi.demography_census_rebuild_cli

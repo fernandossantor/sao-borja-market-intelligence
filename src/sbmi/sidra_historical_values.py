@@ -1,4 +1,4 @@
-"""Captura rastreável de valores agropecuários históricos do SIDRA."""
+"""Captura rastreável de valores históricos do SIDRA."""
 
 from __future__ import annotations
 
@@ -95,9 +95,22 @@ def _fetch(session, row, timeout: float, limit: int) -> tuple[bytes, list[dict],
 
 def _normalize(query, payload: list[dict]) -> list[dict]:
     header, records = payload[0], payload[1:]
-    required = {"NC", "MC", "MN", "V", "D1C", "D2C", "D3C", "D4C"}
+    required = {"NC", "MC", "MN", "V", "D1C", "D2C", "D3C"}
     if not required.issubset(header):
         raise ValueError(f"Esquema SIDRA incompleto: {query.query_id}")
+    classification_id = (
+        "" if pd.isna(query.classification_id) else str(query.classification_id).strip()
+    )
+    category_ids = "" if pd.isna(query.category_ids) else str(query.category_ids).strip()
+    classified = bool(classification_id or category_ids)
+    if classified and (not classification_id or not category_ids or "D4C" not in header):
+        raise ValueError(f"Classificação SIDRA incompleta: {query.query_id}")
+    period_start_value = getattr(query, "period_start", YEAR_MIN)
+    period_end_value = getattr(query, "period_end", YEAR_MAX)
+    period_start = YEAR_MIN if pd.isna(period_start_value) else int(period_start_value)
+    period_end = YEAR_MAX if pd.isna(period_end_value) else int(period_end_value)
+    if period_end < period_start:
+        raise ValueError(f"Intervalo inválido: {query.query_id}")
     output = []
     for record in records:
         year_text = str(record.get("D2C", ""))
@@ -105,12 +118,12 @@ def _normalize(query, payload: list[dict]) -> list[dict]:
             str(record.get("NC")) != "6"
             or str(record.get("D1C")) != MUNICIPALITY_CODE
             or not year_text.isdigit()
-            or not YEAR_MIN <= int(year_text) <= YEAR_MAX
+            or not period_start <= int(year_text) <= period_end
         ):
             raise ValueError(f"Geografia ou período divergente: {query.query_id}")
         if str(record.get("D3C")) not in str(query.variable_ids).split(","):
             raise ValueError(f"Variável divergente: {query.query_id}")
-        if str(record.get("D4C")) not in str(query.category_ids).split(","):
+        if classified and str(record.get("D4C")) not in category_ids.split(","):
             raise ValueError(f"Categoria divergente: {query.query_id}")
         raw_value = str(record.get("V", ""))
         numeric_value = pd.to_numeric(raw_value.replace(",", "."), errors="coerce")
@@ -123,8 +136,8 @@ def _normalize(query, payload: list[dict]) -> list[dict]:
                 "reference_year": int(year_text),
                 "variable_id": str(record["D3C"]),
                 "variable_name": str(record.get("D3N", "")),
-                "classification_id": str(query.classification_id),
-                "category_id": str(record["D4C"]),
+                "classification_id": classification_id,
+                "category_id": str(record.get("D4C", "")),
                 "category_name": str(record.get("D4N", "")),
                 "unit_code": str(record.get("MC", "")),
                 "unit_name": str(record.get("MN", "")),
@@ -234,11 +247,15 @@ def collect_sidra_historical_values(
         plan.assign(execution_status="EXECUTED").to_csv(
             audit_partial / "executed_query_plan.csv", index=False
         )
+        promoted: list[Path] = []
         for target, partial in targets:
             target.parent.mkdir(parents=True, exist_ok=True)
             partial.replace(target)
+            promoted.append(target)
     except Exception:
         for _, partial in targets:
             shutil.rmtree(partial, ignore_errors=True)
+        for target in reversed(locals().get("promoted", [])):
+            shutil.rmtree(target, ignore_errors=True)
         raise
     return ValuesResult(manifest, curated, validation, *(item[0] for item in targets))

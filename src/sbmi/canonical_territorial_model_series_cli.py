@@ -6,37 +6,41 @@ from pathlib import Path
 
 from sbmi.canonical_territorial_model_series import build_series_canonical_model
 
+SERIES_ARGUMENTS = {
+    "demography_historical": "--demography-historical-path",
+    "demography_census": "--demography-census-path",
+    "economy_gdp": "--economy-gdp-path",
+    "business_employment": "--business-employment-path",
+    "education": "--education-path",
+    "public_finance": "--public-finance-path",
+    "siconfi_dca": "--siconfi-dca-path",
+}
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--base-root", type=Path, required=True)
+    for option in SERIES_ARGUMENTS.values():
+        parser.add_argument(option, type=Path, required=True)
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=Path(".data/curated/base_territorial/canonical_series"),
+    )
+    parser.add_argument("--run-id")
+    return parser
+
 
 def main() -> None:
-    argparse.ArgumentParser(description=__doc__).parse_args()
-    run_id = f"canonical-series-{datetime.now(UTC):%Y%m%d-%H%M%S}"
-    root = Path(".data/curated/base_territorial")
+    args = build_parser().parse_args()
+    run_id = args.run_id or f"canonical-series-{datetime.now(UTC):%Y%m%d-%H%M%S}"
     result = build_series_canonical_model(
-        base_root=root / "canonical_extended/canonical-extended-20260729-200621",
+        base_root=args.base_root,
         series_paths={
-            "demography_historical": root
-            / "demography_historical_values/demography-historical-values-20260813-002503"
-            / "sidra_historical_values.csv",
-            "demography_census": root
-            / "demography_census_series/demography-census-series-20260813-002505"
-            / "demography_census_series.csv",
-            "economy_gdp": root
-            / "economy_gdp_series/economy-gdp-series-20260813-002507"
-            / "economy_gdp_series.csv",
-            "business_employment": root
-            / "business_employment_series/business-employment-series-20260813-002203"
-            / "business_employment_series.csv",
-            "education": root
-            / "education_series/education-series-20260813-002204"
-            / "education_series.csv",
-            "public_finance": root
-            / "public_finance_series/public-finance-series-20260813-002204"
-            / "public_finance_series.csv",
-            "siconfi_dca": root
-            / "siconfi_dca_series/siconfi-dca-series-20260813-002543"
-            / "siconfi_dca_series.csv",
+            family: getattr(args, option.removeprefix("--").replace("-", "_"))
+            for family, option in SERIES_ARGUMENTS.items()
         },
-        output_root=root / "canonical_series",
+        output_root=args.output_root,
         run_id=run_id,
     )
     print(f"run_id={run_id}")

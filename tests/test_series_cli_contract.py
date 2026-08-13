@@ -2,8 +2,11 @@
 
 import importlib
 import sys
+from pathlib import Path
 
 import pytest
+
+from sbmi.canonical_territorial_model_series_cli import SERIES_ARGUMENTS, build_parser
 
 
 @pytest.mark.parametrize(
@@ -28,3 +31,18 @@ def test_help_does_not_execute_pipeline(monkeypatch, module_name, builder_name):
     with pytest.raises(SystemExit) as raised:
         module.main()
     assert raised.value.code == 0
+
+
+def test_canonical_cli_requires_explicit_inputs():
+    arguments = ["--base-root", "base"]
+    for option in SERIES_ARGUMENTS.values():
+        arguments.extend([option, option.removeprefix("--") + ".csv"])
+    parsed = build_parser().parse_args(arguments)
+    assert parsed.base_root == Path("base")
+    assert parsed.demography_historical_path == Path("demography-historical-path.csv")
+
+
+def test_canonical_cli_rejects_missing_inputs():
+    with pytest.raises(SystemExit) as raised:
+        build_parser().parse_args(["--base-root", "base"])
+    assert raised.value.code == 2

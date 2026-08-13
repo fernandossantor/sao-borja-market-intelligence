@@ -75,6 +75,30 @@ def test_builds_parallel_series_model_and_records_exclusions(tmp_path: Path):
     assert (result.output_path / "canonical_manifest.csv").is_file()
 
 
+def test_preserves_missing_text_and_categories_without_nan(tmp_path: Path):
+    base, paths = _write_inputs(tmp_path)
+    economy = pd.read_csv(paths["economy_gdp"])
+    economy["raw_value"] = None
+    economy.to_csv(paths["economy_gdp"], index=False)
+    education = pd.read_csv(paths["education"])
+    education["category"] = None
+    education.to_csv(paths["education"], index=False)
+
+    result = build_series_canonical_model(
+        base_root=base,
+        series_paths=paths,
+        output_root=tmp_path / "output",
+        run_id="run",
+    )
+    gdp = result.facts.loc[result.facts.source_dataset.eq("economy_gdp_series")].iloc[0]
+    assert gdp.value_text == "1.0"
+    education_row = result.facts.loc[
+        result.facts.source_dataset.eq("education_series")
+    ].iloc[0]
+    assert education_row.category_name == ""
+    assert education_row.category_id == ""
+
+
 def test_refuses_overwrite_and_removes_partial_on_error(tmp_path: Path):
     base, paths = _write_inputs(tmp_path)
     build_series_canonical_model(base_root=base, series_paths=paths,

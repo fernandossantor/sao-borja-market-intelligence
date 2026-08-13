@@ -125,7 +125,7 @@ def _canonical_rows(path: Path, family: str) -> tuple[list[dict], int, int]:
             )
             indicator_name = item["indicator_name"]
             unit = item["unit"]
-            value_text = item["raw_value"]
+            value_text = _text_or(item["raw_value"], item["numeric_value"])
             theme, subtheme = "economy", "gdp_vab"
             dataset = "economy_gdp_series"
             limitations = "Séries metodológicas permanecem separadas."
@@ -144,7 +144,7 @@ def _canonical_rows(path: Path, family: str) -> tuple[list[dict], int, int]:
             value_text = str(item["numeric_value"])
             theme, subtheme = "education", "education_series"
             dataset = "education_series"
-            category_name = str(item["category"])
+            category_name = _text_or(item["category"], "")
             category_id = _slug(category_name)
         elif family == "public_finance":
             indicator_id = f"public_finance.local.{item['indicator_id']}"

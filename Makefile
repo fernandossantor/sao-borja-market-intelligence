@@ -21,6 +21,14 @@ EXECUTION_TIMESTAMP = $(shell date -u +%Y%m%d-%H%M%S)
 PUBLIC_FINANCE_SOURCE_DIR ?= .data/snapshots/web/complementary_source_values/complementary-source-values-20260729-220618/sebrae_observatorio_profile
 SICONFI_DCA_SNAPSHOT_ID ?= siconfi-dca-4318002-2019-2025-$(EXECUTION_TIMESTAMP)
 SICONFI_DCA_SNAPSHOT_DIR ?=
+CANONICAL_SERIES_BASE_ROOT ?=
+CANONICAL_DEMOGRAPHY_HISTORICAL_PATH ?=
+CANONICAL_DEMOGRAPHY_CENSUS_PATH ?=
+CANONICAL_ECONOMY_GDP_PATH ?=
+CANONICAL_BUSINESS_EMPLOYMENT_PATH ?=
+CANONICAL_EDUCATION_PATH ?=
+CANONICAL_PUBLIC_FINANCE_PATH ?=
+CANONICAL_SICONFI_DCA_PATH ?=
 
 bootstrap:
 	python -m pip install --upgrade pip setuptools wheel
@@ -166,7 +174,23 @@ build-base-territorial-siconfi-dca-series:
 		--snapshot-dir $(SICONFI_DCA_SNAPSHOT_DIR)
 
 build-canonical-territorial-model-series:
-	python -m sbmi.canonical_territorial_model_series_cli
+	test -n "$(CANONICAL_SERIES_BASE_ROOT)" || (printf '%s\n' 'CANONICAL_SERIES_BASE_ROOT is required' >&2; exit 2)
+	test -n "$(CANONICAL_DEMOGRAPHY_HISTORICAL_PATH)" || (printf '%s\n' 'CANONICAL_DEMOGRAPHY_HISTORICAL_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_DEMOGRAPHY_CENSUS_PATH)" || (printf '%s\n' 'CANONICAL_DEMOGRAPHY_CENSUS_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_ECONOMY_GDP_PATH)" || (printf '%s\n' 'CANONICAL_ECONOMY_GDP_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_BUSINESS_EMPLOYMENT_PATH)" || (printf '%s\n' 'CANONICAL_BUSINESS_EMPLOYMENT_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_EDUCATION_PATH)" || (printf '%s\n' 'CANONICAL_EDUCATION_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_PUBLIC_FINANCE_PATH)" || (printf '%s\n' 'CANONICAL_PUBLIC_FINANCE_PATH is required' >&2; exit 2)
+	test -n "$(CANONICAL_SICONFI_DCA_PATH)" || (printf '%s\n' 'CANONICAL_SICONFI_DCA_PATH is required' >&2; exit 2)
+	python -m sbmi.canonical_territorial_model_series_cli \
+		--base-root $(CANONICAL_SERIES_BASE_ROOT) \
+		--demography-historical-path $(CANONICAL_DEMOGRAPHY_HISTORICAL_PATH) \
+		--demography-census-path $(CANONICAL_DEMOGRAPHY_CENSUS_PATH) \
+		--economy-gdp-path $(CANONICAL_ECONOMY_GDP_PATH) \
+		--business-employment-path $(CANONICAL_BUSINESS_EMPLOYMENT_PATH) \
+		--education-path $(CANONICAL_EDUCATION_PATH) \
+		--public-finance-path $(CANONICAL_PUBLIC_FINANCE_PATH) \
+		--siconfi-dca-path $(CANONICAL_SICONFI_DCA_PATH)
 
 rebuild-base-territorial-demography-census-products:
 	python -m sbmi.demography_census_rebuild_cli

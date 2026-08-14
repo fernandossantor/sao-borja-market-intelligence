@@ -30,6 +30,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--snapshot-path", type=Path)
     parser.add_argument(
+        "--source-subdir",
+        default="raw/new_files",
+        help="Subdiretório relativo e seguro a perfilar dentro da captura.",
+    )
+    parser.add_argument(
         "--snapshots-root",
         type=Path,
         default=Path(".data/snapshots/new_files"),
@@ -51,7 +56,7 @@ def main() -> None:
         else Path(".data/audit/new_files/content_profile") / snapshot_path.name
     )
 
-    result = profile_snapshot(snapshot_path)
+    result = profile_snapshot(snapshot_path, source_subdir=args.source_subdir)
     output_dir.mkdir(parents=True, exist_ok=True)
     result.files.to_csv(output_dir / "file_profile.csv", index=False)
     result.sheets.to_csv(output_dir / "sheet_profile.csv", index=False)
@@ -73,6 +78,7 @@ def main() -> None:
     )
 
     print(f"snapshot_path={snapshot_path}")
+    print(f"source_subdir={args.source_subdir}")
     print(f"files_discovered={len(result.files)}")
     print(f"files_profiled={files_profiled}")
     print(f"files_unsupported={unsupported}")

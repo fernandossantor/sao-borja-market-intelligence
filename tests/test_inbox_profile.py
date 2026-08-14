@@ -91,3 +91,28 @@ def test_profile_outputs_are_tabular_dataframes(tmp_path: Path) -> None:
     assert isinstance(result.sheets, pd.DataFrame)
     assert isinstance(result.columns, pd.DataFrame)
     assert isinstance(result.schema_groups, pd.DataFrame)
+
+
+def test_profile_snapshot_accepts_safe_source_subdir(tmp_path: Path) -> None:
+    snapshot = tmp_path / "snapshot"
+    source = snapshot / "raw" / "agro"
+    source.mkdir(parents=True)
+    (source / "dados.csv").write_text("Ano;Valor\n2024;10\n", encoding="utf-8")
+
+    result = profile_snapshot(snapshot, source_subdir="raw")
+
+    assert result.files["relative_path"].tolist() == ["raw/agro/dados.csv"]
+    assert result.files["profile_status"].tolist() == ["PROFILED"]
+
+
+def test_profile_snapshot_rejects_unsafe_source_subdir(tmp_path: Path) -> None:
+    snapshot = tmp_path / "snapshot"
+    snapshot.mkdir()
+
+    for source_subdir in ("", ".", "..", "raw/../outside", "/absolute"):
+        try:
+            profile_snapshot(snapshot, source_subdir=source_subdir)
+        except ValueError as exc:
+            assert "Subdiretório de origem inválido" in str(exc)
+        else:
+            raise AssertionError(f"Caminho inseguro aceito: {source_subdir}")

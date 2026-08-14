@@ -16,7 +16,14 @@ from pathlib import Path, PurePosixPath
 import pandas as pd
 from openpyxl import load_workbook
 
-from sbmi.inbox_content_audit import canonical_value, normalized_value
+from sbmi.inbox_content_audit import (
+    COMPACT_YEAR_MONTH_PATTERN,
+    PORTUGUESE_MONTHS,
+    TEXT_MONTH_PATTERN,
+    TEXT_MONTH_SHORT_YEAR_PATTERN,
+    canonical_value,
+    normalized_value,
+)
 from sbmi.inbox_profile import normalize_label
 from sbmi.inbox_structure_triage import source_from_path
 
@@ -111,11 +118,30 @@ def build_content_duplicate_pairs(snapshot_path: Path, tables: Iterable[object])
                 right.relative_path,
             )
             binary_same = left_binary == right_binary
+            same_file = left.relative_path == right.relative_path
+            documentation_same = (
+                normalize_label(left.sheet_name) == "notas"
+                and normalize_label(right.sheet_name) == "notas"
+            )
+            if documentation_same:
+                duplicate_class = "DOCUMENTATION_CONTENT_DUPLICATE"
+            elif same_file:
+                duplicate_class = "INTRA_FILE_TABLE_DUPLICATE"
+            elif binary_same:
+                duplicate_class = "EXACT_DUPLICATE"
+            else:
+                duplicate_class = "CONTENT_DUPLICATE"
+
             records.append(
                 {
                     "content_fingerprint_sha256": fingerprint,
                     "left_path": left.relative_path,
                     "right_path": right.relative_path,
+                    "left_sheet": left.sheet_name,
+                    "left_sheet_index": left.sheet_index,
+                    "right_sheet": right.sheet_name,
+                    "right_sheet_index": right.sheet_index,
+                    "same_file": same_file,
                     "left_source": left.source_declared,
                     "right_source": right.source_declared,
                     "rows_left": len(left.rows),
@@ -123,9 +149,7 @@ def build_content_duplicate_pairs(snapshot_path: Path, tables: Iterable[object])
                     "binary_sha256_left": left_binary,
                     "binary_sha256_right": right_binary,
                     "binary_same": binary_same,
-                    "duplicate_class": "EXACT_DUPLICATE"
-                    if binary_same
-                    else "CONTENT_DUPLICATE",
+                    "duplicate_class": duplicate_class,
                     "suggested_primary_path": primary,
                     "suggested_duplicate_path": duplicate,
                     "suggestion_basis": basis,
@@ -136,6 +160,11 @@ def build_content_duplicate_pairs(snapshot_path: Path, tables: Iterable[object])
         "content_fingerprint_sha256",
         "left_path",
         "right_path",
+        "left_sheet",
+        "left_sheet_index",
+        "right_sheet",
+        "right_sheet_index",
+        "same_file",
         "left_source",
         "right_source",
         "rows_left",
@@ -151,9 +180,11 @@ def build_content_duplicate_pairs(snapshot_path: Path, tables: Iterable[object])
     ]
     if not records:
         return pd.DataFrame(columns=columns)
-    return pd.DataFrame(records).sort_values(
-        ["duplicate_class", "left_path", "right_path"]
-    ).reset_index(drop=True)
+    return (
+        pd.DataFrame(records)
+        .sort_values(["duplicate_class", "left_path", "right_path"])
+        .reset_index(drop=True)
+    )
 
 
 def _decode_delimited(path: Path) -> tuple[str, str]:
@@ -242,9 +273,7 @@ def build_duplicate_row_groups(
                     "normalized_row_hash": normalized_hash,
                     "occurrence_count": len(group),
                     "duplicate_excess": len(group) - 1,
-                    "source_row_numbers": "|".join(
-                        str(item.source_row_number) for item in group
-                    ),
+                    "source_row_numbers": "|".join(str(item.source_row_number) for item in group),
                     "strict_variants": len(strict_hashes),
                     "duplicate_class": "STRICT_EXACT_ROW"
                     if len(strict_hashes) == 1
@@ -269,10 +298,14 @@ def build_duplicate_row_groups(
     ]
     if not records:
         return pd.DataFrame(columns=columns)
-    return pd.DataFrame(records).sort_values(
-        ["duplicate_excess", "relative_path", "source_row_numbers"],
-        ascending=[False, True, True],
-    ).reset_index(drop=True)
+    return (
+        pd.DataFrame(records)
+        .sort_values(
+            ["duplicate_excess", "relative_path", "source_row_numbers"],
+            ascending=[False, True, True],
+        )
+        .reset_index(drop=True)
+    )
 
 
 def _safe_date(year: int, month: int, day: int) -> date | None:
@@ -334,17 +367,30 @@ def parse_date_observation(value: object) -> dict[str, object]:
     if match:
         parsed = _safe_date(int(match[1]), int(match[2]), 1)
         return {**base, "parsed_date": parsed, "parse_method": "YEAR_MONTH"}
+    match = COMPACT_YEAR_MONTH_PATTERN.fullmatch(text)
+    if match:
+        parsed = _safe_date(int(match.group("year")), int(match.group("month")), 1)
+        return {**base, "parsed_date": parsed, "parse_method": "COMPACT_YEAR_MONTH"}
+
+    for pattern, year_digits in (
+        (TEXT_MONTH_PATTERN, 4),
+        (TEXT_MONTH_SHORT_YEAR_PATTERN, 2),
+    ):
+        match = pattern.fullmatch(text)
+        if match:
+            month = PORTUGUESE_MONTHS.get(normalize_label(match.group("month")))
+            year = int(match.group("year"))
+            if year_digits == 2:
+                year += 2000
+            parsed = _safe_date(year, month or 0, 1)
+            return {**base, "parsed_date": parsed, "parse_method": "TEXT_MONTH_YEAR"}
 
     match = SLASH_DATE_PATTERN.fullmatch(text)
     if match:
         first, second, year = (int(match[1]), int(match[2]), int(match[3]))
         day_first = _safe_date(year, second, first)
         month_first = _safe_date(year, first, second)
-        ambiguous = (
-            day_first is not None
-            and month_first is not None
-            and day_first != month_first
-        )
+        ambiguous = day_first is not None and month_first is not None and day_first != month_first
         return {
             **base,
             "parsed_date": day_first,
@@ -394,8 +440,7 @@ def build_temporal_review(
                 parsed_dates.append(parsed_date)
                 future = parsed_date > snapshot_date
                 alternative_not_future = (
-                    isinstance(alternative_date, date)
-                    and alternative_date <= snapshot_date
+                    isinstance(alternative_date, date) and alternative_date <= snapshot_date
                 )
                 if ambiguous and future and alternative_not_future:
                     anomaly_class = "AMBIGUOUS_DATE_POSSIBLE_REVERSAL"
@@ -443,20 +488,50 @@ def build_temporal_review(
                 "ambiguous_values": ambiguous_count,
                 "future_values": future_count,
                 "possible_reversal_values": reversal_count,
-                "period_min_observed": min(parsed_dates).isoformat()
-                if parsed_dates
-                else "",
-                "period_max_observed": max(parsed_dates).isoformat()
-                if parsed_dates
-                else "",
+                "period_min_observed": min(parsed_dates).isoformat() if parsed_dates else "",
+                "period_max_observed": max(parsed_dates).isoformat() if parsed_dates else "",
                 "raw_types": "|".join(
                     f"{name}:{count}" for name, count in sorted(raw_type_counter.items())
                 ),
             }
         )
 
-    summary = pd.DataFrame(summary_records)
-    anomalies = pd.DataFrame(anomaly_records)
+    summary = pd.DataFrame(
+        summary_records,
+        columns=[
+            "relative_path",
+            "source_declared",
+            "sheet_name",
+            "date_header",
+            "values_observed",
+            "values_parsed",
+            "parse_failures",
+            "ambiguous_values",
+            "future_values",
+            "possible_reversal_values",
+            "period_min_observed",
+            "period_max_observed",
+            "raw_types",
+        ],
+    )
+    anomalies = pd.DataFrame(
+        anomaly_records,
+        columns=[
+            "relative_path",
+            "source_declared",
+            "sheet_name",
+            "source_row_number",
+            "date_header",
+            "raw_type",
+            "raw_text",
+            "parsed_date",
+            "alternative_date",
+            "parse_method",
+            "anomaly_class",
+            "snapshot_date",
+            "review_status",
+        ],
+    )
     return summary, anomalies
 
 
@@ -468,15 +543,38 @@ def build_review_summary(
 ) -> pd.DataFrame:
     """Produz indicadores agregados com natureza explicitada."""
     anomaly_classes = (
-        temporal_anomalies["anomaly_class"].value_counts()
-        if not temporal_anomalies.empty
-        else {}
+        temporal_anomalies["anomaly_class"].value_counts() if not temporal_anomalies.empty else {}
     )
     indicators = [
         ("content_duplicate_pairs", len(content_duplicates), "calculated"),
         (
             "content_duplicate_binary_different_pairs",
+            int(content_duplicates["binary_same"].eq(False).sum())  # noqa: E712
+            if not content_duplicates.empty
+            else 0,
+            "calculated",
+        ),
+        (
+            "intra_file_table_duplicate_pairs",
+            int(content_duplicates["duplicate_class"].eq("INTRA_FILE_TABLE_DUPLICATE").sum())
+            if not content_duplicates.empty
+            else 0,
+            "calculated",
+        ),
+        (
+            "cross_file_content_duplicate_pairs",
             int(content_duplicates["duplicate_class"].eq("CONTENT_DUPLICATE").sum())
+            if not content_duplicates.empty
+            else 0,
+            "calculated",
+        ),
+        (
+            "documentation_content_duplicate_pairs",
+            int(
+                content_duplicates["duplicate_class"]
+                .eq("DOCUMENTATION_CONTENT_DUPLICATE")
+                .sum()
+            )
             if not content_duplicates.empty
             else 0,
             "calculated",
@@ -484,31 +582,23 @@ def build_review_summary(
         ("duplicate_row_groups", len(duplicate_rows), "calculated"),
         (
             "duplicate_row_excess",
-            int(duplicate_rows["duplicate_excess"].sum())
-            if not duplicate_rows.empty
-            else 0,
+            int(duplicate_rows["duplicate_excess"].sum()) if not duplicate_rows.empty else 0,
             "calculated",
         ),
         (
             "tables_with_duplicate_rows",
-            int(duplicate_rows["relative_path"].nunique())
-            if not duplicate_rows.empty
-            else 0,
+            int(duplicate_rows["relative_path"].nunique()) if not duplicate_rows.empty else 0,
             "calculated",
         ),
         ("temporal_tables", len(temporal_summary), "observed"),
         (
             "future_date_values",
-            int(temporal_summary["future_values"].sum())
-            if not temporal_summary.empty
-            else 0,
+            int(temporal_summary["future_values"].sum()) if not temporal_summary.empty else 0,
             "calculated",
         ),
         (
             "ambiguous_date_values",
-            int(temporal_summary["ambiguous_values"].sum())
-            if not temporal_summary.empty
-            else 0,
+            int(temporal_summary["ambiguous_values"].sum()) if not temporal_summary.empty else 0,
             "calculated",
         ),
         (
@@ -518,9 +608,7 @@ def build_review_summary(
         ),
         (
             "date_parse_failures",
-            int(temporal_summary["parse_failures"].sum())
-            if not temporal_summary.empty
-            else 0,
+            int(temporal_summary["parse_failures"].sum()) if not temporal_summary.empty else 0,
             "calculated",
         ),
     ]

@@ -45,19 +45,21 @@ def _validate_columns(frame: pd.DataFrame, required: set[str], name: str) -> Non
 
 
 def source_from_path(value: object) -> str:
-    """Extrai a origem declarada logo abaixo de ``raw/new_files``."""
+    """Extrai a origem declarada de caminhos históricos e ramos de ``raw``."""
     parts = PurePosixPath(str(value or "").strip("/")).parts
     if len(parts) >= 3 and parts[0:2] == ("raw", "new_files"):
         return parts[2]
+    if len(parts) >= 4 and parts[0:2] == ("raw", "raw_portal_transparencia"):
+        return parts[2]
+    if len(parts) >= 3 and parts[0] == "raw":
+        return parts[1]
     return "(não identificada)"
 
 
 def _header_sequences(columns: pd.DataFrame) -> dict[tuple[object, ...], tuple[str, ...]]:
     ordered = columns.copy()
     ordered["column_index"] = pd.to_numeric(ordered["column_index"], errors="raise")
-    ordered["header_normalized"] = (
-        ordered["header_normalized"].fillna("").astype(str).str.strip()
-    )
+    ordered["header_normalized"] = ordered["header_normalized"].fillna("").astype(str).str.strip()
     ordered = ordered.sort_values(TABLE_KEY + ["column_index"])
 
     result: dict[tuple[object, ...], tuple[str, ...]] = {}
@@ -87,9 +89,7 @@ def build_table_registry(sheets: pd.DataFrame, columns: pd.DataFrame) -> pd.Data
     )
     registry["schema_status"] = "NO_SIGNATURE"
     registry.loc[registry["exact_schema_group_size"].eq(1), "schema_status"] = "SINGLETON"
-    registry.loc[registry["exact_schema_group_size"].gt(1), "schema_status"] = (
-        "REPEATED_EXACT"
-    )
+    registry.loc[registry["exact_schema_group_size"].gt(1), "schema_status"] = "REPEATED_EXACT"
 
     sequences = _header_sequences(columns)
     registry["header_sequence"] = [
@@ -116,10 +116,14 @@ def build_table_registry(sheets: pd.DataFrame, columns: pd.DataFrame) -> pd.Data
         "header_token_count",
         "header_sequence",
     ]
-    return registry[selected].sort_values(
-        ["exact_schema_group_size", "source_declared", "relative_path", "sheet_index"],
-        ascending=[False, True, True, True],
-    ).reset_index(drop=True)
+    return (
+        registry[selected]
+        .sort_values(
+            ["exact_schema_group_size", "source_declared", "relative_path", "sheet_index"],
+            ascending=[False, True, True, True],
+        )
+        .reset_index(drop=True)
+    )
 
 
 def build_schema_summary(registry: pd.DataFrame) -> pd.DataFrame:
@@ -160,10 +164,14 @@ def build_schema_summary(registry: pd.DataFrame) -> pd.DataFrame:
                 "year_max_observed": int(year_max.max()) if year_max.notna().any() else None,
             }
         )
-    return pd.DataFrame(records).sort_values(
-        ["group_size", "sources", "schema_signature_sha256"],
-        ascending=[False, True, True],
-    ).reset_index(drop=True)
+    return (
+        pd.DataFrame(records)
+        .sort_values(
+            ["group_size", "sources", "schema_signature_sha256"],
+            ascending=[False, True, True],
+        )
+        .reset_index(drop=True)
+    )
 
 
 def build_source_summary(registry: pd.DataFrame) -> pd.DataFrame:
@@ -239,9 +247,7 @@ def build_similarity_candidates(
                 "jaccard_similarity_estimate": round(jaccard, 6),
                 "containment_similarity_estimate": round(containment, 6),
                 "sequence_similarity_estimate": round(sequence_ratio, 6),
-                "candidate_class": "NEAR_SCHEMA"
-                if jaccard >= 0.80
-                else "PARTIAL_SCHEMA",
+                "candidate_class": "NEAR_SCHEMA" if jaccard >= 0.80 else "PARTIAL_SCHEMA",
             }
         )
 
@@ -263,16 +269,20 @@ def build_similarity_candidates(
                 "candidate_class",
             ]
         )
-    return pd.DataFrame(records).sort_values(
-        [
-            "jaccard_similarity_estimate",
-            "containment_similarity_estimate",
-            "sequence_similarity_estimate",
-            "left_path",
-            "right_path",
-        ],
-        ascending=[False, False, False, True, True],
-    ).reset_index(drop=True)
+    return (
+        pd.DataFrame(records)
+        .sort_values(
+            [
+                "jaccard_similarity_estimate",
+                "containment_similarity_estimate",
+                "sequence_similarity_estimate",
+                "left_path",
+                "right_path",
+            ],
+            ascending=[False, False, False, True, True],
+        )
+        .reset_index(drop=True)
+    )
 
 
 def triage_structure(sheets: pd.DataFrame, columns: pd.DataFrame) -> StructureTriageResult:

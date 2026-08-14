@@ -481,13 +481,30 @@ def _schema_groups(sheets: pd.DataFrame) -> pd.DataFrame:
     ).reset_index(drop=True)
 
 
-def profile_snapshot(snapshot_path: Path) -> ProfileResult:
-    """Perfila os arquivos sob ``raw/new_files`` sem modificar a captura."""
+def _safe_source_subdir(value: str) -> Path:
+    raw = str(value or "").strip()
+    text = raw.strip("/")
+    pure = PurePosixPath(text)
+    if (
+        not text
+        or raw.startswith("/")
+        or text in {".", ".."}
+        or any(part in {".", ".."} for part in pure.parts)
+    ):
+        raise ValueError(f"Subdiretório de origem inválido: {value!r}")
+    return Path(*pure.parts)
+
+
+def profile_snapshot(
+    snapshot_path: Path,
+    source_subdir: str = "raw/new_files",
+) -> ProfileResult:
+    """Perfila os arquivos sob uma subárvore segura sem modificar a captura."""
     root = snapshot_path.expanduser().resolve()
-    inbox_root = root / "raw" / "new_files"
+    inbox_root = root / _safe_source_subdir(source_subdir)
     if not inbox_root.is_dir():
         raise FileNotFoundError(
-            f"Caixa capturada não encontrada: {inbox_root}"
+            f"Subdiretório capturado não encontrado: {inbox_root}"
         )
 
     file_records: list[dict[str, object]] = []

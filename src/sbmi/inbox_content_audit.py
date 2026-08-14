@@ -57,8 +57,13 @@ PORTUGUESE_MONTHS = {
 }
 MONTH_YEAR_PATTERN = re.compile(r"^(?P<month>\d{1,2})[/-](?P<year>\d{4})$")
 YEAR_MONTH_PATTERN = re.compile(r"^(?P<year>\d{4})[/-](?P<month>\d{1,2})$")
+COMPACT_YEAR_MONTH_PATTERN = re.compile(r"^(?P<year>\d{4})(?P<month>\d{2})$")
 TEXT_MONTH_PATTERN = re.compile(
     r"^(?P<month>[A-Za-zÀ-ÿ]+)[\s./-]+(?P<year>\d{4})$",
+    flags=re.IGNORECASE,
+)
+TEXT_MONTH_SHORT_YEAR_PATTERN = re.compile(
+    r"^(?P<month>[A-Za-zÀ-ÿ]+)[\s./-]+(?P<year>\d{2})$",
     flags=re.IGNORECASE,
 )
 
@@ -83,9 +88,7 @@ class ContentAuditResult:
 
 def _ascii_fold(value: str) -> str:
     decomposed = unicodedata.normalize("NFKD", value)
-    return "".join(
-        char for char in decomposed if not unicodedata.combining(char)
-    )
+    return "".join(char for char in decomposed if not unicodedata.combining(char))
 
 
 def canonical_value(value: object) -> str:
@@ -155,6 +158,12 @@ def parse_temporal_value(value: object) -> str | None:
         year = int(year_month.group("year"))
         if 1 <= month <= 12:
             return date(year, month, 1).isoformat()
+    compact_year_month = COMPACT_YEAR_MONTH_PATTERN.fullmatch(text)
+    if compact_year_month:
+        month = int(compact_year_month.group("month"))
+        year = int(compact_year_month.group("year"))
+        if 1 <= month <= 12:
+            return date(year, month, 1).isoformat()
 
     text_month = TEXT_MONTH_PATTERN.fullmatch(text)
     if text_month:
@@ -162,6 +171,13 @@ def parse_temporal_value(value: object) -> str | None:
         month = PORTUGUESE_MONTHS.get(month_token)
         if month is not None:
             year = int(text_month.group("year"))
+            return date(year, month, 1).isoformat()
+    short_text_month = TEXT_MONTH_SHORT_YEAR_PATTERN.fullmatch(text)
+    if short_text_month:
+        month_token = normalize_label(short_text_month.group("month"))
+        month = PORTUGUESE_MONTHS.get(month_token)
+        if month is not None:
+            year = 2000 + int(short_text_month.group("year"))
             return date(year, month, 1).isoformat()
 
     parsed = pd.to_datetime(text, errors="coerce", dayfirst=True)
@@ -320,26 +336,14 @@ def build_table_summary(tables: Iterable[LoadedTable]) -> pd.DataFrame:
     """Resume linhas, duplicidades internas e períodos por tabela."""
     records: list[dict[str, object]] = []
     for table in tables:
-        strict_hashes = [
-            _row_hash(row, normalized=False) for row in table.rows
-        ]
-        normalized_hashes = [
-            _row_hash(row, normalized=True) for row in table.rows
-        ]
+        strict_hashes = [_row_hash(row, normalized=False) for row in table.rows]
+        normalized_hashes = [_row_hash(row, normalized=True) for row in table.rows]
         normalized_counts = Counter(normalized_hashes)
         date_index, date_header = _date_header(table)
-        date_values = (
-            [row[date_index] for row in table.rows]
-            if date_index is not None
-            else []
-        )
-        nonblank_dates = [
-            value for value in date_values if canonical_value(value)
-        ]
+        date_values = [row[date_index] for row in table.rows] if date_index is not None else []
+        nonblank_dates = [value for value in date_values if canonical_value(value)]
         parsed_dates = [
-            parsed
-            for value in nonblank_dates
-            if (parsed := parse_temporal_value(value))
+            parsed for value in nonblank_dates if (parsed := parse_temporal_value(value))
         ]
 
         records.append(
@@ -350,31 +354,19 @@ def build_table_summary(tables: Iterable[LoadedTable]) -> pd.DataFrame:
                 "sheet_index": table.sheet_index,
                 "rows_observed": len(table.rows),
                 "unique_rows_normalized": len(normalized_counts),
-                "duplicate_rows_within_file": (
-                    len(table.rows) - len(normalized_counts)
-                ),
+                "duplicate_rows_within_file": (len(table.rows) - len(normalized_counts)),
                 "strict_sequence_sha256": _sequence_hash(strict_hashes),
-                "normalized_sequence_sha256": _sequence_hash(
-                    normalized_hashes
-                ),
-                "normalized_multiset_sha256": _multiset_hash(
-                    normalized_hashes
-                ),
+                "normalized_sequence_sha256": _sequence_hash(normalized_hashes),
+                "normalized_multiset_sha256": _multiset_hash(normalized_hashes),
                 "date_header_observed": date_header,
                 "date_values_nonblank": len(nonblank_dates),
                 "date_values_parsed": len(parsed_dates),
                 "date_parse_failures": len(nonblank_dates) - len(parsed_dates),
                 "date_parse_rate": (
-                    round(len(parsed_dates) / len(nonblank_dates), 6)
-                    if nonblank_dates
-                    else None
+                    round(len(parsed_dates) / len(nonblank_dates), 6) if nonblank_dates else None
                 ),
-                "period_min_observed": (
-                    min(parsed_dates) if parsed_dates else None
-                ),
-                "period_max_observed": (
-                    max(parsed_dates) if parsed_dates else None
-                ),
+                "period_min_observed": (min(parsed_dates) if parsed_dates else None),
+                "period_max_observed": (max(parsed_dates) if parsed_dates else None),
                 "normalized_row_hashes": "|".join(normalized_hashes),
             }
         )
@@ -406,16 +398,8 @@ def build_federal_overlap_candidates(summary: pd.DataFrame) -> pd.DataFrame:
     records: list[dict[str, object]] = []
 
     for left, right in combinations(federal.itertuples(index=False), 2):
-        left_hashes = [
-            value
-            for value in str(left.normalized_row_hashes).split("|")
-            if value
-        ]
-        right_hashes = [
-            value
-            for value in str(right.normalized_row_hashes).split("|")
-            if value
-        ]
+        left_hashes = [value for value in str(left.normalized_row_hashes).split("|") if value]
+        right_hashes = [value for value in str(right.normalized_row_hashes).split("|") if value]
         left_set = set(left_hashes)
         right_set = set(right_hashes)
         intersection = len(left_set & right_set)
@@ -424,13 +408,8 @@ def build_federal_overlap_candidates(summary: pd.DataFrame) -> pd.DataFrame:
 
         union = len(left_set | right_set)
         left_containment = intersection / len(left_set) if left_set else 0.0
-        right_containment = (
-            intersection / len(right_set) if right_set else 0.0
-        )
-        identical_multiset = (
-            left.normalized_multiset_sha256
-            == right.normalized_multiset_sha256
-        )
+        right_containment = intersection / len(right_set) if right_set else 0.0
+        identical_multiset = left.normalized_multiset_sha256 == right.normalized_multiset_sha256
         if identical_multiset:
             candidate_class = "IDENTICAL_NORMALIZED_CONTENT"
         elif left_containment == 1.0:
@@ -447,9 +426,7 @@ def build_federal_overlap_candidates(summary: pd.DataFrame) -> pd.DataFrame:
                 "left_rows": int(left.rows_observed),
                 "right_rows": int(right.rows_observed),
                 "shared_unique_rows": intersection,
-                "jaccard_row_similarity": (
-                    round(intersection / union, 6) if union else 0.0
-                ),
+                "jaccard_row_similarity": (round(intersection / union, 6) if union else 0.0),
                 "left_containment": round(left_containment, 6),
                 "right_containment": round(right_containment, 6),
                 "same_normalized_multiset": bool(identical_multiset),
@@ -489,21 +466,13 @@ def build_audit_summary(
         temporal_tables = 0
         date_failures = 0
     else:
-        federal_tables = int(
-            table_summary["source_declared"].eq("Federal").sum()
-        )
-        duplicate_tables = int(
-            table_summary["duplicate_rows_within_file"].gt(0).sum()
-        )
-        temporal_tables = int(
-            table_summary["date_header_observed"].fillna("").ne("").sum()
-        )
+        federal_tables = int(table_summary["source_declared"].eq("Federal").sum())
+        duplicate_tables = int(table_summary["duplicate_rows_within_file"].gt(0).sum())
+        temporal_tables = int(table_summary["date_header_observed"].fillna("").ne("").sum())
         date_failures = int(table_summary["date_parse_failures"].sum())
 
     classes = (
-        overlap_candidates["candidate_class"].value_counts()
-        if not overlap_candidates.empty
-        else {}
+        overlap_candidates["candidate_class"].value_counts() if not overlap_candidates.empty else {}
     )
     indicators = [
         ("tables_loaded", len(table_summary), "observed"),
@@ -559,5 +528,14 @@ def audit_snapshot_content(
             federal_overlap_candidates=overlap,
             audit_summary=summary,
         ),
-        pd.DataFrame(errors),
+        pd.DataFrame(
+            errors,
+            columns=[
+                "relative_path",
+                "sheet_name",
+                "sheet_index",
+                "error_type",
+                "error_message",
+            ],
+        ),
     )

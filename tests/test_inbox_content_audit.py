@@ -42,6 +42,9 @@ def test_parse_temporal_value_uses_explicit_date_formats() -> None:
     assert parse_temporal_value("01/2024") == "2024-01-01"
     assert parse_temporal_value("2025-07") == "2025-07-01"
     assert parse_temporal_value("fevereiro/2026") == "2026-02-01"
+    assert parse_temporal_value("202303") == "2023-03-01"
+    assert parse_temporal_value("fev/20") == "2020-02-01"
+    assert parse_temporal_value("202313") is None
     assert parse_temporal_value("codigo 2026") is None
 
 
@@ -102,6 +105,13 @@ def test_audit_snapshot_content_detects_containment(tmp_path: Path) -> None:
     _write_workbook(tmp_path / right, [["Título", None, None], header, row_a, row_b])
 
     result, errors = audit_snapshot_content(tmp_path, _profile(left, right))
+    assert errors.columns.tolist() == [
+        "relative_path",
+        "sheet_name",
+        "sheet_index",
+        "error_type",
+        "error_message",
+    ]
 
     assert errors.empty
     assert result.audit_summary.set_index("indicator").loc["containment_pairs", "value"] == 1

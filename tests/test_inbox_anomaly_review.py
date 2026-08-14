@@ -7,10 +7,11 @@ from openpyxl import Workbook
 from sbmi.inbox_anomaly_review import (
     build_content_duplicate_pairs,
     build_duplicate_row_groups,
+    build_review_summary,
     build_temporal_review,
     parse_date_observation,
 )
-from sbmi.inbox_content_audit import load_profiled_tables
+from sbmi.inbox_content_audit import LoadedTable, load_profiled_tables
 
 
 def _write_workbook(path: Path, title: str, rows: list[list[object]]) -> None:
@@ -62,6 +63,69 @@ def test_content_duplicate_detects_binary_different_copy(tmp_path: Path) -> None
     assert pairs.loc[0, "suggested_duplicate_path"] == right
 
 
+def test_same_file_tables_are_not_classified_as_binary_duplicates(
+    tmp_path: Path,
+) -> None:
+    path = "raw/agro/base.xlsx"
+    target = tmp_path / path
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"same-workbook")
+    common = {
+        "relative_path": path,
+        "source_declared": "agro",
+        "headers": ("ano", "valor"),
+        "normalized_headers": ("ano", "valor"),
+        "rows": (("2024", 10),),
+    }
+    tables = [
+        LoadedTable(sheet_name="Dados", sheet_index=1, **common),
+        LoadedTable(sheet_name="Copia", sheet_index=2, **common),
+    ]
+
+    pairs = build_content_duplicate_pairs(tmp_path, tables)
+    assert pairs.loc[0, "duplicate_class"] == "INTRA_FILE_TABLE_DUPLICATE"
+    assert pairs.loc[0, "same_file"] == True  # noqa: E712
+    assert {
+        pairs.loc[0, "left_sheet"],
+        pairs.loc[0, "right_sheet"],
+    } == {"Dados", "Copia"}
+
+
+def test_documentation_duplicates_remain_recorded_separately(tmp_path: Path) -> None:
+    paths = ("raw/agro/a.xlsx", "raw/pib/b.xlsx")
+    for path in paths:
+        target = tmp_path / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(path.encode("utf-8"))
+    common = {
+        "sheet_name": "Notas",
+        "sheet_index": 1,
+        "headers": ("nota",),
+        "normalized_headers": ("nota",),
+        "rows": (("Conteúdo institucional",),),
+    }
+    tables = [
+        LoadedTable(relative_path=paths[0], source_declared="agro", **common),
+        LoadedTable(relative_path=paths[1], source_declared="pib", **common),
+    ]
+
+    pairs = build_content_duplicate_pairs(tmp_path, tables)
+
+    assert len(pairs) == 1
+    assert pairs.loc[0, "duplicate_class"] == "DOCUMENTATION_CONTENT_DUPLICATE"
+    assert pairs.loc[0, "review_status"] == "PENDING_MANUAL_DISPOSITION"
+
+    summary = build_review_summary(
+        pairs,
+        pd.DataFrame(),
+        pd.DataFrame(),
+        pd.DataFrame(),
+    ).set_index("indicator")
+    assert summary.loc["content_duplicate_binary_different_pairs", "value"] == 1
+    assert summary.loc["cross_file_content_duplicate_pairs", "value"] == 0
+    assert summary.loc["documentation_content_duplicate_pairs", "value"] == 1
+
+
 def test_duplicate_rows_preserve_source_row_numbers(tmp_path: Path) -> None:
     path = "raw/new_files/Estadual/icms.xlsx"
     _write_workbook(
@@ -91,6 +155,14 @@ def test_parse_date_observation_flags_possible_reversal() -> None:
     assert parsed["alternative_date"] == date(2026, 5, 12)
     assert parsed["ambiguous"] is True
     assert parsed["parse_method"] == "DMY_ASSUMED"
+    compact = parse_date_observation("202303")
+    short_text = parse_date_observation("fev/20")
+    invalid = parse_date_observation("202313")
+    assert compact["parsed_date"] == date(2023, 3, 1)
+    assert compact["parse_method"] == "COMPACT_YEAR_MONTH"
+    assert short_text["parsed_date"] == date(2020, 2, 1)
+    assert short_text["parse_method"] == "TEXT_MONTH_YEAR"
+    assert invalid["parsed_date"] is None
 
 
 def test_temporal_review_separates_future_and_ambiguous_values(tmp_path: Path) -> None:
@@ -119,3 +191,27 @@ def test_temporal_review_separates_future_and_ambiguous_values(tmp_path: Path) -
         "AMBIGUOUS_DATE_POSSIBLE_REVERSAL",
         "FUTURE_DATE",
     }
+
+
+def test_temporal_review_preserves_empty_anomaly_schema(tmp_path: Path) -> None:
+    path = "raw/social/bolsa.xlsx"
+    _write_workbook(
+        tmp_path / path,
+        "Relatório",
+        [
+            ["Mês Competência", "Município", "Valor"],
+            ["202303", "São Borja", 100],
+        ],
+    )
+
+    summary, anomalies = build_temporal_review(
+        tmp_path,
+        _profile(path),
+        snapshot_date=date(2026, 8, 14),
+    )
+
+    assert summary.loc[0, "parse_failures"] == 0
+    assert summary.loc[0, "period_min_observed"] == "2023-03-01"
+    assert anomalies.empty
+    assert "anomaly_class" in anomalies.columns
+    assert "review_status" in anomalies.columns

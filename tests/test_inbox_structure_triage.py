@@ -87,7 +87,13 @@ def sample_profiles() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def test_source_from_path() -> None:
     assert source_from_path("raw/new_files/Federal/a.xlsx") == "Federal"
-    assert source_from_path("raw/fiscal/a.xlsx") == "(não identificada)"
+    assert source_from_path("raw/fiscal/a.xlsx") == "fiscal"
+    assert source_from_path("raw/social/a.csv") == "social"
+    assert (
+        source_from_path("raw/raw_portal_transparencia/Federal/bolsa.xlsx")
+        == "Federal"
+    )
+    assert source_from_path("raw/outro/subpasta/base.csv") == "outro"
 
 
 def test_registry_classifies_exact_groups() -> None:
@@ -122,10 +128,7 @@ def test_similarity_candidates_exclude_exact_and_capture_partial() -> None:
     candidates = build_similarity_candidates(registry)
 
     assert len(candidates) == 2
-    pairs = {
-        (row.left_path, row.right_path)
-        for row in candidates.itertuples(index=False)
-    }
+    pairs = {(row.left_path, row.right_path) for row in candidates.itertuples(index=False)}
     assert (
         "raw/new_files/Federal/a.xlsx",
         "raw/new_files/Municipal/c.xlsx",

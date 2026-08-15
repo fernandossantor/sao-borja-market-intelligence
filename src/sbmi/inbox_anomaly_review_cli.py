@@ -56,10 +56,7 @@ def _filename(value: object) -> str:
 
 
 def _indicator_map(summary: pd.DataFrame) -> dict[str, int]:
-    return {
-        str(row.indicator): int(row.value)
-        for row in summary.itertuples(index=False)
-    }
+    return {str(row.indicator): int(row.value) for row in summary.itertuples(index=False)}
 
 
 def main() -> None:
@@ -121,6 +118,9 @@ def main() -> None:
     for name in (
         "content_duplicate_pairs",
         "content_duplicate_binary_different_pairs",
+        "intra_file_table_duplicate_pairs",
+        "cross_file_content_duplicate_pairs",
+        "documentation_content_duplicate_pairs",
         "duplicate_row_groups",
         "duplicate_row_excess",
         "tables_with_duplicate_rows",
@@ -140,6 +140,8 @@ def main() -> None:
             f"\tleft={_filename(row.left_path)}"
             f"\tright={_filename(row.right_path)}"
             f"\tbinary_same={row.binary_same}"
+            f"\tleft_sheet={row.left_sheet}"
+            f"\tright_sheet={row.right_sheet}"
             f"\tsuggested_primary={_filename(row.suggested_primary_path) if row.suggested_primary_path else '-'}"
             f"\tsuggestion_basis={row.suggestion_basis}"
         )

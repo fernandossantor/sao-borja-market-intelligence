@@ -123,10 +123,10 @@ def build_content_duplicate_pairs(snapshot_path: Path, tables: Iterable[object])
                 normalize_label(left.sheet_name) == "notas"
                 and normalize_label(right.sheet_name) == "notas"
             )
-            if documentation_same:
-                duplicate_class = "DOCUMENTATION_CONTENT_DUPLICATE"
-            elif same_file:
+            if same_file:
                 duplicate_class = "INTRA_FILE_TABLE_DUPLICATE"
+            elif documentation_same:
+                duplicate_class = "DOCUMENTATION_CONTENT_DUPLICATE"
             elif binary_same:
                 duplicate_class = "EXACT_DUPLICATE"
             else:
@@ -372,18 +372,21 @@ def parse_date_observation(value: object) -> dict[str, object]:
         parsed = _safe_date(int(match.group("year")), int(match.group("month")), 1)
         return {**base, "parsed_date": parsed, "parse_method": "COMPACT_YEAR_MONTH"}
 
-    for pattern, year_digits in (
-        (TEXT_MONTH_PATTERN, 4),
-        (TEXT_MONTH_SHORT_YEAR_PATTERN, 2),
-    ):
-        match = pattern.fullmatch(text)
-        if match:
-            month = PORTUGUESE_MONTHS.get(normalize_label(match.group("month")))
-            year = int(match.group("year"))
-            if year_digits == 2:
-                year += 2000
-            parsed = _safe_date(year, month or 0, 1)
-            return {**base, "parsed_date": parsed, "parse_method": "TEXT_MONTH_YEAR"}
+    match = TEXT_MONTH_PATTERN.fullmatch(text)
+    if match:
+        month = PORTUGUESE_MONTHS.get(normalize_label(match.group("month")))
+        parsed = _safe_date(int(match.group("year")), month or 0, 1)
+        return {**base, "parsed_date": parsed, "parse_method": "TEXT_MONTH_YEAR"}
+
+    match = TEXT_MONTH_SHORT_YEAR_PATTERN.fullmatch(text)
+    if match:
+        month = PORTUGUESE_MONTHS.get(normalize_label(match.group("month")))
+        if month is not None:
+            return {
+                **base,
+                "parse_method": "TEXT_MONTH_SHORT_YEAR_AMBIGUOUS",
+                "ambiguous": True,
+            }
 
     match = SLASH_DATE_PATTERN.fullmatch(text)
     if match:
@@ -433,7 +436,11 @@ def build_temporal_review(
             parsed_date = parsed["parsed_date"]
             alternative_date = parsed["alternative_date"]
             ambiguous = bool(parsed["ambiguous"])
-            if parsed_date is None:
+            if parsed_date is None and ambiguous:
+                failure_count += 1
+                ambiguous_count += 1
+                anomaly_class = "AMBIGUOUS_DATE"
+            elif parsed_date is None:
                 failure_count += 1
                 anomaly_class = "PARSE_FAILURE"
             else:

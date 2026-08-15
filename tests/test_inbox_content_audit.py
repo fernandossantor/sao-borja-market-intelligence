@@ -43,7 +43,8 @@ def test_parse_temporal_value_uses_explicit_date_formats() -> None:
     assert parse_temporal_value("2025-07") == "2025-07-01"
     assert parse_temporal_value("fevereiro/2026") == "2026-02-01"
     assert parse_temporal_value("202303") == "2023-03-01"
-    assert parse_temporal_value("fev/20") == "2020-02-01"
+    assert parse_temporal_value("fev/20") is None
+    assert parse_temporal_value("dez/99") is None
     assert parse_temporal_value("202313") is None
     assert parse_temporal_value("codigo 2026") is None
 

@@ -174,11 +174,7 @@ def parse_temporal_value(value: object) -> str | None:
             return date(year, month, 1).isoformat()
     short_text_month = TEXT_MONTH_SHORT_YEAR_PATTERN.fullmatch(text)
     if short_text_month:
-        month_token = normalize_label(short_text_month.group("month"))
-        month = PORTUGUESE_MONTHS.get(month_token)
-        if month is not None:
-            year = 2000 + int(short_text_month.group("year"))
-            return date(year, month, 1).isoformat()
+        return None
 
     parsed = pd.to_datetime(text, errors="coerce", dayfirst=True)
     if pd.isna(parsed):

@@ -8,6 +8,15 @@ from pathlib import Path
 from sbmi.inbox_profile import profile_snapshot
 
 
+def default_output_dir(snapshot_path: Path, source_subdir: str) -> Path:
+    """Deriva um destino determinístico que preserve o escopo perfilado."""
+    scope = "--".join(Path(source_subdir).parts)
+    return (
+        Path(".data/audit/new_files/content_profile")
+        / f"{snapshot_path.name}--{scope}"
+    )
+
+
 def latest_snapshot(snapshots_root: Path) -> Path:
     """Seleciona a captura não oculta mais recente pelo nome do diretório."""
     root = snapshots_root.expanduser().resolve()
@@ -53,11 +62,14 @@ def main() -> None:
     output_dir = (
         args.output_dir.expanduser().resolve()
         if args.output_dir is not None
-        else Path(".data/audit/new_files/content_profile") / snapshot_path.name
+        else default_output_dir(snapshot_path, args.source_subdir)
     )
 
+    if output_dir.exists():
+        raise FileExistsError(f"Destino de perfil já existe: {output_dir}")
+
     result = profile_snapshot(snapshot_path, source_subdir=args.source_subdir)
-    output_dir.mkdir(parents=True, exist_ok=True)
+    output_dir.mkdir(parents=True, exist_ok=False)
     result.files.to_csv(output_dir / "file_profile.csv", index=False)
     result.sheets.to_csv(output_dir / "sheet_profile.csv", index=False)
     result.columns.to_csv(output_dir / "column_profile.csv", index=False)

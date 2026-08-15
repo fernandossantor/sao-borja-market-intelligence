@@ -126,6 +126,32 @@ def test_documentation_duplicates_remain_recorded_separately(tmp_path: Path) -> 
     assert summary.loc["documentation_content_duplicate_pairs", "value"] == 1
 
 
+def test_same_file_documentation_tables_are_classified_as_intra_file(
+    tmp_path: Path,
+) -> None:
+    path = "raw/agro/base.xlsx"
+    target = tmp_path / path
+    target.parent.mkdir(parents=True)
+    target.write_bytes(b"same-workbook")
+    common = {
+        "relative_path": path,
+        "source_declared": "agro",
+        "sheet_name": "Notas",
+        "headers": ("nota",),
+        "normalized_headers": ("nota",),
+        "rows": (("Conteúdo institucional",),),
+    }
+    tables = [
+        LoadedTable(sheet_index=1, **common),
+        LoadedTable(sheet_index=2, **common),
+    ]
+
+    pairs = build_content_duplicate_pairs(tmp_path, tables)
+
+    assert pairs.loc[0, "duplicate_class"] == "INTRA_FILE_TABLE_DUPLICATE"
+    assert pairs.loc[0, "same_file"] == True  # noqa: E712
+
+
 def test_duplicate_rows_preserve_source_row_numbers(tmp_path: Path) -> None:
     path = "raw/new_files/Estadual/icms.xlsx"
     _write_workbook(
@@ -156,12 +182,13 @@ def test_parse_date_observation_flags_possible_reversal() -> None:
     assert parsed["ambiguous"] is True
     assert parsed["parse_method"] == "DMY_ASSUMED"
     compact = parse_date_observation("202303")
-    short_text = parse_date_observation("fev/20")
+    short_text = parse_date_observation("dez/99")
     invalid = parse_date_observation("202313")
     assert compact["parsed_date"] == date(2023, 3, 1)
     assert compact["parse_method"] == "COMPACT_YEAR_MONTH"
-    assert short_text["parsed_date"] == date(2020, 2, 1)
-    assert short_text["parse_method"] == "TEXT_MONTH_YEAR"
+    assert short_text["parsed_date"] is None
+    assert short_text["ambiguous"] is True
+    assert short_text["parse_method"] == "TEXT_MONTH_SHORT_YEAR_AMBIGUOUS"
     assert invalid["parsed_date"] is None
 
 

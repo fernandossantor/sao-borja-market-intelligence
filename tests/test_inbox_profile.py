@@ -4,7 +4,7 @@ import pandas as pd
 from openpyxl import Workbook
 
 from sbmi.inbox_profile import normalize_label, profile_snapshot
-from sbmi.inbox_profile_cli import latest_snapshot
+from sbmi.inbox_profile_cli import default_output_dir, latest_snapshot
 
 
 def build_snapshot(tmp_path: Path) -> Path:
@@ -82,6 +82,17 @@ def test_normalization_and_latest_snapshot_resolution(tmp_path: Path) -> None:
 
     assert normalize_label("Município / Código") == "municipio_codigo"
     assert latest_snapshot(root).name == "snapshot-002"
+
+
+def test_default_output_dir_includes_source_scope() -> None:
+    snapshot = Path(".data/snapshots/example/snapshot-001")
+
+    default_scope = default_output_dir(snapshot, "raw/new_files")
+    raw_scope = default_output_dir(snapshot, "raw")
+
+    assert default_scope.name == "snapshot-001--raw--new_files"
+    assert raw_scope.name == "snapshot-001--raw"
+    assert default_scope != raw_scope
 
 
 def test_profile_outputs_are_tabular_dataframes(tmp_path: Path) -> None:

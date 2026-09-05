@@ -101,6 +101,7 @@ DATASET_CONTRACTS = {
         MUNICIPAL_RECEITA_ELEMENTO_HEADERS,
     ): "municipal_receita_elemento",
 }
+STAGING_SOURCE_LEVELS = frozenset(source for source, _headers in DATASET_CONTRACTS)
 
 NUMERIC_HEADERS = {
     "valor_transferido",
@@ -326,21 +327,32 @@ def build_staging(
     *,
     snapshot_id: str,
 ) -> StagingResult:
-    """Constrói dataframes de staging sem alterar arquivos de origem."""
+    """Constrói dataframes de staging sem alterar arquivos de origem.
+
+    Perfis de ramos funcionais que não pertencem aos contratos históricos de
+    finanças públicas são ignorados explicitamente. Isso permite que
+    ``new_files`` contenha fontes, execuções e produtos de outros domínios sem
+    tratá-los acidentalmente como entradas deste staging.
+    """
     excluded = _excluded_paths(content_duplicates)
     duplicate_lookup = _duplicate_row_lookup(duplicate_rows)
     grouped_records: dict[str, list[dict[str, object]]] = {
         name: [] for name in sorted(set(DATASET_CONTRACTS.values()))
     }
     manifest_records: list[dict[str, object]] = []
+    profile_tables_outside_staging_scope = 0
 
     for profile_row in sheet_profile.itertuples(index=False):
         relative_path = str(profile_row.relative_path)
+        source_declared = source_from_path(relative_path)
+        if source_declared not in STAGING_SOURCE_LEVELS:
+            profile_tables_outside_staging_scope += 1
+            continue
+
         headers, observations = inbox_anomaly_review._table_rows(
             snapshot_path,
             profile_row,
         )
-        source_declared = source_from_path(relative_path)
         dataset = classify_dataset(source_declared, headers)
         input_rows = len(observations)
 
@@ -377,32 +389,61 @@ def build_staging(
             }
         )
 
+    manifest_columns = [
+        "relative_path",
+        "source_declared",
+        "dataset",
+        "input_rows",
+        "output_rows",
+        "disposition",
+        "basis",
+    ]
+    if manifest_records:
+        manifest = (
+            pd.DataFrame(manifest_records, columns=manifest_columns)
+            .sort_values(["source_declared", "dataset", "relative_path"])
+            .reset_index(drop=True)
+        )
+    else:
+        manifest = pd.DataFrame(columns=manifest_columns)
+
     datasets = {
         name: pd.DataFrame(records)
         for name, records in grouped_records.items()
     }
-    manifest = (
-        pd.DataFrame(manifest_records)
-        .sort_values(["source_declared", "dataset", "relative_path"])
-        .reset_index(drop=True)
-    )
 
     duplicate_flagged_rows = sum(
         int(frame["_duplicate_group_id"].notna().sum())
         for frame in datasets.values()
         if "_duplicate_group_id" in frame.columns
     )
+    source_rows_observed = int(manifest["input_rows"].sum()) if not manifest.empty else 0
+    source_files_excluded = (
+        int(manifest["disposition"].ne("INCLUDED_IN_STAGING").sum())
+        if not manifest.empty
+        else 0
+    )
+    source_rows_excluded = (
+        int((manifest["input_rows"] - manifest["output_rows"]).sum())
+        if not manifest.empty
+        else 0
+    )
     indicators = [
         ("source_tables_observed", len(manifest), "observed"),
-        ("source_rows_observed", int(manifest["input_rows"].sum()), "observed"),
+        ("source_rows_observed", source_rows_observed, "observed"),
+        (
+            "profile_tables_outside_staging_scope",
+            profile_tables_outside_staging_scope,
+            "calculated",
+        ),
         (
             "source_files_excluded_from_staging",
-            int(manifest["disposition"].ne("INCLUDED_IN_STAGING").sum()),
+            source_files_excluded,
             "calculated",
         ),
         (
             "source_rows_excluded_from_staging",
-            int((manifest["input_rows"] - manifest["output_rows"]).sum()),
+            source_rows_excluded,
             "calculated",
         ),
         ("staging_datasets", len(datasets), "observed"),
@@ -418,7 +459,9 @@ def build_staging(
                     manifest["dataset"].eq("federal_transferencias")
                     & manifest["disposition"].eq("INCLUDED_IN_STAGING")
                 ].shape[0]
-            ),
+            )
+            if not manifest.empty
+            else 0,
             "calculated",
         ),
         (

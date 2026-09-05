@@ -87,6 +87,35 @@ def sample_profiles() -> tuple[pd.DataFrame, pd.DataFrame]:
 
 def test_source_from_path() -> None:
     assert source_from_path("raw/new_files/Federal/a.xlsx") == "Federal"
+    assert (
+        source_from_path(
+            "raw/new_files/01_fontes_e_coletas/financas_publicas/Federal/a.xlsx"
+        )
+        == "Federal"
+    )
+    assert (
+        source_from_path(
+            "raw/new_files/01_fontes_e_coletas/demografia/eventos_vitais/"
+            "ibge_registro_civil/tabela2612.xlsx"
+        )
+        == "ibge_registro_civil"
+    )
+    assert (
+        source_from_path(
+            "raw/new_files/02_execucoes_tecnicas/financas_publicas/run/raw/a.xlsx"
+        )
+        == "(não identificada)"
+    )
+    assert (
+        source_from_path(
+            "raw/new_files/03_bases_sistematizadas/demografia/eventos_vitais/base.xlsx"
+        )
+        == "(não identificada)"
+    )
+    assert (
+        source_from_path("raw/new_files/01_fontes_e_coletas/economia/base.xlsx")
+        == "(não identificada)"
+    )
     assert source_from_path("raw/fiscal/a.xlsx") == "fiscal"
     assert source_from_path("raw/social/a.csv") == "social"
     assert (

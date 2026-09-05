@@ -28,6 +28,14 @@ REQUIRED_COLUMN_COLUMNS = {
     "column_index",
     "header_normalized",
 }
+NEW_FILES_FUNCTIONAL_ROOTS = {
+    "01_fontes_e_coletas",
+    "02_execucoes_tecnicas",
+    "03_bases_sistematizadas",
+    "04_apresentacoes",
+    "05_integracao_bi",
+}
+LEGACY_PUBLIC_FINANCE_SOURCES = ("Federal", "Estadual", "Municipal")
 
 
 @dataclass(frozen=True)
@@ -45,10 +53,29 @@ def _validate_columns(frame: pd.DataFrame, required: set[str], name: str) -> Non
 
 
 def source_from_path(value: object) -> str:
-    """Extrai a origem declarada de caminhos históricos e ramos de ``raw``."""
+    """Extrai origem declarada sem confundir estágio funcional com fonte.
+
+    Caminhos históricos ``raw/new_files/Federal|Estadual|Municipal`` continuam
+    válidos. Na árvore funcional, somente ``01_fontes_e_coletas`` pode declarar
+    fonte. Os demais ramos são produtos ou execuções e retornam origem não
+    identificada para impedir que sejam promovidos como entradas brutas.
+    """
     parts = PurePosixPath(str(value or "").strip("/")).parts
     if len(parts) >= 3 and parts[0:2] == ("raw", "new_files"):
-        return parts[2]
+        tail = parts[2:]
+        root = tail[0]
+        if root not in NEW_FILES_FUNCTIONAL_ROOTS:
+            return root
+        if root != "01_fontes_e_coletas":
+            return "(não identificada)"
+
+        directories = tail[1:-1]
+        for source in LEGACY_PUBLIC_FINANCE_SOURCES:
+            if source in directories:
+                return source
+        if len(directories) >= 2:
+            return directories[-1]
+        return "(não identificada)"
     if len(parts) >= 4 and parts[0:2] == ("raw", "raw_portal_transparencia"):
         return parts[2]
     if len(parts) >= 3 and parts[0] == "raw":

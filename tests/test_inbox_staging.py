@@ -138,6 +138,30 @@ def test_build_staging_excludes_content_copy_and_flags_icms_rows(
     assert icms_frame["_duplicate_group_id"].notna().sum() == 2
     dispositions = result.source_manifest.set_index("relative_path")["disposition"]
     assert dispositions[federal_copy] == "EXCLUDED_CONTENT_DUPLICATE_FROM_STAGING"
+    indicators = result.quality_summary.set_index("indicator")["value"]
+    assert indicators["profile_tables_outside_staging_scope"] == 0
+
+
+def test_build_staging_ignores_non_source_functional_branches(tmp_path: Path) -> None:
+    outside = (
+        "raw/new_files/03_bases_sistematizadas/demografia/eventos_vitais/base.xlsx"
+    )
+    _write_workbook(tmp_path / outside, ("ano", "valor"), [[2024, 1]])
+    profile = _profile(outside, widths={outside: 2})
+
+    result = build_staging(
+        tmp_path,
+        profile,
+        pd.DataFrame(),
+        pd.DataFrame(),
+        snapshot_id="new-files-functional-001",
+    )
+
+    assert result.source_manifest.empty
+    assert sum(len(frame) for frame in result.datasets.values()) == 0
+    indicators = result.quality_summary.set_index("indicator")["value"]
+    assert indicators["source_tables_observed"] == 0
+    assert indicators["profile_tables_outside_staging_scope"] == 1
 
 
 def test_write_staging_output_is_atomic_and_refuses_overwrite(

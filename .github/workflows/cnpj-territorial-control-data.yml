@@ -22,7 +22,7 @@ jobs:
     timeout-minutes: 300
     env:
       DEFAULT_COMPETENCE: '2026-08'
-      RFB_SHARE: 'https://arquivos.receitafederal.gov.br/index.php/s/gn672Ad4CF8N6TK/download'
+      RFB_SHARE: 'https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
             echo "Downloading $file"
             curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 \
               --output "$out" \
-              "${RFB_SHARE}?path=%2F${COMPETENCE}&files=${file}"
+              "${RFB_SHARE}/${COMPETENCE}/${file}"
             test -s "$out"
             unzip -tq "$out" >/dev/null
           }

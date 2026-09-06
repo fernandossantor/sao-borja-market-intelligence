@@ -1,0 +1,106 @@
+name: CEMPRE 9528 v007 capture
+
+on:
+  push:
+    branches:
+      - data/cempre-9528-v007
+    paths:
+      - .github/workflows/cempre-9528-v007.yml
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Query official SIDRA table 9528
+        shell: bash
+        run: |
+          mkdir -p artifacts/cempre_9528_v007
+          python - <<'PY'
+          import csv
+          import json
+          import pathlib
+          import urllib.parse
+          import urllib.request
+
+          out = pathlib.Path('artifacts/cempre_9528_v007')
+          base = 'https://apisidra.ibge.gov.br/values'
+          categories = [
+              '117440', # 47.11-3 hipermercados e supermercados
+              '117441', # 47.12-1 minimercados, mercearias e armazens
+              '117444', # 47.21-1 padaria/laticinio/doces
+              '117445', # 47.22-9 carnes e pescados
+              '117446', # 47.23-7 bebidas
+              '117447', # 47.24-5 hortifrutigranjeiros
+              '117448', # 47.29-6 outros alimentos/fumo
+          ]
+          periods = ['2022', '2023', '2024']
+          variables = ['706', '707']  # unidades locais; pessoal ocupado total
+          rows = []
+          manifest = []
+
+          for period in periods:
+              path = (
+                  f'/t/9528/n6/4318002/v/{",".join(variables)}/p/{period}'
+                  f'/c12762/{",".join(categories)}/h/y/f/a/d/m'
+              )
+              url = base + path
+              req = urllib.request.Request(url, headers={'User-Agent': 'sbmi-cempre-v007/1.0'})
+              try:
+                  with urllib.request.urlopen(req, timeout=120) as resp:
+                      payload_bytes = resp.read()
+                      status = resp.status
+                      content_type = resp.headers.get('content-type')
+              except Exception as exc:
+                  manifest.append({'period': period, 'url': url, 'status': 'ERROR', 'error': repr(exc)})
+                  continue
+
+              raw_path = out / f'sidra_9528_sao_borja_{period}.json'
+              raw_path.write_bytes(payload_bytes)
+              payload = json.loads(payload_bytes.decode('utf-8'))
+              manifest.append({
+                  'period': period,
+                  'url': url,
+                  'status': status,
+                  'content_type': content_type,
+                  'rows_including_header': len(payload),
+              })
+              if not isinstance(payload, list) or len(payload) < 2:
+                  continue
+              header = payload[0]
+              for item in payload[1:]:
+                  friendly = {header.get(k, k): v for k, v in item.items()}
+                  friendly['_period_request'] = period
+                  rows.append(friendly)
+
+          (out / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
+          (out / 'normalized.json').write_text(json.dumps(rows, ensure_ascii=False, indent=2), encoding='utf-8')
+
+          if rows:
+              fields = []
+              seen = set()
+              for row in rows:
+                  for key in row:
+                      if key not in seen:
+                          seen.add(key)
+                          fields.append(key)
+              with (out / 'normalized.csv').open('w', newline='', encoding='utf-8-sig') as fh:
+                  writer = csv.DictWriter(fh, fieldnames=fields)
+                  writer.writeheader()
+                  writer.writerows(rows)
+
+          print(json.dumps(manifest, ensure_ascii=False, indent=2))
+          print(f'normalized rows: {len(rows)}')
+          if not rows:
+              raise SystemExit('No SIDRA rows returned')
+          PY
+      - name: Upload capture artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cempre-9528-v007
+          path: artifacts/cempre_9528_v007/
+          if-no-files-found: error

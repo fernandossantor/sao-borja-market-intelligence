@@ -21,8 +21,10 @@ A finalidade analítica é apoiar o módulo transversal de **retenção territor
 Fonte primária: Receita Federal do Brasil — Dados Abertos CNPJ.
 
 - Dados cadastrais e campo matriz/filial: <https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/convenios-e-transferencias/compartilhamento-de-bases-de-dados-2013-decreto-no-8-789-2016/leiaute-das-bases/dados-da-base-cnpj>
+- Metadados dos Dados Abertos CNPJ: <https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf>
 - Cadastro e dados abertos: <https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/dados-abertos/cadastros>
 - Tabela de municípios TOM: <https://www.gov.br/receitafederal/dados/municipios.csv/view>
+- CNPJ alfanumérico: <https://www.gov.br/receitafederal/pt-br/acesso-a-informacao/acoes-e-programas/programas-e-atividades/cnpj-alfanumerico/cnpj-alfa>
 
 São Borja:
 
@@ -39,6 +41,8 @@ A classificação territorial resulta de duas informações diferentes:
 
 - condição do estabelecimento local (`matriz` ou `filial`);
 - município da matriz empresarial.
+
+Essa separação tornou-se ainda mais importante com o CNPJ alfanumérico. Desde julho de 2026, novas inscrições podem conter letras nas doze primeiras posições do CNPJ, enquanto os dois dígitos verificadores permanecem numéricos. Além disso, a própria Receita Federal esclarece que a associação histórica entre ordem `0001` e matriz não deve ser usada como identificador permanente, pois uma filial pode posteriormente assumir a condição de matriz. O pipeline trata raiz, ordem e CNPJ completo como texto e possui teste de regressão para o formato alfanumérico.
 
 ## Entradas
 

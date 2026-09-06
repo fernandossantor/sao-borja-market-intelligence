@@ -6,9 +6,9 @@ import csv
 import hashlib
 import shutil
 import zipfile
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 import pandas as pd
 
@@ -255,9 +255,9 @@ def curate_cnpj_territorial_control(
     company_keep = company[
         ["cnpj_basico", "razao_social", "natureza_juridica", "capital_social", "porte_empresa"]
     ].copy()
-    matrix_keep = matrices[
-        ["cnpj_basico", "matrix_cnpj", "municipio", "uf"]
-    ].rename(columns={"municipio": "matrix_municipality_tom", "uf": "matrix_uf"})
+    matrix_keep = matrices[["cnpj_basico", "matrix_cnpj", "municipio", "uf"]].rename(
+        columns={"municipio": "matrix_municipality_tom", "uf": "matrix_uf"}
+    )
 
     result = local.merge(company_keep, on="cnpj_basico", how="left", validate="many_to_one")
     result = result.merge(matrix_keep, on="cnpj_basico", how="left", validate="many_to_one")
@@ -274,9 +274,11 @@ def curate_cnpj_territorial_control(
     )
     result["municipality_ibge"] = municipality_ibge
     result["cnae_division"] = result["cnae_fiscal_principal"].str[:2]
-    result["matrix_branch_label"] = result["identificador_matriz_filial"].map(
-        {"1": "MATRIZ", "2": "FILIAL"}
-    ).fillna("DESCONHECIDO")
+    result["matrix_branch_label"] = (
+        result["identificador_matriz_filial"]
+        .map({"1": "MATRIZ", "2": "FILIAL"})
+        .fillna("DESCONHECIDO")
+    )
     result["territorial_control_status"] = "INDETERMINADO"
     is_local_matrix = result["identificador_matriz_filial"] == "1"
     is_branch = result["identificador_matriz_filial"] == "2"
@@ -287,9 +289,9 @@ def curate_cnpj_territorial_control(
     result.loc[
         is_branch & matrix_known & ~matrix_local, "territorial_control_status"
     ] = "FILIAL_DE_MATRIZ_EXTERNA"
-    result.loc[
-        is_branch & ~matrix_known, "territorial_control_status"
-    ] = "FILIAL_MATRIZ_NAO_LOCALIZADA"
+    result.loc[is_branch & ~matrix_known, "territorial_control_status"] = (
+        "FILIAL_MATRIZ_NAO_LOCALIZADA"
+    )
     result["nature"] = "observed_rfb"
     result["source_scope"] = "Dados Abertos CNPJ — estabelecimento ativo em São Borja"
 
@@ -317,7 +319,11 @@ def curate_cnpj_territorial_control(
         "nature",
         "source_scope",
     ]
-    result = result[keep].sort_values(["territorial_control_status", "cnpj"]).reset_index(drop=True)
+    result = (
+        result[keep]
+        .sort_values(["territorial_control_status", "cnpj"])
+        .reset_index(drop=True)
+    )
 
     status_order = [
         "MATRIZ_LOCAL",

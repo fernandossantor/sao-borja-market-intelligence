@@ -176,6 +176,59 @@ def test_cnpj_territorial_control_classifies_local_and_external_matrices(
     assert len(persisted) == 3
 
 
+def test_cnpj_territorial_control_accepts_alphanumeric_cnpj(tmp_path: Path) -> None:
+    est_dir = tmp_path / "est"
+    emp_dir = tmp_path / "emp"
+    est_dir.mkdir()
+    emp_dir.mkdir()
+
+    # Desde julho de 2026 novas inscrições podem usar letras nas 12 primeiras
+    # posições do CNPJ. O parser deve preservar raiz e ordem como texto.
+    root = "A1B2C3D4"
+    order = "E08G"
+    _zip_rows(
+        est_dir / "Estabelecimentos0.zip",
+        "ESTABELE0.CSV",
+        [
+            _est(
+                root,
+                order,
+                "12",
+                "1",
+                "02",
+                "8863",
+                fantasy="Matriz alfanumerica",
+                cnae="6201501",
+            )
+        ],
+    )
+    _zip_rows(
+        emp_dir / "Empresas0.zip",
+        "EMPRE0.CSV",
+        [_company(root, "Empresa Alfa Ltda", "03")],
+    )
+    _zip_rows(tmp_path / "Municipios.zip", "MUNIC.CSV", [["8863", "SAO BORJA"]])
+
+    roots = {
+        layer: tmp_path / layer
+        for layer in ("staging", "curated", "exports", "audit")
+    }
+    result = curate_cnpj_territorial_control(
+        establishments=est_dir,
+        companies=emp_dir,
+        municipalities_zip=tmp_path / "Municipios.zip",
+        roots=roots,
+        execution_id="alpha",
+        chunksize=1,
+    )
+
+    row = result.establishments.iloc[0]
+    assert row["cnpj"] == "A1B2C3D4E08G12"
+    assert row["cnpj_basico"] == root
+    assert row["cnpj_ordem"] == order
+    assert row["territorial_control_status"] == "MATRIZ_LOCAL"
+
+
 def test_cnpj_territorial_control_refuses_overwrite(tmp_path: Path) -> None:
     est_dir = tmp_path / "est"
     emp_dir = tmp_path / "emp"

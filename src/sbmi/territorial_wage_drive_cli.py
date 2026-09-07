@@ -1,4 +1,4 @@
-"""Run the territorial wage pipeline from the project master copies on Google Drive."""
+"""Run the territorial wage pipeline from project master copies on Google Drive."""
 
 from __future__ import annotations
 
@@ -18,12 +18,16 @@ from sbmi.territorial_wage_estimation import (
 
 RAIS_VINC_SUL_2025_DRIVE_ID = "16NgcdvbvKLwlNoUmBpfXoeVXqGr5kOhn"
 RAIS_VINC_SUL_2025_SIZE = 704_888_712
-RAIS_VINC_SUL_2025_SHA256 = "c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0"
+RAIS_VINC_SUL_2025_SHA256 = (
+    "c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0"
+)
 RAIS_VINC_MEMBER = "RAIS_VINC_PUB_SUL.COMT"
 
 RFB_CELLS_DRIVE_ID = "10Frn6bcdixiMiXNQpe_5ycKjDHOrmyCd"
 RFB_CELLS_SIZE = 30_429
-RFB_CELLS_SHA256 = "73d53f372abda611f448970a5ea5a362f4183aee09e14b4c355c74ff7b585497"
+RFB_CELLS_SHA256 = (
+    "73d53f372abda611f448970a5ea5a362f4183aee09e14b4c355c74ff7b585497"
+)
 
 
 def _source_manifest(
@@ -72,7 +76,8 @@ def _run_metadata(*, execution_id: str) -> pd.DataFrame:
             ("rfb_competence", "2026-08", "observed_source_period"),
             (
                 "operational_source",
-                "Google Drive project master copies; no external source reacquisition in this run",
+                "Google Drive project master copies; no external source "
+                "reacquisition in this run",
                 "method",
             ),
             (
@@ -92,7 +97,8 @@ def _run_metadata(*, execution_id: str) -> pd.DataFrame:
             ),
             (
                 "primary_wage_metric",
-                "sum of Vl Rem Média Nom across active non-abandoned business links; not annual payroll",
+                "sum of Vl Rem Média Nom across active non-abandoned business links; "
+                "not annual payroll",
                 "method",
             ),
             (
@@ -102,12 +108,14 @@ def _run_metadata(*, execution_id: str) -> pd.DataFrame:
             ),
             (
                 "estimation_rule",
-                "RAIS employment and remuneration allocated by RFB establishment shares within hierarchical CNAE/nature cells",
+                "RAIS employment and remuneration allocated by RFB establishment "
+                "shares within hierarchical CNAE/nature cells",
                 "method",
             ),
             (
                 "temporal_comparability",
-                "RAIS stock/reference 2025 versus RFB 2026-08; estimates are not same-period observations",
+                "RAIS stock/reference 2025 versus RFB 2026-08; estimates are not "
+                "same-period observations",
                 "limitation",
             ),
         ],
@@ -119,7 +127,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--execution-id",
-        default=f"territorial-wage-rais2025-rfb2026-08-drive-{datetime.now(UTC).strftime('%Y%m%d-%H%M%S')}",
+        default=(
+            "territorial-wage-rais2025-rfb2026-08-drive-"
+            f"{datetime.now(UTC).strftime('%Y%m%d-%H%M%S')}"
+        ),
     )
     parser.add_argument("--secret-env", default="SBMI_GDRIVE_SA_B64")
     parser.add_argument("--rais-drive-file-id", default=RAIS_VINC_SUL_2025_DRIVE_ID)
@@ -132,7 +143,9 @@ def main() -> None:
     parser.add_argument(
         "--rais-extract-path",
         type=Path,
-        default=Path(".data/staging/rais/2025/rais_vinc_2025_sao_borja_extract_v001.csv"),
+        default=Path(
+            ".data/staging/rais/2025/rais_vinc_2025_sao_borja_extract_v001.csv"
+        ),
     )
     parser.add_argument(
         "--rfb-cells-local-path",

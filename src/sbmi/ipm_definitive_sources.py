@@ -37,9 +37,9 @@ def validate_source_registry() -> None:
     expected = set(range(2003, 2027))
     observed = set(IPM_DEFINITIVE_ARCHIVE_URLS)
     if observed != expected:
-        raise ValueError(
-            f"Registro IPM incompleto: faltam={sorted(expected-observed)} extras={sorted(observed-expected)}"
-        )
+        missing = sorted(expected - observed)
+        extras = sorted(observed - expected)
+        raise ValueError(f"Registro IPM incompleto: faltam={missing} extras={extras}")
     allowed_hosts = (
         "https://atendimento.receita.rs.gov.br/",
         "https://admin.atendimento.receita.rs.gov.br/",

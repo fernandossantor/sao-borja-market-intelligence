@@ -79,41 +79,45 @@ A pasta de destino dos derivados canônicos foi criada em `_sao_borja/exports/`:
 - folder ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`;
 - nome `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
 
-### Diagnóstico das tentativas com conta de serviço
+### Tentativas com conta de serviço
 
 A primeira tentativa foi interrompida por `403 Forbidden` quando a conta de serviço ainda possuía papel `reader`. Após a permissão ser elevada manualmente para `writer`, a segunda tentativa retornou o mesmo `403`.
 
-A auditoria posterior confirmou que a alteração de permissão foi efetiva: a conta `sbmi-drive-reader@sao-borja-market-intelligence.iam.gserviceaccount.com` aparece como `writer` na pasta. A pasta, porém, está em **Meu Drive** (`driveId` ausente/nulo), e não em um Shared Drive.
+A auditoria posterior confirmou que a alteração de permissão foi efetiva, mas a pasta está em **Meu Drive** (`driveId` ausente/nulo), não em Shared Drive. A conta de serviço, portanto, não foi usada na promoção final.
 
-Esse segundo bloqueio não é mais uma falha de permissão de pasta. Contas de serviço não possuem cota de armazenamento própria para assumir a propriedade de novos arquivos em Meu Drive. Para criar arquivos nesse contexto, a escrita deve ocorrer em um Shared Drive ou por OAuth 2.0 em nome de um usuário humano.
+### Promoção final por handoff controlado
 
-A pasta foi conferida novamente e permanece vazia: **0 de 7 arquivos promovidos**. Não houve upload parcial.
+Os sete CSVs foram empacotados no Codespace e transferidos em um ZIP de 22.223 bytes, SHA-256 `a4fc57af8c7bf3f81d8d160eed9fbc954826d9d1fa55dd0af8320c779eeeff43`.
 
-### Backend de promoção adotado
+Antes do upload, o ZIP foi aberto e conferido: continha exatamente os sete nomes esperados, e cada arquivo reproduziu os tamanhos e SHA-256 canônicos registrados nesta auditoria. Os arquivos foram então enviados ao Google Drive como CSVs brutos, sem conversão.
 
-A leitura do projeto continua separada e restrita:
+Conferência pós-upload disponível pelo conector:
 
-- `SBMI_GDRIVE_SA_B64`: conta de serviço para leitura programática;
-- `sbmi-drive`: remote rclone existente com escopo `drive.readonly`.
+- arquivos esperados: 7;
+- arquivos presentes: 7;
+- nomes divergentes: 0;
+- tamanhos divergentes: 0;
+- promoção parcial: não.
 
-A promoção autorizada passa a usar um segundo remote rclone, `sbmi-drive-write`, autenticado por OAuth em nome do usuário humano proprietário do Drive e restrito operacionalmente pela raiz `_sao_borja`.
+O conector Google Drive usado nesta promoção não expõe `sha256Checksum` no retorno normalizado. Por isso, não se registra uma segunda recomputação criptográfica sobre bytes baixados do Drive. O SHA-256 permanece o hash dos bytes revalidados imediatamente antes do upload; no Drive foram conferidos quantidade, nome, pasta-pai e tamanho em bytes.
 
-A CLI `sbmi.territorial_wage_promote_drive_cli` valida os sete arquivos locais por tamanho e SHA-256. Para cada arquivo remoto existente ou recém-enviado, baixa uma cópia temporária e recalcula o SHA-256. Nomes duplicados ou qualquer divergência interrompem a promoção. A rotina não usa `sync`, não apaga arquivos e não altera dados brutos.
+IDs finais:
 
-A configuração única do remote de escrita está documentada em `docs/drive_write_connection.md`.
+- `run_metadata.csv`: `12_w-dFhOarOT1cKPIHs1Xppn6oML88Bl`;
+- `source_manifest.csv`: `1PxFmNNRIDWwAxHbDPyg08H8oKB3pY0av`;
+- `territorial_wage_by_division.csv`: `15bivaaf_fgD_zh9GMGrPL8Vtcq6aTOdC`;
+- `territorial_wage_cells.csv`: `19WoXfENy0cihi5MeMcz0kWqCqj_BQ5Tx`;
+- `territorial_wage_coverage.csv`: `1J_DEWZqRrUI9UpF5z9PaW3zZ7rugeG9D`;
+- `territorial_wage_summary.csv`: `1K5h5wVnJMWx5X39M9QBXN0T4pkRjrP9g`;
+- `validation.csv`: `1GGOFgIWajrANx6s5n_0CovopzIKz2Eca`.
 
-Execução, depois de configurar `sbmi-drive-write`:
+Manifesto específico: `docs/caderno_base/territorial_wage_drive_promotion_manifest.md`.
 
-```bash
-cd /workspaces/sbmi-cnpj-run
-git fetch origin feature/cnpj-territorial-control-v1
-git merge --ff-only origin/feature/cnpj-territorial-control-v1
-python -m sbmi.territorial_wage_promote_drive_cli
-```
+**Status operacional da promoção: CONCLUÍDO — 7/7 arquivos.**
 
 ## Caderno-Base sincronizado
 
-A versão de controle corrente foi criada no Drive como `caderno_base_territorial_v006_emprego_remuneracao_20260907`, preservando a v005 como histórico. A v006 reúne, em abas próprias, resumo, emprego/remuneração, cobertura de match, validação remuneratória, manifesto de fontes/saídas e análise setorial remuneratória.
+A versão de controle corrente é `caderno_base_territorial_v006_emprego_remuneracao_20260907`, preservando a v005 como histórico. A aba `Manifesto_remuneracao` foi atualizada com os sete Drive file IDs, o status 7/7 promovidos, o hash do ZIP de handoff e a limitação de verificação pós-upload.
 
 ## Interpretação e limitações
 

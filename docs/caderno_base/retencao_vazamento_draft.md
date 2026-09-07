@@ -1,6 +1,6 @@
 # Retenção territorial, vazamento econômico e circulação da renda
 
-**Status:** texto-base atualizado após execução e auditoria do pipeline oficial da Receita Federal, competência 2026-08; ainda não constitui um índice monetário de retenção territorial.  
+**Status:** texto-base atualizado após execução e auditoria do pipeline oficial da Receita Federal, competência 2026-08, e da primeira ponderação estimada pelo emprego formal da RAIS 2025; ainda não constitui um índice monetário de retenção territorial.  
 **Abrangência:** município de São Borja/RS, com desdobramentos setoriais posteriores.  
 **Objetivo:** interpretar não apenas quanto valor econômico é produzido ou movimentado em São Borja, mas quanto desse valor permanece, recircula ou é transferido para fora do território.
 
@@ -66,23 +66,43 @@ As categorias cadastrais de porte também apresentam incidência desigual de fil
 
 Esses resultados são **dados calculados pelo projeto a partir dos microdados oficiais da Receita Federal — Dados Abertos CNPJ, competência 2026-08**. Não constituem estatísticas oficiais publicadas pela RFB para São Borja, mas indicadores derivados por pipeline auditado e reproduzível.
 
-## 5. Do controle cadastral ao peso econômico
+## 5. Do controle cadastral ao peso laboral estimado
 
-A localização da matriz é apenas a primeira etapa. Ela identifica onde está formalmente situado o centro cadastral da raiz CNPJ, mas não mede, por si só, o valor que deixa ou permanece no município. A contagem de estabelecimentos atribui peso unitário a organizações de escalas muito diferentes.
+A localização da matriz identifica onde está formalmente situado o centro cadastral da raiz CNPJ, mas não mede, por si só, o peso econômico das unidades. A contagem de estabelecimentos atribui peso unitário a organizações de escalas muito diferentes. A primeira ponderação foi, por isso, realizada com o emprego formal da **RAIS Estabelecimentos 2025**, restringindo-se a estabelecimentos do tipo CNPJ e ao grande grupo de Natureza Jurídica **Entidades Empresariais**.
 
-A primeira ponderação será feita pelo emprego formal e pela massa salarial. O objetivo é comparar a participação dos estabelecimentos com matriz local e externa no número de vínculos e, quando metodologicamente possível, na remuneração total. Essa etapa é importante porque permite diferenciar **quantidade de estabelecimentos** de **peso econômico aproximado**.
+Na RAIS 2025 foram observados **2.197 registros empresariais do tipo CNPJ em São Borja e 8.595 vínculos ativos**. Esse total não deve ser comparado diretamente aos 6.906 CNPJs empresariais ativos da Receita Federal: são universos administrativos diferentes. A RFB registra estabelecimentos cadastralmente ativos; a RAIS registra estabelecimentos alcançados pela declaração trabalhista, inclusive com lógica própria para unidades sem vínculos.
 
-A segunda dimensão é fiscal. No comércio de mercadorias, a análise deve considerar especialmente o ICMS e os mecanismos relacionados ao Valor Adicionado Fiscal (VAF) e à participação municipal nas receitas estaduais, enquanto o ISSQN é particularmente relevante para atividades de serviços. Esses instrumentos possuem bases de incidência e mecanismos de apropriação distintos e não devem ser somados ou atribuídos aos setores sem a devida compatibilização metodológica.
+Como a base pública da RAIS não preserva o CNPJ do estabelecimento, não foi possível executar um join empresarial direto. O projeto adotou uma compatibilização hierárquica entre as duas fontes. A chave principal combina **CNAE 2.0 subclasse × Natureza Jurídica detalhada**. Quando essa combinação não existe na RFB 2026, o algoritmo recua, sucessivamente, para subclasse CNAE, classe × natureza, classe e divisão. O procedimento é explícito e cada célula registra o nível de correspondência utilizado.
 
-A terceira dimensão é o encadeamento produtivo. Para ela, os dados secundários são mais limitados. Será necessário estimar ou pesquisar a proporção das compras realizadas junto a fornecedores locais, regionais, nacionais ou internacionais. A mesma necessidade se aplica aos serviços corporativos e ao destino do excedente empresarial, dimensões em que empresas privadas raramente divulgam informações territorializadas com o detalhe necessário.
+A cobertura foi elevada: **8.581 dos 8.595 vínculos, ou 99,84%, encontram correspondência exata em CNAE subclasse × Natureza Jurídica**. Outros 14 vínculos utilizam algum nível de recuo e as três células sem correspondência possuem zero vínculos ativos. Do lado da RFB, a correspondência exata cobre 6.029 dos 6.906 estabelecimentos empresariais e 255 das 284 filiais empresariais de matriz externa; com os recuos controlados, 280 das 284 unidades externas encontram correspondência.
 
-## 6. Hipótese setorial: comércio e vazamento econômico
+Para cada célula compatível, os vínculos observados na RAIS são distribuídos entre matriz local, filial de matriz local e filial de matriz externa segundo a participação dos estabelecimentos RFB de cada grupo na mesma célula:
 
-O comércio desempenha uma função ambivalente no território. Ele organiza a distribuição de bens, gera postos de trabalho, ocupa imóveis, demanda serviços e transforma renda domiciliar em atividade econômica local. Ao mesmo tempo, a análise cadastral mostra que o comércio concentra **mais da metade das unidades empresariais de matriz externa identificadas no município**.
+**emprego estimado do grupo na célula = vínculos RAIS da célula × estabelecimentos RFB do grupo na célula / total de estabelecimentos RFB da célula.**
 
-Nos grandes supermercados, atacarejos, redes de farmácias e lojas de eletrodomésticos, é plausível esperar maior centralização de compras, logística, tecnologia, marketing, administração e decisões financeiras. **Essa é uma hipótese estrutural baseada na forma de organização das redes, não uma estimativa monetária para São Borja.** A magnitude do eventual vazamento dependerá da cadeia concreta de cada setor, das margens, da política de compras, do emprego local, da propriedade dos imóveis e dos mecanismos fiscais.
+O resultado é uma **estimativa**, não uma contagem observada de trabalhadores de empresas individualmente identificadas. O cenário-base produz aproximadamente **6.080,6 vínculos associados a matrizes locais**, **351,8 a filiais de matriz local** e **2.162,5 a filiais de matriz externa**. Assim, a participação estimada das estruturas empresariais de matriz externa no emprego formal empresarial é de **25,16%**.
 
-Por isso, o caderno não tratará o faturamento comercial como renda retida e não converterá o percentual de filiais externas em percentual de vazamento. A relação a investigar é mais próxima de:
+Esse resultado contrasta com os **4,11% dos estabelecimentos empresariais** vinculados a matrizes externas. A razão entre os dois pesos é aproximadamente **6,12**. Esse indicador deve ser lido como **sobrerrepresentação do peso laboral estimado em relação ao peso cadastral**, e não como afirmação de que uma filial externa individual empregue 6,12 vezes mais trabalhadores do que uma empresa local.
+
+A robustez foi testada de diferentes formas. Usando somente as células com correspondência exata, a participação externa estimada é de **25,08%**, apenas 0,08 ponto percentual abaixo do resultado completo. Entre as 551 células exatas, 449 são territorialmente puras na RFB e 102 são mistas. Nas células puras externas e nos poucos recuos igualmente puros há **1.232 vínculos**, equivalentes a **14,33%** do emprego empresarial. Esse valor não deve ser tratado como mínimo comprovado, porque a RAIS refere-se a 31/12/2025 e a RFB a agosto de 2026.
+
+A principal hipótese do modelo está nas células mistas, nas quais se presume, no cenário-base, emprego médio equivalente entre estabelecimentos locais e externos comparáveis dentro da mesma célula. A análise de sensibilidade mostra que, se o emprego médio das unidades externas fosse metade do emprego médio das unidades locais, a participação estimada externa cairia para **21,31%**; se fosse o dobro, subiria para **29,85%**. Esses valores são cenários de sensibilidade, não intervalos de confiança estatística.
+
+## 6. Evidência setorial: comércio concentra o peso externo estimado
+
+O comércio desempenha uma função ambivalente no território. Ele organiza a distribuição de bens, gera postos de trabalho, ocupa imóveis, demanda serviços e transforma renda domiciliar em atividade econômica local. Ao mesmo tempo, a análise cadastral mostra que o comércio concentra mais da metade das unidades empresariais de matriz externa identificadas no município, e a ponderação pelo emprego confirma que essa concentração também possui relevância laboral.
+
+As divisões **45, 46 e 47** reúnem **3.706 vínculos empresariais observados na RAIS 2025**. O modelo estima aproximadamente **1.315,5 vínculos associados a matrizes externas**, ou **35,50% do emprego empresarial do comércio**. Esse bloco responde por cerca de **60,83% de todo o emprego externo estimado**.
+
+O comércio varejista, divisão 47, possui 2.893 vínculos e aproximadamente **1.083,7 vínculos externos estimados**, correspondentes a **37,46% do emprego empresarial da divisão** e a pouco mais de metade de todo o emprego externo estimado no município. Transporte terrestre (49), comércio atacadista (46), atividades de serviços financeiros (64) e armazenamento e apoio aos transportes (52) aparecem em seguida em contribuição absoluta ao emprego externo estimado.
+
+As divisões 64 e 35 apresentam participação externa estimada muito elevada dentro de seus próprios estoques de emprego, mas possuem bases de vínculos bem menores que o comércio varejista. Por isso, percentuais setoriais elevados não devem ser confundidos com contribuição absoluta elevada.
+
+A concentração também foi auditada por célula CNAE × natureza. Há 105 células com contribuição externa positiva; a maior responde por 8,26% do emprego externo estimado, as cinco maiores por 28,77%, as dez maiores por 47,24% e as vinte maiores por 68,80%. Assim, o resultado não depende de uma única combinação excepcional, embora exista concentração setorial e empresarial relevante.
+
+Nos grandes supermercados, atacarejos, redes de farmácias e lojas de eletrodomésticos, permanece plausível esperar maior centralização de compras, logística, tecnologia, marketing, administração e decisões financeiras. **Essa continua sendo uma hipótese estrutural sobre os fluxos monetários, não uma estimativa de vazamento para São Borja.** A estimativa de emprego externo mede peso laboral associado à estrutura cadastral, não remessa de lucros, origem das compras ou saída líquida de renda.
+
+Por isso, o caderno não tratará o faturamento comercial como renda retida e não converterá o percentual de filiais externas ou de emprego externo estimado em percentual de vazamento. A relação a investigar é mais próxima de:
 
 **valor movimentado localmente → custos intermediários externos + custos locais + remuneração do trabalho + tributos/retornos fiscais + excedente → parcela efetivamente retida no território.**
 
@@ -100,9 +120,15 @@ Essa dimensão será posteriormente relacionada aos módulos de finanças públi
 
 As evidências disponíveis permitem formular um diagnóstico mais preciso, embora ainda não monetário.
 
-Primeiro, **a estrutura cadastral e empresarial de São Borja é numericamente predominantemente local**: 95,58% de todos os estabelecimentos ativos e 95,89% dos estabelecimentos do grupo Entidades Empresariais pertencem a raízes cuja matriz cadastral está em São Borja. Segundo, **a presença de matrizes externas é concentrada**, tanto em formas societárias organizadas — especialmente sociedades limitadas e anônimas — quanto em determinados setores, sobretudo comércio, transporte/logística e atividades financeiras. Terceiro, **a contagem cadastral não representa o peso econômico dessas unidades**, tornando indispensável a ponderação por emprego, massa salarial e outras medidas de escala.
+Primeiro, **a estrutura cadastral e empresarial de São Borja é numericamente predominantemente local**: 95,58% de todos os estabelecimentos ativos e 95,89% dos estabelecimentos do grupo Entidades Empresariais pertencem a raízes cuja matriz cadastral está em São Borja.
 
-A análise de natureza jurídica também mostra que o conceito de matriz externa precisa ser aplicado de forma diferenciada. No universo geral do CNPJ, a vinculação externa inclui organizações empresariais, entidades associativas e estruturas públicas. Para a análise econômica de retenção e vazamento, o subconjunto de Entidades Empresariais é mais adequado, embora ainda precise ser refinado quando o objetivo exigir separar sociedades privadas, cooperativas, empresas públicas e sociedades de economia mista.
+Segundo, **a presença de matrizes externas é concentrada**, tanto em formas societárias organizadas — especialmente sociedades limitadas e anônimas — quanto em determinados setores, sobretudo comércio, transporte/logística e atividades financeiras.
+
+Terceiro, a primeira ponderação pelo emprego indica que **o peso laboral estimado das estruturas empresariais de matriz externa é muito superior ao seu peso na contagem cadastral**: 4,11% dos estabelecimentos empresariais contra aproximadamente 25,16% do emprego formal empresarial estimado. A diferença é consistente com a hipótese de que as unidades externas se concentram em atividades e formatos organizacionais de maior escala média, mas a base pública disponível não permite identificar diretamente os vínculos de cada CNPJ.
+
+Quarto, essa sobrerrepresentação não está distribuída uniformemente: o comércio 45–47 concentra 60,83% do emprego externo estimado e o varejo sozinho responde por pouco mais da metade. Isso reforça a importância de tratar retenção e vazamento de forma setorial, e não por um único coeficiente municipal.
+
+A análise de natureza jurídica continua mostrando que o conceito de matriz externa precisa ser aplicado de forma diferenciada. No universo geral do CNPJ, a vinculação externa inclui organizações empresariais, entidades associativas e estruturas públicas. Para a análise econômica de retenção e vazamento, o subconjunto de Entidades Empresariais é mais adequado, embora ainda precise ser refinado quando o objetivo exigir separar sociedades privadas, cooperativas, empresas públicas e sociedades de economia mista.
 
 A hipótese mais útil, portanto, não é a de uma economia que simplesmente “perde” riqueza, mas a de uma economia submetida a **fluxos simultâneos de entrada e saída**, cuja composição varia por setor e tipo de organização. O desafio analítico é identificar quais fluxos predominam, em que intensidade e com quais efeitos sobre renda disponível, consumo, reinvestimento e formação de capital local.
 
@@ -114,7 +140,8 @@ Cada caderno deverá distinguir:
 
 - participação de estruturas com matriz local e de filiais vinculadas a matrizes externas;
 - natureza jurídica das organizações, quando relevante para a interpretação;
-- emprego e massa salarial associados a cada grupo;
+- emprego observado por setor e emprego territorial estimado pelo método RAIS × RFB;
+- massa salarial associada a cada grupo, quando metodologicamente mensurável;
 - fornecedores e serviços contratados dentro e fora do município, quando mensuráveis;
 - retorno fiscal compatível com a atividade;
 - destino do excedente e reinvestimento, quando houver evidência verificável;
@@ -124,20 +151,22 @@ Cada caderno deverá distinguir:
 
 A análise ainda não permite calcular um **índice monetário de retenção territorial**. Também não permite afirmar quanto do lucro das filiais é remetido para fora, qual a parcela das compras realizada com fornecedores externos ou qual multiplicador local está associado a cada tipo de organização.
 
+A estimativa de emprego possui duas limitações centrais. A primeira é a ausência de CNPJ identificador na RAIS pública, que obriga a distribuição dos vínculos por células CNAE × natureza jurídica em vez de um join estabelecimento a estabelecimento. A segunda é a diferença temporal entre as fontes: a RAIS representa o estoque de vínculos em 31/12/2025, enquanto a estrutura cadastral da RFB utilizada corresponde à competência 2026-08. Mudanças de abertura, encerramento, natureza jurídica ou CNAE entre as duas datas podem alterar a composição das células.
+
 A situação cadastral ativa da Receita Federal não comprova, isoladamente, que o estabelecimento esteja operando economicamente na data de referência. Além disso, a localização da matriz formal não demonstra onde ocorrem todas as decisões empresariais, compras, receitas, pagamentos ou reinvestimentos.
 
-Com a classificação oficial matriz/filial, o município da matriz e a natureza jurídica já concluídos, os próximos avanços dependem principalmente de três conjuntos de dados: (1) emprego formal e massa salarial por estabelecimento ou recorte compatível; (2) VAF e demais dados fiscais territorializados e setorialmente compatíveis; e (3) pesquisa primária ou documentação empresarial sobre origem dos fornecedores, serviços contratados, destino do excedente e reinvestimento.
+Com a classificação oficial matriz/filial, o município da matriz, a natureza jurídica e a primeira ponderação pelo emprego concluídos, os próximos avanços dependem principalmente de três conjuntos de dados: (1) remuneração e massa salarial da RAIS 2025 em recorte compatível; (2) VAF e demais dados fiscais territorializados e setorialmente compatíveis; e (3) pesquisa primária ou documentação empresarial sobre origem dos fornecedores, serviços contratados, destino do excedente e reinvestimento.
 
 Somente depois dessa integração será avaliada a viabilidade de construir um **Índice de Retenção Territorial do Valor (IRTV)**. Até lá, a análise permanecerá modular, apresentando separadamente os componentes observados, calculados, estimados e hipotéticos.
 
 ## Fontes principais desta versão
 
 - Receita Federal do Brasil — Dados Abertos CNPJ, competência 2026-08, arquivos de Estabelecimentos, Empresas e Municípios utilizados pelo pipeline oficial do projeto.
-- CONCLA/IBGE — classificação de Natureza Jurídica e CNAE 2.0, conforme códigos preservados nos microdados da Receita Federal.
+- Ministério do Trabalho e Emprego — RAIS Estabelecimentos, ano-base 2025, arquivo público nacional `RAIS_ESTAB_PUB.7z`, filtrado para São Borja no derivado municipal do projeto.
+- CONCLA/IBGE — classificação de Natureza Jurídica e CNAE 2.0, conforme códigos preservados nos microdados da Receita Federal e da RAIS.
 - IBGE — PIB dos Municípios e CEMPRE, conforme módulos do Caderno-Base.
-- Ministério do Trabalho e Emprego — RAIS, conforme bases incorporadas ao projeto.
 - DataSebrae — fotografia empresarial utilizada na Base Territorial.
 - Levantamentos POM 2026 dos quatro mercados setoriais de São Borja.
 - Verificações cadastrais/corporativas registradas nas versões anteriores do Caderno-Base.
 
-**Nota de método:** as proporções desta versão foram calculadas a partir dos microdados oficiais da Receita Federal — Dados Abertos CNPJ, competência 2026-08, por meio do pipeline auditado do projeto. A execução canônica `cnpj-territorial-control-202608-manual-v002` reproduziu integralmente os 7.306 estabelecimentos da v001, acrescentando apenas a coluna `natureza_juridica`; as 22 colunas comuns, os agregados por CNAE e porte e os manifestos dos 21 arquivos-fonte permaneceram idênticos. Nenhum percentual derivado da antiga heurística de ordem do CNPJ foi reutilizado como resultado definitivo.
+**Nota de método:** a execução canônica `cnpj-territorial-control-202608-manual-v002` reproduziu integralmente os 7.306 estabelecimentos da v001 e preservou a Natureza Jurídica. O derivado RFB utilizado na ponderação contém 982 células territoriais CNAE × natureza × status. O extrato RAIS municipal utilizado possui SHA-256 `055ec3b175d1520fb9c83d49fbcaf9c4eea94c12adcd737d05f7e0f52632ef8c`; o derivado RFB de células possui SHA-256 `73d53f372abda611f448970a5ea5a362f4183aee09e14b4c355c74ff7b585497`; o arquivo bruto `RAIS_ESTAB_PUB.7z` preservado no Drive possui SHA-256 `6844c2fbd7b9e74354f616a18180001f5d5e4cc73425128a9008a217a49f4457`. A rotina reproduzível `sbmi.territorial_employment_estimation` registra cobertura, nível de fallback, estimativas, sensibilidade, reconciliação e manifesto das entradas imediatas. Nenhum percentual estimado de emprego deve ser apresentado como observação direta por CNPJ ou como percentual de vazamento monetário.

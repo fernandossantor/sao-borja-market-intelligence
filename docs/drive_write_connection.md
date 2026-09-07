@@ -28,6 +28,24 @@ ID da raiz:
 1or8_CYJYYWPjU3cIAmzgYPLRhKTGv91V
 ```
 
+## Pré-requisito: rclone instalado
+
+O rclone não é garantido pela imagem padrão do Codespace. Antes de configurar o remote, verificar:
+
+```bash
+command -v rclone || true
+```
+
+Se não houver resultado, instalar pelo gerenciador de pacotes do ambiente:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y rclone
+rclone version
+```
+
+Essa instalação altera apenas o ambiente efêmero do Codespace; não modifica o Google Drive nem os dados do projeto.
+
 ## Configuração única
 
 No Codespace:

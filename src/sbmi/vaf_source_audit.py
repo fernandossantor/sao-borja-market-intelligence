@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse
@@ -11,7 +12,11 @@ VAF_WRAPPER_URL = "https://www.sefaz.rs.gov.br/AIM/VAL-HIS.aspx"
 VAF_HISTORY_FORM_URL = (
     "https://www.sefaz.rs.gov.br/ASP/SEF_ROOT/AIM/AIM-WEB-VAL-HIS_1.asp"
 )
+VAF_HISTORY_RESULT_URL = (
+    "https://www.sefaz.rs.gov.br/ASP/SEF_ROOT/AIM/AIM-WEB-VAL-HIS_2.asp"
+)
 VAF_ARCHIVE_URL = "https://atendimento.receita.rs.gov.br/consultas-e-arquivos-antigos-ipm"
+SAO_BORJA_RANGE_VALUE = "SAO MARTINHSZZZZZZZZZZ"
 ALLOWED_HOSTS = {
     "atendimento.receita.rs.gov.br",
     "receita.fazenda.rs.gov.br",
@@ -162,11 +167,67 @@ class _RouteParser(HTMLParser):
             self.current_text = []
 
 
+class _TableParser(HTMLParser):
+    """Captura texto visível de tabelas sem atribuir semântica posicional."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.tables: list[list[dict[str, object]]] = []
+        self.current_table: list[dict[str, object]] | None = None
+        self.current_row: list[dict[str, str]] | None = None
+        self.current_cell_tag: str | None = None
+        self.current_cell_text: list[str] = []
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        del attrs
+        tag = tag.lower()
+        if tag == "table" and self.current_table is None:
+            self.current_table = []
+        elif tag == "tr" and self.current_table is not None:
+            self.current_row = []
+        elif tag in {"th", "td"} and self.current_row is not None:
+            self.current_cell_tag = tag
+            self.current_cell_text = []
+
+    def handle_data(self, data: str) -> None:
+        if self.current_cell_tag is not None:
+            self.current_cell_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        tag = tag.lower()
+        if tag in {"th", "td"} and self.current_cell_tag == tag:
+            assert self.current_row is not None
+            self.current_row.append(
+                {
+                    "tag": tag,
+                    "text": " ".join("".join(self.current_cell_text).split()),
+                }
+            )
+            self.current_cell_tag = None
+            self.current_cell_text = []
+        elif tag == "tr" and self.current_row is not None:
+            assert self.current_table is not None
+            if self.current_row:
+                self.current_table.append({"cells": self.current_row})
+            self.current_row = None
+        elif tag == "table" and self.current_table is not None:
+            self.tables.append(self.current_table)
+            self.current_table = None
+
+
 def _ensure_official_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.hostname not in ALLOWED_HOSTS:
         raise ValueError(f"Host VAF não autorizado: {parsed.hostname}")
     return url
+
+
+def _normalized_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value)
+    without_marks = "".join(char for char in normalized if not unicodedata.combining(char))
+    return " ".join(without_marks.casefold().split())
 
 
 def official_source_catalog() -> tuple[dict[str, str], ...]:
@@ -236,6 +297,36 @@ def extract_iframe_sources(html: str, *, source_url: str) -> tuple[str, ...]:
             continue
         results.append(url)
     return tuple(results)
+
+
+def extract_table_rows(html: str) -> tuple[tuple[dict[str, object], ...], ...]:
+    """Extrai células de tabelas preservando apenas tag e texto visível."""
+    parser = _TableParser()
+    parser.feed(html)
+    return tuple(tuple(row for row in table) for table in parser.tables)
+
+
+def find_table_rows_containing(
+    html: str,
+    needle: str,
+) -> tuple[dict[str, object], ...]:
+    """Localiza linhas por texto normalizado, sem interpretar colunas ou valores."""
+    target = _normalized_text(needle)
+    matches: list[dict[str, object]] = []
+    for table_index, table in enumerate(extract_table_rows(html)):
+        for row_index, row in enumerate(table):
+            cells = row["cells"]
+            assert isinstance(cells, list)
+            joined = " ".join(cell["text"] for cell in cells)
+            if target in _normalized_text(joined):
+                matches.append(
+                    {
+                        "table_index": table_index,
+                        "row_index": row_index,
+                        "cells": cells,
+                    }
+                )
+    return tuple(matches)
 
 
 def summarize_form(structure: FormStructure) -> dict[str, object]:

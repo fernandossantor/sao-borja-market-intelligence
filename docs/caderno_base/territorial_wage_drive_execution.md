@@ -81,6 +81,14 @@ A pasta de destino dos derivados canônicos foi criada em `_sao_borja/exports/`:
 
 A rotina `sbmi.territorial_wage_promote_drive_cli` promove somente os sete arquivos cujos tamanho e SHA-256 coincidirem exatamente com esta auditoria. Arquivos já existentes e idênticos são reutilizados; colisões de mesmo nome com conteúdo divergente interrompem a promoção.
 
+### Estado operacional da promoção
+
+A primeira tentativa de promoção em 2026-09-07 foi interrompida antes de qualquer upload por resposta `403 Forbidden` da API do Google Drive. A auditoria de permissões da pasta de destino confirmou que a conta de serviço `sbmi-drive-reader@sao-borja-market-intelligence.iam.gserviceaccount.com` possui papel `reader`, enquanto a pasta exige permissão de escrita para criação dos arquivos.
+
+A pasta de destino foi conferida após a falha e permaneceu vazia: **0 de 7 arquivos foram enviados**. Portanto, não houve promoção parcial nem divergência entre os derivados locais auditados e o Drive; o bloqueio é exclusivamente de autorização de escrita.
+
+Para concluir a promoção, a conta de serviço deve receber papel de **Editor/Writer** na pasta de destino (ou em um ancestral com herança efetiva de escrita). Depois disso, a mesma CLI pode ser executada novamente; sua lógica idempotente preserva a auditoria de nome, tamanho e SHA-256.
+
 Execução:
 
 ```bash

@@ -23,26 +23,50 @@ Versões anteriores do caderno e derivados consolidados não devem ser sobrescri
 - Execução remuneratória canônica: `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
 - Pasta dos derivados remuneratórios promovidos: Drive ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`.
 - Auditoria da execução remuneratória: 7/7 controles `PASS`, 0 vínculos `unmatched` e reconciliação integral das três métricas.
-- Estado dos sete CSVs remuneratórios canônicos: **7/7 promovidos ao Drive** em 2026-09-07. O handoff ZIP foi revalidado antes do upload contra os sete nomes, tamanhos e SHA-256 canônicos; após a promoção, a pasta foi conferida com exatamente sete arquivos e tamanhos idênticos aos auditados.
-- Manifesto final da promoção remuneratória: `docs/caderno_base/territorial_wage_drive_promotion_manifest.md`, com IDs individuais dos sete arquivos e limitação explícita de que o conector utilizado não expõe `sha256Checksum` para uma segunda recomputação criptográfica pós-upload.
+- Estado dos sete CSVs remuneratórios canônicos: **7/7 promovidos ao Drive** em 2026-09-07.
+- Manifesto final da promoção remuneratória: `docs/caderno_base/territorial_wage_drive_promotion_manifest.md`.
 
-## Etapa fiscal em andamento
+## Fiscalidade territorial — estado atual
 
-A v007 inicia a dimensão **VAF/fiscalidade territorializada**, sem alterar os resultados consolidados de cadastro, emprego ou remuneração.
+O primeiro bloco fiscal da v007, referente ao **IPM definitivo**, está canonizado. O bloco de **VAF** permanece em auditoria.
 
-Benchmarks oficiais atualmente registrados para São Borja:
+### IPM definitivo — série canônica
 
-- IPM definitivo 2025: **0,527880** — dado observado, Receita Estadual/RS;
-- IPM definitivo 2026: **0,533647** — dado observado, Receita Estadual/RS;
-- variação relativa 2026/2025: **+1,092483%** (aprox. **+1,09%**) — dado calculado pela fórmula `(0,533647 / 0,527880 - 1) × 100`;
-- IPM provisório 2026: **0,528175** — preservado apenas para linhagem, pois foi superado pelo índice definitivo de 2026;
-- IPM 2027: publicação provisória identificada, ainda sujeita ao processo de impugnação; o valor municipal de São Borja não foi incorporado à série desta etapa.
+- Fonte: Receita Estadual/RS — IPM Definitivos — arquivos `DAIM545X`.
+- Geografia: São Borja/RS.
+- Anos de distribuição: **2003–2026**.
+- Execução canônica: `ipm-definitive-sao-borja-2003-2026-v001`.
+- Cobertura: **24/24 anos** e exatamente um registro de São Borja em cada arquivo.
+- Validação: **7/7 controles PASS**.
+- Benchmarks reproduzidos: 2025 = **0,527880**; 2026 = **0,533647**.
+- Variação calculada 2026/2025: **+1,092483%** (aprox. +1,09%).
+- Pasta dos cinco derivados promovidos ao Drive: ID `1YTbi1SKuaJndJ8E-GhYwqHgcN1crnjJu`.
+- Promoção: **5/5 arquivos**, nomes e tamanhos pós-upload conferidos.
+- Manifesto: `docs/caderno_base/ipm_definitive_drive_promotion_manifest.md`.
 
-A aba `Fiscalidade_IPM` da v007 registra também mudanças de pesos informadas para o IPM provisório 2027 e a distinção metodológica central: **IPM ≠ VAF ≠ VAB ≠ arrecadação municipal**.
+A v007 contém agora as abas `IPM_historico` e `Manifesto_IPM`, além de `Fiscalidade_IPM`. O status corrente é **IPM DEFINITIVO CANONIZADO — VAF ainda em auditoria**.
 
-O estágio fiscal permanece **AUDITORIA INICIAL**. Ainda não existe série histórica canônica de VAF, decomposição definitiva dos componentes nem reconciliação do IPM com a quota-parte monetária do ICMS. Esses dados não devem ser tratados como retenção/vazamento de valor antes da conclusão dessas etapas.
+A regra de extração histórica é deliberadamente conservadora: usa apenas o último campo de seis casas da linha única de São Borja no `DAIM545X`. Os componentes intermediários não são interpretados porque a estrutura do arquivo muda entre os anos.
 
-Documento metodológico: `docs/caderno_base/fiscalidade_vaf_ipm_audit.md`.
+### Limitações fiscais preservadas
+
+**IPM ≠ VAF ≠ VAB ≠ arrecadação municipal.** O IPM é um índice de repartição do ICMS; o VAF é uma grandeza fiscal utilizada em sua apuração; o VAB pertence às Contas Regionais/PIB; e transferências efetivas são fluxos financeiros. A variação do IPM não representa, por si só, a mesma variação percentual do valor monetário recebido pelo município.
+
+A série do índice final é histórica e oficial, mas os pesos e critérios legais do IPM mudam ao longo do tempo. Portanto, não se deve atribuir uma oscilação anual a um conjunto fixo de determinantes sem decomposição metodológica específica de cada período.
+
+O IPM 2027 permanece provisório nesta etapa e não integra a série definitiva.
+
+## Próxima etapa fiscal
+
+A construção da série histórica definitiva do IPM, anteriormente listada como próximo passo, está **CONCLUÍDA**.
+
+A etapa corrente é a auditoria da fonte oficial de **Valor Adicionado dos Municípios / VAF**, com três objetivos antes de qualquer canonização:
+
+1. identificar período, unidade, status e semântica dos campos disponibilizados pela Receita Estadual/RS;
+2. verificar se os derivados fiscais já existentes no projeto contêm VAF ou se tratam apenas de SICONFI/transferências, evitando duplicidade e mistura conceitual;
+3. somente após essa auditoria decidir a estrutura de uma série histórica canônica de VAF e sua posterior reconciliação com a quota-parte monetária do ICMS.
+
+Documento metodológico principal: `docs/caderno_base/fiscalidade_vaf_ipm_audit.md`.
 
 A configuração de escrita controlada e as alternativas operacionais estão em `docs/drive_write_connection.md`; a execução e os controles metodológicos da remuneração estão em `docs/caderno_base/territorial_wage_drive_execution.md`.
 

@@ -28,7 +28,7 @@ VAF_LEGACY_DOWNLOAD_INDEX_URL = "https://www.sefaz.rs.gov.br/ASP/SEF_root/DWN/"
 VAF_LEGACY_1989_1997_BINARY_URL = (
     "https://www.sefaz.rs.gov.br/ASP/Download/AIM/tabvalor.exe"
 )
-SAO_BORJA_RANGE_VALUE = "SAO MARTINHSZZZZZZZZZZ"
+SAO_BORJA_RANGE_VALUE = "S          SAO MARTINH"
 ALLOWED_HOSTS = {
     "atendimento.receita.rs.gov.br",
     "receita.fazenda.rs.gov.br",

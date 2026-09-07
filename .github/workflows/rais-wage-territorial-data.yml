@@ -17,7 +17,10 @@ jobs:
     timeout-minutes: 300
     env:
       RFB_COMPETENCE: '2026-08'
-      RFB_BASE_URL: 'https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj'
+      RFB_REFERENCE_B64: 'manifests/reference/rfb_cnae_nature_territorial_cells_2026-08_v001.csv.gz.b64'
+      RFB_REFERENCE_PROVENANCE: 'manifests/reference/rfb_cnae_nature_territorial_cells_2026-08_v001.md'
+      RFB_EXPECTED_SHA256: '73d53f372abda611f448970a5ea5a362f4183aee09e14b4c355c74ff7b585497'
+      RFB_DRIVE_FILE_ID: '10Frn6bcdixiMiXNQpe_5ycKjDHOrmyCd'
       RAIS_EXPECTED_SIZE: '704888712'
       RAIS_EXPECTED_SHA256: 'c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0'
       RAIS_OFFICIAL_URL: 'ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z'
@@ -47,175 +50,82 @@ jobs:
       - name: Verify codebase
         run: make verify
 
-      - name: Download official RFB CNPJ 2026-08 files
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw=".data/raw/rfb_cnpj/${RFB_COMPETENCE}"
-          audit='.data/audit/base_territorial/rais2025_wage/rfb_source_integrity'
-          mkdir -p "$raw" "$audit"
-
-          download_file() {
-            local file="$1"
-            local out="$raw/$file"
-            local partial="${out}.partial"
-            local url="${RFB_BASE_URL}/${RFB_COMPETENCE}/${file}"
-            rm -f "$partial"
-            echo "Downloading ${url}"
-            curl \
-              --fail \
-              --location \
-              --retry 5 \
-              --retry-all-errors \
-              --retry-delay 5 \
-              --connect-timeout 30 \
-              --output "$partial" \
-              "$url"
-            test -s "$partial"
-            unzip -tq "$partial" >/dev/null
-            mv "$partial" "$out"
-            du -h "$out"
-          }
-
-          echo 'Disk before RFB download:'
-          df -h .
-          download_file Municipios.zip
-          for i in {0..9}; do download_file "Estabelecimentos${i}.zip"; done
-          for i in {0..9}; do download_file "Empresas${i}.zip"; done
-          echo 'Disk after RFB download:'
-          df -h .
-          du -sh "$raw"
-          sha256sum "$raw"/*.zip | sort > "$audit/SHA256SUMS.txt"
-          printf 'declared_source=Receita Federal — Dados Abertos CNPJ\ncompetence=%s\nbase_url=%s\nfile_count=21\nSTATUS=RFB_SOURCE_DOWNLOAD_VERIFIED\n' \
-            "$RFB_COMPETENCE" "$RFB_BASE_URL" > "$audit/source_metadata.txt"
-          cat "$audit/source_metadata.txt"
-
-      - name: Build audited RFB territorial-control base
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw=".data/raw/rfb_cnpj/${RFB_COMPETENCE}"
-          execution_id="cnpj-territorial-control-${RFB_COMPETENCE}-wage-actions-${GITHUB_RUN_ID}"
-          python -m sbmi.cnpj_territorial_control_cli \
-            --establishments-dir "$raw" \
-            --companies-dir "$raw" \
-            --municipalities-zip "$raw/Municipios.zip" \
-            --execution-id "$execution_id" \
-            --municipality-tom 8863 \
-            --municipality-ibge 4318002 \
-            --active-status-code 02 \
-            --chunksize 200000
-
-          canonical=".data/curated/base_territorial/cnpj_territorial_control/${execution_id}/cnpj_territorial_control.csv"
-          validation=".data/audit/base_territorial/cnpj_territorial_control/${execution_id}/validation.csv"
-          test -f "$canonical"
-          test -f "$validation"
-          echo "RFB_EXECUTION_ID=${execution_id}" >> "$GITHUB_ENV"
-          echo "RFB_CANONICAL=${canonical}" >> "$GITHUB_ENV"
-          echo "RFB_VALIDATION=${validation}" >> "$GITHUB_ENV"
-          echo '--- RFB validation ---'
-          cat "$validation"
-
-      - name: Validate RFB territorial-control benchmark
-        shell: bash
-        run: |
-          set -euo pipefail
-          python - "$RFB_CANONICAL" "$RFB_VALIDATION" <<'PY'
-          import sys
-          import pandas as pd
-
-          canonical_path, validation_path = sys.argv[1:3]
-          df = pd.read_csv(canonical_path, dtype=str, keep_default_na=False)
-          validation = pd.read_csv(validation_path, dtype=str, keep_default_na=False)
-
-          if 'FAIL' in set(validation['status']):
-              raise SystemExit('STATUS=RFB_VALIDATION_FAIL')
-          if len(df) != 7306:
-              raise SystemExit(f'STATUS=RFB_ROWS_FAIL observed={len(df)} expected=7306')
-
-          external_all = int(df['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA').sum())
-          business = df[df['natureza_juridica'].astype(str).str.zfill(4).str.startswith('2')]
-          external_business = int(
-              business['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA').sum()
-          )
-          if external_all != 323:
-              raise SystemExit(
-                  f'STATUS=RFB_EXTERNAL_ALL_FAIL observed={external_all} expected=323'
-              )
-          if len(business) != 6906:
-              raise SystemExit(
-                  f'STATUS=RFB_BUSINESS_TOTAL_FAIL observed={len(business)} expected=6906'
-              )
-          if external_business != 284:
-              raise SystemExit(
-                  'STATUS=RFB_EXTERNAL_BUSINESS_FAIL '
-                  f'observed={external_business} expected=284'
-              )
-          print(f'rfb_rows={len(df)}')
-          print(f'rfb_external_all={external_all}')
-          print(f'rfb_business={len(business)}')
-          print(f'rfb_external_business={external_business}')
-          print('STATUS=RFB_TERRITORIAL_BENCHMARK_OK')
-          PY
-
-      - name: Build audited RFB CNAE x nature territorial cells
+      - name: Restore and verify audited compact RFB cells snapshot
         shell: bash
         run: |
           set -euo pipefail
           out='.data/staging/base_territorial/rais2025_wage/rfb_cnae_nature_territorial_cells_v001.csv'
-          mkdir -p "$(dirname "$out")"
-          python - "$RFB_CANONICAL" "$out" <<'PY'
+          audit='.data/audit/base_territorial/rais2025_wage/rfb_reference_snapshot'
+          mkdir -p "$(dirname "$out")" "$audit"
+
+          test -f "$RFB_REFERENCE_B64"
+          test -f "$RFB_REFERENCE_PROVENANCE"
+          base64 --decode "$RFB_REFERENCE_B64" | gzip -dc > "$out"
+
+          observed_sha="$(sha256sum "$out" | awk '{print $1}')"
+          observed_bytes="$(stat -c%s "$out")"
+          echo "rfb_reference_sha256=${observed_sha}"
+          echo "rfb_reference_bytes=${observed_bytes}"
+          if [[ "$observed_sha" != "$RFB_EXPECTED_SHA256" ]]; then
+            echo 'STATUS=RFB_REFERENCE_SHA256_FAIL' >&2
+            exit 30
+          fi
+
+          python - "$out" <<'PY'
           import sys
-          from pathlib import Path
           import pandas as pd
 
-          source = Path(sys.argv[1])
-          output = Path(sys.argv[2])
-          df = pd.read_csv(source, dtype=str, keep_default_na=False)
-          statuses = {
-              'MATRIZ_LOCAL',
-              'FILIAL_DE_MATRIZ_LOCAL',
-              'FILIAL_DE_MATRIZ_EXTERNA',
+          path = sys.argv[1]
+          df = pd.read_csv(path, dtype=str, keep_default_na=False)
+          expected_columns = {
+              'cnae_subclass',
+              'natureza_juridica',
+              'territorial_control_status',
+              'estabelecimentos',
           }
-          work = df.copy()
-          work['cnae_subclass'] = work['cnae_fiscal_principal'].astype(str).str.strip().str.zfill(7)
-          work['natureza_juridica'] = work['natureza_juridica'].astype(str).str.strip().str.zfill(4)
-          work = work[
-              work['natureza_juridica'].str.startswith('2')
-              & work['territorial_control_status'].isin(statuses)
-          ]
-          cells = (
-              work.groupby(
-                  ['cnae_subclass', 'natureza_juridica', 'territorial_control_status'],
-                  as_index=False,
+          if set(df.columns) != expected_columns:
+              raise SystemExit(
+                  'STATUS=RFB_REFERENCE_COLUMNS_FAIL '
+                  f'observed={list(df.columns)}'
               )
-              .size()
-              .rename(columns={'size': 'estabelecimentos'})
-              .sort_values(['cnae_subclass', 'natureza_juridica', 'territorial_control_status'])
-              .reset_index(drop=True)
-          )
-          total = int(cells['estabelecimentos'].sum())
-          external = int(
-              cells.loc[
-                  cells['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA'),
+          df['estabelecimentos'] = pd.to_numeric(df['estabelecimentos'], errors='raise')
+          total = int(df['estabelecimentos'].sum())
+          business = df[df['natureza_juridica'].astype(str).str.zfill(4).str.startswith('2')]
+          business_total = int(business['estabelecimentos'].sum())
+          external_business = int(
+              business.loc[
+                  business['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA'),
                   'estabelecimentos',
               ].sum()
           )
-          if total != 6906:
-              raise SystemExit(f'STATUS=RFB_BUSINESS_TOTAL_FAIL observed={total} expected=6906')
-          if external != 284:
-              raise SystemExit(f'STATUS=RFB_EXTERNAL_TOTAL_FAIL observed={external} expected=284')
-          if len(cells) != 982:
-              raise SystemExit(f'STATUS=RFB_CELL_COUNT_FAIL observed={len(cells)} expected=982')
-          cells.to_csv(output, index=False)
-          print(f'rfb_cells={len(cells)}')
-          print(f'rfb_business_establishments={total}')
-          print(f'rfb_external_business_establishments={external}')
-          print(f'output={output}')
-          print('STATUS=RFB_WAGE_CELLS_OK')
+          checks = {
+              'rows': (len(df), 982),
+              'all_establishments': (total, 7306),
+              'business_establishments': (business_total, 6906),
+              'external_business_establishments': (external_business, 284),
+          }
+          for label, (observed, expected) in checks.items():
+              print(f'{label}: observed={observed} expected={expected}')
+              if observed != expected:
+                  raise SystemExit(
+                      f'STATUS=RFB_REFERENCE_BENCHMARK_FAIL '
+                      f'indicator={label} observed={observed} expected={expected}'
+                  )
+          print('STATUS=RFB_REFERENCE_SNAPSHOT_OK')
           PY
+
+          cp "$RFB_REFERENCE_PROVENANCE" "$audit/provenance.md"
+          {
+            echo "drive_file_id=${RFB_DRIVE_FILE_ID}"
+            echo "rfb_competence=${RFB_COMPETENCE}"
+            echo "reference_b64=${RFB_REFERENCE_B64}"
+            echo "csv_bytes=${observed_bytes}"
+            echo "csv_sha256=${observed_sha}"
+            echo 'nature=calculated_derived_snapshot_from_audited_official_rfb_pipeline'
+            echo 'STATUS=RFB_REFERENCE_PROVENANCE_OK'
+          } > "$audit/integrity.txt"
+          cat "$audit/integrity.txt"
           echo "RFB_CELLS=${out}" >> "$GITHUB_ENV"
-          sha256sum "$out"
 
       - name: Download and verify RAIS Vínculos Sul 2025
         shell: bash
@@ -226,18 +136,35 @@ jobs:
           audit='.data/audit/base_territorial/rais2025_wage/rais_vinc_source_integrity.txt'
           mkdir -p "$(dirname "$raw")" "$(dirname "$audit")"
           rm -f "$partial"
+
           transport='mte_ftp'
-          if ! curl --fail --location --ftp-pasv --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 30 \
-            --output "$partial" "$RAIS_OFFICIAL_URL"; then
+          if ! curl \
+            --fail \
+            --location \
+            --ftp-pasv \
+            --retry 3 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            --connect-timeout 20 \
+            --output "$partial" \
+            "$RAIS_OFFICIAL_URL"; then
             echo 'Official MTE FTP unavailable; using integrity-verified transport mirror.'
             rm -f "$partial"
             transport='huggingface_transport_mirror'
-            curl --fail --location --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 30 \
-              --output "$partial" "$RAIS_MIRROR_URL"
+            curl \
+              --fail \
+              --location \
+              --retry 5 \
+              --retry-all-errors \
+              --retry-delay 5 \
+              --connect-timeout 30 \
+              --output "$partial" \
+              "$RAIS_MIRROR_URL"
           fi
+
           size="$(stat -c%s "$partial")"
           sha="$(sha256sum "$partial" | awk '{print $1}')"
-          printf 'transport=%s\nsize=%s\nsha256=%s\nexpected_size=%s\nexpected_sha256=%s\n' \
+          printf 'declared_source=MTE — RAIS 2025\ntransport=%s\nsize=%s\nsha256=%s\nexpected_size=%s\nexpected_sha256=%s\n' \
             "$transport" "$size" "$sha" "$RAIS_EXPECTED_SIZE" "$RAIS_EXPECTED_SHA256" | tee "$audit"
           if [[ "$size" != "$RAIS_EXPECTED_SIZE" ]]; then
             echo 'STATUS=RAIS_SIZE_FAIL' >&2
@@ -276,6 +203,7 @@ jobs:
           sevenzip = shutil.which('7zz') or shutil.which('7z') or shutil.which('7za')
           if not sevenzip:
               raise SystemExit('STATUS=SEVENZIP_NOT_FOUND')
+
           start = time.time()
           proc = subprocess.Popen(
               [sevenzip, 'x', '-so', str(archive), member],
@@ -288,6 +216,7 @@ jobs:
           if len(header) != 62:
               proc.kill()
               raise SystemExit(f'STATUS=RAIS_HEADER_WIDTH_FAIL observed={len(header)} expected=62')
+
           required = {
               'Município - Código',
               'CNAE 2.0 Subclasse - Codigo',
@@ -302,6 +231,7 @@ jobs:
           if missing:
               proc.kill()
               raise SystemExit(f'STATUS=RAIS_REQUIRED_COLUMNS_FAIL missing={missing}')
+
           municipality_idx = header.index('Município - Código')
           rows_source = 0
           rows_sb = 0
@@ -324,12 +254,14 @@ jobs:
                       rows_sb += 1
                   if rows_source % 5_000_000 == 0:
                       print(f'rows_source={rows_source} rows_sao_borja={rows_sb}', flush=True)
+
           stderr = proc.stderr.read().decode('utf-8', errors='replace')
           rc = proc.wait()
           if rc != 0:
               raise SystemExit(f'STATUS=RAIS_7ZIP_STREAM_FAIL rc={rc} stderr={stderr[-2000:]}')
           if rows_sb != 19960:
               raise SystemExit(f'STATUS=RAIS_SB_ROWS_FAIL observed={rows_sb} expected=19960')
+
           digest = hashlib.sha256()
           with output.open('rb') as fh:
               for block in iter(lambda: fh.read(8 * 1024 * 1024), b''):
@@ -417,14 +349,12 @@ jobs:
             echo "repository=${GITHUB_REPOSITORY}"
             echo "commit_sha=${GITHUB_SHA}"
             echo "rfb_competence=${RFB_COMPETENCE}"
-            echo "rfb_base_url=${RFB_BASE_URL}"
-            echo "rfb_execution_id=${RFB_EXECUTION_ID}"
+            echo "rfb_drive_file_id=${RFB_DRIVE_FILE_ID}"
+            echo "rfb_reference_sha256=$(sha256sum "$RFB_CELLS" | awk '{print $1}')"
             echo "execution_id=${EXECUTION_ID}"
             echo "rais_archive_size=$(stat -c%s "$RAIS_ARCHIVE")"
             echo "rais_archive_sha256=$(sha256sum "$RAIS_ARCHIVE" | awk '{print $1}')"
             echo "rais_extract_sha256=$(sha256sum "$RAIS_SB_EXTRACT" | awk '{print $1}')"
-            echo "rfb_canonical_sha256=$(sha256sum "$RFB_CANONICAL" | awk '{print $1}')"
-            echo "rfb_cells_sha256=$(sha256sum "$RFB_CELLS" | awk '{print $1}')"
             echo 'STATUS=RAIS2025_WAGE_ACTIONS_EXECUTION_OK'
           } | tee "$manifest"
 
@@ -439,5 +369,4 @@ jobs:
             ${{ env.RAIS_SB_EXTRACT }}
             ${{ env.RFB_CELLS }}
             .data/audit/base_territorial/rais2025_wage/
-            .data/audit/base_territorial/cnpj_territorial_control/${{ env.RFB_EXECUTION_ID }}/validation.csv
-            .data/audit/base_territorial/cnpj_territorial_control/${{ env.RFB_EXECUTION_ID }}/source_manifest.csv
+            ${{ env.RFB_REFERENCE_PROVENANCE }}

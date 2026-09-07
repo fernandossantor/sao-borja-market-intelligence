@@ -2,6 +2,7 @@ from urllib.parse import urlparse
 
 from sbmi.vaf_source_audit import (
     VAF_ARCHIVE_URL,
+    VAF_LEGACY_1989_1997_BINARY_URL,
     VAF_WRAPPER_URL,
     extract_iframe_sources,
     extract_official_links,
@@ -96,8 +97,22 @@ def test_official_source_catalog_uses_only_rs_revenue_hosts() -> None:
         "vaf_current_wrapper",
         "vaf_legacy_form",
         "vaf_historical_archive",
+        "vaf_archive_2009_2012_xls",
+        "vaf_archive_1989_1997_xls",
+        "vaf_legacy_download_index",
+        "vaf_legacy_1989_1997_binary",
     }
     assert all(urlparse(item["url"]).hostname.endswith("rs.gov.br") for item in catalog)
+
+
+def test_legacy_binary_is_cataloged_as_official_attachment_only() -> None:
+    catalog = official_source_catalog()
+    source = next(
+        item for item in catalog if item["source_id"] == "vaf_legacy_1989_1997_binary"
+    )
+    assert source["url"] == VAF_LEGACY_1989_1997_BINARY_URL
+    assert source["kind"] == "official_legacy_binary_attachment"
+    assert source["nature"] == "observed_official_published_attachment_route"
 
 
 def test_extract_official_archive_links_filters_text_and_host() -> None:

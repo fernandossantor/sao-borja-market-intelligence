@@ -22,5 +22,6 @@ Versões anteriores do caderno e derivados consolidados não devem ser sobrescri
 - Execução remuneratória canônica: `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
 - Pasta de promoção dos derivados remuneratórios: Drive ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`.
 - Auditoria da execução remuneratória: 7/7 controles `PASS`, 0 vínculos `unmatched` e reconciliação integral das três métricas.
+- Estado dos sete CSVs canônicos: hashes e destino registrados; a transferência dos bytes do Codespace para a pasta do Drive é concluída pela CLI idempotente `sbmi.territorial_wage_promote_drive_cli` e deve ser verificada antes de marcar a promoção como concluída.
 
 A atualização do caderno deve acompanhar a atualização dos dados; nenhum resultado novo deve permanecer apenas em código, terminal ou conversa sem registro nos artefatos e na narrativa do projeto.

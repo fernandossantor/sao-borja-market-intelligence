@@ -191,6 +191,8 @@ jobs:
                       headers={"Referer": VAF_HISTORY_FORM_URL},
                   )
                   response.raise_for_status()
+                  raw_post = Path("artifacts/raw_official/vaf_post_2025_response.html")
+                  raw_post.write_bytes(response.content)
                   tables = extract_table_rows(response.text)
                   matches = find_table_rows_containing(response.text, "SAO BORJA")
                   matching_table_indexes = sorted(
@@ -201,7 +203,13 @@ jobs:
                       "final_url": response.url,
                       "response_bytes": len(response.content),
                       "encoding": response.encoding,
+                      "raw_response_file": str(raw_post),
+                      "raw_response_sha256": hashlib.sha256(response.content).hexdigest(),
                       "table_count": len(tables),
+                      "all_tables": [
+                          {"table_index": index, "rows": list(table)}
+                          for index, table in enumerate(tables)
+                      ],
                       "sao_borja_match_count": len(matches),
                       "sao_borja_rows": list(matches),
                       "matching_tables": [

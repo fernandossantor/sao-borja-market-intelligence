@@ -237,9 +237,9 @@ def _sensitivity(cells: pd.DataFrame) -> pd.DataFrame:
 
 def _reverse_coverage(rfb: pd.DataFrame, rais: pd.DataFrame) -> dict[str, float]:
     keys = {
-        "subclass_nature": set(zip(rais["cnae_subclass"], rais["natureza_juridica"])),
+        "subclass_nature": set(zip(rais["cnae_subclass"], rais["natureza_juridica"], strict=True)),
         "subclass": set(rais["cnae_subclass"]),
-        "class_nature": set(zip(rais["cnae_class"], rais["natureza_juridica"])),
+        "class_nature": set(zip(rais["cnae_class"], rais["natureza_juridica"], strict=True)),
         "class": set(rais["cnae_class"]),
         "division": set(rais["cnae_division"]),
     }

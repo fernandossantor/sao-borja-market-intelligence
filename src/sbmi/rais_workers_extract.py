@@ -55,20 +55,25 @@ def inspect_existing_extract(
             raise ValueError(f"Coluna municipal ausente em {output}: {municipality_column}")
         if expected_columns is not None and len(header) != expected_columns:
             raise ValueError(
-                f"Largura divergente em {output}: observado={len(header)}, esperado={expected_columns}"
+                f"Largura divergente em {output}: observado={len(header)}, "
+                f"esperado={expected_columns}"
             )
         municipality_idx = header.index(municipality_column)
         for row in reader:
             if len(row) != len(header):
                 raise ValueError(
-                    f"Linha com largura divergente em {output}: observado={len(row)}, esperado={len(header)}"
+                    f"Linha com largura divergente em {output}: "
+                    f"observado={len(row)}, esperado={len(header)}"
                 )
             if normalize_code(row[municipality_idx]) != municipality_code:
-                raise ValueError(f"Extrato contém município diferente de {municipality_code}: {output}")
+                raise ValueError(
+                    f"Extrato contém município diferente de {municipality_code}: {output}"
+                )
             rows += 1
     if expected_rows is not None and rows != expected_rows:
         raise ValueError(
-            f"Quantidade de linhas divergente em {output}: observado={rows}, esperado={expected_rows}"
+            f"Quantidade de linhas divergente em {output}: observado={rows}, "
+            f"esperado={expected_rows}"
         )
     return RaisMunicipalityExtract(
         output_path=Path(output),
@@ -129,7 +134,8 @@ def extract_municipality_from_7z_csv(
     if expected_columns is not None and len(header) != expected_columns:
         proc.kill()
         raise ValueError(
-            f"Largura do cabeçalho RAIS divergente: observado={len(header)}, esperado={expected_columns}"
+            "Largura do cabeçalho RAIS divergente: "
+            f"observado={len(header)}, esperado={expected_columns}"
         )
 
     municipality_idx = header.index(municipality_column)

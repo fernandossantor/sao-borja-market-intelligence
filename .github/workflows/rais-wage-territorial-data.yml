@@ -1,4 +1,4 @@
-name: rais-wage-territorial-data
+name: rais-wage-territorial-code-check
 
 on:
   push:
@@ -6,26 +6,24 @@ on:
       - feature/cnpj-territorial-control-v1
     paths:
       - '.github/workflows/rais-wage-territorial-data.yml'
+      - 'src/sbmi/drive_staging.py'
+      - 'src/sbmi/rais_workers_extract.py'
+      - 'src/sbmi/territorial_wage_*.py'
+      - 'tests/test_drive_staging.py'
+      - 'tests/test_rais_workers_extract.py'
+      - 'tests/test_territorial_wage_estimation.py'
   workflow_dispatch:
+
+concurrency:
+  group: rais-wage-code-check-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 300
-    env:
-      RFB_COMPETENCE: '2026-08'
-      RFB_REFERENCE_B64: 'manifests/reference/rfb_cnae_nature_territorial_cells_2026-08_v001.csv.gz.b64'
-      RFB_REFERENCE_PROVENANCE: 'manifests/reference/rfb_cnae_nature_territorial_cells_2026-08_v001.md'
-      RFB_EXPECTED_SHA256: '73d53f372abda611f448970a5ea5a362f4183aee09e14b4c355c74ff7b585497'
-      RFB_DRIVE_FILE_ID: '10Frn6bcdixiMiXNQpe_5ycKjDHOrmyCd'
-      RAIS_EXPECTED_SIZE: '704888712'
-      RAIS_EXPECTED_SHA256: 'c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0'
-      RAIS_OFFICIAL_URL: 'ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z'
-      RAIS_MIRROR_URL: 'https://huggingface.co/datasets/selenelindsay/rais-caged-bronze/resolve/cc087930d43339cbf66dd9511ee6d39c661c3084/RAIS/2025/RAIS_VINC_PUB_SUL.7z?download=true'
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,337 +34,16 @@ jobs:
           python-version: '3.12'
           cache: pip
 
-      - name: Install project and 7-Zip
-        shell: bash
+      - name: Install project
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
           python -m pip install -e '.[dev]'
-          if ! command -v 7z >/dev/null 2>&1 && ! command -v 7zz >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y p7zip-full
-          fi
 
       - name: Verify codebase
         run: make verify
 
-      - name: Restore and verify audited compact RFB cells snapshot
-        shell: bash
+      - name: Confirm data-execution boundary
         run: |
-          set -euo pipefail
-          out='.data/staging/base_territorial/rais2025_wage/rfb_cnae_nature_territorial_cells_v001.csv'
-          audit='.data/audit/base_territorial/rais2025_wage/rfb_reference_snapshot'
-          mkdir -p "$(dirname "$out")" "$audit"
-
-          test -f "$RFB_REFERENCE_B64"
-          test -f "$RFB_REFERENCE_PROVENANCE"
-          base64 --decode "$RFB_REFERENCE_B64" | gzip -dc > "$out"
-
-          observed_sha="$(sha256sum "$out" | awk '{print $1}')"
-          observed_bytes="$(stat -c%s "$out")"
-          echo "rfb_reference_sha256=${observed_sha}"
-          echo "rfb_reference_bytes=${observed_bytes}"
-          if [[ "$observed_sha" != "$RFB_EXPECTED_SHA256" ]]; then
-            echo 'STATUS=RFB_REFERENCE_SHA256_FAIL' >&2
-            exit 30
-          fi
-
-          python - "$out" <<'PY'
-          import sys
-          import pandas as pd
-
-          path = sys.argv[1]
-          df = pd.read_csv(path, dtype=str, keep_default_na=False)
-          expected_columns = {
-              'cnae_subclass',
-              'natureza_juridica',
-              'territorial_control_status',
-              'estabelecimentos',
-          }
-          if set(df.columns) != expected_columns:
-              raise SystemExit(
-                  'STATUS=RFB_REFERENCE_COLUMNS_FAIL '
-                  f'observed={list(df.columns)}'
-              )
-          df['estabelecimentos'] = pd.to_numeric(df['estabelecimentos'], errors='raise')
-          total = int(df['estabelecimentos'].sum())
-          business = df[df['natureza_juridica'].astype(str).str.zfill(4).str.startswith('2')]
-          business_total = int(business['estabelecimentos'].sum())
-          external_business = int(
-              business.loc[
-                  business['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA'),
-                  'estabelecimentos',
-              ].sum()
-          )
-          checks = {
-              'rows': (len(df), 982),
-              'all_establishments': (total, 7306),
-              'business_establishments': (business_total, 6906),
-              'external_business_establishments': (external_business, 284),
-          }
-          for label, (observed, expected) in checks.items():
-              print(f'{label}: observed={observed} expected={expected}')
-              if observed != expected:
-                  raise SystemExit(
-                      f'STATUS=RFB_REFERENCE_BENCHMARK_FAIL '
-                      f'indicator={label} observed={observed} expected={expected}'
-                  )
-          print('STATUS=RFB_REFERENCE_SNAPSHOT_OK')
-          PY
-
-          cp "$RFB_REFERENCE_PROVENANCE" "$audit/provenance.md"
-          {
-            echo "drive_file_id=${RFB_DRIVE_FILE_ID}"
-            echo "rfb_competence=${RFB_COMPETENCE}"
-            echo "reference_b64=${RFB_REFERENCE_B64}"
-            echo "csv_bytes=${observed_bytes}"
-            echo "csv_sha256=${observed_sha}"
-            echo 'nature=calculated_derived_snapshot_from_audited_official_rfb_pipeline'
-            echo 'STATUS=RFB_REFERENCE_PROVENANCE_OK'
-          } > "$audit/integrity.txt"
-          cat "$audit/integrity.txt"
-          echo "RFB_CELLS=${out}" >> "$GITHUB_ENV"
-
-      - name: Download and verify RAIS Vínculos Sul 2025
-        shell: bash
-        run: |
-          set -euo pipefail
-          raw='.data/raw/rais/2025/RAIS_VINC_PUB_SUL.7z'
-          partial="${raw}.partial"
-          audit='.data/audit/base_territorial/rais2025_wage/rais_vinc_source_integrity.txt'
-          mkdir -p "$(dirname "$raw")" "$(dirname "$audit")"
-          rm -f "$partial"
-
-          transport='mte_ftp'
-          if ! curl \
-            --fail \
-            --location \
-            --ftp-pasv \
-            --retry 3 \
-            --retry-all-errors \
-            --retry-delay 5 \
-            --connect-timeout 20 \
-            --output "$partial" \
-            "$RAIS_OFFICIAL_URL"; then
-            echo 'Official MTE FTP unavailable; using integrity-verified transport mirror.'
-            rm -f "$partial"
-            transport='huggingface_transport_mirror'
-            curl \
-              --fail \
-              --location \
-              --retry 5 \
-              --retry-all-errors \
-              --retry-delay 5 \
-              --connect-timeout 30 \
-              --output "$partial" \
-              "$RAIS_MIRROR_URL"
-          fi
-
-          size="$(stat -c%s "$partial")"
-          sha="$(sha256sum "$partial" | awk '{print $1}')"
-          printf 'declared_source=MTE — RAIS 2025\ntransport=%s\nsize=%s\nsha256=%s\nexpected_size=%s\nexpected_sha256=%s\n' \
-            "$transport" "$size" "$sha" "$RAIS_EXPECTED_SIZE" "$RAIS_EXPECTED_SHA256" | tee "$audit"
-          if [[ "$size" != "$RAIS_EXPECTED_SIZE" ]]; then
-            echo 'STATUS=RAIS_SIZE_FAIL' >&2
-            exit 40
-          fi
-          if [[ "$sha" != "$RAIS_EXPECTED_SHA256" ]]; then
-            echo 'STATUS=RAIS_SHA256_FAIL' >&2
-            exit 41
-          fi
-          mv "$partial" "$raw"
-          echo "RAIS_ARCHIVE=${raw}" >> "$GITHUB_ENV"
-          echo 'STATUS=RAIS_ARCHIVE_VERIFIED' | tee -a "$audit"
-
-      - name: Extract São Borja workers in streaming mode
-        shell: bash
-        run: |
-          set -euo pipefail
-          out='.data/staging/rais/2025/rais_vinc_2025_sao_borja_extract_v001.csv'
-          audit='.data/audit/base_territorial/rais2025_wage/rais_vinc_2025_sao_borja_extraction_v001.txt'
-          mkdir -p "$(dirname "$out")" "$(dirname "$audit")"
-          python - "$RAIS_ARCHIVE" "$out" "$audit" <<'PY'
-          import csv
-          import hashlib
-          import io
-          import shutil
-          import subprocess
-          import sys
-          import time
-          from pathlib import Path
-
-          archive = Path(sys.argv[1])
-          output = Path(sys.argv[2])
-          audit = Path(sys.argv[3])
-          member = 'RAIS_VINC_PUB_SUL.COMT'
-          municipality = '431800'
-          sevenzip = shutil.which('7zz') or shutil.which('7z') or shutil.which('7za')
-          if not sevenzip:
-              raise SystemExit('STATUS=SEVENZIP_NOT_FOUND')
-
-          start = time.time()
-          proc = subprocess.Popen(
-              [sevenzip, 'x', '-so', str(archive), member],
-              stdout=subprocess.PIPE,
-              stderr=subprocess.PIPE,
-          )
-          text = io.TextIOWrapper(proc.stdout, encoding='latin-1', newline='', errors='strict')
-          reader = csv.reader(text, delimiter=',', quotechar='"')
-          header = next(reader)
-          if len(header) != 62:
-              proc.kill()
-              raise SystemExit(f'STATUS=RAIS_HEADER_WIDTH_FAIL observed={len(header)} expected=62')
-
-          required = {
-              'Município - Código',
-              'CNAE 2.0 Subclasse - Codigo',
-              'Natureza Jurídica - Código',
-              'Ind Vínculo Ativo 31/12 - Código',
-              'Ind Vínculo Abandonado - Código',
-              'Tipo Estabelecimento - Código',
-              'Vl Rem Dezembro Nom',
-              'Vl Rem Média Nom',
-          }
-          missing = sorted(required - set(header))
-          if missing:
-              proc.kill()
-              raise SystemExit(f'STATUS=RAIS_REQUIRED_COLUMNS_FAIL missing={missing}')
-
-          municipality_idx = header.index('Município - Código')
-          rows_source = 0
-          rows_sb = 0
-          with output.open('w', encoding='utf-8', newline='') as fout:
-              writer = csv.writer(fout)
-              writer.writerow(header)
-              for row in reader:
-                  rows_source += 1
-                  if len(row) != len(header):
-                      proc.kill()
-                      raise SystemExit(
-                          f'STATUS=RAIS_ROW_WIDTH_FAIL row={rows_source} '
-                          f'observed={len(row)} expected={len(header)}'
-                      )
-                  code = str(row[municipality_idx]).strip().strip('"')
-                  if code.endswith('.0'):
-                      code = code[:-2]
-                  if code == municipality:
-                      writer.writerow(row)
-                      rows_sb += 1
-                  if rows_source % 5_000_000 == 0:
-                      print(f'rows_source={rows_source} rows_sao_borja={rows_sb}', flush=True)
-
-          stderr = proc.stderr.read().decode('utf-8', errors='replace')
-          rc = proc.wait()
-          if rc != 0:
-              raise SystemExit(f'STATUS=RAIS_7ZIP_STREAM_FAIL rc={rc} stderr={stderr[-2000:]}')
-          if rows_sb != 19960:
-              raise SystemExit(f'STATUS=RAIS_SB_ROWS_FAIL observed={rows_sb} expected=19960')
-
-          digest = hashlib.sha256()
-          with output.open('rb') as fh:
-              for block in iter(lambda: fh.read(8 * 1024 * 1024), b''):
-                  digest.update(block)
-          lines = [
-              'source=' + str(archive),
-              'member=' + member,
-              'municipality_filter=' + municipality,
-              f'columns={len(header)}',
-              f'rows_source={rows_source}',
-              f'rows_sao_borja={rows_sb}',
-              'output=' + str(output),
-              f'output_size={output.stat().st_size}',
-              'output_sha256=' + digest.hexdigest(),
-              f'elapsed_seconds={time.time() - start:.3f}',
-              'STATUS=RAIS2025_SAO_BORJA_EXTRACTION_OK',
-          ]
-          audit.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-          print('\n'.join(lines))
-          PY
-          echo "RAIS_SB_EXTRACT=${out}" >> "$GITHUB_ENV"
-
-      - name: Run dedicated estimator tests
-        run: python -m pytest tests/test_territorial_wage_estimation.py tests/test_territorial_employment_estimation.py
-
-      - name: Run real RAIS 2025 x RFB 2026-08 wage pipeline
-        shell: bash
-        run: |
-          set -euo pipefail
-          execution_id="territorial-wage-rais2025-rfb2026-08-actions-${GITHUB_RUN_ID}"
-          out=".data/exports/base_territorial/territorial_wage_estimation/${execution_id}"
-          python -m sbmi.territorial_wage_estimation_cli \
-            --rais-workers-csv "$RAIS_SB_EXTRACT" \
-            --rfb-cells-csv "$RFB_CELLS" \
-            --output-dir "$out" \
-            --municipality-code 431800 \
-            --rais-reference-year 2025 \
-            --rfb-competence 2026-08 \
-            --expected-business-active-links 8595
-          echo "WAGE_OUTPUT_DIR=${out}" >> "$GITHUB_ENV"
-          echo "EXECUTION_ID=${execution_id}" >> "$GITHUB_ENV"
-
-      - name: Validate real outputs and benchmark reproduction
-        shell: bash
-        run: |
-          set -euo pipefail
-          echo '--- validation.csv ---'
-          cat "$WAGE_OUTPUT_DIR/validation.csv"
-          echo '--- territorial_wage_summary.csv ---'
-          cat "$WAGE_OUTPUT_DIR/territorial_wage_summary.csv"
-          echo '--- territorial_wage_coverage.csv ---'
-          cat "$WAGE_OUTPUT_DIR/territorial_wage_coverage.csv"
-          python - "$WAGE_OUTPUT_DIR/territorial_wage_summary.csv" <<'PY'
-          import sys
-          import pandas as pd
-
-          summary = pd.read_csv(sys.argv[1]).set_index('indicator')['value']
-          checks = {
-              'rais_business_active_links': (8595.0, 0.0),
-              'estimated_external_active_links_share_pct': (25.16055458, 0.0001),
-              'estimated_external_avg_rem_sum_share_pct': (29.0903, 0.001),
-              'estimated_external_dec_mass_share_pct': (29.6897, 0.001),
-          }
-          for indicator, (expected, tolerance) in checks.items():
-              observed = float(summary[indicator])
-              diff = abs(observed - expected)
-              print(
-                  f'{indicator}: observed={observed:.8f} expected={expected:.8f} '
-                  f'diff={diff:.8f} tolerance={tolerance}'
-              )
-              if diff > tolerance:
-                  raise SystemExit(f'STATUS=BENCHMARK_FAIL indicator={indicator}')
-          print('STATUS=RAIS2025_WAGE_BENCHMARKS_OK')
-          PY
-
-      - name: Create execution manifest
-        shell: bash
-        run: |
-          set -euo pipefail
-          manifest='.data/audit/base_territorial/rais2025_wage/actions_execution_manifest.txt'
-          mkdir -p "$(dirname "$manifest")"
-          {
-            echo "workflow_run_id=${GITHUB_RUN_ID}"
-            echo "workflow_run_attempt=${GITHUB_RUN_ATTEMPT}"
-            echo "repository=${GITHUB_REPOSITORY}"
-            echo "commit_sha=${GITHUB_SHA}"
-            echo "rfb_competence=${RFB_COMPETENCE}"
-            echo "rfb_drive_file_id=${RFB_DRIVE_FILE_ID}"
-            echo "rfb_reference_sha256=$(sha256sum "$RFB_CELLS" | awk '{print $1}')"
-            echo "execution_id=${EXECUTION_ID}"
-            echo "rais_archive_size=$(stat -c%s "$RAIS_ARCHIVE")"
-            echo "rais_archive_sha256=$(sha256sum "$RAIS_ARCHIVE" | awk '{print $1}')"
-            echo "rais_extract_sha256=$(sha256sum "$RAIS_SB_EXTRACT" | awk '{print $1}')"
-            echo 'STATUS=RAIS2025_WAGE_ACTIONS_EXECUTION_OK'
-          } | tee "$manifest"
-
-      - name: Upload compact wage analytical outputs
-        uses: actions/upload-artifact@v4
-        with:
-          name: territorial-wage-rais2025-rfb2026-08-${{ github.run_id }}
-          if-no-files-found: error
-          retention-days: 30
-          path: |
-            ${{ env.WAGE_OUTPUT_DIR }}/
-            ${{ env.RAIS_SB_EXTRACT }}
-            ${{ env.RFB_CELLS }}
-            .data/audit/base_territorial/rais2025_wage/
-            ${{ env.RFB_REFERENCE_PROVENANCE }}
+          echo 'No RAIS or RFB microdata are acquired by this workflow.'
+          echo 'Real data execution belongs in the Codespace and stages the project master copies from Google Drive.'
+          echo 'STATUS=RAIS_WAGE_ACTIONS_CODE_ONLY_OK'

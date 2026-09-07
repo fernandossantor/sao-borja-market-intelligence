@@ -43,11 +43,13 @@ def _validate_local_file(
     sha256 = sha256_file(path)
     if expected_size is not None and size != expected_size:
         raise ValueError(
-            f"Tamanho local divergente para {path}: observado={size}, esperado={expected_size}"
+            f"Tamanho local divergente para {path}: observado={size}, "
+            f"esperado={expected_size}"
         )
     if expected_sha256 is not None and sha256 != expected_sha256.lower():
         raise ValueError(
-            f"SHA-256 local divergente para {path}: observado={sha256}, esperado={expected_sha256}"
+            f"SHA-256 local divergente para {path}: observado={sha256}, "
+            f"esperado={expected_sha256}"
         )
     return size, sha256
 
@@ -126,12 +128,14 @@ def stage_drive_file(
     sha256 = digest.hexdigest()
     if expected_size is not None and size != expected_size:
         raise ValueError(
-            f"Tamanho transferido divergente para {drive_name}: observado={size}, esperado={expected_size}; "
+            "Tamanho transferido divergente para "
+            f"{drive_name}: observado={size}, esperado={expected_size}; "
             f"arquivo parcial preservado em {partial}"
         )
     if expected_sha256 is not None and sha256 != expected_sha256.lower():
         raise ValueError(
-            f"SHA-256 transferido divergente para {drive_name}: observado={sha256}, esperado={expected_sha256}; "
+            "SHA-256 transferido divergente para "
+            f"{drive_name}: observado={sha256}, esperado={expected_sha256}; "
             f"arquivo parcial preservado em {partial}"
         )
 

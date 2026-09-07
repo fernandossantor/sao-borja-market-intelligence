@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import pytest
-
 from sbmi.vaf_source_audit import parse_vaf_form, summarize_form
+
+import pytest
 
 
 HTML = """

@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import hashlib
+from types import SimpleNamespace
 
 import pytest
 
 import sbmi.drive_promotion as promotion
-from sbmi.drive_promotion import ExpectedDerivative, promote_derivatives, validate_local_derivatives
+from sbmi.drive_promotion import (
+    ExpectedDerivative,
+    promote_derivatives,
+    promote_derivatives_rclone,
+    validate_local_derivatives,
+)
 
 
 def test_validate_local_derivatives_checks_size_and_hash(tmp_path):
@@ -66,3 +72,73 @@ def test_promote_derivatives_reuses_matching_existing_file(tmp_path, monkeypatch
     assert len(result) == 1
     assert result[0].drive_file_id == "existing-file-id"
     assert result[0].reused_existing is True
+
+
+def test_rclone_promotion_requires_separate_write_remote(tmp_path, monkeypatch):
+    path = tmp_path / "sample.csv"
+    path.write_bytes(b"a,b\n1,2\n")
+    expected = [
+        ExpectedDerivative(
+            "sample.csv",
+            path.stat().st_size,
+            hashlib.sha256(path.read_bytes()).hexdigest(),
+        )
+    ]
+    monkeypatch.setattr(
+        promotion,
+        "run_rclone",
+        lambda args: SimpleNamespace(stdout="sbmi-drive:\n"),
+    )
+
+    with pytest.raises(RuntimeError, match="não configurado"):
+        promote_derivatives_rclone(
+            output_dir=tmp_path,
+            remote="sbmi-drive-write",
+            remote_folder_path="exports/run",
+            expected=expected,
+        )
+
+
+def test_rclone_promotion_uploads_and_verifies(tmp_path, monkeypatch):
+    path = tmp_path / "sample.csv"
+    path.write_bytes(b"a,b\n1,2\n")
+    sha256 = hashlib.sha256(path.read_bytes()).hexdigest()
+    expected = [ExpectedDerivative("sample.csv", path.stat().st_size, sha256)]
+
+    monkeypatch.setattr(
+        promotion,
+        "_configured_rclone_remotes",
+        lambda: {"sbmi-drive-write"},
+    )
+
+    calls = {"list": 0, "copy": []}
+
+    def fake_list(remote, folder):
+        calls["list"] += 1
+        if calls["list"] == 1:
+            return {}
+        return {"sample.csv": [{"Name": "sample.csv", "ID": "drive-file-id"}]}
+
+    monkeypatch.setattr(promotion, "_rclone_list_files", fake_list)
+    monkeypatch.setattr(
+        promotion,
+        "_verify_remote_rclone_file",
+        lambda remote, remote_file_path, item: None,
+    )
+
+    def fake_run(args):
+        calls["copy"].append(args)
+        return SimpleNamespace(stdout="")
+
+    monkeypatch.setattr(promotion, "run_rclone", fake_run)
+
+    result = promote_derivatives_rclone(
+        output_dir=tmp_path,
+        remote="sbmi-drive-write",
+        remote_folder_path="exports/run",
+        expected=expected,
+    )
+
+    assert result[0].drive_file_id == "drive-file-id"
+    assert result[0].reused_existing is False
+    assert calls["copy"][0][0] == "copyto"

@@ -1,0 +1,54 @@
+name: ipm-definitive-layout-audit
+
+on:
+  pull_request:
+    paths:
+      - "src/sbmi/ipm_archive_audit.py"
+      - "src/sbmi/ipm_archive_audit_cli.py"
+      - "tests/test_ipm_archive_audit.py"
+      - ".github/workflows/ipm-definitive-layout-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: |
+          python -m pip install -e '.[dev]'
+      - name: Run focused tests
+        run: |
+          python -m pytest tests/test_ipm_archive_audit.py
+          python -m ruff check src/sbmi/ipm_archive_audit.py src/sbmi/ipm_archive_audit_cli.py tests/test_ipm_archive_audit.py
+      - name: Download two official definitive IPM archives
+        run: |
+          mkdir -p .data/staging/ipm_definitive_layout
+          curl --fail --location --retry 4 --retry-all-errors \
+            --output .data/staging/ipm_definitive_layout/ipm_2026.zip \
+            'https://atendimento.receita.rs.gov.br/upload/arquivos/202512/17093842-daim545-3.zip'
+          curl --fail --location --retry 4 --retry-all-errors \
+            --output .data/staging/ipm_definitive_layout/ipm_2025.zip \
+            'https://atendimento.receita.rs.gov.br/upload/arquivos/202508/21133005-20241211105501daim545-2025.zip'
+          ls -lh .data/staging/ipm_definitive_layout
+      - name: Inspect São Borja lines without parsing numeric layout
+        run: |
+          python -m sbmi.ipm_archive_audit_cli \
+            --archive 2025=.data/staging/ipm_definitive_layout/ipm_2025.zip \
+            --archive 2026=.data/staging/ipm_definitive_layout/ipm_2026.zip \
+            --output artifacts/ipm_definitive_layout_audit.csv
+          cat artifacts/ipm_definitive_layout_audit.csv
+      - name: Upload compact layout audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipm-definitive-layout-audit
+          path: artifacts/ipm_definitive_layout_audit.csv
+          retention-days: 14

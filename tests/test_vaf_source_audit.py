@@ -5,6 +5,8 @@ from sbmi.vaf_source_audit import (
     VAF_WRAPPER_URL,
     extract_iframe_sources,
     extract_official_links,
+    extract_table_rows,
+    find_table_rows_containing,
     official_source_catalog,
     parse_vaf_form,
     summarize_form,
@@ -43,6 +45,19 @@ WRAPPER_HTML = """
 <html><body>
 <iframe src="/ASP/SEF_ROOT/AIM/AIM-WEB-VAL-HIS_1.asp"></iframe>
 <iframe src="https://example.com/foreign"></iframe>
+</body></html>
+"""
+
+RESULT_HTML = """
+<html><body>
+<table>
+  <tr><th>Município</th><th>Ano</th><th>Campo publicado</th></tr>
+  <tr><td>São Borja</td><td>2025</td><td>1.234,56</td></tr>
+  <tr><td>São José</td><td>2025</td><td>2.345,67</td></tr>
+</table>
+<table>
+  <tr><td>Nota</td><td>Texto auxiliar</td></tr>
+</table>
 </body></html>
 """
 
@@ -102,3 +117,26 @@ def test_extract_iframe_sources_keeps_only_official_route() -> None:
     assert iframes == (
         "https://www.sefaz.rs.gov.br/ASP/SEF_ROOT/AIM/AIM-WEB-VAL-HIS_1.asp",
     )
+
+
+def test_extract_table_rows_preserves_visible_headers_and_cells() -> None:
+    tables = extract_table_rows(RESULT_HTML)
+    assert len(tables) == 2
+    first_cells = tables[0][0]["cells"]
+    assert first_cells == [
+        {"tag": "th", "text": "Município"},
+        {"tag": "th", "text": "Ano"},
+        {"tag": "th", "text": "Campo publicado"},
+    ]
+    assert tables[0][1]["cells"][2]["text"] == "1.234,56"
+
+
+def test_find_table_rows_containing_normalizes_accents() -> None:
+    rows = find_table_rows_containing(RESULT_HTML, "SAO BORJA")
+    assert len(rows) == 1
+    assert rows[0]["table_index"] == 0
+    assert [cell["text"] for cell in rows[0]["cells"]] == [
+        "São Borja",
+        "2025",
+        "1.234,56",
+    ]

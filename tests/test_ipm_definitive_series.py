@@ -43,8 +43,17 @@ def test_build_ipm_series_requires_complete_benchmarked_series() -> None:
     outputs = build_ipm_series_from_audits(results, execution_id="test-v001")
     assert len(outputs.series) == 24
     assert outputs.validation["status"].eq("PASS").all()
-    assert outputs.series.loc[outputs.series.distribution_year == 2025, "ipm_definitive"].iloc[0] == pytest.approx(0.52788)
-    assert outputs.series.loc[outputs.series.distribution_year == 2026, "yoy_change_pct"].iloc[0] == pytest.approx(1.0924831401)
+
+    ipm_2025 = outputs.series.loc[
+        outputs.series.distribution_year == 2025,
+        "ipm_definitive",
+    ].iloc[0]
+    yoy_2026 = outputs.series.loc[
+        outputs.series.distribution_year == 2026,
+        "yoy_change_pct",
+    ].iloc[0]
+    assert ipm_2025 == pytest.approx(0.52788)
+    assert yoy_2026 == pytest.approx(1.0924831401)
     assert len(outputs.source_manifest) == 24
 
 

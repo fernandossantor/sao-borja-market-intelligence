@@ -29,8 +29,9 @@ jobs:
           python -m ruff check src/sbmi/vaf_source_audit.py tests/test_vaf_source_audit.py
       - name: Audit official VAF source routes and one-year result
         run: |
-          mkdir -p artifacts
+          mkdir -p artifacts/raw_official
           python - <<'PY'
+          import hashlib
           import json
           from pathlib import Path
 
@@ -39,8 +40,12 @@ jobs:
           from sbmi.vaf_source_audit import (
               PORTAL_IPM_URL,
               SAO_BORJA_RANGE_VALUE,
+              VAF_ARCHIVE_1989_1997_XLS_URL,
+              VAF_ARCHIVE_2009_2012_XLS_URL,
               VAF_ARCHIVE_URL,
               VAF_HISTORY_FORM_URL,
+              VAF_LEGACY_1989_1997_BINARY_URL,
+              VAF_LEGACY_DOWNLOAD_INDEX_URL,
               VAF_WRAPPER_URL,
               extract_iframe_sources,
               extract_official_links,
@@ -61,8 +66,10 @@ jobs:
               "source_catalog": list(official_source_catalog()),
               "routes": {},
               "archive_links": [],
+              "legacy_download_links": [],
               "wrapper_iframes": [],
               "legacy_form": None,
+              "raw_binary_snapshots": [],
               "minimal_query": {
                   "requested_apuracao_start": "2025",
                   "requested_apuracao_end": "2025",
@@ -81,6 +88,9 @@ jobs:
                       "http_status": response.status_code,
                       "response_bytes": len(response.content),
                       "final_url": response.url,
+                      "content_type": response.headers.get("Content-Type"),
+                      "content_disposition": response.headers.get("Content-Disposition"),
+                      "last_modified": response.headers.get("Last-Modified"),
                   }
                   return response
               except requests.RequestException as exc:
@@ -91,10 +101,38 @@ jobs:
                   }
                   return None
 
+          def preserve_opaque_binary(
+              response: requests.Response | None,
+              *,
+              source_url: str,
+              file_name: str,
+          ) -> None:
+              if response is None or not response.ok:
+                  return
+              payload = response.content
+              output = Path("artifacts/raw_official") / file_name
+              output.write_bytes(payload)
+              result["raw_binary_snapshots"].append(
+                  {
+                      "source_url": source_url,
+                      "file_name": file_name,
+                      "response_bytes": len(payload),
+                      "sha256": hashlib.sha256(payload).hexdigest(),
+                      "content_type": response.headers.get("Content-Type"),
+                      "content_disposition": response.headers.get("Content-Disposition"),
+                      "last_modified": response.headers.get("Last-Modified"),
+                      "nature": "observed_official_raw_binary_preserved_without_execution_or_semantic_parsing",
+                  }
+              )
+
           portal = fetch(PORTAL_IPM_URL, 20)
           archive = fetch(VAF_ARCHIVE_URL, 20)
           wrapper = fetch(VAF_WRAPPER_URL, 15)
           legacy = fetch(VAF_HISTORY_FORM_URL, 15)
+          legacy_download_index = fetch(VAF_LEGACY_DOWNLOAD_INDEX_URL, 20)
+          archive_2009_2012 = fetch(VAF_ARCHIVE_2009_2012_XLS_URL, 20)
+          archive_1989_1997 = fetch(VAF_ARCHIVE_1989_1997_XLS_URL, 20)
+          legacy_1989_1997 = fetch(VAF_LEGACY_1989_1997_BINARY_URL, 20)
 
           if archive is not None and archive.ok:
               result["archive_links"] = list(
@@ -104,6 +142,31 @@ jobs:
                       text_terms=("Valor Adicionado Municipios", "Layout Sistema Proprio"),
                   )
               )
+
+          if legacy_download_index is not None and legacy_download_index.ok:
+              result["legacy_download_links"] = list(
+                  extract_official_links(
+                      legacy_download_index.text,
+                      source_url=legacy_download_index.url,
+                      text_terms=("Valor adicionado mun",),
+                  )
+              )
+
+          preserve_opaque_binary(
+              archive_2009_2012,
+              source_url=VAF_ARCHIVE_2009_2012_XLS_URL,
+              file_name="vaf_municipios_2009_2012_official.xls",
+          )
+          preserve_opaque_binary(
+              archive_1989_1997,
+              source_url=VAF_ARCHIVE_1989_1997_XLS_URL,
+              file_name="vaf_municipios_1989_1997_official.xls",
+          )
+          preserve_opaque_binary(
+              legacy_1989_1997,
+              source_url=VAF_LEGACY_1989_1997_BINARY_URL,
+              file_name="tabvalor_1989_1997_official_opaque.exe",
+          )
 
           if wrapper is not None and wrapper.ok:
               result["wrapper_iframes"] = list(
@@ -159,6 +222,9 @@ jobs:
 
           result["portal_content_seen"] = bool(portal is not None and portal.ok)
           result["archive_content_seen"] = bool(archive is not None and archive.ok)
+          result["legacy_download_index_seen"] = bool(
+              legacy_download_index is not None and legacy_download_index.ok
+          )
           result["current_query_content_seen"] = bool(
               (wrapper is not None and wrapper.ok) or (legacy is not None and legacy.ok)
           )
@@ -175,5 +241,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vaf-source-and-minimal-query-audit
-          path: artifacts/vaf_source_and_minimal_query_audit.json
+          path: |
+            artifacts/vaf_source_and_minimal_query_audit.json
+            artifacts/raw_official/
           retention-days: 14

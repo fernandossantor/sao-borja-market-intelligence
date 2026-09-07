@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pytest tests/test_vaf_source_audit.py
           python -m ruff check src/sbmi/vaf_source_audit.py tests/test_vaf_source_audit.py
-      - name: Audit official VAF source routes
+      - name: Audit official VAF source routes and one-year result
         run: |
           mkdir -p artifacts
           python - <<'PY'
@@ -38,11 +38,14 @@ jobs:
 
           from sbmi.vaf_source_audit import (
               PORTAL_IPM_URL,
+              SAO_BORJA_RANGE_VALUE,
               VAF_ARCHIVE_URL,
               VAF_HISTORY_FORM_URL,
               VAF_WRAPPER_URL,
               extract_iframe_sources,
               extract_official_links,
+              extract_table_rows,
+              find_table_rows_containing,
               official_source_catalog,
               parse_vaf_form,
               summarize_form,
@@ -54,12 +57,20 @@ jobs:
           )
 
           result = {
-              "nature": "observed_official_source_availability_audit",
+              "nature": "observed_official_source_and_query_structure_audit",
               "source_catalog": list(official_source_catalog()),
               "routes": {},
               "archive_links": [],
               "wrapper_iframes": [],
               "legacy_form": None,
+              "minimal_query": {
+                  "requested_apuracao_start": "2025",
+                  "requested_apuracao_end": "2025",
+                  "municipality_range_value": SAO_BORJA_RANGE_VALUE,
+                  "submit_value": "Consultar",
+                  "nature": "observed_form_parameters_used_for_read_only_query",
+                  "response": None,
+              },
           }
 
           def fetch(url: str, timeout: int) -> requests.Response | None:
@@ -101,10 +112,48 @@ jobs:
 
           if legacy is not None and legacy.ok:
               try:
-                  result["legacy_form"] = summarize_form(parse_vaf_form(legacy.text))
-              except ValueError as exc:
-                  result["legacy_form"] = {
-                      "status": "parse_error",
+                  form = parse_vaf_form(legacy.text)
+                  result["legacy_form"] = summarize_form(form)
+                  payload = {
+                      "anoini": "2025",
+                      "anofim": "2025",
+                      "letramun": SAO_BORJA_RANGE_VALUE,
+                      "Action": "Consultar",
+                  }
+                  response = session.post(
+                      form.action,
+                      data=payload,
+                      timeout=30,
+                      allow_redirects=True,
+                      headers={"Referer": VAF_HISTORY_FORM_URL},
+                  )
+                  response.raise_for_status()
+                  tables = extract_table_rows(response.text)
+                  matches = find_table_rows_containing(response.text, "SAO BORJA")
+                  matching_table_indexes = sorted(
+                      {int(match["table_index"]) for match in matches}
+                  )
+                  result["minimal_query"]["response"] = {
+                      "http_status": response.status_code,
+                      "final_url": response.url,
+                      "response_bytes": len(response.content),
+                      "encoding": response.encoding,
+                      "table_count": len(tables),
+                      "sao_borja_match_count": len(matches),
+                      "sao_borja_rows": list(matches),
+                      "matching_tables": [
+                          {
+                              "table_index": index,
+                              "rows": list(tables[index]),
+                          }
+                          for index in matching_table_indexes
+                      ],
+                      "nature": "observed_visible_result_cells_without_column_relabeling",
+                  }
+              except (ValueError, requests.RequestException) as exc:
+                  result["minimal_query"]["response"] = {
+                      "status": "query_or_parse_error",
+                      "error_type": type(exc).__name__,
                       "error": str(exc),
                   }
 
@@ -114,17 +163,17 @@ jobs:
               (wrapper is not None and wrapper.ok) or (legacy is not None and legacy.ok)
           )
 
-          output = Path("artifacts/vaf_source_availability.json")
+          output = Path("artifacts/vaf_source_and_minimal_query_audit.json")
           output.write_text(
               json.dumps(result, ensure_ascii=False, indent=2),
               encoding="utf-8",
           )
           print(output.read_text(encoding="utf-8"))
-          print("STATUS=VAF_SOURCE_AVAILABILITY_AUDIT_COMPLETED")
+          print("STATUS=VAF_SOURCE_AND_MINIMAL_QUERY_AUDIT_COMPLETED")
           PY
       - name: Upload compact source audit
         uses: actions/upload-artifact@v4
         with:
-          name: vaf-source-availability
-          path: artifacts/vaf_source_availability.json
+          name: vaf-source-and-minimal-query-audit
+          path: artifacts/vaf_source_and_minimal_query_audit.json
           retention-days: 14

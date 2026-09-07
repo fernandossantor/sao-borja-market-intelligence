@@ -5,18 +5,14 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from sbmi.drive_promotion import (
-    ExpectedDerivative,
-    build_authorized_write_session,
-    promote_derivatives,
-)
-from sbmi.google_drive import service_account_info_from_environment
+from sbmi.drive_promotion import ExpectedDerivative, promote_derivatives_rclone
 
 DEFAULT_EXECUTION_ID = "territorial-wage-rais2025-rfb2026-08-drive-20260907-200236"
 DEFAULT_OUTPUT_DIR = Path(
     ".data/exports/base_territorial/territorial_wage_estimation"
 ) / DEFAULT_EXECUTION_ID
-DEFAULT_DRIVE_FOLDER_ID = "12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x"
+DEFAULT_RCLONE_REMOTE = "sbmi-drive-write"
+DEFAULT_REMOTE_FOLDER = f"exports/{DEFAULT_EXECUTION_ID}"
 
 EXPECTED = [
     ExpectedDerivative(
@@ -60,16 +56,14 @@ EXPECTED = [
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
-    parser.add_argument("--drive-folder-id", default=DEFAULT_DRIVE_FOLDER_ID)
-    parser.add_argument("--secret-env", default="SBMI_GDRIVE_SA_B64")
+    parser.add_argument("--remote", default=DEFAULT_RCLONE_REMOTE)
+    parser.add_argument("--remote-folder", default=DEFAULT_REMOTE_FOLDER)
     args = parser.parse_args()
 
-    info = service_account_info_from_environment(args.secret_env)
-    session = build_authorized_write_session(info)
-    results = promote_derivatives(
-        session,
+    results = promote_derivatives_rclone(
         output_dir=args.output_dir,
-        parent_folder_id=args.drive_folder_id,
+        remote=args.remote,
+        remote_folder_path=args.remote_folder,
         expected=EXPECTED,
     )
 
@@ -79,7 +73,9 @@ def main() -> None:
             f"bytes={result.size_bytes} sha256={result.sha256} "
             f"reused_existing={str(result.reused_existing).lower()}"
         )
-    print(f"drive_folder_id={args.drive_folder_id}")
+    print("backend=rclone-human-oauth")
+    print(f"remote={args.remote}")
+    print(f"remote_folder={args.remote_folder}")
     print(f"files_promoted={len(results)}")
     print("STATUS=TERRITORIAL_WAGE_DRIVE_PROMOTION_OK")
 

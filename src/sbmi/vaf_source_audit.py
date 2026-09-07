@@ -1,4 +1,4 @@
-"""Auditoria estrutural da consulta histórica oficial de VAF da SEFAZ/RS."""
+"""Auditoria estrutural das fontes oficiais de VAF da Receita Estadual/RS."""
 
 from __future__ import annotations
 
@@ -6,10 +6,45 @@ from dataclasses import dataclass
 from html.parser import HTMLParser
 from urllib.parse import urljoin, urlparse
 
+PORTAL_IPM_URL = "https://atendimento.receita.rs.gov.br/ipm-indice-de-participacao-dos-municipios"
+VAF_WRAPPER_URL = "https://www.sefaz.rs.gov.br/AIM/VAL-HIS.aspx"
 VAF_HISTORY_FORM_URL = (
     "https://www.sefaz.rs.gov.br/ASP/SEF_ROOT/AIM/AIM-WEB-VAL-HIS_1.asp"
 )
-ALLOWED_HOSTS = {"www.sefaz.rs.gov.br", "sefaz.rs.gov.br"}
+VAF_ARCHIVE_URL = "https://atendimento.receita.rs.gov.br/consultas-e-arquivos-antigos-ipm"
+ALLOWED_HOSTS = {
+    "atendimento.receita.rs.gov.br",
+    "receita.fazenda.rs.gov.br",
+    "sefaz.rs.gov.br",
+    "www.sefaz.rs.gov.br",
+}
+
+SOURCE_CATALOG: tuple[dict[str, str], ...] = (
+    {
+        "source_id": "ipm_service_portal",
+        "kind": "official_service_index",
+        "url": PORTAL_IPM_URL,
+        "nature": "observed_official_source_route",
+    },
+    {
+        "source_id": "vaf_current_wrapper",
+        "kind": "official_current_query_wrapper",
+        "url": VAF_WRAPPER_URL,
+        "nature": "observed_official_source_route",
+    },
+    {
+        "source_id": "vaf_legacy_form",
+        "kind": "official_legacy_query_form",
+        "url": VAF_HISTORY_FORM_URL,
+        "nature": "observed_official_source_route",
+    },
+    {
+        "source_id": "vaf_historical_archive",
+        "kind": "official_historical_archive_index",
+        "url": VAF_ARCHIVE_URL,
+        "nature": "observed_official_source_route",
+    },
+)
 
 
 @dataclass(frozen=True)
@@ -74,9 +109,7 @@ class _FormParser(HTMLParser):
     def handle_endtag(self, tag: str) -> None:
         tag = tag.lower()
         if tag == "option" and self.current_option is not None:
-            self.current_option["text"] = " ".join(
-                "".join(self.option_text).split()
-            )
+            self.current_option["text"] = " ".join("".join(self.option_text).split())
             assert self.current_select is not None
             options = self.current_select["options"]
             assert isinstance(options, list)
@@ -90,11 +123,62 @@ class _FormParser(HTMLParser):
             self.in_form = False
 
 
+class _RouteParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.links: list[dict[str, str]] = []
+        self.iframes: list[str] = []
+        self.current_href: str | None = None
+        self.current_text: list[str] = []
+
+    @staticmethod
+    def _attrs(attrs: list[tuple[str, str | None]]) -> dict[str, str]:
+        return {key.lower(): value or "" for key, value in attrs}
+
+    def handle_starttag(
+        self, tag: str, attrs: list[tuple[str, str | None]]
+    ) -> None:
+        attr = self._attrs(attrs)
+        tag = tag.lower()
+        if tag == "a":
+            self.current_href = attr.get("href", "")
+            self.current_text = []
+        elif tag == "iframe" and attr.get("src"):
+            self.iframes.append(attr["src"])
+
+    def handle_data(self, data: str) -> None:
+        if self.current_href is not None:
+            self.current_text.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() == "a" and self.current_href is not None:
+            self.links.append(
+                {
+                    "href": self.current_href,
+                    "text": " ".join("".join(self.current_text).split()),
+                }
+            )
+            self.current_href = None
+            self.current_text = []
+
+
+def _ensure_official_url(url: str) -> str:
+    parsed = urlparse(url)
+    if parsed.hostname not in ALLOWED_HOSTS:
+        raise ValueError(f"Host VAF não autorizado: {parsed.hostname}")
+    return url
+
+
+def official_source_catalog() -> tuple[dict[str, str], ...]:
+    """Retorna apenas rotas oficiais explicitamente registradas no projeto."""
+    for source in SOURCE_CATALOG:
+        _ensure_official_url(source["url"])
+    return SOURCE_CATALOG
+
+
 def parse_vaf_form(html: str, *, source_url: str = VAF_HISTORY_FORM_URL) -> FormStructure:
     """Extrai método, action, selects e inputs sem inferir a semântica dos campos."""
-    parsed_source = urlparse(source_url)
-    if parsed_source.hostname not in ALLOWED_HOSTS:
-        raise ValueError(f"Host VAF não autorizado: {parsed_source.hostname}")
+    _ensure_official_url(source_url)
 
     parser = _FormParser()
     parser.feed(html)
@@ -103,9 +187,7 @@ def parse_vaf_form(html: str, *, source_url: str = VAF_HISTORY_FORM_URL) -> Form
 
     method = parser.form_attrs.get("method", "get").lower()
     action = urljoin(source_url, parser.form_attrs.get("action", ""))
-    parsed_action = urlparse(action)
-    if parsed_action.hostname not in ALLOWED_HOSTS:
-        raise ValueError(f"Action VAF fora do host oficial: {action}")
+    _ensure_official_url(action)
 
     return FormStructure(
         method=method,
@@ -113,6 +195,47 @@ def parse_vaf_form(html: str, *, source_url: str = VAF_HISTORY_FORM_URL) -> Form
         selects=tuple(parser.selects),
         inputs=tuple(parser.inputs),
     )
+
+
+def extract_official_links(
+    html: str,
+    *,
+    source_url: str,
+    text_terms: tuple[str, ...] = (),
+) -> tuple[dict[str, str], ...]:
+    """Extrai links oficiais, opcionalmente filtrados por termos do texto publicado."""
+    _ensure_official_url(source_url)
+    parser = _RouteParser()
+    parser.feed(html)
+    terms = tuple(term.casefold() for term in text_terms)
+    results: list[dict[str, str]] = []
+    for link in parser.links:
+        text = link["text"]
+        if terms and not any(term in text.casefold() for term in terms):
+            continue
+        url = urljoin(source_url, link["href"])
+        try:
+            _ensure_official_url(url)
+        except ValueError:
+            continue
+        results.append({"text": text, "url": url})
+    return tuple(results)
+
+
+def extract_iframe_sources(html: str, *, source_url: str) -> tuple[str, ...]:
+    """Extrai somente iframes hospedados em domínios oficiais autorizados."""
+    _ensure_official_url(source_url)
+    parser = _RouteParser()
+    parser.feed(html)
+    results: list[str] = []
+    for iframe in parser.iframes:
+        url = urljoin(source_url, iframe)
+        try:
+            _ensure_official_url(url)
+        except ValueError:
+            continue
+        results.append(url)
+    return tuple(results)
 
 
 def summarize_form(structure: FormStructure) -> dict[str, object]:

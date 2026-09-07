@@ -1,6 +1,7 @@
 from urllib.parse import urlparse
 
 from sbmi.vaf_source_audit import (
+    SAO_BORJA_RANGE_VALUE,
     VAF_ARCHIVE_URL,
     VAF_LEGACY_1989_1997_BINARY_URL,
     VAF_WRAPPER_URL,
@@ -25,6 +26,18 @@ FORM_HTML = """
     <option value="117">SAO BORJA</option>
   </select>
   <input type="submit" name="consultar" value="Consultar">
+</form>
+</body></html>
+"""
+
+MUNICIPALITY_RANGE_HTML = """
+<html><body>
+<form method="post" action="AIM-WEB-VAL-HIS_2.asp">
+  <select name="letramun">
+    <option value="S          SAO MARTINH">Sagrada Família até São Martinho</option>
+    <option value="SAO MARTINHSZZZZZZZZZZ">São Martinho até Soledade</option>
+  </select>
+  <input type="submit" name="Action" value="Consultar">
 </form>
 </body></html>
 """
@@ -72,6 +85,19 @@ def test_parse_vaf_form_preserves_observed_structure() -> None:
     assert structure.selects[0]["options"][1]["selected"] is True
     assert structure.selects[1]["options"][0]["text"] == "SAO BORJA"
     assert structure.inputs[0]["type"] == "hidden"
+
+
+def test_sao_borja_range_matches_official_pre_sao_martinho_option() -> None:
+    structure = parse_vaf_form(MUNICIPALITY_RANGE_HTML)
+    select = structure.selects[0]
+    options = select["options"]
+    assert select["name"] == "letramun"
+    assert any(
+        option["value"] == SAO_BORJA_RANGE_VALUE
+        and option["text"] == "Sagrada Família até São Martinho"
+        for option in options
+    )
+    assert SAO_BORJA_RANGE_VALUE == "S          SAO MARTINH"
 
 
 def test_summarize_form_does_not_relabel_fields() -> None:

@@ -35,38 +35,67 @@ A medida remuneratória principal é a soma de `Vl Rem Média Nom` dos vínculos
 
 A defasagem RAIS 2025 × RFB 2026-08 permanece limitação explícita.
 
-## Execução no worktree correto
+## Execução canônica auditada
+
+Execução: `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
+
+A execução reutilizou a cópia local validada da RAIS e o recorte municipal já existente. O derivado RFB de 30.429 bytes foi staged a partir da cópia mestre do Drive. Não houve readquisição de microdados em fonte externa.
+
+Resultados principais:
+
+- 8.595 vínculos empresariais ativos não abandonados;
+- 25,160555% do emprego estimado associado a matriz externa;
+- 29,090298% da soma da remuneração média nominal estimada associada a matriz externa;
+- 29,689702% da remuneração de dezembro informada estimada associada a matriz externa;
+- 0 vínculos sem correspondência efetiva;
+- todas as reconciliações de emprego e remuneração com diferença zero nos limites de validação.
+
+Cobertura do match exato `CNAE subclasse × natureza jurídica`:
+
+- 99,837115% dos vínculos;
+- 99,790511% da remuneração de dezembro;
+- 99,766278% da soma das remunerações médias nominais.
+
+Os sete controles de `validation.csv` foram `PASS`.
+
+## Saídas canônicas e hashes
+
+A execução criou sete derivados em `.data/exports/base_territorial/territorial_wage_estimation/territorial-wage-rais2025-rfb2026-08-drive-20260907-200236/`:
+
+- `run_metadata.csv` — 1.062 bytes — SHA-256 `88e00fc30380a7ae0ea12bd97882677d9cd45ad25a04dc05ee77497ecae448f7`;
+- `source_manifest.csv` — 616 bytes — SHA-256 `334a77029b14e3a0f51be34adda280f62ec2e253440244fc8026ec9137729839`;
+- `territorial_wage_by_division.csv` — 10.450 bytes — SHA-256 `c6d8fe91d95324da28ad35a77d08317309ecc3c358b6f070e21a86a9ef3e667a`;
+- `territorial_wage_cells.csv` — 55.816 bytes — SHA-256 `0c2a6bb20e2a3abcca9840536639a3f2b516802d8c0cf2fffe6e83d1e109144f`;
+- `territorial_wage_coverage.csv` — 680 bytes — SHA-256 `337b5e080d93b76f9dc67357c03c915ed1cb44524f72aa08d5c5ecd92b44c812`;
+- `territorial_wage_summary.csv` — 1.490 bytes — SHA-256 `1c72ebfa313548050eb9d6684ea1e02ee5b05208e9a08634729d27d748ac5f1e`;
+- `validation.csv` — 306 bytes — SHA-256 `3379431961f8fc030bf85c1d6ffaaf74624b37074661f7a2406b6d33e8eede7d`.
+
+O recorte municipal intermediário possui 5.275.011 bytes e SHA-256 `a4db6fb847eacab43e883d4daaaa9f0a16e23db07d4d2f117dd90231631e5c57`.
+
+## Promoção ao Drive
+
+A pasta de destino dos derivados canônicos foi criada em `_sao_borja/exports/`:
+
+- folder ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`;
+- nome `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
+
+A rotina `sbmi.territorial_wage_promote_drive_cli` promove somente os sete arquivos cujos tamanho e SHA-256 coincidirem exatamente com esta auditoria. Arquivos já existentes e idênticos são reutilizados; colisões de mesmo nome com conteúdo divergente interrompem a promoção.
+
+Execução:
 
 ```bash
 cd /workspaces/sbmi-cnpj-run
 git fetch origin feature/cnpj-territorial-control-v1
 git merge --ff-only origin/feature/cnpj-territorial-control-v1
-python -m sbmi.territorial_wage_drive_cli
+python -m sbmi.territorial_wage_promote_drive_cli
 ```
 
-Se as cópias locais da RAIS e do derivado RFB já estiverem validadas, a rotina as reutiliza e não transfere novamente o conteúdo do Drive.
+## Caderno-Base sincronizado
 
-## Saídas
+A versão de controle corrente foi criada no Drive como `caderno_base_territorial_v006_emprego_remuneracao_20260907`, preservando a v005 como histórico. A v006 reúne, em abas próprias, resumo, emprego/remuneração, cobertura de match, validação remuneratória, manifesto de fontes/saídas e análise setorial remuneratória.
 
-Cada execução cria uma pasta nova em `.data/exports/base_territorial/territorial_wage_estimation/` contendo:
+## Interpretação e limitações
 
-- `territorial_wage_cells.csv`;
-- `territorial_wage_coverage.csv`;
-- `territorial_wage_by_division.csv`;
-- `territorial_wage_summary.csv`;
-- `validation.csv`;
-- `source_manifest.csv`;
-- `run_metadata.csv`.
+Os resultados de emprego e remuneração por controle territorial são **estimativas por células CNAE × natureza jurídica**, não observações por CNPJ. A diferença entre a remuneração média implícita das estruturas externas e locais é efeito agregado de composição das células e não demonstra prêmio salarial empresa a empresa.
 
-O manifesto registra os IDs das fontes mestre do Drive, tamanhos e SHA-256 das entradas e do recorte municipal.
-
-## Benchmarks de auditoria
-
-Antes de promover qualquer resultado à narrativa do Caderno-Base, a execução deve reproduzir aproximadamente:
-
-- 8.595 vínculos empresariais;
-- 25,1606% do emprego estimado associado a matriz externa;
-- 29,0903% da soma da remuneração média nominal estimada associada a matriz externa;
-- 29,6897% da remuneração de dezembro informada estimada associada a matriz externa.
-
-Essas participações são **estimativas**, não observações empresa a empresa, e não medem remessa de lucros, compras fora do município ou vazamento monetário.
+As participações estimadas não medem remessa de lucros, compras fora do município, valor adicionado apropriado externamente nem vazamento monetário. A RAIS 2025 e a RFB 2026-08 também não representam o mesmo período.

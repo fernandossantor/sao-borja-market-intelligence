@@ -1,5 +1,3 @@
-import pytest
-
 from sbmi.vaf_source_audit import parse_vaf_form, summarize_form
 
 
@@ -39,5 +37,9 @@ def test_summarize_form_does_not_relabel_fields() -> None:
 
 
 def test_parse_vaf_form_rejects_non_official_host() -> None:
-    with pytest.raises(ValueError, match="não autorizado"):
+    try:
         parse_vaf_form(HTML, source_url="https://example.com/form")
+    except ValueError as exc:
+        assert "não autorizado" in str(exc)
+    else:
+        raise AssertionError("Host não oficial deveria ser recusado")

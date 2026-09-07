@@ -1,6 +1,5 @@
 from sbmi.vaf_source_audit import parse_vaf_form, summarize_form
 
-
 HTML = """
 <html><body>
 <form method="post" action="AIM-WEB-VAL-HIS_2.asp">

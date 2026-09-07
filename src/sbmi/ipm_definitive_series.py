@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
@@ -51,8 +51,16 @@ def _build_validation(series: pd.DataFrame) -> pd.DataFrame:
     ipm = series.set_index("distribution_year")["ipm_definitive"].to_dict()
     rows = [
         _validation_row("rows", len(series), len(series) == len(EXPECTED_YEARS)),
-        _validation_row("unique_years", len(unique_years), len(unique_years) == len(EXPECTED_YEARS)),
-        _validation_row("year_range_complete", f"{min(years)}-{max(years)}", tuple(years) == EXPECTED_YEARS),
+        _validation_row(
+            "unique_years",
+            len(unique_years),
+            len(unique_years) == len(EXPECTED_YEARS),
+        ),
+        _validation_row(
+            "year_range_complete",
+            f"{min(years)}-{max(years)}",
+            tuple(years) == EXPECTED_YEARS,
+        ),
         _validation_row(
             "municipality_match_exactly_one_per_year",
             int(series["municipality_match_count"].sum()),
@@ -151,17 +159,26 @@ def build_ipm_series_from_audits(
             },
             {
                 "field": "extraction_rule",
-                "value": "último campo da linha única de São Borja em DAIM545X; seis casas decimais",
+                "value": (
+                    "último campo da linha única de São Borja em DAIM545X; "
+                    "seis casas decimais"
+                ),
                 "nature": "method",
             },
             {
                 "field": "layout_rule",
-                "value": "componentes intermediários não interpretados porque o número de campos muda entre anos",
+                "value": (
+                    "componentes intermediários não interpretados porque o número "
+                    "de campos muda entre anos"
+                ),
                 "nature": "limitation",
             },
             {
                 "field": "comparability",
-                "value": "IPM é comparável como índice final publicado; pesos e critérios legais mudam ao longo do tempo",
+                "value": (
+                    "IPM é comparável como índice final publicado; pesos e critérios "
+                    "legais mudam ao longo do tempo"
+                ),
                 "nature": "limitation",
             },
         ]
@@ -196,7 +213,6 @@ def write_ipm_series_outputs(outputs: IpmSeriesOutputs, output_dir: Path) -> Non
     """Grava apenas derivados pequenos e auditáveis."""
     target = Path(output_dir)
     target.mkdir(parents=True, exist_ok=False)
-    asdict(outputs)  # valida que a estrutura permanece dataclass; tabelas são gravadas abaixo.
     outputs.series.to_csv(target / "sao_borja_ipm_definitive_2003_2026.csv", index=False)
     outputs.validation.to_csv(target / "validation.csv", index=False)
     outputs.source_manifest.to_csv(target / "source_manifest.csv", index=False)

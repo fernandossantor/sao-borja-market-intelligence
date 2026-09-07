@@ -20,10 +20,11 @@ Versões anteriores do caderno e derivados consolidados não devem ser sobrescri
 - Controle cadastral: RFB Dados Abertos CNPJ, competência 2026-08.
 - Emprego e remuneração: RAIS 2025, compatibilizada com RFB 2026-08 por células CNAE × natureza jurídica.
 - Execução remuneratória canônica: `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
-- Pasta de promoção dos derivados remuneratórios: Drive ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`.
+- Pasta dos derivados remuneratórios promovidos: Drive ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`.
 - Auditoria da execução remuneratória: 7/7 controles `PASS`, 0 vínculos `unmatched` e reconciliação integral das três métricas.
-- Estado dos sete CSVs canônicos: **0/7 promovidos**. A permissão da conta de serviço foi elevada de `reader` para `writer`, mas a segunda tentativa continuou retornando `403`. A auditoria confirmou que a pasta está em Meu Drive e a conta de serviço não pode assumir propriedade de novos arquivos por não possuir cota de armazenamento. O backend de promoção foi corrigido para um remote rclone separado, `sbmi-drive-write`, autenticado por OAuth humano. O remote de leitura `sbmi-drive` permanece `drive.readonly`.
+- Estado dos sete CSVs canônicos: **7/7 promovidos ao Drive** em 2026-09-07. O handoff ZIP foi revalidado antes do upload contra os sete nomes, tamanhos e SHA-256 canônicos; após a promoção, a pasta foi conferida com exatamente sete arquivos e tamanhos idênticos aos auditados.
+- Manifesto final da promoção: `docs/caderno_base/territorial_wage_drive_promotion_manifest.md`, com IDs individuais dos sete arquivos e limitação explícita de que o conector utilizado não expõe `sha256Checksum` para uma segunda recomputação criptográfica pós-upload.
 
-A configuração do backend de escrita está em `docs/drive_write_connection.md`; a execução e os controles da promoção remuneratória estão em `docs/caderno_base/territorial_wage_drive_execution.md`.
+A configuração de escrita controlada e as alternativas operacionais estão em `docs/drive_write_connection.md`; a execução e os controles metodológicos da remuneração estão em `docs/caderno_base/territorial_wage_drive_execution.md`.
 
 A atualização do caderno deve acompanhar a atualização dos dados; nenhum resultado novo deve permanecer apenas em código, terminal ou conversa sem registro nos artefatos e na narrativa do projeto.

@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m pytest tests/test_vaf_source_audit.py
           python -m ruff check src/sbmi/vaf_source_audit.py tests/test_vaf_source_audit.py
-      - name: Audit official VAF source routes and one-year result
+      - name: Audit official VAF source routes, 2025 result and 2009-2019 overlap
         run: |
           mkdir -p artifacts/raw_official
           python - <<'PY'
@@ -73,6 +73,14 @@ jobs:
               "minimal_query": {
                   "requested_apuracao_start": "2025",
                   "requested_apuracao_end": "2025",
+                  "municipality_range_value": SAO_BORJA_RANGE_VALUE,
+                  "submit_value": "Consultar",
+                  "nature": "observed_form_parameters_used_for_read_only_query",
+                  "response": None,
+              },
+              "historical_overlap_query": {
+                  "requested_apuracao_start": "2009",
+                  "requested_apuracao_end": "2019",
                   "municipality_range_value": SAO_BORJA_RANGE_VALUE,
                   "submit_value": "Consultar",
                   "nature": "observed_form_parameters_used_for_read_only_query",
@@ -124,6 +132,52 @@ jobs:
                       "nature": "observed_official_raw_binary_preserved_without_execution_or_semantic_parsing",
                   }
               )
+
+          def query_period(form_action: str, start: str, end: str, raw_name: str) -> dict[str, object]:
+              payload = {
+                  "anoini": start,
+                  "anofim": end,
+                  "letramun": SAO_BORJA_RANGE_VALUE,
+                  "Action": "Consultar",
+              }
+              response = session.post(
+                  form_action,
+                  data=payload,
+                  timeout=30,
+                  allow_redirects=True,
+                  headers={"Referer": VAF_HISTORY_FORM_URL},
+              )
+              response.raise_for_status()
+              raw_post = Path("artifacts/raw_official") / raw_name
+              raw_post.write_bytes(response.content)
+              tables = extract_table_rows(response.text)
+              matches = find_table_rows_containing(response.text, "SAO BORJA")
+              matching_table_indexes = sorted(
+                  {int(match["table_index"]) for match in matches}
+              )
+              return {
+                  "http_status": response.status_code,
+                  "final_url": response.url,
+                  "response_bytes": len(response.content),
+                  "encoding": response.encoding,
+                  "raw_response_file": str(raw_post),
+                  "raw_response_sha256": hashlib.sha256(response.content).hexdigest(),
+                  "table_count": len(tables),
+                  "all_tables": [
+                      {"table_index": index, "rows": list(table)}
+                      for index, table in enumerate(tables)
+                  ],
+                  "sao_borja_match_count": len(matches),
+                  "sao_borja_rows": list(matches),
+                  "matching_tables": [
+                      {
+                          "table_index": index,
+                          "rows": list(tables[index]),
+                      }
+                      for index in matching_table_indexes
+                  ],
+                  "nature": "observed_visible_result_cells_without_column_relabeling",
+              }
 
           portal = fetch(PORTAL_IPM_URL, 20)
           archive = fetch(VAF_ARCHIVE_URL, 20)
@@ -177,56 +231,28 @@ jobs:
               try:
                   form = parse_vaf_form(legacy.text)
                   result["legacy_form"] = summarize_form(form)
-                  payload = {
-                      "anoini": "2025",
-                      "anofim": "2025",
-                      "letramun": SAO_BORJA_RANGE_VALUE,
-                      "Action": "Consultar",
-                  }
-                  response = session.post(
+                  result["minimal_query"]["response"] = query_period(
                       form.action,
-                      data=payload,
-                      timeout=30,
-                      allow_redirects=True,
-                      headers={"Referer": VAF_HISTORY_FORM_URL},
+                      "2025",
+                      "2025",
+                      "vaf_post_2025_response.html",
                   )
-                  response.raise_for_status()
-                  raw_post = Path("artifacts/raw_official/vaf_post_2025_response.html")
-                  raw_post.write_bytes(response.content)
-                  tables = extract_table_rows(response.text)
-                  matches = find_table_rows_containing(response.text, "SAO BORJA")
-                  matching_table_indexes = sorted(
-                      {int(match["table_index"]) for match in matches}
+                  result["historical_overlap_query"]["response"] = query_period(
+                      form.action,
+                      "2009",
+                      "2019",
+                      "vaf_post_2009_2019_response.html",
                   )
-                  result["minimal_query"]["response"] = {
-                      "http_status": response.status_code,
-                      "final_url": response.url,
-                      "response_bytes": len(response.content),
-                      "encoding": response.encoding,
-                      "raw_response_file": str(raw_post),
-                      "raw_response_sha256": hashlib.sha256(response.content).hexdigest(),
-                      "table_count": len(tables),
-                      "all_tables": [
-                          {"table_index": index, "rows": list(table)}
-                          for index, table in enumerate(tables)
-                      ],
-                      "sao_borja_match_count": len(matches),
-                      "sao_borja_rows": list(matches),
-                      "matching_tables": [
-                          {
-                              "table_index": index,
-                              "rows": list(tables[index]),
-                          }
-                          for index in matching_table_indexes
-                      ],
-                      "nature": "observed_visible_result_cells_without_column_relabeling",
-                  }
               except (ValueError, requests.RequestException) as exc:
-                  result["minimal_query"]["response"] = {
+                  error = {
                       "status": "query_or_parse_error",
                       "error_type": type(exc).__name__,
                       "error": str(exc),
                   }
+                  if result["minimal_query"]["response"] is None:
+                      result["minimal_query"]["response"] = error
+                  if result["historical_overlap_query"]["response"] is None:
+                      result["historical_overlap_query"]["response"] = error
 
           result["portal_content_seen"] = bool(portal is not None and portal.ok)
           result["archive_content_seen"] = bool(archive is not None and archive.ok)

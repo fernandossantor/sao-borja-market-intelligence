@@ -303,6 +303,7 @@ def curate_cnpj_territorial_control(
         "identificador_matriz_filial",
         "matrix_branch_label",
         "razao_social",
+        "natureza_juridica",
         "nome_fantasia",
         "cnae_fiscal_principal",
         "cnae_division",

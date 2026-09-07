@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,7 @@ from typing import Any
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2 import service_account
 
+from sbmi.drive import remote_spec, run_rclone
 from sbmi.google_drive import FOLDER_MIME_TYPE, get_file_metadata, list_children
 
 DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive"
@@ -38,7 +40,7 @@ class PromotedDerivative:
 
 
 def build_authorized_write_session(info: dict[str, Any]) -> AuthorizedSession:
-    """Create a Drive write session without changing the read-only default helper."""
+    """Create a Drive write session for shared-drive/service-account use cases."""
     credentials = service_account.Credentials.from_service_account_info(
         info,
         scopes=[DRIVE_WRITE_SCOPE],
@@ -121,7 +123,11 @@ def _upload_one(
             files=files,
             timeout=300,
         )
-    response.raise_for_status()
+    if not response.ok:
+        detail = response.text.strip()
+        raise RuntimeError(
+            f"Falha no upload Drive de {path.name}: HTTP {response.status_code}: {detail}"
+        )
     payload = response.json()
     if not isinstance(payload, dict) or not payload.get("id"):
         raise RuntimeError(f"Resposta de upload inválida para {path.name}")
@@ -135,7 +141,11 @@ def promote_derivatives(
     parent_folder_id: str,
     expected: list[ExpectedDerivative],
 ) -> list[PromotedDerivative]:
-    """Promote audited derivatives idempotently, refusing divergent collisions."""
+    """Promote audited derivatives with a Drive API session.
+
+    This backend is suitable for a human OAuth session or a service account writing
+    to a Shared Drive. Service accounts cannot own files in a user's My Drive.
+    """
     folder = get_file_metadata(session, parent_folder_id)
     if folder.get("mimeType") != FOLDER_MIME_TYPE:
         raise ValueError(f"Destino {parent_folder_id} não é uma pasta do Google Drive")
@@ -168,5 +178,114 @@ def promote_derivatives(
                 f"Upload divergente para {item.name}: size={size}, sha256={sha256}"
             )
         results.append(PromotedDerivative(item.name, uploaded_id, size, sha256, False))
+
+    return results
+
+
+def _configured_rclone_remotes() -> set[str]:
+    result = run_rclone(["listremotes"])
+    return {line.strip().removesuffix(":") for line in result.stdout.splitlines() if line.strip()}
+
+
+def _rclone_list_files(remote: str, remote_folder_path: str) -> dict[str, list[dict[str, Any]]]:
+    result = run_rclone(
+        [
+            "lsjson",
+            remote_spec(remote, remote_folder_path),
+            "--files-only",
+            "--max-depth",
+            "1",
+        ]
+    )
+    payload = json.loads(result.stdout or "[]")
+    if not isinstance(payload, list):
+        raise RuntimeError("Resposta inesperada do rclone lsjson")
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("Name") or item.get("Path") or "").strip()
+        if name:
+            grouped.setdefault(name, []).append(item)
+    return grouped
+
+
+def _verify_remote_rclone_file(
+    remote: str,
+    remote_file_path: str,
+    expected: ExpectedDerivative,
+) -> None:
+    with tempfile.TemporaryDirectory(prefix="sbmi-drive-verify-") as temp_dir:
+        local_copy = Path(temp_dir) / expected.name
+        run_rclone(["copyto", remote_spec(remote, remote_file_path), str(local_copy)])
+        observed_size = local_copy.stat().st_size
+        observed_sha256 = sha256_file(local_copy)
+        if observed_size != expected.size_bytes or observed_sha256 != expected.sha256.lower():
+            raise ValueError(
+                f"Cópia remota divergente para {expected.name}: "
+                f"size={observed_size}, sha256={observed_sha256}"
+            )
+
+
+def promote_derivatives_rclone(
+    *,
+    output_dir: Path,
+    remote: str,
+    remote_folder_path: str,
+    expected: list[ExpectedDerivative],
+) -> list[PromotedDerivative]:
+    """Promote audited derivatives using a human-OAuth rclone remote.
+
+    The write remote is intentionally separate from the project's read-only remote.
+    Every local file is validated before upload and every remote file is downloaded
+    back after upload/reuse so SHA-256 can be checked independently of Drive metadata.
+    """
+    configured = _configured_rclone_remotes()
+    normalized_remote = remote.strip().removesuffix(":")
+    if normalized_remote not in configured:
+        raise RuntimeError(
+            f"Remote rclone de escrita '{normalized_remote}' não configurado. "
+            "Configure um remote OAuth humano separado antes da promoção."
+        )
+
+    local = validate_local_derivatives(output_dir, expected)
+    remote_files = _rclone_list_files(normalized_remote, remote_folder_path)
+    results: list[PromotedDerivative] = []
+
+    for item in expected:
+        matches = remote_files.get(item.name, [])
+        if len(matches) > 1:
+            raise ValueError(f"Mais de um arquivo remoto com nome {item.name} no destino")
+
+        remote_file_path = f"{remote_folder_path.rstrip('/')}/{item.name}"
+        reused = bool(matches)
+        if reused:
+            _verify_remote_rclone_file(normalized_remote, remote_file_path, item)
+        else:
+            run_rclone(
+                [
+                    "copyto",
+                    str(local[item.name]),
+                    remote_spec(normalized_remote, remote_file_path),
+                ]
+            )
+            _verify_remote_rclone_file(normalized_remote, remote_file_path, item)
+
+        refreshed = _rclone_list_files(normalized_remote, remote_folder_path).get(item.name, [])
+        if len(refreshed) != 1:
+            raise RuntimeError(
+                f"Não foi possível identificar univocamente {item.name} após promoção"
+            )
+        drive_file_id = str(refreshed[0].get("ID", ""))
+        results.append(
+            PromotedDerivative(
+                item.name,
+                drive_file_id,
+                item.size_bytes,
+                item.sha256.lower(),
+                reused,
+            )
+        )
+        remote_files[item.name] = refreshed
 
     return results

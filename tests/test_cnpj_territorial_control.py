@@ -164,6 +164,7 @@ def test_cnpj_territorial_control_classifies_local_and_external_matrices(
     ).iloc[0]
     assert external["matrix_municipality_name"] == "SANTA MARIA"
     assert external["matrix_cnpj"].startswith("22222222")
+    assert external["natureza_juridica"] == "2062"
 
     assert set(result.by_division["cnae_division"]) == {"47"}
     assert result.validation.query("indicator == 'duplicate_cnpjs'").iloc[0]["status"] == "PASS"
@@ -174,6 +175,7 @@ def test_cnpj_territorial_control_classifies_local_and_external_matrices(
         result.paths["curated"] / "cnpj_territorial_control.csv", dtype=str
     )
     assert len(persisted) == 3
+    assert set(persisted["natureza_juridica"]) == {"2062"}
 
 
 def test_cnpj_territorial_control_accepts_alphanumeric_cnpj(tmp_path: Path) -> None:

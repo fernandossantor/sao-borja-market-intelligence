@@ -10,18 +10,19 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 300
     env:
-      RFB_ARTIFACT_NAME: cnpj-territorial-control-2026-08
+      RFB_COMPETENCE: '2026-08'
+      RFB_BASE_URL: 'https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj'
       RAIS_EXPECTED_SIZE: '704888712'
       RAIS_EXPECTED_SHA256: 'c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0'
       RAIS_OFFICIAL_URL: 'ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z'
       RAIS_MIRROR_URL: 'https://huggingface.co/datasets/selenelindsay/rais-caged-bronze/resolve/cc087930d43339cbf66dd9511ee6d39c661c3084/RAIS/2025/RAIS_VINC_PUB_SUL.7z?download=true'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,65 +44,119 @@ jobs:
             sudo apt-get install -y p7zip-full
           fi
 
-      - name: Wait for matching quality run
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          quality_run=''
-          quality_status=''
-          quality_conclusion=''
-          for attempt in {1..120}; do
-            runs_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&event=pull_request&per_page=50")"
-            quality_run="$(jq -r '.workflow_runs[] | select(.name == "quality") | .id' <<<"$runs_json" | head -n 1)"
-            if [[ -z "$quality_run" || "$quality_run" == 'null' ]]; then
-              echo "quality run not available yet (attempt ${attempt})"
-              sleep 15
-              continue
-            fi
-            run_json="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${quality_run}")"
-            quality_status="$(jq -r '.status' <<<"$run_json")"
-            quality_conclusion="$(jq -r '.conclusion // ""' <<<"$run_json")"
-            echo "quality_run=${quality_run} status=${quality_status} conclusion=${quality_conclusion:-pending}"
-            if [[ "$quality_status" == 'completed' ]]; then
-              break
-            fi
-            sleep 30
-          done
-          if [[ -z "$quality_run" || "$quality_run" == 'null' ]]; then
-            echo 'STATUS=QUALITY_RUN_NOT_FOUND' >&2
-            exit 20
-          fi
-          if [[ "$quality_status" != 'completed' ]]; then
-            echo 'STATUS=QUALITY_RUN_TIMEOUT' >&2
-            exit 21
-          fi
-          if [[ "$quality_conclusion" != 'success' ]]; then
-            echo "STATUS=QUALITY_RUN_${quality_conclusion}" >&2
-            exit 22
-          fi
-          echo "QUALITY_RUN_ID=${quality_run}" >> "$GITHUB_ENV"
-          echo 'STATUS=QUALITY_RUN_READY'
+      - name: Verify codebase
+        run: make verify
 
-      - name: Download RFB compact artifact from matching quality run
+      - name: Download official RFB CNPJ 2026-08 files
         shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p _upstream_rfb
-          gh run download "$QUALITY_RUN_ID" \
-            --repo "$GITHUB_REPOSITORY" \
-            --name "$RFB_ARTIFACT_NAME" \
-            --dir _upstream_rfb
-          canonical="$(find _upstream_rfb -type f -name 'cnpj_territorial_control.csv' -print -quit)"
-          if [[ -z "$canonical" ]]; then
-            echo 'STATUS=RFB_CANONICAL_NOT_FOUND' >&2
-            exit 30
-          fi
+          raw=".data/raw/rfb_cnpj/${RFB_COMPETENCE}"
+          audit='.data/audit/base_territorial/rais2025_wage/rfb_source_integrity'
+          mkdir -p "$raw" "$audit"
+
+          download_file() {
+            local file="$1"
+            local out="$raw/$file"
+            local partial="${out}.partial"
+            local url="${RFB_BASE_URL}/${RFB_COMPETENCE}/${file}"
+            rm -f "$partial"
+            echo "Downloading ${url}"
+            curl \
+              --fail \
+              --location \
+              --retry 5 \
+              --retry-all-errors \
+              --retry-delay 5 \
+              --connect-timeout 30 \
+              --output "$partial" \
+              "$url"
+            test -s "$partial"
+            unzip -tq "$partial" >/dev/null
+            mv "$partial" "$out"
+            du -h "$out"
+          }
+
+          echo 'Disk before RFB download:'
+          df -h .
+          download_file Municipios.zip
+          for i in {0..9}; do download_file "Estabelecimentos${i}.zip"; done
+          for i in {0..9}; do download_file "Empresas${i}.zip"; done
+          echo 'Disk after RFB download:'
+          df -h .
+          du -sh "$raw"
+          sha256sum "$raw"/*.zip | sort > "$audit/SHA256SUMS.txt"
+          printf 'declared_source=Receita Federal — Dados Abertos CNPJ\ncompetence=%s\nbase_url=%s\nfile_count=21\nSTATUS=RFB_SOURCE_DOWNLOAD_VERIFIED\n' \
+            "$RFB_COMPETENCE" "$RFB_BASE_URL" > "$audit/source_metadata.txt"
+          cat "$audit/source_metadata.txt"
+
+      - name: Build audited RFB territorial-control base
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw=".data/raw/rfb_cnpj/${RFB_COMPETENCE}"
+          execution_id="cnpj-territorial-control-${RFB_COMPETENCE}-wage-actions-${GITHUB_RUN_ID}"
+          python -m sbmi.cnpj_territorial_control_cli \
+            --establishments-dir "$raw" \
+            --companies-dir "$raw" \
+            --municipalities-zip "$raw/Municipios.zip" \
+            --execution-id "$execution_id" \
+            --municipality-tom 8863 \
+            --municipality-ibge 4318002 \
+            --active-status-code 02 \
+            --chunksize 200000
+
+          canonical=".data/curated/base_territorial/cnpj_territorial_control/${execution_id}/cnpj_territorial_control.csv"
+          validation=".data/audit/base_territorial/cnpj_territorial_control/${execution_id}/validation.csv"
+          test -f "$canonical"
+          test -f "$validation"
+          echo "RFB_EXECUTION_ID=${execution_id}" >> "$GITHUB_ENV"
           echo "RFB_CANONICAL=${canonical}" >> "$GITHUB_ENV"
-          echo "rfb_canonical=${canonical}"
+          echo "RFB_VALIDATION=${validation}" >> "$GITHUB_ENV"
+          echo '--- RFB validation ---'
+          cat "$validation"
+
+      - name: Validate RFB territorial-control benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - "$RFB_CANONICAL" "$RFB_VALIDATION" <<'PY'
+          import sys
+          import pandas as pd
+
+          canonical_path, validation_path = sys.argv[1:3]
+          df = pd.read_csv(canonical_path, dtype=str, keep_default_na=False)
+          validation = pd.read_csv(validation_path, dtype=str, keep_default_na=False)
+
+          if 'FAIL' in set(validation['status']):
+              raise SystemExit('STATUS=RFB_VALIDATION_FAIL')
+          if len(df) != 7306:
+              raise SystemExit(f'STATUS=RFB_ROWS_FAIL observed={len(df)} expected=7306')
+
+          external_all = int(df['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA').sum())
+          business = df[df['natureza_juridica'].astype(str).str.zfill(4).str.startswith('2')]
+          external_business = int(
+              business['territorial_control_status'].eq('FILIAL_DE_MATRIZ_EXTERNA').sum()
+          )
+          if external_all != 323:
+              raise SystemExit(
+                  f'STATUS=RFB_EXTERNAL_ALL_FAIL observed={external_all} expected=323'
+              )
+          if len(business) != 6906:
+              raise SystemExit(
+                  f'STATUS=RFB_BUSINESS_TOTAL_FAIL observed={len(business)} expected=6906'
+              )
+          if external_business != 284:
+              raise SystemExit(
+                  'STATUS=RFB_EXTERNAL_BUSINESS_FAIL '
+                  f'observed={external_business} expected=284'
+              )
+          print(f'rfb_rows={len(df)}')
+          print(f'rfb_external_all={external_all}')
+          print(f'rfb_business={len(business)}')
+          print(f'rfb_external_business={external_business}')
+          print('STATUS=RFB_TERRITORIAL_BENCHMARK_OK')
+          PY
 
       - name: Build audited RFB CNAE x nature territorial cells
         shell: bash
@@ -172,12 +227,12 @@ jobs:
           mkdir -p "$(dirname "$raw")" "$(dirname "$audit")"
           rm -f "$partial"
           transport='mte_ftp'
-          if ! curl --fail --location --ftp-pasv --retry 5 --retry-delay 5 --connect-timeout 30 \
+          if ! curl --fail --location --ftp-pasv --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 30 \
             --output "$partial" "$RAIS_OFFICIAL_URL"; then
             echo 'Official MTE FTP unavailable; using integrity-verified transport mirror.'
             rm -f "$partial"
             transport='huggingface_transport_mirror'
-            curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 \
+            curl --fail --location --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 30 \
               --output "$partial" "$RAIS_MIRROR_URL"
           fi
           size="$(stat -c%s "$partial")"
@@ -361,12 +416,14 @@ jobs:
             echo "workflow_run_attempt=${GITHUB_RUN_ATTEMPT}"
             echo "repository=${GITHUB_REPOSITORY}"
             echo "commit_sha=${GITHUB_SHA}"
-            echo "quality_run_id=${QUALITY_RUN_ID}"
-            echo "rfb_artifact_name=${RFB_ARTIFACT_NAME}"
+            echo "rfb_competence=${RFB_COMPETENCE}"
+            echo "rfb_base_url=${RFB_BASE_URL}"
+            echo "rfb_execution_id=${RFB_EXECUTION_ID}"
             echo "execution_id=${EXECUTION_ID}"
             echo "rais_archive_size=$(stat -c%s "$RAIS_ARCHIVE")"
             echo "rais_archive_sha256=$(sha256sum "$RAIS_ARCHIVE" | awk '{print $1}')"
             echo "rais_extract_sha256=$(sha256sum "$RAIS_SB_EXTRACT" | awk '{print $1}')"
+            echo "rfb_canonical_sha256=$(sha256sum "$RFB_CANONICAL" | awk '{print $1}')"
             echo "rfb_cells_sha256=$(sha256sum "$RFB_CELLS" | awk '{print $1}')"
             echo 'STATUS=RAIS2025_WAGE_ACTIONS_EXECUTION_OK'
           } | tee "$manifest"
@@ -382,3 +439,5 @@ jobs:
             ${{ env.RAIS_SB_EXTRACT }}
             ${{ env.RFB_CELLS }}
             .data/audit/base_territorial/rais2025_wage/
+            .data/audit/base_territorial/cnpj_territorial_control/${{ env.RFB_EXECUTION_ID }}/validation.csv
+            .data/audit/base_territorial/cnpj_territorial_control/${{ env.RFB_EXECUTION_ID }}/source_manifest.csv

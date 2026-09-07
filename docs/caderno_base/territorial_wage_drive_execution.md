@@ -79,17 +79,30 @@ A pasta de destino dos derivados canônicos foi criada em `_sao_borja/exports/`:
 - folder ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`;
 - nome `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
 
-A rotina `sbmi.territorial_wage_promote_drive_cli` promove somente os sete arquivos cujos tamanho e SHA-256 coincidirem exatamente com esta auditoria. Arquivos já existentes e idênticos são reutilizados; colisões de mesmo nome com conteúdo divergente interrompem a promoção.
+### Diagnóstico das tentativas com conta de serviço
 
-### Estado operacional da promoção
+A primeira tentativa foi interrompida por `403 Forbidden` quando a conta de serviço ainda possuía papel `reader`. Após a permissão ser elevada manualmente para `writer`, a segunda tentativa retornou o mesmo `403`.
 
-A primeira tentativa de promoção em 2026-09-07 foi interrompida antes de qualquer upload por resposta `403 Forbidden` da API do Google Drive. A auditoria de permissões da pasta de destino confirmou que a conta de serviço `sbmi-drive-reader@sao-borja-market-intelligence.iam.gserviceaccount.com` possui papel `reader`, enquanto a pasta exige permissão de escrita para criação dos arquivos.
+A auditoria posterior confirmou que a alteração de permissão foi efetiva: a conta `sbmi-drive-reader@sao-borja-market-intelligence.iam.gserviceaccount.com` aparece como `writer` na pasta. A pasta, porém, está em **Meu Drive** (`driveId` ausente/nulo), e não em um Shared Drive.
 
-A pasta de destino foi conferida após a falha e permaneceu vazia: **0 de 7 arquivos foram enviados**. Portanto, não houve promoção parcial nem divergência entre os derivados locais auditados e o Drive; o bloqueio é exclusivamente de autorização de escrita.
+Esse segundo bloqueio não é mais uma falha de permissão de pasta. Contas de serviço não possuem cota de armazenamento própria para assumir a propriedade de novos arquivos em Meu Drive. Para criar arquivos nesse contexto, a escrita deve ocorrer em um Shared Drive ou por OAuth 2.0 em nome de um usuário humano.
 
-Para concluir a promoção, a conta de serviço deve receber papel de **Editor/Writer** na pasta de destino (ou em um ancestral com herança efetiva de escrita). Depois disso, a mesma CLI pode ser executada novamente; sua lógica idempotente preserva a auditoria de nome, tamanho e SHA-256.
+A pasta foi conferida novamente e permanece vazia: **0 de 7 arquivos promovidos**. Não houve upload parcial.
 
-Execução:
+### Backend de promoção adotado
+
+A leitura do projeto continua separada e restrita:
+
+- `SBMI_GDRIVE_SA_B64`: conta de serviço para leitura programática;
+- `sbmi-drive`: remote rclone existente com escopo `drive.readonly`.
+
+A promoção autorizada passa a usar um segundo remote rclone, `sbmi-drive-write`, autenticado por OAuth em nome do usuário humano proprietário do Drive e restrito operacionalmente pela raiz `_sao_borja`.
+
+A CLI `sbmi.territorial_wage_promote_drive_cli` valida os sete arquivos locais por tamanho e SHA-256. Para cada arquivo remoto existente ou recém-enviado, baixa uma cópia temporária e recalcula o SHA-256. Nomes duplicados ou qualquer divergência interrompem a promoção. A rotina não usa `sync`, não apaga arquivos e não altera dados brutos.
+
+A configuração única do remote de escrita está documentada em `docs/drive_write_connection.md`.
+
+Execução, depois de configurar `sbmi-drive-write`:
 
 ```bash
 cd /workspaces/sbmi-cnpj-run

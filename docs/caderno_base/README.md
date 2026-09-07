@@ -16,9 +16,11 @@ Versões anteriores do caderno e derivados consolidados não devem ser sobrescri
 
 ## Versão corrente neste estágio
 
-- Caderno de controle: `caderno_base_territorial_v006_emprego_remuneracao_20260907`.
+- Caderno de controle: `caderno_base_territorial_v006_emprego_remuneracao_20260907` (Drive ID `1A5C15qT1sAbEVnYctvGx91yokoiDOUgSDaC6UQrL8jg`).
 - Controle cadastral: RFB Dados Abertos CNPJ, competência 2026-08.
 - Emprego e remuneração: RAIS 2025, compatibilizada com RFB 2026-08 por células CNAE × natureza jurídica.
 - Execução remuneratória canônica: `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236`.
+- Pasta de promoção dos derivados remuneratórios: Drive ID `12TDHgZ6_M63f98RMRUckTqcEA5FCRp_x`.
+- Auditoria da execução remuneratória: 7/7 controles `PASS`, 0 vínculos `unmatched` e reconciliação integral das três métricas.
 
 A atualização do caderno deve acompanhar a atualização dos dados; nenhum resultado novo deve permanecer apenas em código, terminal ou conversa sem registro nos artefatos e na narrativa do projeto.

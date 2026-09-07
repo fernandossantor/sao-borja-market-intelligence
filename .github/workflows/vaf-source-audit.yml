@@ -27,36 +27,104 @@ jobs:
         run: |
           python -m pytest tests/test_vaf_source_audit.py
           python -m ruff check src/sbmi/vaf_source_audit.py tests/test_vaf_source_audit.py
-      - name: Fetch and audit official VAF history form
+      - name: Audit official VAF source routes
         run: |
           mkdir -p artifacts
           python - <<'PY'
           import json
           from pathlib import Path
+
           import requests
+
           from sbmi.vaf_source_audit import (
+              PORTAL_IPM_URL,
+              VAF_ARCHIVE_URL,
               VAF_HISTORY_FORM_URL,
+              VAF_WRAPPER_URL,
+              extract_iframe_sources,
+              extract_official_links,
+              official_source_catalog,
               parse_vaf_form,
               summarize_form,
           )
 
-          response = requests.get(VAF_HISTORY_FORM_URL, timeout=60)
-          response.raise_for_status()
-          structure = parse_vaf_form(response.text)
-          summary = summarize_form(structure)
-          summary['http_status'] = response.status_code
-          summary['response_bytes'] = len(response.content)
-          output = Path('artifacts/vaf_history_form_structure.json')
-          output.write_text(
-              json.dumps(summary, ensure_ascii=False, indent=2),
-              encoding='utf-8',
+          session = requests.Session()
+          session.headers.update(
+              {"User-Agent": "SBMI territorial-market-intelligence source audit/1.0"}
           )
-          print(output.read_text(encoding='utf-8'))
-          print('STATUS=VAF_HISTORY_FORM_AUDIT_OK')
+
+          result = {
+              "nature": "observed_official_source_availability_audit",
+              "source_catalog": list(official_source_catalog()),
+              "routes": {},
+              "archive_links": [],
+              "wrapper_iframes": [],
+              "legacy_form": None,
+          }
+
+          def fetch(url: str, timeout: int) -> requests.Response | None:
+              try:
+                  response = session.get(url, timeout=timeout, allow_redirects=True)
+                  result["routes"][url] = {
+                      "status": "reachable" if response.ok else "http_error",
+                      "http_status": response.status_code,
+                      "response_bytes": len(response.content),
+                      "final_url": response.url,
+                  }
+                  return response
+              except requests.RequestException as exc:
+                  result["routes"][url] = {
+                      "status": "network_error",
+                      "error_type": type(exc).__name__,
+                      "error": str(exc),
+                  }
+                  return None
+
+          portal = fetch(PORTAL_IPM_URL, 20)
+          archive = fetch(VAF_ARCHIVE_URL, 20)
+          wrapper = fetch(VAF_WRAPPER_URL, 15)
+          legacy = fetch(VAF_HISTORY_FORM_URL, 15)
+
+          if archive is not None and archive.ok:
+              result["archive_links"] = list(
+                  extract_official_links(
+                      archive.text,
+                      source_url=archive.url,
+                      text_terms=("Valor Adicionado Municipios", "Layout Sistema Proprio"),
+                  )
+              )
+
+          if wrapper is not None and wrapper.ok:
+              result["wrapper_iframes"] = list(
+                  extract_iframe_sources(wrapper.text, source_url=wrapper.url)
+              )
+
+          if legacy is not None and legacy.ok:
+              try:
+                  result["legacy_form"] = summarize_form(parse_vaf_form(legacy.text))
+              except ValueError as exc:
+                  result["legacy_form"] = {
+                      "status": "parse_error",
+                      "error": str(exc),
+                  }
+
+          result["portal_content_seen"] = bool(portal is not None and portal.ok)
+          result["archive_content_seen"] = bool(archive is not None and archive.ok)
+          result["current_query_content_seen"] = bool(
+              (wrapper is not None and wrapper.ok) or (legacy is not None and legacy.ok)
+          )
+
+          output = Path("artifacts/vaf_source_availability.json")
+          output.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2),
+              encoding="utf-8",
+          )
+          print(output.read_text(encoding="utf-8"))
+          print("STATUS=VAF_SOURCE_AVAILABILITY_AUDIT_COMPLETED")
           PY
       - name: Upload compact source audit
         uses: actions/upload-artifact@v4
         with:
-          name: vaf-history-form-structure
-          path: artifacts/vaf_history_form_structure.json
+          name: vaf-source-availability
+          path: artifacts/vaf_source_availability.json
           retention-days: 14

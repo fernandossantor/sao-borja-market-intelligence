@@ -6,7 +6,7 @@ O projeto mantém `sbmi-drive` como remote rclone **somente leitura**. Esse remo
 
 A conta de serviço `sbmi-drive-reader@sao-borja-market-intelligence.iam.gserviceaccount.com` permanece adequada para leitura e auditoria, mas não deve ser usada para criar arquivos em `Meu Drive`: mesmo com papel `writer` na pasta, a criação de novos objetos pode falhar porque contas de serviço não possuem cota própria para assumir a propriedade dos arquivos em `Meu Drive`.
 
-Por isso, promoções autorizadas de derivados auditados podem utilizar um segundo remote rclone autenticado por OAuth em nome do usuário humano proprietário do Drive. Como alternativa operacional para pequenos lotes de derivados, os arquivos podem ser transferidos ao operador autorizado e promovidos pelo conector Google Drive, preservando a mesma validação de tamanho e SHA-256.
+Por isso, promoções autorizadas de derivados auditados podem utilizar um segundo remote rclone autenticado por OAuth em nome do usuário humano proprietário do Drive. Como alternativa operacional para pequenos lotes de derivados, os arquivos podem ser transferidos ao operador autorizado e promovidos pelo conector Google Drive, preservando a mesma validação de tamanho e SHA-256 antes da escrita.
 
 ## Remote de escrita
 
@@ -76,23 +76,28 @@ Nunca registrar o token OAuth, `rclone.conf` ou credenciais no GitHub, nos docum
 
 - `sbmi-drive`: leitura e snapshots; permanece `drive.readonly`;
 - `SBMI_GDRIVE_SA_B64`: leitura programática e inventários via conta de serviço;
-- `sbmi-drive-write`: escrita excepcional e controlada de derivados já auditados, autenticada pelo usuário humano.
+- `sbmi-drive-write`: escrita excepcional e controlada de derivados já auditados, autenticada pelo usuário humano;
+- handoff controlado + conector Google Drive: alternativa para lotes pequenos já integralmente auditados.
 
 ## Promoção remuneratória
 
-Depois de configurar o remote de escrita:
-
-```bash
-python -m sbmi.territorial_wage_promote_drive_cli
-```
-
-A CLI valida tamanho e SHA-256 dos sete arquivos locais antes de qualquer escrita. Em seguida:
-
-- se um arquivo remoto com o mesmo nome já existir, baixa uma cópia temporária e exige igualdade de tamanho e SHA-256;
-- se não existir, envia o arquivo e baixa uma cópia temporária para validar novamente tamanho e SHA-256;
-- se houver nomes duplicados ou conteúdo divergente, interrompe a promoção;
-- não usa `sync`, não exclui arquivos e não altera dados brutos.
+A CLI `sbmi.territorial_wage_promote_drive_cli` permanece disponível para ambientes em que `sbmi-drive-write` esteja configurado. Ela valida tamanho e SHA-256 dos sete arquivos locais antes da escrita, reutiliza arquivos remotos idênticos e interrompe colisões divergentes.
 
 ## Alternativa para pequenos lotes
 
-Quando o lote for pequeno e já estiver totalmente auditado, como os sete CSVs da execução remuneratória, pode-se empacotar os derivados no Codespace, transferir o pacote ao operador autorizado e fazer a promoção via conector Google Drive. Nessa alternativa, devem ser preservados e novamente conferidos os mesmos nomes, tamanhos e SHA-256 registrados no manifesto canônico antes de marcar a promoção como concluída.
+Quando o lote for pequeno e já estiver totalmente auditado, como os sete CSVs da execução remuneratória, pode-se empacotar os derivados no Codespace, transferir o pacote ao operador autorizado e fazer a promoção via conector Google Drive. Nessa alternativa:
+
+- o pacote deve ser reaberto antes da escrita;
+- os nomes e a quantidade devem coincidir com o manifesto;
+- tamanho e SHA-256 devem ser recalculados localmente antes do upload;
+- os arquivos devem ser enviados sem conversão;
+- a pasta de destino deve ser relistada após a promoção;
+- deve-se registrar qualquer limitação do conector para verificação pós-upload.
+
+## Execução remuneratória de 2026-09-07
+
+A promoção final da execução `territorial-wage-rais2025-rfb2026-08-drive-20260907-200236` utilizou essa alternativa de handoff controlado após a autenticação OAuth por rclone se mostrar desnecessariamente onerosa para um lote de apenas sete CSVs já auditados.
+
+O ZIP de handoff tinha 22.223 bytes e SHA-256 `a4fc57af8c7bf3f81d8d160eed9fbc954826d9d1fa55dd0af8320c779eeeff43`. Os sete arquivos internos reproduziram seus hashes canônicos antes da escrita. Após a promoção via conector Google Drive, a pasta continha exatamente sete CSVs com os tamanhos esperados.
+
+O conector utilizado não expõe `sha256Checksum` no retorno normalizado; portanto, a etapa pós-upload confirmou quantidade, nomes, pasta-pai e tamanhos, mas não realizou uma segunda recomputação criptográfica sobre bytes baixados do Drive. O manifesto final está em `docs/caderno_base/territorial_wage_drive_promotion_manifest.md`.

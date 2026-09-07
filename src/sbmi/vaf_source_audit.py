@@ -16,6 +16,18 @@ VAF_HISTORY_RESULT_URL = (
     "https://www.sefaz.rs.gov.br/ASP/SEF_ROOT/AIM/AIM-WEB-VAL-HIS_2.asp"
 )
 VAF_ARCHIVE_URL = "https://atendimento.receita.rs.gov.br/consultas-e-arquivos-antigos-ipm"
+VAF_ARCHIVE_2009_2012_XLS_URL = (
+    "https://receita.fazenda.rs.gov.br/download/"
+    "20161109101939valor_adicionado_municipios___2009_a_2012.xls"
+)
+VAF_ARCHIVE_1989_1997_XLS_URL = (
+    "https://receita.fazenda.rs.gov.br/download/"
+    "20161109101430valor_adicionado_municipios___1989_a_1997.xls"
+)
+VAF_LEGACY_DOWNLOAD_INDEX_URL = "https://www.sefaz.rs.gov.br/ASP/SEF_root/DWN/"
+VAF_LEGACY_1989_1997_BINARY_URL = (
+    "https://www.sefaz.rs.gov.br/ASP/Download/AIM/tabvalor.exe"
+)
 SAO_BORJA_RANGE_VALUE = "SAO MARTINHSZZZZZZZZZZ"
 ALLOWED_HOSTS = {
     "atendimento.receita.rs.gov.br",
@@ -48,6 +60,30 @@ SOURCE_CATALOG: tuple[dict[str, str], ...] = (
         "kind": "official_historical_archive_index",
         "url": VAF_ARCHIVE_URL,
         "nature": "observed_official_source_route",
+    },
+    {
+        "source_id": "vaf_archive_2009_2012_xls",
+        "kind": "official_historical_archive_attachment",
+        "url": VAF_ARCHIVE_2009_2012_XLS_URL,
+        "nature": "observed_official_published_attachment_route",
+    },
+    {
+        "source_id": "vaf_archive_1989_1997_xls",
+        "kind": "official_historical_archive_attachment",
+        "url": VAF_ARCHIVE_1989_1997_XLS_URL,
+        "nature": "observed_official_published_attachment_route",
+    },
+    {
+        "source_id": "vaf_legacy_download_index",
+        "kind": "official_legacy_download_index",
+        "url": VAF_LEGACY_DOWNLOAD_INDEX_URL,
+        "nature": "observed_official_source_route",
+    },
+    {
+        "source_id": "vaf_legacy_1989_1997_binary",
+        "kind": "official_legacy_binary_attachment",
+        "url": VAF_LEGACY_1989_1997_BINARY_URL,
+        "nature": "observed_official_published_attachment_route",
     },
 )
 

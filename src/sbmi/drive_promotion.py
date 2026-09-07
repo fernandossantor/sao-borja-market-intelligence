@@ -11,7 +11,7 @@ from typing import Any
 from google.auth.transport.requests import AuthorizedSession
 from google.oauth2 import service_account
 
-from sbmi.google_drive import DRIVE_API_BASE, FOLDER_MIME_TYPE, get_file_metadata, list_children
+from sbmi.google_drive import FOLDER_MIME_TYPE, get_file_metadata, list_children
 
 DRIVE_WRITE_SCOPE = "https://www.googleapis.com/auth/drive"
 DRIVE_UPLOAD_BASE = "https://www.googleapis.com/upload/drive/v3/files"

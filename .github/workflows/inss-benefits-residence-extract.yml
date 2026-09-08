@@ -12,251 +12,183 @@ permissions:
 jobs:
   extract-sao-borja:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Stream official July 2026 INSS resource and filter Sao Borja residence
+      - name: Extract Sao Borja residence from official July 2026 INSS resource
         run: |
           set -euo pipefail
           python -m pip install --upgrade requests
           mkdir -p artifacts
+
           python - <<'PY'
-          import csv
-          import hashlib
-          import io
-          import json
-          import re
-          import unicodedata
-          import zipfile
-          from collections import Counter, defaultdict
-          from decimal import Decimal, InvalidOperation
+          import hashlib, json
           from pathlib import Path
           import requests
 
-          RESOURCE_ID = "63467992-f291-4549-8a07-b1d5ee27a1a2"
-          API = f"https://dadosabertos.inss.gov.br/api/3/action/resource_show?id={RESOURCE_ID}"
-          session = requests.Session()
-          session.headers.update({"User-Agent": "SBMI INSS residence extraction/5.0"})
-
-          meta_response = session.get(API, timeout=45)
-          meta_response.raise_for_status()
-          resource = meta_response.json()["result"]
+          rid = "63467992-f291-4549-8a07-b1d5ee27a1a2"
+          api = f"https://dadosabertos.inss.gov.br/api/3/action/resource_show?id={rid}"
+          s = requests.Session()
+          s.headers.update({"User-Agent": "SBMI INSS residence extraction/6.0"})
+          meta = s.get(api, timeout=45)
+          meta.raise_for_status()
+          resource = meta.json()["result"]
           url = resource["url"]
-          Path("artifacts/inss_resource_show_raw.json").write_bytes(meta_response.content)
+          Path("artifacts/inss_resource_show_raw.json").write_bytes(meta.content)
 
           target = Path("/tmp/inss_emitidos_202607.zip")
-          sha = hashlib.sha256()
-          total_bytes = 0
-          with session.get(url, stream=True, timeout=(30, 300)) as response:
-              response.raise_for_status()
-              download_headers = {
-                  "status": response.status_code,
-                  "content_type": response.headers.get("content-type"),
-                  "content_length": response.headers.get("content-length"),
-                  "etag": response.headers.get("etag"),
-                  "last_modified": response.headers.get("last-modified"),
-                  "accept_ranges": response.headers.get("accept-ranges"),
-                  "final_url": response.url,
+          sha = hashlib.sha256(); total = 0
+          with s.get(url, stream=True, timeout=(30,300)) as r:
+              r.raise_for_status()
+              headers = {
+                  "status": r.status_code,
+                  "content_type": r.headers.get("content-type"),
+                  "content_length": r.headers.get("content-length"),
+                  "etag": r.headers.get("etag"),
+                  "last_modified": r.headers.get("last-modified"),
+                  "final_url": r.url,
               }
-              with target.open("wb") as out:
-                  for chunk in response.iter_content(chunk_size=8 * 1024 * 1024):
+              with target.open("wb") as f:
+                  for chunk in r.iter_content(chunk_size=8*1024*1024):
                       if chunk:
-                          out.write(chunk)
-                          sha.update(chunk)
-                          total_bytes += len(chunk)
-          if download_headers["content_length"] and total_bytes != int(download_headers["content_length"]):
-              raise SystemExit("National ZIP download size mismatch")
-
-          download_manifest = {
-              "dataset": "Benefícios emitidos - Plano de Dados Abertos Jun/2023 a jun/2027",
-              "resource": resource.get("name"),
-              "resource_id": RESOURCE_ID,
-              "reference_period": "2026-07",
-              "source_system": "SUIBE/INSS",
-              "resource_url": url,
-              "download_headers": download_headers,
-              "downloaded_bytes": total_bytes,
-              "download_sha256": sha.hexdigest(),
-              "raw_national_file_persisted_in_artifact": False,
-              "note": "O ZIP nacional é usado temporariamente no runner; o artifact preserva metadados, validação e o recorte municipal, não o arquivo nacional de ~1 GB.",
+                          f.write(chunk); sha.update(chunk); total += len(chunk)
+          if headers["content_length"] and total != int(headers["content_length"]):
+              raise SystemExit("Download size mismatch")
+          manifest = {
+              "dataset":"Benefícios emitidos - Plano de Dados Abertos Jun/2023 a jun/2027",
+              "resource":resource.get("name"),"resource_id":rid,"reference_period":"2026-07",
+              "source_system":"SUIBE/INSS","resource_url":url,"download_headers":headers,
+              "downloaded_bytes":total,"download_sha256":sha.hexdigest(),
+              "raw_national_file_persisted_in_artifact":False,
           }
-          Path("artifacts/inss_202607_download_manifest.json").write_text(json.dumps(download_manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-          print(json.dumps(download_manifest, ensure_ascii=False, indent=2))
-
-          def norm(value):
-              value = unicodedata.normalize("NFKD", str(value))
-              value = "".join(c for c in value if not unicodedata.combining(c))
-              value = value.upper().strip()
-              value = re.sub(r"[^A-Z0-9]+", " ", value)
-              return re.sub(r"\s+", " ", value).strip()
-
-          def parse_decimal(raw):
-              text = str(raw).strip().replace("R$", "").replace(" ", "")
-              if not text:
-                  return None
-              if "," in text and "." in text:
-                  text = text.replace(".", "").replace(",", ".") if text.rfind(",") > text.rfind(".") else text.replace(",", "")
-              elif "," in text:
-                  text = text.replace(".", "").replace(",", ".")
-              try:
-                  return Decimal(text)
-              except InvalidOperation:
-                  return None
-
-          with zipfile.ZipFile(target) as archive:
-              members = archive.infolist()
-              if len(members) != 1:
-                  raise SystemExit(f"Expected one CSV member; found {len(members)}")
-              member = members[0]
-              layout = {
-                  "member": member.filename,
-                  "compressed_size": member.compress_size,
-                  "uncompressed_size": member.file_size,
-                  "crc": member.CRC,
-                  "header_delimiter": ",",
-                  "data_delimiter": ";",
-                  "layout_note": "A fonte usa cabeçalho separado por vírgulas e registros de dados separados por ponto e vírgula; o campo credito usa vírgula decimal.",
-              }
-              Path("artifacts/inss_202607_zip_layout.json").write_text(json.dumps(layout, ensure_ascii=False, indent=2), encoding="utf-8")
-
-              matched_rows = []
-              total_rows = 0
-              bad_width = 0
-              borja_residence_literals = Counter()
-              borja_payment_literals = Counter()
-              type_summary = defaultdict(lambda: {"records": 0, "valid_credit": 0, "credit": Decimal("0")})
-              species_summary = defaultdict(lambda: {"records": 0, "valid_credit": 0, "credit": Decimal("0")})
-              total_credit = Decimal("0")
-              valid_credit_records = 0
-
-              with archive.open(member) as binary:
-                  text = io.TextIOWrapper(binary, encoding="utf-8-sig", errors="strict", newline="")
-                  header_line = text.readline().rstrip("\r\n")
-                  headers = next(csv.reader([header_line], delimiter=","))
-                  reader = csv.reader(text, delimiter=";")
-                  normalized_headers = [norm(h) for h in headers]
-
-                  def exact_col(label):
-                      target_header = norm(label)
-                      matches = [i for i, h in enumerate(normalized_headers) if h == target_header]
-                      return matches[0] if matches else None
-
-                  residence_idx = exact_col("municipio_residencia")
-                  payment_idx = exact_col("municipio_pagamento")
-                  value_idx = exact_col("credito")
-                  type_idx = exact_col("tipo_beneficio")
-                  client_idx = exact_col("clientela")
-                  uf_idx = exact_col("uf")
-                  species_indices = [i for i, h in enumerate(normalized_headers) if h == "ESPECIE"]
-                  species_desc_idx = species_indices[-1] if species_indices else None
-                  if residence_idx is None or value_idx is None:
-                      raise SystemExit(f"Required source columns unavailable: {headers}")
-
-                  keep_indices = []
-                  for idx in [residence_idx, payment_idx, uf_idx, type_idx, client_idx, *species_indices, value_idx]:
-                      if idx is not None and idx not in keep_indices:
-                          keep_indices.append(idx)
-
-                  for row in reader:
-                      total_rows += 1
-                      if len(row) != len(headers):
-                          bad_width += 1
-                          continue
-                      residence_literal = row[residence_idx]
-                      if "BORJA" not in residence_literal.upper():
-                          continue
-                      residence_normalized = norm(residence_literal)
-                      borja_residence_literals[residence_literal] += 1
-                      if "SAO BORJA" not in residence_normalized:
-                          continue
-                      if payment_idx is not None:
-                          borja_payment_literals[row[payment_idx]] += 1
-                      value = parse_decimal(row[value_idx])
-                      matched_rows.append(row)
-                      type_key = row[type_idx] if type_idx is not None else "[não identificado]"
-                      species_key = row[species_desc_idx] if species_desc_idx is not None else "[não identificado]"
-                      type_summary[type_key]["records"] += 1
-                      species_summary[species_key]["records"] += 1
-                      if value is not None:
-                          valid_credit_records += 1
-                          total_credit += value
-                          type_summary[type_key]["valid_credit"] += 1
-                          type_summary[type_key]["credit"] += value
-                          species_summary[species_key]["valid_credit"] += 1
-                          species_summary[species_key]["credit"] += value
-
-              diagnostic = {
-                  "source_header_columns": headers,
-                  "source_encoding": "utf-8-sig",
-                  "header_delimiter": ",",
-                  "data_delimiter": ";",
-                  "national_data_rows_read": total_rows,
-                  "bad_width_rows": bad_width,
-                  "matched_residence_records": len(matched_rows),
-                  "residence_literals_containing_borja": borja_residence_literals,
-                  "payment_literals_for_matched_residence": borja_payment_literals,
-                  "filter_rule": "municipio_residencia literal contains BORJA and normalized value contains SAO BORJA",
-                  "source_value_field_literal": headers[value_idx],
-                  "source_value_semantics": "O portal descreve o conjunto como contendo valor líquido; o CSV de 2026-07 usa o cabeçalho literal credito.",
-                  "duplicate_especie_headers": len(species_indices),
-              }
-              Path("artifacts/inss_emitidos_sao_borja_202607_diagnostic_v005.json").write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2), encoding="utf-8")
-              print(json.dumps(diagnostic, ensure_ascii=False, indent=2))
-
-              if not matched_rows:
-                  Path("artifacts/inss_emitidos_sao_borja_202607_status_v005.json").write_text(json.dumps({"status":"no_residence_match","reference_period":"2026-07"}, indent=2), encoding="utf-8")
-                  raise SystemExit(0)
-
-              filtered = Path("artifacts/inss_emitidos_sao_borja_residencia_202607_v005.csv")
-              output_headers = []
-              seen = Counter()
-              for idx in keep_indices:
-                  seen[headers[idx]] += 1
-                  output_headers.append(headers[idx] if headers.count(headers[idx]) == 1 else f"{headers[idx]}_{seen[headers[idx]]}")
-              with filtered.open("w", encoding="utf-8", newline="") as out:
-                  writer = csv.writer(out)
-                  writer.writerow(output_headers + ["periodo_referencia", "natureza"])
-                  for row in matched_rows:
-                      writer.writerow([row[i] for i in keep_indices] + ["2026-07", "observado_em_fonte_oficial"])
-
-              def write_summary(path, key_name, mapping):
-                  with Path(path).open("w", encoding="utf-8", newline="") as out:
-                      writer = csv.writer(out)
-                      writer.writerow([key_name, "registros_emitidos", "registros_credito_valido", "soma_credito_rs", "periodo", "natureza"])
-                      for key, stats in sorted(mapping.items(), key=lambda item: (-item[1]["credit"], item[0])):
-                          writer.writerow([key, stats["records"], stats["valid_credit"], f"{stats['credit']:.2f}", "2026-07", "calculado_a_partir_de_registros_oficiais"])
-
-              write_summary("artifacts/inss_emitidos_sao_borja_202607_por_tipo_v005.csv", "tipo_beneficio_fonte", type_summary)
-              write_summary("artifacts/inss_emitidos_sao_borja_202607_por_especie_v005.csv", "especie_descricao_fonte", species_summary)
-
-              validation = {
-                  "reference_period": "2026-07",
-                  "source": "INSS Portal de Dados Abertos / SUIBE — Benefícios Emitidos Julho 2026",
-                  "geographic_filter_source_field": headers[residence_idx],
-                  "matched_records": len(matched_rows),
-                  "valid_credit_records": valid_credit_records,
-                  "sum_credit_rs": f"{total_credit:.2f}",
-                  "unique_residence_literals": sorted(borja_residence_literals),
-                  "type_categories_literal": sorted(type_summary),
-                  "species_categories_count": len(species_summary),
-                  "filtered_csv_sha256": hashlib.sha256(filtered.read_bytes()).hexdigest(),
-                  "interpretation_limit": "A contagem é de registros de benefícios/créditos emitidos; não equivale a pessoas beneficiárias únicas sem identificador de beneficiário.",
-                  "annualization_limit": "Não multiplicar automaticamente o valor mensal por 12; competências podem variar e incluir eventos próprios.",
-              }
-              Path("artifacts/inss_emitidos_sao_borja_202607_validation_v005.json").write_text(json.dumps(validation, ensure_ascii=False, indent=2), encoding="utf-8")
-              print(json.dumps(validation, ensure_ascii=False, indent=2))
-
-          target.unlink(missing_ok=True)
+          Path("artifacts/inss_202607_download_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(manifest,ensure_ascii=False,indent=2))
           PY
+
+          python - <<'PY'
+          import json, zipfile
+          from pathlib import Path
+          with zipfile.ZipFile("/tmp/inss_emitidos_202607.zip") as z:
+              infos=z.infolist()
+              if len(infos)!=1: raise SystemExit(f"Expected one member; found {len(infos)}")
+              info=infos[0]
+              with z.open(info) as f: header=f.readline()
+              Path("artifacts/inss_202607_header_raw.bin").write_bytes(header)
+              Path("/tmp/inss_member_name.txt").write_text(info.filename,encoding="utf-8")
+              layout={
+                  "member":info.filename,"compressed_size":info.compress_size,"uncompressed_size":info.file_size,"crc":info.CRC,
+                  "header_delimiter":",","data_delimiter":";",
+                  "layout_note":"Cabeçalho oficial separado por vírgulas; registros separados por ponto e vírgula; credito usa vírgula decimal. Confirmado por auditoria amostral run 34281997627."
+              }
+              Path("artifacts/inss_202607_zip_layout.json").write_text(json.dumps(layout,ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps(layout,ensure_ascii=False,indent=2))
+          PY
+
+          MEMBER="$(cat /tmp/inss_member_name.txt)"
+          unzip -p /tmp/inss_emitidos_202607.zip "$MEMBER" | LC_ALL=C grep -i 'BORJA' > /tmp/inss_borja_candidates.txt || true
+          echo "Candidate physical lines containing BORJA: $(wc -l < /tmp/inss_borja_candidates.txt)"
+
+          python - <<'PY'
+          import csv, hashlib, json, re, unicodedata
+          from collections import Counter, defaultdict
+          from decimal import Decimal, InvalidOperation
+          from pathlib import Path
+
+          def norm(v):
+              v=unicodedata.normalize("NFKD",str(v)); v="".join(c for c in v if not unicodedata.combining(c)); v=v.upper().strip(); v=re.sub(r"[^A-Z0-9]+"," ",v); return re.sub(r"\s+"," ",v).strip()
+          def dec(raw):
+              s=str(raw).strip().replace("R$","").replace(" ","")
+              if not s:return None
+              if "," in s and "." in s:
+                  s=s.replace(".","").replace(",",".") if s.rfind(",")>s.rfind(".") else s.replace(",","")
+              elif "," in s:s=s.replace(".","").replace(",",".")
+              try:return Decimal(s)
+              except InvalidOperation:return None
+
+          header_text=Path("artifacts/inss_202607_header_raw.bin").read_text(encoding="utf-8-sig").strip("\r\n")
+          headers=next(csv.reader([header_text],delimiter=",")); nh=[norm(h) for h in headers]
+          def col(label):
+              m=[i for i,h in enumerate(nh) if h==norm(label)]; return m[0] if m else None
+          residence_idx=col("municipio_residencia"); payment_idx=col("municipio_pagamento"); value_idx=col("credito"); type_idx=col("tipo_beneficio"); client_idx=col("clientela"); uf_idx=col("uf")
+          species_indices=[i for i,h in enumerate(nh) if h=="ESPECIE"]
+          species_desc_idx=species_indices[-1] if species_indices else None
+          if residence_idx is None or value_idx is None: raise SystemExit(f"Required columns missing: {headers}")
+
+          candidate_count=0; bad_width=0; matched=[]; residence_literals=Counter(); payment_literals=Counter()
+          type_summary=defaultdict(lambda:{"records":0,"valid":0,"credit":Decimal("0")})
+          species_summary=defaultdict(lambda:{"records":0,"valid":0,"credit":Decimal("0")})
+          total_credit=Decimal("0"); valid_credit=0
+          with Path("/tmp/inss_borja_candidates.txt").open("r",encoding="utf-8-sig",errors="strict",newline="") as f:
+              for row in csv.reader(f,delimiter=";"):
+                  candidate_count+=1
+                  if len(row)!=len(headers): bad_width+=1; continue
+                  residence=row[residence_idx]
+                  if "BORJA" in residence.upper(): residence_literals[residence]+=1
+                  if "SAO BORJA" not in norm(residence): continue
+                  if payment_idx is not None: payment_literals[row[payment_idx]]+=1
+                  value=dec(row[value_idx]); matched.append(row)
+                  t=row[type_idx] if type_idx is not None else "[não identificado]"
+                  e=row[species_desc_idx] if species_desc_idx is not None else "[não identificado]"
+                  type_summary[t]["records"]+=1; species_summary[e]["records"]+=1
+                  if value is not None:
+                      valid_credit+=1; total_credit+=value
+                      type_summary[t]["valid"]+=1; type_summary[t]["credit"]+=value
+                      species_summary[e]["valid"]+=1; species_summary[e]["credit"]+=value
+
+          diag={
+              "source_header_columns":headers,"source_encoding":"utf-8-sig","header_delimiter":",","data_delimiter":";",
+              "candidate_lines_containing_borja":candidate_count,"candidate_bad_width":bad_width,
+              "matched_residence_records":len(matched),"residence_literals_containing_borja":residence_literals,
+              "payment_literals_for_matched_residence":payment_literals,
+              "geographic_filter_source_field":headers[residence_idx],"source_value_field_literal":headers[value_idx],
+              "source_value_semantics":"O portal descreve o conjunto como contendo valor líquido; o CSV usa o cabeçalho literal credito.",
+              "duplicate_especie_headers":len(species_indices),
+          }
+          Path("artifacts/inss_emitidos_sao_borja_202607_diagnostic_v006.json").write_text(json.dumps(diag,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(diag,ensure_ascii=False,indent=2))
+          if not matched:
+              raise SystemExit("No Sao Borja residence records after valid mixed-delimiter parsing")
+
+          keep=[]
+          for idx in [residence_idx,payment_idx,uf_idx,type_idx,client_idx,*species_indices,value_idx]:
+              if idx is not None and idx not in keep:keep.append(idx)
+          seen=Counter(); out_headers=[]
+          for idx in keep:
+              seen[headers[idx]]+=1; out_headers.append(headers[idx] if headers.count(headers[idx])==1 else f"{headers[idx]}_{seen[headers[idx]]}")
+          filtered=Path("artifacts/inss_emitidos_sao_borja_residencia_202607_v006.csv")
+          with filtered.open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(out_headers+["periodo_referencia","natureza"])
+              for row in matched:w.writerow([row[i] for i in keep]+["2026-07","observado_em_fonte_oficial"])
+
+          def summary(path,key_name,mapping):
+              with Path(path).open("w",encoding="utf-8",newline="") as f:
+                  w=csv.writer(f); w.writerow([key_name,"registros_emitidos","registros_credito_valido","soma_credito_rs","periodo","natureza"])
+                  for k,s in sorted(mapping.items(),key=lambda x:(-x[1]["credit"],x[0])):w.writerow([k,s["records"],s["valid"],f"{s['credit']:.2f}","2026-07","calculado_a_partir_de_registros_oficiais"])
+          summary("artifacts/inss_emitidos_sao_borja_202607_por_tipo_v006.csv","tipo_beneficio_fonte",type_summary)
+          summary("artifacts/inss_emitidos_sao_borja_202607_por_especie_v006.csv","especie_descricao_fonte",species_summary)
+          validation={
+              "reference_period":"2026-07","source":"INSS Portal de Dados Abertos / SUIBE — Benefícios Emitidos Julho 2026",
+              "geographic_filter_source_field":headers[residence_idx],"matched_records":len(matched),"valid_credit_records":valid_credit,
+              "sum_credit_rs":f"{total_credit:.2f}","unique_residence_literals":sorted(residence_literals),
+              "type_categories_literal":sorted(type_summary),"species_categories_count":len(species_summary),
+              "filtered_csv_sha256":hashlib.sha256(filtered.read_bytes()).hexdigest(),
+              "interpretation_limit":"Contagem de registros emitidos não equivale a pessoas beneficiárias únicas.",
+              "annualization_limit":"Não multiplicar automaticamente o valor mensal por 12."
+          }
+          Path("artifacts/inss_emitidos_sao_borja_202607_validation_v006.json").write_text(json.dumps(validation,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(validation,ensure_ascii=False,indent=2))
+          PY
+
+          rm -f /tmp/inss_emitidos_202607.zip /tmp/inss_borja_candidates.txt
 
       - name: Upload Sao Borja INSS extraction artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: inss-emitidos-sao-borja-residencia-202607-v005
-          if-no-files-found: warn
+          name: inss-emitidos-sao-borja-residencia-202607-v006
+          if-no-files-found: error
           retention-days: 30
           path: artifacts/

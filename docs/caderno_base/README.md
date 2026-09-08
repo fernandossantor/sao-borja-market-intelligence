@@ -18,19 +18,21 @@ Versões anteriores permanecem preservadas para auditoria histórica.
 
 - Caderno corrente: `caderno_base_territorial_v009_mercado_consumidor_renda_transferencias_20260908` — Drive ID `15NzQK7LimFA56jJ60pPL0pmpS75FvUxIMPhWH6LkuzM`.
 - Versão histórica anterior: `caderno_base_territorial_v008_diagnostico_integrado_20260907` — Drive ID `1NJp_tmQ36NE8YDA2JhmyqjsnB1a7V9ivtAFJW7YLhcU`.
-- Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v007.md`.
-- Documento analítico anterior: `docs/caderno_base/diagnostico_analitico_integrado_v006.md`.
+- Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v008.md`.
+- Documento analítico anterior: `docs/caderno_base/diagnostico_analitico_integrado_v007.md`.
 - Mercado consumidor corrente: `docs/caderno_base/mercado_consumidor_base_v006.md`.
 - Mercado consumidor anterior: `docs/caderno_base/mercado_consumidor_base_v005.md`.
+- Matriz de fluxos de renda/transferências: `docs/caderno_base/matriz_fluxos_renda_transferencias_v001.md`.
 - Nota Novo Bolsa Família — série: `docs/caderno_base/novo_bolsa_familia_sao_borja_serie_2026_01_07_v002.md`.
 - Nota Novo Bolsa Família — referência julho: `docs/caderno_base/novo_bolsa_familia_sao_borja_202607_v001.md`.
 - Nota INSS/SUIBE: `docs/caderno_base/inss_beneficios_residentes_202607_v001.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
 - Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
-- Documento analítico nativo corrente no Drive: `Caderno-Base — diagnóstico analítico integrado v005 — 20260908` — ID `1QTQGuhnXXcniW4-eJhgH-27e8kv_3gvEFzVoywNy2Gg`.
-- Nota nativa corrente do Novo Bolsa Família: `Novo_Bolsa_Familia_Sao_Borja_serie_2026_01_07_v002` — ID `1okus0U8IMDtzHjGZHtpESLsxtTPY2L4kUNLrz-_Sobs`.
+- Documento analítico nativo corrente no Drive: `Caderno-Base — diagnóstico analítico integrado v006 — 20260908` — ID `1gf-bTqEXoEs5L5HCrZH6l1PZ3HiXYhfeuTdO3v-y8Zo`.
+- Nota nativa da matriz monetária: `Matriz de fluxos de renda e transferências — v001 — 20260908` — ID `1E4TghI46on_azi360vKFt7SAl65SA-hjbec6jRm4RY4`.
+- Nota nativa do Novo Bolsa Família: `Novo_Bolsa_Familia_Sao_Borja_serie_2026_01_07_v002` — ID `1okus0U8IMDtzHjGZHtpESLsxtTPY2L4kUNLrz-_Sobs`.
 
-A v009 preserva as abas anteriores e acrescenta `NBF_serie_2026` e `NBF_cobertura`, mantendo `Novo_Bolsa_Familia_202607` como referência pontual auditada.
+A v009 preserva as abas anteriores e acrescenta `NBF_serie_2026`, `NBF_cobertura` e `Matriz_fluxos_renda`, mantendo `Novo_Bolsa_Familia_202607` como referência pontual auditada.
 
 ## Estado das bases principais
 
@@ -141,6 +143,24 @@ Drive:
 - auditoria de cobertura v002: ID `1XFmz-fQlH64eQ0fGaOhXlj9AhUMeKENN`;
 - nota metodológica nativa v002: ID `1okus0U8IMDtzHjGZHtpESLsxtTPY2L4kUNLrz-_Sobs`.
 
+## Matriz de fluxos de renda e transferências
+
+A aba `Matriz_fluxos_renda` organiza as camadas monetárias e torna explícita a regra de **não soma**:
+
+- massa implícita de rendimento domiciliar — Censo 2022: R$ 92.605.826,04/mês;
+- remuneração de dezembro informada — RAIS 2025: R$ 23.940.059,71;
+- crédito INSS/SUIBE — jul/2026: R$ 24.535.168,54;
+- NBF — média mensal do fluxo corrente jan–jul/2026: R$ 1.502.070,14;
+- NBF — fluxo corrente jul/2026: R$ 1.513.564,00.
+
+**Não existe total combinado.** Períodos, universos, conceitos e pessoas podem se sobrepor.
+
+Comparação contextual de magnitude no mesmo mês:
+
+`R$ 1.513.564,00 / R$ 24.535.168,54 × 100 = 6,16896%`.
+
+O resultado indica apenas que a magnitude do NBF em julho equivale a aproximadamente **6,17%** do crédito INSS/SUIBE de julho. Não é participação do NBF na renda total nem em um conjunto mutuamente exclusivo de transferências.
+
 ## Correção conceitual — Bolsa Família
 
 A planilha anteriormente localizada no Drive continua classificada como **IGD transferido ao FMAS**, repasse administrativo de gestão, e permanece excluída de renda domiciliar e demanda de consumo.
@@ -155,23 +175,25 @@ A base oficial usa `VALOR PARCELA` de favorecidos e constitui transferência mon
 - 21,31% dos domicílios são unipessoais;
 - **85,79%** dos moradores do universo da tabela 10296 estão sem rendimento ou em faixas de até 2 SM per capita;
 - o INSS/SUIBE registra **R$ 24,535 milhões** em benefícios/créditos emitidos a residentes em julho de 2026;
-- o Novo Bolsa Família apresenta fluxo corrente médio de **R$ 1,502 milhão/mês** em jan–jul/2026, com baixa dispersão no intervalo.
+- o Novo Bolsa Família apresenta fluxo corrente médio de **R$ 1,502 milhão/mês** em jan–jul/2026, com baixa dispersão no intervalo;
+- as camadas monetárias devem ser interpretadas pela **composição**, e não pela soma.
 
-As referências monetárias de Censo 2022, RAIS 2025, INSS 2026-07 e Novo Bolsa Família 2026 têm universos e conceitos diferentes e **não devem ser somadas diretamente**.
+**Interpretação/hipótese:** a combinação de concentração de renda nas faixas inferiores, benefícios/transferências recorrentes e forte peso funcional de estruturas externas no varejo torna a interface entre renda residente e oferta varejista uma prioridade analítica. Ainda não é possível medir quanto do gasto é capturado por empresas locais ou redes externas, nem inferir vazamento monetário.
 
 ## Rendas e transferências não laborais — estado
 
-A referência municipal do INSS/SUIBE para julho de 2026 está consolidada e a série Novo Bolsa Família janeiro–julho de 2026 está construída.
+A referência municipal do INSS/SUIBE para julho de 2026 está consolidada, a série Novo Bolsa Família janeiro–julho de 2026 está construída e a matriz de fluxos monetários está formalizada.
 
-A lacuna passa a ser **outras transferências monetárias diretamente recebidas por residentes/famílias**, além da extensão longitudinal dessas bases.
+A lacuna passa a ser **destino do gasto, retenção territorial, comportamento de compra, extensão longitudinal das bases e outras transferências monetárias diretamente recebidas por residentes/famílias**.
 
 ## Próxima agenda
 
 1. estender a série Novo Bolsa Família para a cobertura oficial desde 2023-03, validando mudanças de esquema;
-2. mapear outras transferências monetárias relevantes em fontes oficiais;
-3. avaliar série mensal INSS/SUIBE;
-4. somente depois definir metodologia explícita para capacidade de compra, renda disponível aproximada, retenção local e alocação setorial do gasto;
-5. conectar renda, benefícios e transferências aos quatro cadernos setoriais e à matriz de controle territorial;
-6. manter fiscalidade, VAF e IPM em trilha conceitual própria.
+2. avaliar série mensal INSS/SUIBE;
+3. mapear outras transferências monetárias relevantes;
+4. avançar para dados de comportamento, canais e destino do gasto;
+5. somente depois definir metodologia explícita para capacidade de compra, renda disponível aproximada e retenção local;
+6. conectar a matriz monetária aos quatro cadernos setoriais e à matriz de controle territorial;
+7. manter fiscalidade, VAF e IPM em trilha conceitual própria.
 
 A configuração de escrita controlada permanece em `docs/drive_write_connection.md`. Nenhum resultado novo deve permanecer apenas em código, terminal ou conversa sem registro nos artefatos e na narrativa do projeto.

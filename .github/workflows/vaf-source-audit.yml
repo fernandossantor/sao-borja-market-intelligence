@@ -189,14 +189,59 @@ jobs:
                   "nature": "observed_visible_result_cells_without_column_relabeling",
               }
 
-          portal = fetch(PORTAL_IPM_URL, 20)
-          archive = fetch(VAF_ARCHIVE_URL, 20)
-          wrapper = fetch(VAF_WRAPPER_URL, 15)
-          legacy = fetch(VAF_HISTORY_FORM_URL, 15)
-          legacy_download_index = fetch(VAF_LEGACY_DOWNLOAD_INDEX_URL, 20)
-          archive_2009_2012 = fetch(VAF_ARCHIVE_2009_2012_XLS_URL, 20)
-          archive_1989_1997 = fetch(VAF_ARCHIVE_1989_1997_XLS_URL, 20)
-          legacy_1989_1997 = fetch(VAF_LEGACY_1989_1997_BINARY_URL, 20)
+          # Prioridade: recuperar a consulta que responde ao objetivo analítico atual.
+          legacy = fetch(VAF_HISTORY_FORM_URL, 20)
+          if legacy is not None and legacy.ok:
+              try:
+                  form = parse_vaf_form(legacy.text)
+                  result["legacy_form"] = summarize_form(form)
+              except ValueError as exc:
+                  form = None
+                  result["legacy_form"] = {
+                      "status": "parse_error",
+                      "error_type": type(exc).__name__,
+                      "error": str(exc),
+                  }
+
+              if form is not None:
+                  overlap_specs = [
+                      ("2009", "2016", "vaf_post_2009_2016_response.html"),
+                      ("2017", "2019", "vaf_post_2017_2019_response.html"),
+                  ]
+                  for query, (start, end, raw_name) in zip(
+                      result["historical_overlap_queries"], overlap_specs, strict=True
+                  ):
+                      try:
+                          query["response"] = query_period(form.action, start, end, raw_name)
+                      except requests.RequestException as exc:
+                          query["response"] = {
+                              "status": "query_error",
+                              "error_type": type(exc).__name__,
+                              "error": str(exc),
+                          }
+
+                  try:
+                      result["minimal_query"]["response"] = query_period(
+                          form.action,
+                          "2025",
+                          "2025",
+                          "vaf_post_2025_response.html",
+                      )
+                  except requests.RequestException as exc:
+                      result["minimal_query"]["response"] = {
+                          "status": "query_error",
+                          "error_type": type(exc).__name__,
+                          "error": str(exc),
+                      }
+
+          # Rotas secundárias são auditadas depois e não bloqueiam a consulta principal.
+          portal = fetch(PORTAL_IPM_URL, 10)
+          archive = fetch(VAF_ARCHIVE_URL, 10)
+          wrapper = fetch(VAF_WRAPPER_URL, 10)
+          legacy_download_index = fetch(VAF_LEGACY_DOWNLOAD_INDEX_URL, 10)
+          archive_2009_2012 = fetch(VAF_ARCHIVE_2009_2012_XLS_URL, 10)
+          archive_1989_1997 = fetch(VAF_ARCHIVE_1989_1997_XLS_URL, 10)
+          legacy_1989_1997 = fetch(VAF_LEGACY_1989_1997_BINARY_URL, 10)
 
           if archive is not None and archive.ok:
               result["archive_links"] = list(
@@ -237,44 +282,12 @@ jobs:
                   extract_iframe_sources(wrapper.text, source_url=wrapper.url)
               )
 
-          if legacy is not None and legacy.ok:
-              try:
-                  form = parse_vaf_form(legacy.text)
-                  result["legacy_form"] = summarize_form(form)
-                  result["minimal_query"]["response"] = query_period(
-                      form.action,
-                      "2025",
-                      "2025",
-                      "vaf_post_2025_response.html",
-                  )
-                  overlap_specs = [
-                      ("2009", "2016", "vaf_post_2009_2016_response.html"),
-                      ("2017", "2019", "vaf_post_2017_2019_response.html"),
-                  ]
-                  for query, (start, end, raw_name) in zip(
-                      result["historical_overlap_queries"], overlap_specs, strict=True
-                  ):
-                      query["response"] = query_period(form.action, start, end, raw_name)
-              except (ValueError, requests.RequestException) as exc:
-                  error = {
-                      "status": "query_or_parse_error",
-                      "error_type": type(exc).__name__,
-                      "error": str(exc),
-                  }
-                  if result["minimal_query"]["response"] is None:
-                      result["minimal_query"]["response"] = error
-                  for query in result["historical_overlap_queries"]:
-                      if query["response"] is None:
-                          query["response"] = error
-
           result["portal_content_seen"] = bool(portal is not None and portal.ok)
           result["archive_content_seen"] = bool(archive is not None and archive.ok)
           result["legacy_download_index_seen"] = bool(
               legacy_download_index is not None and legacy_download_index.ok
           )
-          result["current_query_content_seen"] = bool(
-              (wrapper is not None and wrapper.ok) or (legacy is not None and legacy.ok)
-          )
+          result["current_query_content_seen"] = bool(legacy is not None and legacy.ok)
 
           output = Path("artifacts/vaf_source_and_minimal_query_audit.json")
           output.write_text(

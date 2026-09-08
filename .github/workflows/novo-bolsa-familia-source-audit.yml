@@ -28,15 +28,15 @@ jobs:
           import json
           import re
           from pathlib import Path
-          from urllib.parse import urljoin, urlparse
+          from urllib.parse import urljoin
 
           import requests
           from bs4 import BeautifulSoup
 
           PAGE = "https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia"
-          DICT = "https://portaldatransparencia.gov.br/pagina-interna/605543-dicionario-de-dados-novo-bolsa-familia"
+          DICT = "https://portaldatransparencia.gov.br/dicionario-de-dados/novo-bolsa-familia"
           session = requests.Session()
-          session.headers.update({"User-Agent": "SBMI Novo Bolsa Familia source audit/1.0"})
+          session.headers.update({"User-Agent": "SBMI Novo Bolsa Familia source audit/1.1"})
 
           report = {
               "objective": "discover official open-data download mechanism for Novo Bolsa Familia without using beneficiary-level API credentials",
@@ -51,7 +51,7 @@ jobs:
               ],
           }
 
-          def fetch(url, name, timeout=45):
+          def fetch(url, name, timeout=45, required=True):
               r = session.get(url, timeout=timeout)
               report["requests"][name] = {
                   "url": url,
@@ -62,13 +62,15 @@ jobs:
                   "bytes": len(r.content),
                   "sha256": hashlib.sha256(r.content).hexdigest(),
               }
-              r.raise_for_status()
+              if required:
+                  r.raise_for_status()
               return r
 
           page = fetch(PAGE, "download_page")
           Path("artifacts/novo_bolsa_familia_download_page_raw.html").write_bytes(page.content)
-          dictionary = fetch(DICT, "dictionary_page")
-          Path("artifacts/novo_bolsa_familia_dictionary_raw.html").write_bytes(dictionary.content)
+          dictionary = fetch(DICT, "dictionary_page", required=False)
+          if dictionary.ok:
+              Path("artifacts/novo_bolsa_familia_dictionary_raw.html").write_bytes(dictionary.content)
 
           soup = BeautifulSoup(page.text, "html.parser")
           script_urls = []
@@ -99,13 +101,13 @@ jobs:
                           frag = text[a:b]
                           if "novo" in frag.lower() or "download" in frag.lower():
                               hits.append(frag)
-                          if len(hits) >= 20:
+                          if len(hits) >= 40:
                               break
                       entry["hit_count_saved"] = len(hits)
                       for h in hits:
                           report["candidate_fragments"].append({"script": url, "fragment": h})
                       urls = sorted(set(url_pat.findall(text)))
-                      entry["candidate_urls"] = [u for u in urls if terms.search(u)][:100]
+                      entry["candidate_urls"] = [u for u in urls if terms.search(u)][:150]
                       if hits:
                           Path(f"artifacts/script_{idx:02d}_relevant_fragments.txt").write_text("\n\n---\n\n".join(hits), encoding="utf-8")
                   else:
@@ -114,7 +116,6 @@ jobs:
                   entry["error"] = f"{type(exc).__name__}: {exc}"
               report["scripts"].append(entry)
 
-          # Record official aggregate API behavior without a token only as a source-access audit.
           aggregate_url = "https://api.portaldatransparencia.gov.br/api-de-dados/novo-bolsa-familia-por-municipio?mesAno=202607&codigoIbge=4318002&pagina=1"
           try:
               r = session.get(aggregate_url, timeout=30)
@@ -128,7 +129,7 @@ jobs:
           except Exception as exc:
               report["aggregate_api_no_token_probe"] = {"url": aggregate_url, "error": f"{type(exc).__name__}: {exc}"}
 
-          Path("artifacts/novo_bolsa_familia_source_audit_v001.json").write_text(
+          Path("artifacts/novo_bolsa_familia_source_audit_v002.json").write_text(
               json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
           )
           print(json.dumps(report, ensure_ascii=False, indent=2))
@@ -137,7 +138,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: novo-bolsa-familia-source-audit-v001
+          name: novo-bolsa-familia-source-audit-v002
           path: artifacts/
           if-no-files-found: error
           retention-days: 30

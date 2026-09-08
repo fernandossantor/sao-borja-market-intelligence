@@ -26,6 +26,7 @@ Versões anteriores permanecem preservadas para auditoria histórica.
 - Nota INSS/SUIBE: `docs/caderno_base/inss_beneficios_residentes_202607_v001.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
 - Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
+- Documento analítico nativo corrente no Drive: `Caderno-Base — diagnóstico analítico integrado v004 — 20260908` — ID `1bGjPFs5N4McbooNeRtD9hEtmcBPNoueWfbbA_Jgpjgc`.
 
 A v008 preserva as abas anteriores e inclui `Diagnostico_integrado`, `VAF_reconciliacao`, `VAF_historico`, `VAF_IPM_exploratorio`, `Matriz_controle_setorial`, `Mercado_consumidor_base`, `INSS_beneficios_202607` e `Novo_Bolsa_Familia_202607`.
 

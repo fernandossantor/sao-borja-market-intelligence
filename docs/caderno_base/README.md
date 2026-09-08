@@ -20,13 +20,15 @@ Versões anteriores não devem ser sobrescritas quando forem necessárias para a
 - Versão histórica imediatamente anterior: `caderno_base_territorial_v007_fiscalidade_ipm_20260907` — Drive ID `1x83_dMuDQ9ks0mdNnv6mdw_Sopt7-KjIFWrD1rlouz8`.
 - Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v002.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
+- Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
 
 A v008 preserva todas as abas anteriores e acrescenta:
 
 - `Diagnostico_integrado`;
 - `VAF_reconciliacao`;
 - `VAF_historico`;
-- `VAF_IPM_exploratorio`.
+- `VAF_IPM_exploratorio`;
+- `Matriz_controle_setorial`.
 
 ## Estado das bases principais
 
@@ -72,7 +74,8 @@ A etapa de fonte para o intervalo em REAL está **CONCLUÍDA**.
 Derivados promovidos ao Drive:
 
 - `_sao_borja/exports/caderno-base-v008-diagnostico-integrado-v001/vaf_sao_borja_1994_2025_oficial_v001.csv`;
-- `_sao_borja/exports/caderno-base-v008-diagnostico-integrado-v001/vaf_ipm_alinhamento_exploratorio_v001.csv`.
+- `_sao_borja/exports/caderno-base-v008-diagnostico-integrado-v001/vaf_ipm_alinhamento_exploratorio_v001.csv`;
+- `_sao_borja/exports/caderno-base-v008-diagnostico-integrado-v001/matriz_controle_setorial_sao_borja_v001.csv`.
 
 Pacotes brutos e HTMLs oficiais permanecem em `_sao_borja/raw/fiscal/vaf_sefaz_rs`.
 
@@ -87,15 +90,22 @@ Primeiros resultados:
 - o peso estimado das estruturas externas no emprego é aproximadamente 6,12 vezes sua participação cadastral;
 - a remuneração média implícita estimada nas estruturas externas é cerca de 22,03% superior à local dentro do mesmo modelo;
 - as quatro maiores divisões CNAE concentram 73,05% da remuneração de dezembro estimada como externa; as seis maiores, 81,91%;
-- o varejo é o principal nó de emprego externo estimado;
+- o varejo é o principal nó externo em peso absoluto: 6,63% de presença cadastral externa na divisão, mas 37,46% do emprego e 38,16% da remuneração de dezembro estimados como externos; responde por 36,41% do total externo de dezembro;
+- finanças (96,73% do emprego; 98,70% da remuneração) e energia/utilidades (96,20%; 100%) apresentam dependência funcional externa muito elevada nas métricas disponíveis;
+- transporte e serviços de apoio empresarial mostram que baixa presença cadastral externa pode coexistir com maior peso funcional;
+- percentuais elevados precisam ser lidos com peso absoluto: serviços pessoais têm 57,57% da remuneração estimada como externa, mas apenas 27 vínculos e 0,60% do total externo de dezembro;
 - o IPM apresenta ciclos de perda e recuperação, e não tendência linear;
 - no alinhamento exploratório VAF `t` → IPM `t+2`, 15/23 transições têm o mesmo sinal e 8/23 divergem; em todas as divergências, o VAF municipal nominal cresceu enquanto o IPM caiu. Isso reforça que o VAF nominal municipal, isoladamente, não explica a participação relativa do município no ICMS.
 
 ## Próxima agenda
 
-1. construir matriz setorial de controle territorial — cadastro × emprego × remuneração;
+A primeira matriz setorial de controle territorial está **CONCLUÍDA** para dez divisões com sobreposição disponível entre cadastro e modelo laboral/remuneratório. A classificação textual é interpretativa e preliminar; os denominadores não são fundidos em um índice único.
+
+Próximos passos:
+
+1. ampliar a matriz quando houver sobreposição metodologicamente comparável para outras divisões;
 2. integrar estrutura empresarial com consumidores, renda, população e mercado de trabalho;
-3. classificar setores em base local forte, presença externa complementar, dependência funcional externa e setores estratégicos de rede;
+3. usar a matriz para orientar os quatro cadernos setoriais, distinguindo capilaridade local, presença externa complementar, dependência funcional e setores estratégicos de rede;
 4. na fiscalidade, buscar denominador/índice estadual, decomposição dos critérios do IPM e quota-parte monetária efetivamente transferida, em vez de repetir a coleta do VAF municipal;
 5. transformar os resultados em narrativa explicativa e diagnóstica para o Caderno-Base e, posteriormente, para os quatro cadernos setoriais.
 

@@ -16,19 +16,21 @@ Versões anteriores permanecem preservadas para auditoria histórica.
 
 ## Versão corrente
 
-- Caderno corrente: `caderno_base_territorial_v008_diagnostico_integrado_20260907` — Drive ID `1NJp_tmQ36NE8YDA2JhmyqjsnB1a7V9ivtAFJW7YLhcU`.
-- Versão histórica anterior: `caderno_base_territorial_v007_fiscalidade_ipm_20260907` — Drive ID `1x83_dMuDQ9ks0mdNnv6mdw_Sopt7-KjIFWrD1rlouz8`.
-- Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v006.md`.
-- Documento analítico anterior: `docs/caderno_base/diagnostico_analitico_integrado_v005.md`.
-- Mercado consumidor corrente: `docs/caderno_base/mercado_consumidor_base_v005.md`.
-- Mercado consumidor anterior: `docs/caderno_base/mercado_consumidor_base_v004.md`.
-- Nota Novo Bolsa Família: `docs/caderno_base/novo_bolsa_familia_sao_borja_202607_v001.md`.
+- Caderno corrente: `caderno_base_territorial_v009_mercado_consumidor_renda_transferencias_20260908` — Drive ID `15NzQK7LimFA56jJ60pPL0pmpS75FvUxIMPhWH6LkuzM`.
+- Versão histórica anterior: `caderno_base_territorial_v008_diagnostico_integrado_20260907` — Drive ID `1NJp_tmQ36NE8YDA2JhmyqjsnB1a7V9ivtAFJW7YLhcU`.
+- Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v007.md`.
+- Documento analítico anterior: `docs/caderno_base/diagnostico_analitico_integrado_v006.md`.
+- Mercado consumidor corrente: `docs/caderno_base/mercado_consumidor_base_v006.md`.
+- Mercado consumidor anterior: `docs/caderno_base/mercado_consumidor_base_v005.md`.
+- Nota Novo Bolsa Família — série: `docs/caderno_base/novo_bolsa_familia_sao_borja_serie_2026_01_07_v002.md`.
+- Nota Novo Bolsa Família — referência julho: `docs/caderno_base/novo_bolsa_familia_sao_borja_202607_v001.md`.
 - Nota INSS/SUIBE: `docs/caderno_base/inss_beneficios_residentes_202607_v001.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
 - Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
-- Documento analítico nativo corrente no Drive: `Caderno-Base — diagnóstico analítico integrado v004 — 20260908` — ID `1bGjPFs5N4McbooNeRtD9hEtmcBPNoueWfbbA_Jgpjgc`.
+- Documento analítico nativo corrente no Drive: `Caderno-Base — diagnóstico analítico integrado v005 — 20260908` — ID `1QTQGuhnXXcniW4-eJhgH-27e8kv_3gvEFzVoywNy2Gg`.
+- Nota nativa corrente do Novo Bolsa Família: `Novo_Bolsa_Familia_Sao_Borja_serie_2026_01_07_v002` — ID `1okus0U8IMDtzHjGZHtpESLsxtTPY2L4kUNLrz-_Sobs`.
 
-A v008 preserva as abas anteriores e inclui `Diagnostico_integrado`, `VAF_reconciliacao`, `VAF_historico`, `VAF_IPM_exploratorio`, `Matriz_controle_setorial`, `Mercado_consumidor_base`, `INSS_beneficios_202607` e `Novo_Bolsa_Familia_202607`.
+A v009 preserva as abas anteriores e acrescenta `NBF_serie_2026` e `NBF_cobertura`, mantendo `Novo_Bolsa_Familia_202607` como referência pontual auditada.
 
 ## Estado das bases principais
 
@@ -64,7 +66,7 @@ A v008 preserva as abas anteriores e inclui `Diagnostico_integrado`, `VAF_reconc
 - 2024: R$ 2.907.302.928,34;
 - 2025: R$ 2.325.966.620,93;
 - variação nominal 2025/2024: **-19,9957%**;
-- benchmark Sebrae 2009–2019 ↔ SEFAZ 2007–2017: **11/11 correspondências**, deslocamento de dois anos;
+- benchmark Sebrae 2009–2019 ↔ SEFAZ 2007–2017: **11/11 correspondências**;
 - alinhamento exploratório VAF `t` → IPM `t+2`: 15/23 sinais concordantes e 8/23 divergentes, sem inferência causal.
 
 ## Mercado consumidor — base integrada
@@ -89,60 +91,61 @@ Essa massa não é renda disponível, consumo efetivo, faturamento comercial ou 
 
 ### Benefícios emitidos pelo INSS/SUIBE — julho de 2026
 
-Primeira referência oficial municipal **ENCERRADA** para 2026-07.
-
 - recorte: `municipio_residencia = 19181-RS-SAO BORJA`;
 - **14.247 registros emitidos**;
-- **14.247 registros com `credito` válido**;
 - crédito total: **R$ 24.535.168,54**;
-- crédito médio por registro: **R$ 1.722,13**.
+- crédito médio: **R$ 1.722,13**.
 
-A contagem é de registros, não pessoas beneficiárias únicas. As duas espécies literalmente denominadas `AMPARO SOCIAL` somam **R$ 4.777.117,64**, ou **19,47049%** do crédito total, sem que isso seja relabelado como toda a assistência social.
+A contagem é de registros, não pessoas beneficiárias únicas.
 
-### Novo Bolsa Família — julho de 2026
-
-Primeira referência oficial municipal **ENCERRADA** para 2026-07.
+### Novo Bolsa Família — série janeiro–julho de 2026
 
 Fonte: Portal da Transparência / CGU — Dados Abertos — Novo Bolsa Família.
 
 Recorte: `UF = RS`, `NOME MUNICÍPIO = SAO BORJA` após normalização; código Município SIAFI observado `8863`.
 
-Resultados calculados a partir dos registros oficiais:
+Controle de privacidade: **nenhum CPF, NIS ou nome individual foi persistido**.
 
-- **2.199 registros/parcela**;
-- **2.199 registros com `VALOR PARCELA` válido**;
-- soma de `VALOR PARCELA`: **R$ 1.513.564,00**;
-- média por registro/parcela: **R$ 688,30**.
+Resultados calculados:
 
-Em todos os registros municipais, `MÊS COMPETÊNCIA = 202607` e `MÊS REFERÊNCIA = 202607`.
+- fluxo total por competência: **R$ 10.604.291,00**;
+- fluxo de referência corrente: **R$ 10.514.491,00**;
+- ajustes de referências anteriores: **R$ 89.800,00 / 0,84683%**;
+- média mensal do fluxo corrente: **R$ 1.502.070,14**;
+- variação jan→jul do fluxo corrente: **-0,28973%**;
+- variação jan→jul da média por registro corrente: **+1,11650%**;
+- coeficiente de variação mensal do fluxo corrente: **0,70509%**.
 
-Controles agregados: 2.198 NIS não vazios distintos, 1 NIS vazio; 1.746 CPF não vazios distintos, 439 CPF vazios. **Nenhum CPF, NIS ou nome individual foi persistido** no GitHub, Drive, Caderno ou artifact final.
+Ajustes retroativos por competência: jan 2,78741%; fev 0,29716%; mar 2,00992%; abr 0,69774%; mai 0,04012%; jun/jul 0%.
 
-Registro/parcela **não equivale automaticamente a família ou pessoa única**.
+**Competência não equivale automaticamente a referência.** Para comparar o fluxo corrente, o projeto separa parcelas cujo `MÊS REFERÊNCIA` coincide com a competência.
 
-O arquivo 202607 efetivamente observado possui nove campos e **não contém `DATA DISPONIBILIZAÇÃO`**; o projeto usa somente o esquema observado, sem transpor silenciosamente campos de outras versões.
+### Cobertura oficial do Novo Bolsa Família
 
-Rastreabilidade:
+Foram identificados **41 endpoints ZIP mensais consecutivos entre 2023-03 e 2026-07**.
 
-- workflow `novo-bolsa-familia-sao-borja-extract`;
-- run `34284691474`;
-- job `102257430159`;
-- artifact `10079014259`;
-- SHA-256 do artifact `41a27542e9b94ce07606ea7cb15868d6aafc67c073f7c8d86e21b9bc7d44c15e`;
-- SHA-256 do ZIP nacional `f66e621bfdbb945cf324679e216d3d3b42d2029f39be7f646e046fd28b4c30d4`.
+Isso comprova disponibilidade da fonte, não comparabilidade automática de layout/conceito.
+
+Rastreabilidade da série:
+
+- workflow `novo-bolsa-familia-series-2026`;
+- run `34288591742`;
+- artifact `10080614700`;
+- SHA-256 do artifact `68e0548f2daeed4c5d8ad5a2800a3a07f94fb26f84f3e678d41f84cf54974a70`.
 
 Drive:
 
-- pasta `_sao_borja/raw/social/novo_bolsa_familia_portal_transparencia/`, ID `15loZ2NDpNcwIwI4hFTxjsNKjFzaxekhq`;
-- pacote final agregado e sem PII: ID `1am7E0ILJCp26z9X8MjLu7sdSxqYRN1jn`;
-- CSV agregado: ID `1cR1KfPWe_MMwGF9KHHrwNoGJYT5RcjUs`;
-- nota metodológica nativa: ID `11LpVM7KSmgzZ7hk6Hl5eZix_FVAzPhMP9tRfXheaDNc`.
+- pasta bruta `_sao_borja/raw/social/novo_bolsa_familia_portal_transparencia/`, ID `15loZ2NDpNcwIwI4hFTxjsNKjFzaxekhq`;
+- pacote série v002: ID `1BzTJVG1nTUKF-vl4riX3dPSdZF1ZEJa7`;
+- CSV analítico v002: ID `1nD5kpXmKDrjDuWbITB7CAGUtUDQx1sSt`;
+- auditoria de cobertura v002: ID `1XFmz-fQlH64eQ0fGaOhXlj9AhUMeKENN`;
+- nota metodológica nativa v002: ID `1okus0U8IMDtzHjGZHtpESLsxtTPY2L4kUNLrz-_Sobs`.
 
 ## Correção conceitual — Bolsa Família
 
-A planilha anteriormente localizada no Drive continua classificada como **IGD transferido ao FMAS**, isto é, repasse administrativo de gestão, e permanece excluída de renda domiciliar e demanda de consumo.
+A planilha anteriormente localizada no Drive continua classificada como **IGD transferido ao FMAS**, repasse administrativo de gestão, e permanece excluída de renda domiciliar e demanda de consumo.
 
-A nova extração usa `VALOR PARCELA` da base oficial de favorecidos e é conceitualmente uma transferência monetária direta registrada no programa. Ainda assim, transferência registrada ≠ consumo observado ≠ retenção local.
+A base oficial usa `VALOR PARCELA` de favorecidos e constitui transferência monetária registrada no programa. Ainda assim, transferência registrada ≠ consumo observado ≠ retenção local.
 
 ## Leitura analítica corrente
 
@@ -151,20 +154,20 @@ A nova extração usa `VALOR PARCELA` da base oficial de favorecidos e é concei
 - IPM e VAF não se movem mecanicamente na mesma direção;
 - 21,31% dos domicílios são unipessoais;
 - **85,79%** dos moradores do universo da tabela 10296 estão sem rendimento ou em faixas de até 2 SM per capita;
-- o INSS/SUIBE acrescenta um fluxo de **R$ 24,535 milhões** em benefícios emitidos a residentes em julho de 2026;
-- o Novo Bolsa Família acrescenta **R$ 1,514 milhão** em `VALOR PARCELA` na mesma competência.
+- o INSS/SUIBE registra **R$ 24,535 milhões** em benefícios/créditos emitidos a residentes em julho de 2026;
+- o Novo Bolsa Família apresenta fluxo corrente médio de **R$ 1,502 milhão/mês** em jan–jul/2026, com baixa dispersão no intervalo.
 
-As quatro referências monetárias — Censo 2022, RAIS 2025, INSS 2026-07 e Novo Bolsa Família 2026-07 — têm universos e conceitos diferentes e **não devem ser somadas diretamente**. Pode haver sobreposição de pessoas entre fontes e programas.
+As referências monetárias de Censo 2022, RAIS 2025, INSS 2026-07 e Novo Bolsa Família 2026 têm universos e conceitos diferentes e **não devem ser somadas diretamente**.
 
 ## Rendas e transferências não laborais — estado
 
-A primeira referência oficial municipal do INSS/SUIBE e a primeira referência oficial municipal do Novo Bolsa Família estão encerradas para julho de 2026.
+A referência municipal do INSS/SUIBE para julho de 2026 está consolidada e a série Novo Bolsa Família janeiro–julho de 2026 está construída.
 
-A lacuna passa a ser **outras transferências monetárias diretamente recebidas por residentes/famílias**, sempre separando benefício monetário de repasse administrativo.
+A lacuna passa a ser **outras transferências monetárias diretamente recebidas por residentes/famílias**, além da extensão longitudinal dessas bases.
 
 ## Próxima agenda
 
-1. construir série mensal do Novo Bolsa Família com a mesma regra de privacidade e filtro territorial;
+1. estender a série Novo Bolsa Família para a cobertura oficial desde 2023-03, validando mudanças de esquema;
 2. mapear outras transferências monetárias relevantes em fontes oficiais;
 3. avaliar série mensal INSS/SUIBE;
 4. somente depois definir metodologia explícita para capacidade de compra, renda disponível aproximada, retenção local e alocação setorial do gasto;

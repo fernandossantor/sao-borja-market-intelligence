@@ -21,7 +21,8 @@ Versões anteriores não devem ser sobrescritas quando forem necessárias para a
 - Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v002.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
 - Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
-- Mercado consumidor — base territorial: `docs/caderno_base/mercado_consumidor_base_v001.md`.
+- Mercado consumidor — base territorial corrente: `docs/caderno_base/mercado_consumidor_base_v002.md`.
+- Mercado consumidor — versão histórica anterior: `docs/caderno_base/mercado_consumidor_base_v001.md`.
 - Checkpoint de retomada: `docs/caderno_base/checkpoint_20260907.md`.
 
 A v008 preserva todas as abas anteriores e acrescenta, nesta etapa analítica:
@@ -82,22 +83,47 @@ Derivados promovidos ao Drive:
 
 Pacotes brutos e HTMLs oficiais permanecem em `_sao_borja/raw/fiscal/vaf_sefaz_rs`.
 
-### Mercado consumidor — primeira base integrada
+### Mercado consumidor — base integrada
 
-A nova aba `Mercado_consumidor_base` conecta, sem fundir conceitos distintos, população, estrutura domiciliar, produção econômica, emprego formal e remuneração.
+A aba `Mercado_consumidor_base` conecta, sem fundir conceitos distintos, população, estrutura domiciliar, produção econômica, emprego formal, remuneração e agora **rendimento domiciliar per capita**.
 
-Dados incorporados:
+Dados já incorporados:
 
 - população residente — Censo 2022: **59.676 pessoas** — IBGE/SIDRA;
 - população estimada 2025: **61.311 pessoas** — IBGE, estimativa oficial;
-- diferença calculada entre estimativa 2025 e Censo 2022: **1.635 pessoas / 2,7398%**, explicitamente não tratada como taxa oficial de crescimento;
+- diferença calculada estimativa 2025/Censo 2022: **1.635 pessoas / 2,7398%**, explicitamente não tratada como taxa oficial de crescimento;
 - domicílios unipessoais — Censo 2022: **4.815 / 21,31%**;
 - domicílios nucleares: **13.820 / 61,17%**;
 - domicílios estendidos: **3.518 / 15,57%**;
 - domicílios compostos: **438 / 1,94%**;
 - soma calculada das quatro categorias reportadas: **22.591 domicílios**, sem relabelagem como total oficial;
-- PIB a preços correntes 2023: **R$ 2.550.388.000** — SIDRA tabela 5938, unidade original mil R$;
+- PIB a preços correntes 2023: **R$ 2.550.388.000** — SIDRA tabela 5938;
 - PIB per capita 2023: **R$ 42.737,25** — IBGE Cidades.
+
+#### Rendimento domiciliar per capita — Censo 2022
+
+A lacuna de média e mediana foi **ENCERRADA** por extração direta da API oficial IBGE/SIDRA, tabela 10295:
+
+- variável 13431 — rendimento nominal médio mensal domiciliar per capita: **R$ 1.568,58**;
+- variável 13534 — rendimento nominal mediano mensal domiciliar per capita: **R$ 1.100,00**;
+- diferença calculada média − mediana: **R$ 468,58**;
+- média **42,5982%** acima da mediana, apresentada como **42,60%**.
+
+Definição da fonte: moradores em domicílios particulares permanentes ocupados, **exclusive pensionistas, empregados(as) domésticos(as) e parentes de empregados(as) domésticos(as)**.
+
+Rastreabilidade:
+
+- workflow `consumer-income-sidra`;
+- run `34269331974`, job `102206631993`, success;
+- HTTP 200;
+- SHA-256 JSON bruto `29e84da86e8424d0727325647634b9565e1f181374bf3cedf3c3c64936adea33`;
+- artifact ID `10073147229`, ZIP SHA-256 `7c1d5f13cf6445810a376cae8ed929734f0a00254b82354d2c923351c8cced02`;
+- pacote preservado no Drive: `01_fontes_e_coletas/demografia/renda_domiciliar/sidra_10295_sao_borja_income_2022_official_package.zip`, ID `1BXmiVuMD6LdvIOeCWQGY0SwVD1qj64jz`;
+- documentação Drive: `Renda domiciliar per capita — SIDRA 10295 — auditoria e incorporação — 20260908`, ID `1WrVv6dDXeB-nzz8jxl5GLwR2LrPZPrBchKtaQu0KfqY`.
+
+Interpretação controlada: a mediana abaixo da média recomenda não representar o consumidor típico somente pela média. A mediana fornece referência central menos sensível aos valores superiores. A diferença é compatível com assimetria à direita, mas **não constitui medida de desigualdade** e não permite inferir Gini, quantis ou concentração.
+
+Limitação crítica: **não multiplicar a média pela população total** para estimar massa de renda. Antes disso deve ser recuperado o número de moradores do mesmo universo da tabela 10295.
 
 Indicadores transversais calculados apenas para contexto:
 
@@ -105,39 +131,36 @@ Indicadores transversais calculados apenas para contexto:
 - **140,19 vínculos empresariais por mil residentes estimados**;
 - **1,2446 vínculo empresarial por estabelecimento empresarial**.
 
-Esses indicadores não são taxas oficiais de empreendedorismo, ocupação ou tamanho médio de empresa, pois combinam períodos/universos diferentes e vínculo não equivale a trabalhador único.
+Eles não são taxas oficiais de empreendedorismo, ocupação ou tamanho médio de empresa.
 
-A principal lacuna atual é renda domiciliar. Foi identificada a **tabela SIDRA 10295 — Censo 2022**, com rendimento nominal médio e mediano mensal domiciliar per capita em nível municipal. A definição exclui pensionistas, empregados domésticos e parentes de empregados domésticos. Os valores específicos de São Borja ainda não foram incorporados sem recuperação direta da consulta oficial.
-
-A planilha de Bolsa Família localizada no Drive foi classificada corretamente como **IGD transferido ao FMAS**, e não como benefício recebido pelas famílias; portanto, não integra renda domiciliar nem demanda de consumo.
+A planilha de Bolsa Família localizada no Drive permanece classificada corretamente como **IGD transferido ao FMAS**, não benefício recebido pelas famílias, e está excluída de renda domiciliar e demanda de consumo.
 
 ## Mudança de estágio: da auditoria à análise
 
-A prioridade do projeto deixou de ser repetir auditorias já encerradas. Elas funcionam como controles de integridade e somente devem ser reabertas quando houver nova competência, mudança metodológica, falha de integridade ou necessidade específica ainda não coberta.
+Auditorias encerradas funcionam como controles de integridade e só devem ser reabertas por nova competência, mudança metodológica, falha de integridade ou lacuna específica.
 
 O foco corrente é **análise territorial integrada**.
 
-Primeiros resultados:
+Resultados centrais até aqui:
 
 - o peso estimado das estruturas externas no emprego é aproximadamente 6,12 vezes sua participação cadastral;
 - a remuneração média implícita estimada nas estruturas externas é cerca de 22,03% superior à local dentro do mesmo modelo;
 - as quatro maiores divisões CNAE concentram 73,05% da remuneração de dezembro estimada como externa; as seis maiores, 81,91%;
-- o varejo é o principal nó externo em peso absoluto: 6,63% de presença cadastral externa na divisão, mas 37,46% do emprego e 38,16% da remuneração de dezembro estimados como externos; responde por 36,41% do total externo de dezembro;
-- finanças (96,73% do emprego; 98,70% da remuneração) e energia/utilidades (96,20%; 100%) apresentam dependência funcional externa muito elevada nas métricas disponíveis;
-- transporte e serviços de apoio empresarial mostram que baixa presença cadastral externa pode coexistir com maior peso funcional;
-- percentuais elevados precisam ser lidos com peso absoluto: serviços pessoais têm 57,57% da remuneração estimada como externa, mas apenas 27 vínculos e 0,60% do total externo de dezembro;
-- o IPM apresenta ciclos de perda e recuperação, e não tendência linear;
-- no alinhamento exploratório VAF `t` → IPM `t+2`, 15/23 transições têm o mesmo sinal e 8/23 divergem; em todas as divergências, o VAF municipal nominal cresceu enquanto o IPM caiu;
-- a estrutura domiciliar acrescenta uma dimensão mercadológica transversal: **21,31% dos domicílios são unipessoais**, o que justifica testar hipóteses de conveniência e consumo em menor escala, sem presumir comportamento de compra.
+- o varejo é o principal nó externo em peso absoluto: 6,63% de presença cadastral externa, 37,46% do emprego e 38,16% da remuneração de dezembro estimados como externos;
+- finanças e energia/utilidades apresentam dependência funcional externa muito elevada nas métricas disponíveis;
+- o IPM apresenta ciclos de perda e recuperação, não tendência linear;
+- no alinhamento VAF `t` → IPM `t+2`, 15/23 transições têm o mesmo sinal e 8/23 divergem; em todas as divergências, o VAF nominal municipal cresceu enquanto o IPM caiu;
+- **21,31% dos domicílios são unipessoais**, justificando testar hipóteses de conveniência e consumo em menor escala;
+- a renda domiciliar per capita possui **média de R$ 1.568,58 e mediana de R$ 1.100,00**, tornando a mediana uma referência central importante para a leitura de mercado.
 
 ## Próxima agenda
 
-A matriz setorial v001 e a primeira base demográfica/domiciliar estão concluídas. Próximos passos prioritários:
+A matriz setorial v001, a base demográfica/domiciliar e a média/mediana do rendimento domiciliar per capita estão concluídas. Próximos passos prioritários:
 
-1. recuperar e preservar o rendimento domiciliar mensal per capita médio e mediano de São Borja na tabela SIDRA 10295;
+1. recuperar a **distribuição municipal da renda por faixas/quantis** e o **número de moradores do mesmo universo** da tabela 10295;
 2. incorporar aposentadorias, pensões e benefícios previdenciários pagos a residentes por fonte oficial;
-3. incorporar transferências de renda efetivamente recebidas pelas famílias, distinguindo-as de repasses administrativos aos fundos públicos;
-4. só então estruturar uma leitura de capacidade de compra e segmentação econômica do mercado consumidor;
+3. incorporar transferências monetárias efetivamente recebidas pelas famílias, distinguindo-as de repasses administrativos;
+4. somente então estruturar massa de renda, capacidade de compra e segmentação econômica do mercado consumidor;
 5. conectar essa capacidade de demanda à matriz de controle territorial e aos quatro cadernos setoriais;
 6. na fiscalidade, seguir para denominador/índice estadual do VAF, decomposição do IPM e quota-parte monetária efetivamente transferida, sem repetir a coleta municipal já encerrada.
 

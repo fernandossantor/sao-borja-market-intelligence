@@ -39,7 +39,7 @@ jobs:
           RESOURCE_ID = "63467992-f291-4549-8a07-b1d5ee27a1a2"
           API = f"https://dadosabertos.inss.gov.br/api/3/action/resource_show?id={RESOURCE_ID}"
           session = requests.Session()
-          session.headers.update({"User-Agent": "SBMI INSS residence extraction/4.0"})
+          session.headers.update({"User-Agent": "SBMI INSS residence extraction/5.0"})
 
           meta_response = session.get(API, timeout=45)
           meta_response.raise_for_status()
@@ -116,6 +116,9 @@ jobs:
                   "compressed_size": member.compress_size,
                   "uncompressed_size": member.file_size,
                   "crc": member.CRC,
+                  "header_delimiter": ",",
+                  "data_delimiter": ";",
+                  "layout_note": "A fonte usa cabeçalho separado por vírgulas e registros de dados separados por ponto e vírgula; o campo credito usa vírgula decimal.",
               }
               Path("artifacts/inss_202607_zip_layout.json").write_text(json.dumps(layout, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -125,13 +128,15 @@ jobs:
               borja_residence_literals = Counter()
               borja_payment_literals = Counter()
               type_summary = defaultdict(lambda: {"records": 0, "valid_credit": 0, "credit": Decimal("0")})
+              species_summary = defaultdict(lambda: {"records": 0, "valid_credit": 0, "credit": Decimal("0")})
               total_credit = Decimal("0")
               valid_credit_records = 0
 
               with archive.open(member) as binary:
                   text = io.TextIOWrapper(binary, encoding="utf-8-sig", errors="strict", newline="")
-                  reader = csv.reader(text, delimiter=",")
-                  headers = next(reader)
+                  header_line = text.readline().rstrip("\r\n")
+                  headers = next(csv.reader([header_line], delimiter=","))
+                  reader = csv.reader(text, delimiter=";")
                   normalized_headers = [norm(h) for h in headers]
 
                   def exact_col(label):
@@ -146,6 +151,7 @@ jobs:
                   client_idx = exact_col("clientela")
                   uf_idx = exact_col("uf")
                   species_indices = [i for i, h in enumerate(normalized_headers) if h == "ESPECIE"]
+                  species_desc_idx = species_indices[-1] if species_indices else None
                   if residence_idx is None or value_idx is None:
                       raise SystemExit(f"Required source columns unavailable: {headers}")
 
@@ -160,8 +166,7 @@ jobs:
                           bad_width += 1
                           continue
                       residence_literal = row[residence_idx]
-                      residence_upper = residence_literal.upper()
-                      if "BORJA" not in residence_upper:
+                      if "BORJA" not in residence_literal.upper():
                           continue
                       residence_normalized = norm(residence_literal)
                       borja_residence_literals[residence_literal] += 1
@@ -172,17 +177,22 @@ jobs:
                       value = parse_decimal(row[value_idx])
                       matched_rows.append(row)
                       type_key = row[type_idx] if type_idx is not None else "[não identificado]"
+                      species_key = row[species_desc_idx] if species_desc_idx is not None else "[não identificado]"
                       type_summary[type_key]["records"] += 1
+                      species_summary[species_key]["records"] += 1
                       if value is not None:
                           valid_credit_records += 1
                           total_credit += value
                           type_summary[type_key]["valid_credit"] += 1
                           type_summary[type_key]["credit"] += value
+                          species_summary[species_key]["valid_credit"] += 1
+                          species_summary[species_key]["credit"] += value
 
               diagnostic = {
                   "source_header_columns": headers,
                   "source_encoding": "utf-8-sig",
-                  "delimiter": ",",
+                  "header_delimiter": ",",
+                  "data_delimiter": ";",
                   "national_data_rows_read": total_rows,
                   "bad_width_rows": bad_width,
                   "matched_residence_records": len(matched_rows),
@@ -193,14 +203,14 @@ jobs:
                   "source_value_semantics": "O portal descreve o conjunto como contendo valor líquido; o CSV de 2026-07 usa o cabeçalho literal credito.",
                   "duplicate_especie_headers": len(species_indices),
               }
-              Path("artifacts/inss_emitidos_sao_borja_202607_diagnostic_v004.json").write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2), encoding="utf-8")
+              Path("artifacts/inss_emitidos_sao_borja_202607_diagnostic_v005.json").write_text(json.dumps(diagnostic, ensure_ascii=False, indent=2), encoding="utf-8")
               print(json.dumps(diagnostic, ensure_ascii=False, indent=2))
 
               if not matched_rows:
-                  Path("artifacts/inss_emitidos_sao_borja_202607_status_v004.json").write_text(json.dumps({"status":"no_residence_match","reference_period":"2026-07"}, indent=2), encoding="utf-8")
+                  Path("artifacts/inss_emitidos_sao_borja_202607_status_v005.json").write_text(json.dumps({"status":"no_residence_match","reference_period":"2026-07"}, indent=2), encoding="utf-8")
                   raise SystemExit(0)
 
-              filtered = Path("artifacts/inss_emitidos_sao_borja_residencia_202607_v004.csv")
+              filtered = Path("artifacts/inss_emitidos_sao_borja_residencia_202607_v005.csv")
               output_headers = []
               seen = Counter()
               for idx in keep_indices:
@@ -212,11 +222,15 @@ jobs:
                   for row in matched_rows:
                       writer.writerow([row[i] for i in keep_indices] + ["2026-07", "observado_em_fonte_oficial"])
 
-              with Path("artifacts/inss_emitidos_sao_borja_202607_por_tipo_v004.csv").open("w", encoding="utf-8", newline="") as out:
-                  writer = csv.writer(out)
-                  writer.writerow(["tipo_beneficio_fonte", "registros_emitidos", "registros_credito_valido", "soma_credito_rs", "periodo", "natureza"])
-                  for key, stats in sorted(type_summary.items(), key=lambda item: (-item[1]["credit"], item[0])):
-                      writer.writerow([key, stats["records"], stats["valid_credit"], f"{stats['credit']:.2f}", "2026-07", "calculado_a_partir_de_registros_oficiais"])
+              def write_summary(path, key_name, mapping):
+                  with Path(path).open("w", encoding="utf-8", newline="") as out:
+                      writer = csv.writer(out)
+                      writer.writerow([key_name, "registros_emitidos", "registros_credito_valido", "soma_credito_rs", "periodo", "natureza"])
+                      for key, stats in sorted(mapping.items(), key=lambda item: (-item[1]["credit"], item[0])):
+                          writer.writerow([key, stats["records"], stats["valid_credit"], f"{stats['credit']:.2f}", "2026-07", "calculado_a_partir_de_registros_oficiais"])
+
+              write_summary("artifacts/inss_emitidos_sao_borja_202607_por_tipo_v005.csv", "tipo_beneficio_fonte", type_summary)
+              write_summary("artifacts/inss_emitidos_sao_borja_202607_por_especie_v005.csv", "especie_descricao_fonte", species_summary)
 
               validation = {
                   "reference_period": "2026-07",
@@ -227,11 +241,12 @@ jobs:
                   "sum_credit_rs": f"{total_credit:.2f}",
                   "unique_residence_literals": sorted(borja_residence_literals),
                   "type_categories_literal": sorted(type_summary),
+                  "species_categories_count": len(species_summary),
                   "filtered_csv_sha256": hashlib.sha256(filtered.read_bytes()).hexdigest(),
                   "interpretation_limit": "A contagem é de registros de benefícios/créditos emitidos; não equivale a pessoas beneficiárias únicas sem identificador de beneficiário.",
                   "annualization_limit": "Não multiplicar automaticamente o valor mensal por 12; competências podem variar e incluir eventos próprios.",
               }
-              Path("artifacts/inss_emitidos_sao_borja_202607_validation_v004.json").write_text(json.dumps(validation, ensure_ascii=False, indent=2), encoding="utf-8")
+              Path("artifacts/inss_emitidos_sao_borja_202607_validation_v005.json").write_text(json.dumps(validation, ensure_ascii=False, indent=2), encoding="utf-8")
               print(json.dumps(validation, ensure_ascii=False, indent=2))
 
           target.unlink(missing_ok=True)
@@ -241,7 +256,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: inss-emitidos-sao-borja-residencia-202607-v004
+          name: inss-emitidos-sao-borja-residencia-202607-v005
           if-no-files-found: warn
           retention-days: 30
           path: artifacts/

@@ -18,14 +18,17 @@ Versões anteriores permanecem preservadas quando necessárias para auditoria hi
 
 - Caderno corrente: `caderno_base_territorial_v008_diagnostico_integrado_20260907` — Drive ID `1NJp_tmQ36NE8YDA2JhmyqjsnB1a7V9ivtAFJW7YLhcU`.
 - Versão histórica anterior: `caderno_base_territorial_v007_fiscalidade_ipm_20260907` — Drive ID `1x83_dMuDQ9ks0mdNnv6mdw_Sopt7-KjIFWrD1rlouz8`.
-- Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v004.md`.
-- Documento analítico anterior: `docs/caderno_base/diagnostico_analitico_integrado_v003.md`.
+- Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v005.md`.
+- Documento analítico anterior: `docs/caderno_base/diagnostico_analitico_integrado_v004.md`.
+- Mercado consumidor corrente: `docs/caderno_base/mercado_consumidor_base_v004.md`.
+- Mercado consumidor anterior: `docs/caderno_base/mercado_consumidor_base_v003.md`.
+- Nota INSS/SUIBE: `docs/caderno_base/inss_beneficios_residentes_202607_v001.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
 - Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
-- Mercado consumidor corrente: `docs/caderno_base/mercado_consumidor_base_v003.md`.
-- Mercado consumidor anterior: `docs/caderno_base/mercado_consumidor_base_v002.md`.
 
-A v008 preserva as abas anteriores e inclui `Diagnostico_integrado`, `VAF_reconciliacao`, `VAF_historico`, `VAF_IPM_exploratorio`, `Matriz_controle_setorial` e `Mercado_consumidor_base`.
+Documento analítico nativo corrente no Drive: `Caderno-Base — diagnóstico analítico integrado v003 — 20260908`, ID `1tIHJpW3w-HxaCQhSOAvWlHKFYxeEz_axc1owGyMhYmA`.
+
+A v008 preserva as abas anteriores e inclui `Diagnostico_integrado`, `VAF_reconciliacao`, `VAF_historico`, `VAF_IPM_exploratorio`, `Matriz_controle_setorial`, `Mercado_consumidor_base` e, a partir desta etapa, `INSS_beneficios_202607`.
 
 ## Estado das bases principais
 
@@ -81,64 +84,67 @@ A etapa de fonte para o intervalo em REAL está concluída.
 
 PIB não é renda domiciliar e composição domiciliar não demonstra comportamento de compra.
 
-### Rendimento domiciliar per capita — tabela SIDRA 10295
-
-Lacuna encerrada por consulta oficial direta:
+### Rendimento domiciliar per capita — SIDRA 10295/10296
 
 - média nominal mensal per capita: **R$ 1.568,58**;
 - mediana: **R$ 1.100,00**;
-- diferença: **R$ 468,58**;
-- média **42,60%** acima da mediana.
-
-Universo: moradores em domicílios particulares permanentes ocupados, exclusive pensionistas, empregados(as) domésticos(as) e parentes de empregados(as) domésticos(as).
-
-Rastreabilidade: workflow `consumer-income-sidra`, run `34269331974`, job `102206631993`; raw SHA-256 `29e84da86e8424d0727325647634b9565e1f181374bf3cedf3c3c64936adea33`.
-
-Drive:
-- pacote ID `1BXmiVuMD6LdvIOeCWQGY0SwVD1qj64jz`;
-- documento metodológico ID `1WrVv6dDXeB-nzz8jxl5GLwR2LrPZPrBchKtaQu0KfqY`.
-
-### Distribuição do rendimento — tabela SIDRA 10296
-
-A lacuna de distribuição e denominador compatível também está **ENCERRADA**.
-
-- universo: **59.038 moradores**;
-- até 1/4 SM: 2.441 / 4,13463%;
-- >1/4 a 1/2 SM: 10.917 / 18,49148%;
-- >1/2 a 1 SM: 20.174 / **34,17121%**;
-- >1 a 2 SM: 15.630 / 26,47447%;
-- >2 a 3 SM: 4.659 / 7,89153%;
-- >3 a 5 SM: 2.086 / 3,53332%;
-- >5 a 10 SM: 1.237 / 2,09526%;
-- >10 a 15 SM: 286 / 0,48443%;
-- >15 a 20 SM: 33 / 0,05590%;
-- >20 SM: 87 / 0,14736%;
-- sem rendimento: 1.488 / 2,52041%.
-
-Agregações calculadas do SBMI:
-
+- universo compatível da distribuição: **59.038 moradores**;
 - sem rendimento ou até 1 SM: **35.020 / 59,31773%**;
 - sem rendimento ou até 2 SM: **50.650 / 85,79220%**;
 - acima de 2 SM: **8.388 / 14,20780%**;
 - acima de 5 SM: **1.643 / 2,78295%**.
 
-Essas agregações não são categorias oficiais nem classes sociais.
-
-Rastreabilidade: workflow `consumer-income-distribution-sidra`, run `34280745734`, job `102244621346`, HTTP 200, raw SHA-256 `c605f8898dbe8ba0af0e22b844078da072e75c9d3a2349da5bee3e6901f2dc09`, artifact ID `10077490347`.
-
-Drive:
-- pacote `sidra_10296_sao_borja_income_distribution_2022_v002_official_package.zip`, ID `1eUgoL_9n5oXNtVBWTC-pYRFpCJul2cQA`;
-- documento `Distribuição do rendimento domiciliar per capita — SIDRA 10296 — auditoria e incorporação — 20260908`, ID `1NUbnNZ99hhlgoejWGTj1HR1CFcxJpwSnnbf9tHEostQ`.
+Essas agregações são calculadas pelo SBMI; não são categorias oficiais nem classes sociais.
 
 ### Massa mensal implícita de rendimento
-
-Como a média e o denominador pertencem ao mesmo universo estatístico:
 
 `R$ 1.568,58 × 59.038 = R$ 92.605.826,04/mês`
 
 Natureza: calculado. Referência: Censo 2022.
 
-Esse valor é **massa mensal implícita de rendimento no universo estatístico**, não renda disponível, consumo efetivo, faturamento comercial, potencial setorial ou montante necessariamente gasto em São Borja.
+Esse valor é massa mensal implícita de rendimento no universo estatístico, não renda disponível, consumo efetivo, faturamento comercial ou potencial setorial.
+
+### Benefícios emitidos pelo INSS/SUIBE — julho de 2026
+
+A primeira referência oficial municipal está **ENCERRADA** para a competência 2026-07.
+
+Fonte: INSS Portal de Dados Abertos / SUIBE — `Benefícios Emitidos Julho 2026`.
+
+Recorte canônico: `municipio_residencia = 19181-RS-SAO BORJA`.
+
+Resultados calculados a partir dos registros oficiais:
+
+- **14.247 registros emitidos**;
+- **14.247 registros com `credito` válido**;
+- crédito total: **R$ 24.535.168,54**;
+- crédito médio por registro: **R$ 1.722,13**.
+
+A contagem é de registros, não pessoas beneficiárias únicas.
+
+As duas espécies literalmente denominadas `AMPARO SOCIAL` somam:
+
+- **3.385 registros**;
+- **R$ 4.777.117,64**;
+- **23,75939%** dos registros;
+- **19,47049%** do crédito total.
+
+Esse subtotal não é relabelado como total da assistência social ou dos benefícios não contributivos.
+
+A aba `INSS_beneficios_202607` preserva **27 espécies literais**, número de registros, soma de `credito` e participações calculadas. O recorte municipal exclui registros anômalos da fonte que contêm `SAO BORJA` associado a outras UFs.
+
+Rastreabilidade:
+
+- workflow `inss-benefits-residence-extract`;
+- run `34282566426`;
+- artifact `10078228209`;
+- SHA-256 do artifact `2f75523301768374ee1e9a908480ca850d93d6fe661407991ade50f9c800ba87`;
+- SHA-256 do CSV municipal `eb9e2536026d460892ea64cf672bf3cc26da1231bbf552f3ddd51d4c6945996c`.
+
+Drive:
+
+- pasta `_sao_borja/raw/social/inss_suibe_beneficios_emitidos/`, ID `1gIN6tmhHg-r7lPBlpCnGHNggZCj568vO`;
+- pacote oficial municipal ID `11lAy2Dtlw20tzhOb8Y4ltkbpyZPDhbOs`;
+- nota metodológica ID `1bn5C6u1GII4eHrDwUnDRgTA27VR_YK4yL-QChWk_ncI`.
 
 ## Leitura analítica corrente
 
@@ -146,24 +152,25 @@ Esse valor é **massa mensal implícita de rendimento no universo estatístico**
 - o varejo é o principal nó externo em peso absoluto, enquanto finanças e energia têm dependência funcional externa muito elevada;
 - IPM e VAF não se movem mecanicamente na mesma direção;
 - 21,31% dos domicílios são unipessoais, justificando hipóteses específicas de conveniência e menor escala;
-- a renda domiciliar média de R$ 1.568,58 deve ser lida junto à mediana de R$ 1.100,00 e à distribuição: **85,79% dos moradores do universo estão sem rendimento ou em faixas de até 2 SM per capita**.
+- a renda domiciliar média de R$ 1.568,58 deve ser lida junto à mediana de R$ 1.100,00 e à distribuição: **85,79% dos moradores do universo estão sem rendimento ou em faixas de até 2 SM per capita**;
+- o INSS/SUIBE acrescenta um fluxo de **R$ 24,535 milhões** em benefícios emitidos a residentes na competência observada, demonstrando que a caracterização da renda local não pode se apoiar apenas na remuneração formal do trabalho.
 
-Esse último percentual mede participação de pessoas, não participação na massa monetária da renda, e não autoriza inferir classe social ou comportamento de compra.
+As três referências monetárias mensais — Censo 2022, RAIS 2025 e INSS 2026-07 — têm períodos, universos e conceitos diferentes e **não devem ser somadas diretamente**.
 
 ## Rendas não laborais — estado
 
-A planilha de Programa Bolsa Família já localizada no Drive é **IGD transferido ao FMAS**, recurso administrativo e não benefício recebido pelas famílias. Permanece excluída de renda domiciliar e demanda de consumo.
+A lacuna de uma primeira referência oficial municipal do INSS/SUIBE está encerrada para julho de 2026.
 
-A fonte oficial do INSS/SUIBE para benefícios emitidos foi identificada e a rotina municipal está em auditoria. O arquivo nacional de julho de 2026 possui cerca de 999 MB compactados e usa os campos `municipio_pagamento`, `municipio_residencia` e `credito`; o portal descreve semanticamente o conteúdo de `credito` como valor líquido. Nenhum valor municipal previdenciário foi canonizado ainda.
+A planilha de Programa Bolsa Família já localizada no Drive permanece classificada como **IGD transferido ao FMAS**, recurso administrativo e não benefício monetário recebido pelas famílias. Continua excluída de renda domiciliar e demanda de consumo.
+
+A lacuna prioritária remanescente é recuperar **transferências monetárias efetivamente recebidas pelas famílias** em fonte oficial.
 
 ## Próxima agenda
 
-Média, mediana, distribuição por faixas e denominador compatível da renda domiciliar do Censo 2022 estão concluídos. Próximos passos:
-
-1. concluir a extração/auditoria dos benefícios previdenciários por **município de residência**;
-2. incorporar transferências monetárias efetivamente recebidas pelas famílias;
-3. definir posteriormente uma metodologia explícita para capacidade de compra, renda disponível aproximada, retenção local e alocação setorial do gasto;
-4. conectar a distribuição de renda aos quatro cadernos setoriais e à matriz de controle territorial;
+1. recuperar transferências monetárias diretamente recebidas pelas famílias, distinguindo-as de repasses administrativos;
+2. avaliar série mensal INSS/SUIBE, repetindo a mesma regra territorial e auditoria de layout;
+3. somente após essas camadas definir metodologia explícita para capacidade de compra, renda disponível aproximada, retenção local e alocação setorial do gasto;
+4. conectar renda, benefícios e distribuição aos quatro cadernos setoriais e à matriz de controle territorial;
 5. manter fiscalidade, VAF e IPM em trilha conceitual própria.
 
 A configuração de escrita controlada permanece em `docs/drive_write_connection.md`. Nenhum resultado novo deve permanecer apenas em código, terminal ou conversa sem registro nos artefatos e na narrativa do projeto.

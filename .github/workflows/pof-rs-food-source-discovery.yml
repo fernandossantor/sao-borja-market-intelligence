@@ -1,0 +1,103 @@
+name: pof-rs-food-source-discovery
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/pof-rs-food-source-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download official POF state tables package and identify RS food table members
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade requests
+          mkdir -p artifacts/source
+          python - <<'PY'
+          import hashlib
+          import json
+          import re
+          import zipfile
+          from pathlib import Path
+
+          import requests
+
+          SOURCE_INDEX = "https://ftp.ibge.gov.br/Orcamentos_Familiares/Pesquisa_de_Orcamentos_Familiares_2017_2018/Primeiros_resultados/tabelas_unidades_da_federacao/"
+          DOWNLOAD_URL = SOURCE_INDEX + "tabelas_unidades_da_federacao_xls_20191108.zip"
+          TARGET = Path("artifacts/source/tabelas_unidades_da_federacao_xls_20191108.zip")
+
+          session = requests.Session()
+          session.headers.update({"User-Agent": "SBMI POF RS source discovery/1.0", "Referer": SOURCE_INDEX})
+          sha = hashlib.sha256()
+          total = 0
+          with session.get(DOWNLOAD_URL, stream=True, timeout=(30, 300), allow_redirects=True) as r:
+              headers = {
+                  "status": r.status_code,
+                  "final_url": r.url,
+                  "content_type": r.headers.get("content-type"),
+                  "content_length": r.headers.get("content-length"),
+                  "last_modified": r.headers.get("last-modified"),
+                  "etag": r.headers.get("etag"),
+              }
+              r.raise_for_status()
+              with TARGET.open("wb") as f:
+                  for chunk in r.iter_content(chunk_size=1024 * 1024):
+                      if chunk:
+                          f.write(chunk)
+                          sha.update(chunk)
+                          total += len(chunk)
+
+          if not zipfile.is_zipfile(TARGET):
+              raise SystemExit("Official POF response is not a ZIP")
+
+          members = []
+          candidates = []
+          with zipfile.ZipFile(TARGET) as z:
+              for info in z.infolist():
+                  entry = {
+                      "name": info.filename,
+                      "size": info.file_size,
+                      "compressed_size": info.compress_size,
+                      "crc": info.CRC,
+                  }
+                  members.append(entry)
+                  norm = re.sub(r"[^a-z0-9]+", " ", info.filename.lower())
+                  # Table 1.3.23.3 = Rio Grande do Sul, alimentação por classes de rendimento.
+                  if any(token in norm for token in ("1 3 23 3", "13233", "1 3 23")):
+                      candidates.append(entry)
+                  elif "23" in norm and any(token in norm for token in ("aliment", "despesa", "tabela")):
+                      candidates.append(entry)
+
+          report = {
+              "source": "IBGE — Pesquisa de Orçamentos Familiares 2017-2018 — Primeiros resultados — tabelas por Unidade da Federação",
+              "source_index": SOURCE_INDEX,
+              "download_url": DOWNLOAD_URL,
+              "headers": headers,
+              "downloaded_bytes": total,
+              "sha256": sha.hexdigest(),
+              "members_count": len(members),
+              "target_table": "1.3.23.3 - Despesa monetária e não monetária média mensal familiar, com alimentação, por classes de rendimento total e variação patrimonial mensal familiar - Rio Grande do Sul - 2017-2018",
+              "candidate_members": candidates,
+              "note": "This workflow discovers and preserves the official source package. It does not yet reinterpret or model the table values.",
+          }
+          Path("artifacts/pof_rs_source_manifest_v001.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+          Path("artifacts/pof_state_tables_members_v001.json").write_text(json.dumps(members, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload official source package and discovery manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: pof-rs-food-source-discovery-v001
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30

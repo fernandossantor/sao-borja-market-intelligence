@@ -1,0 +1,143 @@
+name: novo-bolsa-familia-source-audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/novo-bolsa-familia-source-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Audit official Portal da Transparencia download source
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade requests beautifulsoup4
+          mkdir -p artifacts
+          python - <<'PY'
+          import hashlib
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urljoin, urlparse
+
+          import requests
+          from bs4 import BeautifulSoup
+
+          PAGE = "https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia"
+          DICT = "https://portaldatransparencia.gov.br/pagina-interna/605543-dicionario-de-dados-novo-bolsa-familia"
+          session = requests.Session()
+          session.headers.update({"User-Agent": "SBMI Novo Bolsa Familia source audit/1.0"})
+
+          report = {
+              "objective": "discover official open-data download mechanism for Novo Bolsa Familia without using beneficiary-level API credentials",
+              "page": PAGE,
+              "dictionary": DICT,
+              "requests": {},
+              "scripts": [],
+              "candidate_fragments": [],
+              "limitations": [
+                  "This run does not canonize municipal values.",
+                  "No beneficiary-level data are downloaded or persisted.",
+              ],
+          }
+
+          def fetch(url, name, timeout=45):
+              r = session.get(url, timeout=timeout)
+              report["requests"][name] = {
+                  "url": url,
+                  "status": r.status_code,
+                  "final_url": r.url,
+                  "content_type": r.headers.get("content-type"),
+                  "content_length_header": r.headers.get("content-length"),
+                  "bytes": len(r.content),
+                  "sha256": hashlib.sha256(r.content).hexdigest(),
+              }
+              r.raise_for_status()
+              return r
+
+          page = fetch(PAGE, "download_page")
+          Path("artifacts/novo_bolsa_familia_download_page_raw.html").write_bytes(page.content)
+          dictionary = fetch(DICT, "dictionary_page")
+          Path("artifacts/novo_bolsa_familia_dictionary_raw.html").write_bytes(dictionary.content)
+
+          soup = BeautifulSoup(page.text, "html.parser")
+          script_urls = []
+          for tag in soup.find_all("script", src=True):
+              url = urljoin(PAGE, tag["src"])
+              if url not in script_urls:
+                  script_urls.append(url)
+
+          terms = re.compile(r"novo[-_ ]?bolsa|download[-_/ ]?de[-_/ ]?dados|download|arquivo|exercicio|ano|mes|origem", re.I)
+          url_pat = re.compile(r"(?:https?://[^\"'\s)]+|/[A-Za-z0-9_./?=&%{}$:-]{6,})")
+
+          for idx, url in enumerate(script_urls):
+              entry = {"url": url}
+              try:
+                  r = session.get(url, timeout=45)
+                  entry.update({
+                      "status": r.status_code,
+                      "content_type": r.headers.get("content-type"),
+                      "bytes": len(r.content),
+                      "sha256": hashlib.sha256(r.content).hexdigest(),
+                  })
+                  if r.ok and len(r.content) <= 8_000_000:
+                      text = r.text
+                      hits = []
+                      for m in terms.finditer(text):
+                          a = max(0, m.start() - 280)
+                          b = min(len(text), m.end() + 520)
+                          frag = text[a:b]
+                          if "novo" in frag.lower() or "download" in frag.lower():
+                              hits.append(frag)
+                          if len(hits) >= 20:
+                              break
+                      entry["hit_count_saved"] = len(hits)
+                      for h in hits:
+                          report["candidate_fragments"].append({"script": url, "fragment": h})
+                      urls = sorted(set(url_pat.findall(text)))
+                      entry["candidate_urls"] = [u for u in urls if terms.search(u)][:100]
+                      if hits:
+                          Path(f"artifacts/script_{idx:02d}_relevant_fragments.txt").write_text("\n\n---\n\n".join(hits), encoding="utf-8")
+                  else:
+                      entry["note"] = "script not inspected deeply because response was unsuccessful or over size cap"
+              except Exception as exc:
+                  entry["error"] = f"{type(exc).__name__}: {exc}"
+              report["scripts"].append(entry)
+
+          # Record official aggregate API behavior without a token only as a source-access audit.
+          aggregate_url = "https://api.portaldatransparencia.gov.br/api-de-dados/novo-bolsa-familia-por-municipio?mesAno=202607&codigoIbge=4318002&pagina=1"
+          try:
+              r = session.get(aggregate_url, timeout=30)
+              report["aggregate_api_no_token_probe"] = {
+                  "url": aggregate_url,
+                  "status": r.status_code,
+                  "content_type": r.headers.get("content-type"),
+                  "bytes": len(r.content),
+                  "body_prefix": r.text[:500],
+              }
+          except Exception as exc:
+              report["aggregate_api_no_token_probe"] = {"url": aggregate_url, "error": f"{type(exc).__name__}: {exc}"}
+
+          Path("artifacts/novo_bolsa_familia_source_audit_v001.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload source audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: novo-bolsa-familia-source-audit-v001
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30

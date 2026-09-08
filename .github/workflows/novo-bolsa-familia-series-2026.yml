@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build privacy-minimized Sao Borja monthly series for 2026-01 to 2026-07
+      - name: Build privacy-minimized Sao Borja monthly series for 2026-01 to 2026-07 with reference split
         run: |
           set -euo pipefail
           python -m pip install --upgrade requests
@@ -31,7 +31,7 @@ jobs:
           import re
           import unicodedata
           import zipfile
-          from collections import Counter
+          from collections import Counter, defaultdict
           from decimal import Decimal, InvalidOperation
           from pathlib import Path
 
@@ -45,7 +45,7 @@ jobs:
 
           session = requests.Session()
           session.headers.update({
-              "User-Agent": "SBMI Novo Bolsa Familia monthly series/1.0",
+              "User-Agent": "SBMI Novo Bolsa Familia monthly series/2.0",
               "Referer": SOURCE_PAGE,
           })
 
@@ -75,6 +75,7 @@ jobs:
           series = []
           source_manifest = []
           schemas = {}
+          reference_detail = {}
 
           for month in MONTHS:
               download_url = f"{SOURCE_PAGE}/{month}"
@@ -117,7 +118,7 @@ jobs:
               blank_cpf = 0
               siafi_codes = Counter()
               competencia = Counter()
-              referencia = Counter()
+              referencia = defaultdict(lambda: {"records": 0, "value": Decimal("0")})
               schema_records = []
 
               with zipfile.ZipFile(target) as z:
@@ -154,7 +155,13 @@ jobs:
                           value_idx = idx("VALOR PARCELA")
                           nis_idx = idx("NIS FAVORECIDO")
                           cpf_idx = idx("CPF FAVORECIDO")
-                          required = {"UF": uf_idx, "NOME MUNICIPIO": mun_idx, "VALOR PARCELA": value_idx}
+                          required = {
+                              "UF": uf_idx,
+                              "NOME MUNICIPIO": mun_idx,
+                              "MES COMPETENCIA": comp_idx,
+                              "MES REFERENCIA": ref_idx,
+                              "VALOR PARCELA": value_idx,
+                          }
                           missing = [k for k, v in required.items() if v is None]
                           if missing:
                               raise SystemExit(f"{month}: required columns missing in {info.filename}: {missing}")
@@ -179,14 +186,15 @@ jobs:
                               municipal_records += 1
                               if siafi_idx is not None:
                                   siafi_codes[row[siafi_idx].strip()] += 1
+                              comp = row[comp_idx].strip()
+                              ref = row[ref_idx].strip()
+                              competencia[comp] += 1
                               value = parse_decimal(row[value_idx])
                               if value is not None:
                                   valid_value_records += 1
                                   total_value += value
-                              if comp_idx is not None:
-                                  competencia[row[comp_idx].strip()] += 1
-                              if ref_idx is not None:
-                                  referencia[row[ref_idx].strip()] += 1
+                                  referencia[ref]["value"] += value
+                              referencia[ref]["records"] += 1
                               if nis_idx is not None:
                                   nis = row[nis_idx].strip()
                                   if nis:
@@ -206,28 +214,59 @@ jobs:
                   raise SystemExit(f"{month}: invalid VALOR PARCELA coverage {valid_value_records}/{municipal_records}")
               if siafi_codes and set(siafi_codes) != {EXPECTED_SIAFI}:
                   raise SystemExit(f"{month}: unexpected SIAFI codes {dict(siafi_codes)}")
+              if set(competencia) != {month}:
+                  raise SystemExit(f"{month}: unexpected MES COMPETENCIA values {dict(competencia)}")
+
+              current = referencia.get(month, {"records": 0, "value": Decimal("0")})
+              prior_records = sum(v["records"] for k, v in referencia.items() if k < month)
+              prior_value = sum((v["value"] for k, v in referencia.items() if k < month), Decimal("0"))
+              future_records = sum(v["records"] for k, v in referencia.items() if k > month)
+              future_value = sum((v["value"] for k, v in referencia.items() if k > month), Decimal("0"))
+              if current["records"] + prior_records + future_records != municipal_records:
+                  raise SystemExit(f"{month}: reference decomposition does not reconcile records")
+              if current["value"] + prior_value + future_value != total_value:
+                  raise SystemExit(f"{month}: reference decomposition does not reconcile value")
 
               avg = total_value / municipal_records
+              current_avg = current["value"] / current["records"] if current["records"] else None
+              current_share = current["value"] / total_value * Decimal("100") if total_value else Decimal("0")
+              prior_share = prior_value / total_value * Decimal("100") if total_value else Decimal("0")
+              future_share = future_value / total_value * Decimal("100") if total_value else Decimal("0")
+
               row = {
-                  "periodo": f"{month[:4]}-{month[4:]}",
+                  "periodo_competencia": f"{month[:4]}-{month[4:]}",
                   "download_label": month,
-                  "registros": municipal_records,
-                  "registros_valor_valido": valid_value_records,
-                  "soma_valor_parcela_rs": f"{total_value:.2f}",
-                  "media_por_registro_rs": f"{avg:.2f}",
+                  "registros_total": municipal_records,
+                  "soma_valor_parcela_total_rs": f"{total_value:.2f}",
+                  "media_total_por_registro_rs": f"{avg:.2f}",
+                  "registros_referencia_corrente": current["records"],
+                  "valor_referencia_corrente_rs": f"{current['value']:.2f}",
+                  "media_referencia_corrente_rs": f"{current_avg:.2f}" if current_avg is not None else "",
+                  "pct_valor_referencia_corrente": f"{current_share:.5f}",
+                  "registros_referencias_anteriores": prior_records,
+                  "valor_referencias_anteriores_rs": f"{prior_value:.2f}",
+                  "pct_valor_referencias_anteriores": f"{prior_share:.5f}",
+                  "registros_referencias_futuras": future_records,
+                  "valor_referencias_futuras_rs": f"{future_value:.2f}",
+                  "pct_valor_referencias_futuras": f"{future_share:.5f}",
+                  "referencias_distintas": len(referencia),
+                  "referencia_min": min(referencia) if referencia else "",
+                  "referencia_max": max(referencia) if referencia else "",
                   "nis_unicos_nao_vazios": len(unique_nis),
                   "cpf_unicos_nao_vazios": len(unique_cpf),
                   "nis_vazios": blank_nis,
                   "cpf_vazios": blank_cpf,
                   "siafi_observado": ";".join(sorted(siafi_codes)),
-                  "mes_competencia_literais": ";".join(sorted(competencia)),
-                  "mes_referencia_literais": ";".join(sorted(referencia)),
                   "linhas_nacionais_lidas": national_rows,
                   "linhas_largura_invalida": bad_width_rows,
                   "natureza": "calculado_a_partir_de_registros_oficiais",
               }
               series.append(row)
               schemas[month] = schema_records
+              reference_detail[month] = {
+                  k: {"records": v["records"], "sum_valor_parcela_rs": f"{v['value']:.2f}"}
+                  for k, v in sorted(referencia.items())
+              }
               source_manifest.append({
                   "month": month,
                   "download_url": download_url,
@@ -242,35 +281,40 @@ jobs:
                   "raw_national_file_persisted": False,
               })
 
-              Path(f"artifacts/monthly/{month}_validation.json").write_text(
-                  json.dumps(row, ensure_ascii=False, indent=2), encoding="utf-8"
+              Path(f"artifacts/monthly/{month}_validation_v002.json").write_text(
+                  json.dumps({"series_row": row, "by_mes_referencia": reference_detail[month]}, ensure_ascii=False, indent=2),
+                  encoding="utf-8",
               )
               target.unlink(missing_ok=True)
 
           fields = list(series[0].keys())
-          with Path("artifacts/novo_bolsa_familia_sao_borja_2026_01_07_series_v001.csv").open("w", encoding="utf-8", newline="") as f:
+          with Path("artifacts/novo_bolsa_familia_sao_borja_2026_01_07_series_v002.csv").open("w", encoding="utf-8", newline="") as f:
               w = csv.DictWriter(f, fieldnames=fields)
               w.writeheader()
               w.writerows(series)
 
-          Path("artifacts/novo_bolsa_familia_sao_borja_2026_01_07_series_v001.json").write_text(
+          Path("artifacts/novo_bolsa_familia_sao_borja_2026_01_07_series_v002.json").write_text(
               json.dumps(series, ensure_ascii=False, indent=2), encoding="utf-8"
           )
-          Path("artifacts/novo_bolsa_familia_2026_01_07_source_manifest_v001.json").write_text(
+          Path("artifacts/novo_bolsa_familia_2026_01_07_reference_detail_v002.json").write_text(
+              json.dumps(reference_detail, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          Path("artifacts/novo_bolsa_familia_2026_01_07_source_manifest_v002.json").write_text(
               json.dumps(source_manifest, ensure_ascii=False, indent=2), encoding="utf-8"
           )
-          Path("artifacts/novo_bolsa_familia_2026_01_07_schemas_v001.json").write_text(
+          Path("artifacts/novo_bolsa_familia_2026_01_07_schemas_v002.json").write_text(
               json.dumps(schemas, ensure_ascii=False, indent=2), encoding="utf-8"
           )
 
           summary = {
               "geography": "São Borja/RS",
-              "periods": [r["periodo"] for r in series],
+              "periods": [r["periodo_competencia"] for r in series],
               "months_count": len(series),
+              "coverage_rule": "total competence flow is separated from same-month MES REFERENCIA and prior/future reference adjustments",
               "privacy_control": "No CPF, NIS or beneficiary names are persisted; only aggregate counts are retained.",
-              "interpretation_limit": "Monthly records/parcels are not automatically unique families; VALOR PARCELA is not observed consumption or local retention.",
+              "interpretation_limit": "Competence totals may include parcels referring to prior months; records/parcels are not automatically unique families; VALOR PARCELA is not observed consumption or local retention.",
           }
-          Path("artifacts/novo_bolsa_familia_sao_borja_2026_01_07_summary_v001.json").write_text(
+          Path("artifacts/novo_bolsa_familia_sao_borja_2026_01_07_summary_v002.json").write_text(
               json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
           )
           print(json.dumps(series, ensure_ascii=False, indent=2))
@@ -279,7 +323,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: novo-bolsa-familia-sao-borja-2026-01-07-series-v001
+          name: novo-bolsa-familia-sao-borja-2026-01-07-series-v002
           path: artifacts/
           if-no-files-found: error
           retention-days: 30

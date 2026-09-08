@@ -30,18 +30,22 @@ jobs:
           import requests
 
           base = "https://apisidra.ibge.gov.br/values/t/10296/n6/4318002"
+          variables = "13604,1013604"
+          explicit_classes = "9680,9681,9682,9683,9684,9685,9686,9687,9688,9689,9690,9692"
           candidates = [
-              base + "/v/all/p/2022/c2/0/c86/0/c386/all/h/y/f/a/d/m",
-              base + "/v/allxp/p/2022/c2/0/c86/0/c386/all/h/y/f/a/d/m",
+              base + f"/v/{variables}/p/2022/c2/0/c86/0/c386/all/h/y/f/a/d/m",
+              base + f"/v/{variables}/p/2022/c2/0/c86/0/c386/{explicit_classes}/h/y/f/a/d/m",
+              base + f"/v/{variables}/p/2022/c386/{explicit_classes}/h/y/f/a/d/m",
           ]
           s = requests.Session()
-          s.headers.update({"User-Agent": "SBMI SIDRA 10296 distribution extraction/1.0"})
+          s.headers.update({"User-Agent": "SBMI SIDRA 10296 distribution extraction/2.0"})
           manifest = {
               "source": "IBGE/SIDRA tabela 10296",
               "geography": "São Borja/RS",
               "municipality_ibge": "4318002",
               "period": "2022",
-              "classification_filters": {"sexo": "Total", "cor_ou_raca": "Total", "classe_rendimento": "Todas"},
+              "variables_requested": ["13604", "1013604"],
+              "classification_filters": {"sexo": "Total", "cor_ou_raca": "Total", "classe_rendimento": "Todas as 12 categorias associadas à tabela"},
               "nature": "observed_official_sidra_income_distribution_extraction",
               "attempts": [],
           }
@@ -57,17 +61,18 @@ jobs:
                   attempt["bytes"] = len(r.content)
                   attempt["sha256"] = hashlib.sha256(r.content).hexdigest()
                   Path(f"artifacts/raw_official/sidra_10296_attempt_{i}.json").write_bytes(r.content)
-                  r.raise_for_status()
                   data = r.json()
+                  attempt["json_type"] = type(data).__name__
                   attempt["json_rows"] = len(data) if isinstance(data, list) else None
-                  if isinstance(data, list) and len(data) > 2:
+                  if r.status_code == 200 and isinstance(data, list) and len(data) > 2:
                       selected_url = url
                       payload = data
                       raw = r.content
                       attempt["status"] = "selected"
                       manifest["attempts"].append(attempt)
                       break
-                  attempt["status"] = "insufficient_payload"
+                  attempt["status"] = "not_selected"
+                  attempt["response_preview"] = str(data)[:500]
               except Exception as exc:
                   attempt["status"] = "error"
                   attempt["error_type"] = type(exc).__name__
@@ -75,12 +80,14 @@ jobs:
               manifest["attempts"].append(attempt)
 
           if payload is None:
-              Path("artifacts/sidra_10296_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+              Path("artifacts/sidra_10296_manifest.json").write_text(
+                  json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+              )
+              print(json.dumps(manifest, ensure_ascii=False, indent=2))
               raise SystemExit("Could not recover SIDRA 10296 distribution")
 
           header = payload[0]
           rows = payload[1:]
-          dim_names = {k: v for k, v in header.items() if k.endswith("N") or k.endswith("C")}
           clean = []
           for row in rows:
               clean.append({
@@ -104,7 +111,7 @@ jobs:
                   "raw_sha256": hashlib.sha256(raw).hexdigest(),
               })
 
-          out = Path("artifacts/sidra_10296_sao_borja_income_distribution_2022.csv")
+          out = Path("artifacts/sidra_10296_sao_borja_income_distribution_2022_v002.csv")
           with out.open("w", encoding="utf-8", newline="") as f:
               writer = csv.DictWriter(f, fieldnames=list(clean[0]))
               writer.writeheader()
@@ -115,15 +122,18 @@ jobs:
           manifest["header"] = header
           manifest["rows_count"] = len(clean)
           manifest["variables"] = sorted({(r["variavel_codigo"], r["variavel"], r["unidade"]) for r in clean})
-          manifest["classes"] = [(r["classe_rendimento_codigo"], r["classe_rendimento"]) for r in clean if r["classe_rendimento"]]
+          manifest["classes"] = sorted({(r["classe_rendimento_codigo"], r["classe_rendimento"]) for r in clean if r["classe_rendimento"]})
           manifest["status"] = "success"
-          Path("artifacts/sidra_10296_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, default=list), encoding="utf-8")
+          Path("artifacts/sidra_10296_manifest.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2, default=list), encoding="utf-8"
+          )
           print(json.dumps(manifest, ensure_ascii=False, indent=2, default=list))
           print(out.read_text(encoding="utf-8"))
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: sidra-10296-sao-borja-income-distribution-2022
-          if-no-files-found: error
+          name: sidra-10296-sao-borja-income-distribution-2022-v002
+          if-no-files-found: warn
           retention-days: 30
           path: artifacts/

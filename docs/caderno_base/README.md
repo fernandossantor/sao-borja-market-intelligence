@@ -21,14 +21,17 @@ Versões anteriores não devem ser sobrescritas quando forem necessárias para a
 - Documento analítico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v002.md`.
 - Nota fiscal/VAF: `docs/caderno_base/vaf_series_canonicalization_1994_2025.md`.
 - Matriz setorial: `docs/caderno_base/matriz_controle_setorial_v001.md`.
+- Mercado consumidor — base territorial: `docs/caderno_base/mercado_consumidor_base_v001.md`.
+- Checkpoint de retomada: `docs/caderno_base/checkpoint_20260907.md`.
 
-A v008 preserva todas as abas anteriores e acrescenta:
+A v008 preserva todas as abas anteriores e acrescenta, nesta etapa analítica:
 
 - `Diagnostico_integrado`;
 - `VAF_reconciliacao`;
 - `VAF_historico`;
 - `VAF_IPM_exploratorio`;
-- `Matriz_controle_setorial`.
+- `Matriz_controle_setorial`;
+- `Mercado_consumidor_base`.
 
 ## Estado das bases principais
 
@@ -79,9 +82,38 @@ Derivados promovidos ao Drive:
 
 Pacotes brutos e HTMLs oficiais permanecem em `_sao_borja/raw/fiscal/vaf_sefaz_rs`.
 
+### Mercado consumidor — primeira base integrada
+
+A nova aba `Mercado_consumidor_base` conecta, sem fundir conceitos distintos, população, estrutura domiciliar, produção econômica, emprego formal e remuneração.
+
+Dados incorporados:
+
+- população residente — Censo 2022: **59.676 pessoas** — IBGE/SIDRA;
+- população estimada 2025: **61.311 pessoas** — IBGE, estimativa oficial;
+- diferença calculada entre estimativa 2025 e Censo 2022: **1.635 pessoas / 2,7398%**, explicitamente não tratada como taxa oficial de crescimento;
+- domicílios unipessoais — Censo 2022: **4.815 / 21,31%**;
+- domicílios nucleares: **13.820 / 61,17%**;
+- domicílios estendidos: **3.518 / 15,57%**;
+- domicílios compostos: **438 / 1,94%**;
+- soma calculada das quatro categorias reportadas: **22.591 domicílios**, sem relabelagem como total oficial;
+- PIB a preços correntes 2023: **R$ 2.550.388.000** — SIDRA tabela 5938, unidade original mil R$;
+- PIB per capita 2023: **R$ 42.737,25** — IBGE Cidades.
+
+Indicadores transversais calculados apenas para contexto:
+
+- **112,64 estabelecimentos empresariais por mil residentes estimados**;
+- **140,19 vínculos empresariais por mil residentes estimados**;
+- **1,2446 vínculo empresarial por estabelecimento empresarial**.
+
+Esses indicadores não são taxas oficiais de empreendedorismo, ocupação ou tamanho médio de empresa, pois combinam períodos/universos diferentes e vínculo não equivale a trabalhador único.
+
+A principal lacuna atual é renda domiciliar. Foi identificada a **tabela SIDRA 10295 — Censo 2022**, com rendimento nominal médio e mediano mensal domiciliar per capita em nível municipal. A definição exclui pensionistas, empregados domésticos e parentes de empregados domésticos. Os valores específicos de São Borja ainda não foram incorporados sem recuperação direta da consulta oficial.
+
+A planilha de Bolsa Família localizada no Drive foi classificada corretamente como **IGD transferido ao FMAS**, e não como benefício recebido pelas famílias; portanto, não integra renda domiciliar nem demanda de consumo.
+
 ## Mudança de estágio: da auditoria à análise
 
-A prioridade do projeto deixa de ser repetir auditorias já encerradas. Elas passam a funcionar como controles de integridade e somente devem ser reabertas quando houver nova competência, mudança metodológica, falha de integridade ou necessidade específica ainda não coberta.
+A prioridade do projeto deixou de ser repetir auditorias já encerradas. Elas funcionam como controles de integridade e somente devem ser reabertas quando houver nova competência, mudança metodológica, falha de integridade ou necessidade específica ainda não coberta.
 
 O foco corrente é **análise territorial integrada**.
 
@@ -95,18 +127,18 @@ Primeiros resultados:
 - transporte e serviços de apoio empresarial mostram que baixa presença cadastral externa pode coexistir com maior peso funcional;
 - percentuais elevados precisam ser lidos com peso absoluto: serviços pessoais têm 57,57% da remuneração estimada como externa, mas apenas 27 vínculos e 0,60% do total externo de dezembro;
 - o IPM apresenta ciclos de perda e recuperação, e não tendência linear;
-- no alinhamento exploratório VAF `t` → IPM `t+2`, 15/23 transições têm o mesmo sinal e 8/23 divergem; em todas as divergências, o VAF municipal nominal cresceu enquanto o IPM caiu. Isso reforça que o VAF nominal municipal, isoladamente, não explica a participação relativa do município no ICMS.
+- no alinhamento exploratório VAF `t` → IPM `t+2`, 15/23 transições têm o mesmo sinal e 8/23 divergem; em todas as divergências, o VAF municipal nominal cresceu enquanto o IPM caiu;
+- a estrutura domiciliar acrescenta uma dimensão mercadológica transversal: **21,31% dos domicílios são unipessoais**, o que justifica testar hipóteses de conveniência e consumo em menor escala, sem presumir comportamento de compra.
 
 ## Próxima agenda
 
-A primeira matriz setorial de controle territorial está **CONCLUÍDA** para dez divisões com sobreposição disponível entre cadastro e modelo laboral/remuneratório. A classificação textual é interpretativa e preliminar; os denominadores não são fundidos em um índice único.
+A matriz setorial v001 e a primeira base demográfica/domiciliar estão concluídas. Próximos passos prioritários:
 
-Próximos passos:
-
-1. ampliar a matriz quando houver sobreposição metodologicamente comparável para outras divisões;
-2. integrar estrutura empresarial com consumidores, renda, população e mercado de trabalho;
-3. usar a matriz para orientar os quatro cadernos setoriais, distinguindo capilaridade local, presença externa complementar, dependência funcional e setores estratégicos de rede;
-4. na fiscalidade, buscar denominador/índice estadual, decomposição dos critérios do IPM e quota-parte monetária efetivamente transferida, em vez de repetir a coleta do VAF municipal;
-5. transformar os resultados em narrativa explicativa e diagnóstica para o Caderno-Base e, posteriormente, para os quatro cadernos setoriais.
+1. recuperar e preservar o rendimento domiciliar mensal per capita médio e mediano de São Borja na tabela SIDRA 10295;
+2. incorporar aposentadorias, pensões e benefícios previdenciários pagos a residentes por fonte oficial;
+3. incorporar transferências de renda efetivamente recebidas pelas famílias, distinguindo-as de repasses administrativos aos fundos públicos;
+4. só então estruturar uma leitura de capacidade de compra e segmentação econômica do mercado consumidor;
+5. conectar essa capacidade de demanda à matriz de controle territorial e aos quatro cadernos setoriais;
+6. na fiscalidade, seguir para denominador/índice estadual do VAF, decomposição do IPM e quota-parte monetária efetivamente transferida, sem repetir a coleta municipal já encerrada.
 
 A configuração de escrita controlada permanece em `docs/drive_write_connection.md`. A regra central continua válida: nenhum resultado novo deve permanecer apenas em código, terminal ou conversa sem registro nos artefatos e na narrativa do projeto.

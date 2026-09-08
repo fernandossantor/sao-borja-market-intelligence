@@ -1,0 +1,304 @@
+name: novo-bolsa-familia-sao-borja-extract
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/novo-bolsa-familia-sao-borja-extract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract-sao-borja:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download official 2026-07 file and aggregate Sao Borja without persisting PII
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade requests
+          mkdir -p artifacts
+          python - <<'PY'
+          import csv
+          import hashlib
+          import io
+          import json
+          import re
+          import unicodedata
+          import zipfile
+          from collections import Counter, defaultdict
+          from decimal import Decimal, InvalidOperation
+          from pathlib import Path
+
+          import requests
+
+          SOURCE_PAGE = "https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia"
+          DOWNLOAD_URL = "https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia/202607"
+          TARGET_UF = "RS"
+          TARGET_MUNICIPALITY_NORM = "SAO BORJA"
+          REFERENCE_DOWNLOAD = "2026-07"
+
+          session = requests.Session()
+          session.headers.update({
+              "User-Agent": "SBMI Novo Bolsa Familia municipal aggregate/1.0",
+              "Referer": SOURCE_PAGE,
+          })
+
+          def norm(value):
+              value = unicodedata.normalize("NFKD", str(value))
+              value = "".join(c for c in value if not unicodedata.combining(c))
+              value = value.upper().strip()
+              value = re.sub(r"[^A-Z0-9]+", " ", value)
+              return re.sub(r"\s+", " ", value).strip()
+
+          def parse_decimal(raw):
+              s = str(raw).strip().replace("R$", "").replace(" ", "")
+              if not s:
+                  return None
+              if "," in s and "." in s:
+                  if s.rfind(",") > s.rfind("."):
+                      s = s.replace(".", "").replace(",", ".")
+                  else:
+                      s = s.replace(",", "")
+              elif "," in s:
+                  s = s.replace(".", "").replace(",", ".")
+              try:
+                  return Decimal(s)
+              except InvalidOperation:
+                  return None
+
+          target = Path("/tmp/novo_bolsa_familia_202607_download")
+          sha = hashlib.sha256()
+          total_bytes = 0
+          with session.get(DOWNLOAD_URL, stream=True, timeout=(30, 600), allow_redirects=True) as r:
+              status = r.status_code
+              headers = {
+                  "status": status,
+                  "final_url": r.url,
+                  "content_type": r.headers.get("content-type"),
+                  "content_length": r.headers.get("content-length"),
+                  "content_disposition": r.headers.get("content-disposition"),
+                  "etag": r.headers.get("etag"),
+                  "last_modified": r.headers.get("last-modified"),
+              }
+              r.raise_for_status()
+              with target.open("wb") as f:
+                  for chunk in r.iter_content(chunk_size=8 * 1024 * 1024):
+                      if chunk:
+                          f.write(chunk)
+                          sha.update(chunk)
+                          total_bytes += len(chunk)
+          if headers["content_length"] and str(headers["content_length"]).isdigit() and total_bytes != int(headers["content_length"]):
+              raise SystemExit(f"Download size mismatch: {total_bytes} != {headers['content_length']}")
+
+          manifest = {
+              "source": "Portal da Transparencia do Governo Federal / CGU — Novo Bolsa Familia",
+              "source_page": SOURCE_PAGE,
+              "download_url_generated_by_official_page": DOWNLOAD_URL,
+              "download_reference_selected": REFERENCE_DOWNLOAD,
+              "download_headers": headers,
+              "downloaded_bytes": total_bytes,
+              "download_sha256": sha.hexdigest(),
+              "raw_national_file_persisted_in_artifact": False,
+              "privacy_note": "Beneficiary-level CPF/NIS/name rows are processed transiently and are not persisted in the artifact or repository.",
+          }
+          Path("artifacts/novo_bolsa_familia_202607_download_manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(manifest, ensure_ascii=False, indent=2))
+
+          if not zipfile.is_zipfile(target):
+              prefix = target.read_bytes()[:1000]
+              Path("artifacts/non_zip_response_prefix.bin").write_bytes(prefix)
+              raise SystemExit("Official download response is not a ZIP archive")
+
+          archive_report = {"members": []}
+          municipal_records = 0
+          valid_value_records = 0
+          total_value = Decimal("0")
+          blank_nis = 0
+          blank_cpf = 0
+          unique_nis = set()
+          unique_cpf = set()
+          siafi_codes = Counter()
+          municipality_literals = Counter()
+          uf_literals = Counter()
+          competencia = defaultdict(lambda: {"records": 0, "valid": 0, "value": Decimal("0")})
+          referencia = defaultdict(lambda: {"records": 0, "valid": 0, "value": Decimal("0")})
+          availability_dates = Counter()
+          total_rows_read = 0
+          bad_width_rows = 0
+          schema_saved = False
+
+          with zipfile.ZipFile(target) as z:
+              infos = z.infolist()
+              if not infos:
+                  raise SystemExit("ZIP archive is empty")
+              for info in infos:
+                  archive_report["members"].append({
+                      "name": info.filename,
+                      "compressed_size": info.compress_size,
+                      "uncompressed_size": info.file_size,
+                      "crc": info.CRC,
+                  })
+                  if info.is_dir():
+                      continue
+                  with z.open(info) as raw:
+                      first = raw.readline()
+                      encoding = None
+                      header_text = None
+                      for enc in ("utf-8-sig", "utf-8", "latin-1"):
+                          try:
+                              header_text = first.decode(enc)
+                              encoding = enc
+                              break
+                          except UnicodeDecodeError:
+                              pass
+                      if encoding is None:
+                          raise SystemExit(f"Unable to decode header for {info.filename}")
+                      delimiter = ";" if header_text.count(";") >= header_text.count(",") else ","
+                      headers_src = next(csv.reader([header_text.strip("\r\n")], delimiter=delimiter))
+                      normalized_headers = [norm(h) for h in headers_src]
+
+                      def idx(label):
+                          target_label = norm(label)
+                          matches = [i for i, h in enumerate(normalized_headers) if h == target_label]
+                          return matches[0] if matches else None
+
+                      uf_idx = idx("UF")
+                      mun_idx = idx("NOME MUNICIPIO")
+                      siafi_idx = idx("CODIGO MUNICIPIO SIAFI")
+                      comp_idx = idx("MES COMPETENCIA")
+                      ref_idx = idx("MES REFERENCIA")
+                      value_idx = idx("VALOR PARCELA")
+                      nis_idx = idx("NIS FAVORECIDO")
+                      cpf_idx = idx("CPF FAVORECIDO")
+                      date_idx = idx("DATA DISPONIBILIZACAO")
+                      required = {"UF": uf_idx, "NOME MUNICIPIO": mun_idx, "VALOR PARCELA": value_idx}
+                      missing = [k for k, v in required.items() if v is None]
+                      if missing:
+                          raise SystemExit(f"Required columns missing in {info.filename}: {missing}; source={headers_src}")
+
+                      if not schema_saved:
+                          schema = {
+                              "member": info.filename,
+                              "encoding": encoding,
+                              "delimiter": delimiter,
+                              "source_header_columns": headers_src,
+                              "normalized_header_columns": normalized_headers,
+                              "selected_column_indices": {
+                                  "uf": uf_idx,
+                                  "municipality": mun_idx,
+                                  "siafi": siafi_idx,
+                                  "competence": comp_idx,
+                                  "reference": ref_idx,
+                                  "value": value_idx,
+                                  "nis": nis_idx,
+                                  "cpf": cpf_idx,
+                                  "availability_date": date_idx,
+                              },
+                          }
+                          Path("artifacts/novo_bolsa_familia_202607_schema.json").write_text(json.dumps(schema, ensure_ascii=False, indent=2), encoding="utf-8")
+                          schema_saved = True
+
+                      text = io.TextIOWrapper(raw, encoding=encoding, errors="strict", newline="")
+                      reader = csv.reader(text, delimiter=delimiter)
+                      for row in reader:
+                          total_rows_read += 1
+                          if len(row) != len(headers_src):
+                              bad_width_rows += 1
+                              continue
+                          uf = row[uf_idx].strip().upper()
+                          mun = row[mun_idx]
+                          if uf != TARGET_UF or norm(mun) != TARGET_MUNICIPALITY_NORM:
+                              continue
+                          municipal_records += 1
+                          uf_literals[uf] += 1
+                          municipality_literals[mun] += 1
+                          if siafi_idx is not None:
+                              siafi_codes[row[siafi_idx].strip()] += 1
+                          value = parse_decimal(row[value_idx])
+                          if value is not None:
+                              valid_value_records += 1
+                              total_value += value
+                          if comp_idx is not None:
+                              key = row[comp_idx].strip()
+                              competencia[key]["records"] += 1
+                              if value is not None:
+                                  competencia[key]["valid"] += 1
+                                  competencia[key]["value"] += value
+                          if ref_idx is not None:
+                              key = row[ref_idx].strip()
+                              referencia[key]["records"] += 1
+                              if value is not None:
+                                  referencia[key]["valid"] += 1
+                                  referencia[key]["value"] += value
+                          if date_idx is not None:
+                              availability_dates[row[date_idx].strip()] += 1
+                          if nis_idx is not None:
+                              nis = row[nis_idx].strip()
+                              if nis:
+                                  unique_nis.add(nis)
+                              else:
+                                  blank_nis += 1
+                          if cpf_idx is not None:
+                              cpf = row[cpf_idx].strip()
+                              if cpf:
+                                  unique_cpf.add(cpf)
+                              else:
+                                  blank_cpf += 1
+
+          Path("artifacts/novo_bolsa_familia_202607_archive_layout.json").write_text(json.dumps(archive_report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+          def serial_group(mapping):
+              return {
+                  k: {"records": v["records"], "valid_value_records": v["valid"], "sum_valor_parcela_rs": f"{v['value']:.2f}"}
+                  for k, v in sorted(mapping.items())
+              }
+
+          avg = (total_value / municipal_records) if municipal_records else None
+          validation = {
+              "geography": "São Borja/RS",
+              "filter": {"UF": TARGET_UF, "NOME_MUNICIPIO_normalized": TARGET_MUNICIPALITY_NORM},
+              "download_reference": REFERENCE_DOWNLOAD,
+              "national_rows_read": total_rows_read,
+              "bad_width_rows": bad_width_rows,
+              "municipal_records": municipal_records,
+              "valid_valor_parcela_records": valid_value_records,
+              "sum_valor_parcela_rs": f"{total_value:.2f}",
+              "mean_valor_parcela_per_record_rs": f"{avg:.2f}" if avg is not None else None,
+              "unique_nonblank_nis_count": len(unique_nis),
+              "unique_nonblank_cpf_count": len(unique_cpf),
+              "blank_nis_records": blank_nis,
+              "blank_cpf_records": blank_cpf,
+              "observed_siafi_codes": dict(siafi_codes),
+              "observed_municipality_literals": dict(municipality_literals),
+              "observed_uf_literals": dict(uf_literals),
+              "by_mes_competencia": serial_group(competencia),
+              "by_mes_referencia": serial_group(referencia),
+              "availability_date_counts": dict(sorted(availability_dates.items())),
+              "privacy_control": "No CPF, NIS or beneficiary name values are written to artifacts; only aggregate counts are preserved.",
+              "interpretation_limit": "Records and unique identifiers must not be relabeled as families without an explicit source rule; valor parcela disponibilizada is not observed consumption or local retention.",
+          }
+          Path("artifacts/novo_bolsa_familia_sao_borja_202607_validation_v001.json").write_text(json.dumps(validation, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(validation, ensure_ascii=False, indent=2))
+
+          # Aggregate-only CSV for Drive/Caderno use.
+          with Path("artifacts/novo_bolsa_familia_sao_borja_202607_aggregate_v001.csv").open("w", encoding="utf-8", newline="") as f:
+              w = csv.writer(f)
+              w.writerow(["geografia", "periodo_download", "registros", "registros_valor_valido", "soma_valor_parcela_rs", "media_por_registro_rs", "nis_unicos_nao_vazios", "cpf_unicos_nao_vazios", "natureza"])
+              w.writerow(["São Borja/RS", REFERENCE_DOWNLOAD, municipal_records, valid_value_records, f"{total_value:.2f}", f"{avg:.2f}" if avg is not None else "", len(unique_nis), len(unique_cpf), "calculado_a_partir_de_registros_oficiais"])
+
+          target.unlink(missing_ok=True)
+          PY
+      - name: Upload privacy-minimized municipal artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: novo-bolsa-familia-sao-borja-202607-v001
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30

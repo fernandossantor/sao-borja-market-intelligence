@@ -1,0 +1,67 @@
+name: novo-bolsa-familia-coverage-discovery
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/novo-bolsa-familia-coverage-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover-coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Discover official year/month options without downloading beneficiary data
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade playwright
+          python -m playwright install chromium
+          mkdir -p artifacts
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from playwright.sync_api import sync_playwright
+
+          URL = "https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia"
+          report = {
+              "source_page": URL,
+              "objective": "discover the official temporal coverage exposed by the Novo Bolsa Familia open-data page without downloading beneficiary-level files",
+              "pii_downloaded": False,
+              "coverage": {},
+          }
+
+          with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              page = browser.new_page(accept_downloads=False)
+              response = page.goto(URL, wait_until="domcontentloaded", timeout=90000)
+              report["navigation_status"] = response.status if response else None
+              page.wait_for_timeout(5000)
+              years = page.locator("#links-anos option").evaluate_all("els => els.map(e => ({text:(e.textContent||'').trim(), value:e.value}))")
+              report["year_options"] = years
+              for y in years:
+                  year = y["value"]
+                  page.select_option("#links-anos", year)
+                  page.wait_for_timeout(500)
+                  months = page.locator("#links-meses option").evaluate_all("els => els.map(e => ({text:(e.textContent||'').trim(), value:e.value}))")
+                  report["coverage"][year] = months
+              browser.close()
+
+          Path("artifacts/novo_bolsa_familia_official_coverage_v001.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: novo-bolsa-familia-official-coverage-v001
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30

@@ -58,16 +58,38 @@ jobs:
               "municipality_range_value": SAO_BORJA_RANGE_VALUE,
               "source_form": VAF_HISTORY_FORM_URL,
               "currency_rule_observed": "Moeda a partir de 1994: REAL.",
+              "form_status": None,
               "queries": [],
           }
           rows_out = []
+          form = None
 
-          form_response = session.get(VAF_HISTORY_FORM_URL, timeout=20, allow_redirects=True)
-          form_response.raise_for_status()
-          form = parse_vaf_form(form_response.text)
+          try:
+              form_response = session.get(
+                  VAF_HISTORY_FORM_URL, timeout=20, allow_redirects=True
+              )
+              form_response.raise_for_status()
+              form = parse_vaf_form(form_response.text)
+              result["form_status"] = {
+                  "status": "reachable",
+                  "http_status": form_response.status_code,
+              }
+          except (requests.RequestException, ValueError) as exc:
+              result["form_status"] = {
+                  "status": "source_unavailable_or_parse_error",
+                  "error_type": type(exc).__name__,
+                  "error": str(exc),
+              }
 
           for start, end in ranges:
               query_record = {"start": start, "end": end, "response": None}
+              if form is None:
+                  query_record["response"] = {
+                      "status": "not_attempted_form_unavailable",
+                  }
+                  result["queries"].append(query_record)
+                  continue
+
               try:
                   response = session.post(
                       form.action,
@@ -102,7 +124,9 @@ jobs:
                           years = header[first_value_index:]
                           values = cells[first_value_index:]
                           for year, raw_value in zip(years, values, strict=True):
-                              normalized = Decimal(raw_value.replace(".", "").replace(",", "."))
+                              normalized = Decimal(
+                                  raw_value.replace(".", "").replace(",", ".")
+                              )
                               rows_out.append(
                                   {
                                       "municipio": "SAO BORJA",
@@ -158,7 +182,9 @@ jobs:
           result["row_count"] = len(rows_out)
           result["years"] = [row["ano_rotulo_fonte"] for row in rows_out]
           json_path = Path("artifacts/vaf_sao_borja_missing_ranges_manifest.json")
-          json_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+          json_path.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
           print(json_path.read_text(encoding="utf-8"))
           print(csv_path.read_text(encoding="utf-8"))
           PY

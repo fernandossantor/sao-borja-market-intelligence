@@ -1,0 +1,186 @@
+name: bens-essenciais-operadores-rfb-join
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bens-essenciais-operadores-rfb-join.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  join:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      COMPETENCE: '2026-08'
+      RFB_SHARE: 'https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Download official RFB CNPJ 2026-08 files
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw=".data/raw/rfb_cnpj/${COMPETENCE}"
+          mkdir -p "$raw"
+          download_file() {
+            local file="$1"
+            local out="$raw/$file"
+            echo "Downloading $file"
+            curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 \
+              --output "$out" "${RFB_SHARE}/${COMPETENCE}/${file}"
+            test -s "$out"
+            unzip -tq "$out" >/dev/null
+          }
+          download_file Municipios.zip
+          for i in {0..9}; do download_file "Estabelecimentos${i}.zip"; done
+          for i in {0..9}; do download_file "Empresas${i}.zip"; done
+          sha256sum "$raw"/*.zip > "$raw/SHA256SUMS.txt"
+          du -sh "$raw"
+
+      - name: Build canonical São Borja territorial-control base
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXECUTION_ID="bens-essenciais-rfb-join-${COMPETENCE}-$(date -u +%Y%m%d-%H%M%S)"
+          echo "EXECUTION_ID=$EXECUTION_ID" >> "$GITHUB_ENV"
+          python -m sbmi.cnpj_territorial_control_cli \
+            --establishments-dir ".data/raw/rfb_cnpj/${COMPETENCE}" \
+            --companies-dir ".data/raw/rfb_cnpj/${COMPETENCE}" \
+            --municipalities-zip ".data/raw/rfb_cnpj/${COMPETENCE}/Municipios.zip" \
+            --execution-id "$EXECUTION_ID" \
+            --municipality-tom 8863 \
+            --municipality-ibge 4318002 \
+            --active-status-code 02 \
+            --chunksize 200000
+
+      - name: Exact join of 47 documentary-ready operator CNPJs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/operator_join
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+
+          operators = [
+            {'source_row': 2, 'operador_fantasia': 'Rede Vivo Supermercados', 'cnpj_unidade': '91292987000706'},
+            {'source_row': 3, 'operador_fantasia': 'Peruzzo Supermercados XXIV', 'cnpj_unidade': '87397865003137'},
+            {'source_row': 4, 'operador_fantasia': 'Peruzzo Supermercados XXIII', 'cnpj_unidade': '87397865003218'},
+            {'source_row': 7, 'operador_fantasia': 'Mercado Gigante', 'cnpj_unidade': '89898753000170'},
+            {'source_row': 8, 'operador_fantasia': 'Supermercado e Padaria Floresta', 'cnpj_unidade': '44399290000163'},
+            {'source_row': 9, 'operador_fantasia': 'Mercado da Casa', 'cnpj_unidade': '01865820000109'},
+            {'source_row': 10, 'operador_fantasia': 'Mercado Super Um', 'cnpj_unidade': '22653587000170'},
+            {'source_row': 11, 'operador_fantasia': 'Mercado Super Bah', 'cnpj_unidade': '39501353000100'},
+            {'source_row': 12, 'operador_fantasia': 'Lamana Mercado', 'cnpj_unidade': '89225544000246'},
+            {'source_row': 14, 'operador_fantasia': 'Mercado do Canto', 'cnpj_unidade': '01609364000136'},
+            {'source_row': 15, 'operador_fantasia': 'Minimercado Ponto Bom', 'cnpj_unidade': '07254901000159'},
+            {'source_row': 16, 'operador_fantasia': 'Mercado e Acougue Torres', 'cnpj_unidade': '64094757000174'},
+            {'source_row': 17, 'operador_fantasia': 'Padaria Santa Rita', 'cnpj_unidade': '94404316000192'},
+            {'source_row': 19, 'operador_fantasia': 'Mercado Pe de Pano', 'cnpj_unidade': '32072452000175'},
+            {'source_row': 20, 'operador_fantasia': 'Mercado Alaska', 'cnpj_unidade': '22963460000158'},
+            {'source_row': 21, 'operador_fantasia': 'Nosso Mercado', 'cnpj_unidade': '04930281000132'},
+            {'source_row': 22, 'operador_fantasia': 'Mercado Uniao', 'cnpj_unidade': '01578296000195'},
+            {'source_row': 23, 'operador_fantasia': 'Mercado e Sorveteria Tribom', 'cnpj_unidade': '39365516000175'},
+            {'source_row': 24, 'operador_fantasia': 'Compre Bem Mercado', 'cnpj_unidade': '53823094000165'},
+            {'source_row': 25, 'operador_fantasia': 'Mercado do Boeiro', 'cnpj_unidade': '94430741000156'},
+            {'source_row': 26, 'operador_fantasia': 'Mercado Guisolfi', 'cnpj_unidade': '43984027000179'},
+            {'source_row': 28, 'operador_fantasia': 'Mercado Jl', 'cnpj_unidade': '17991032000107'},
+            {'source_row': 29, 'operador_fantasia': 'Minimercado da Vila', 'cnpj_unidade': '47632242000161'},
+            {'source_row': 30, 'operador_fantasia': 'Minimercado J.a', 'cnpj_unidade': '31778318000121'},
+            {'source_row': 31, 'operador_fantasia': 'Mercado e Padaria Sm', 'cnpj_unidade': '30922573000133'},
+            {'source_row': 32, 'operador_fantasia': 'Mini-Mercado Martins', 'cnpj_unidade': '21215999000166'},
+            {'source_row': 34, 'operador_fantasia': 'Padaria Kitute', 'cnpj_unidade': '87580916000146'},
+            {'source_row': 35, 'operador_fantasia': 'Padaria Donald', 'cnpj_unidade': '01584229000183'},
+            {'source_row': 36, 'operador_fantasia': 'Padaria e Cafeteria Tres Irmaos', 'cnpj_unidade': '57090051000179'},
+            {'source_row': 37, 'operador_fantasia': 'Padaria Nova', 'cnpj_unidade': '02585088000186'},
+            {'source_row': 38, 'operador_fantasia': 'Padaria e Confeitaria Glacial', 'cnpj_unidade': '27063157000112'},
+            {'source_row': 39, 'operador_fantasia': 'Padaria Vitória 2', 'cnpj_unidade': '66270792000122'},
+            {'source_row': 40, 'operador_fantasia': 'Padaria Vitória', 'cnpj_unidade': '05196339000129'},
+            {'source_row': 42, 'operador_fantasia': 'Padaria E Confeitaria Tia Lori', 'cnpj_unidade': '05579483000144'},
+            {'source_row': 43, 'operador_fantasia': 'Casa da Carne Real', 'cnpj_unidade': '00958639000184'},
+            {'source_row': 44, 'operador_fantasia': 'Açougue Dom Vitorio', 'cnpj_unidade': '32183512000127'},
+            {'source_row': 45, 'operador_fantasia': 'Acougue Popular', 'cnpj_unidade': '39575019000100'},
+            {'source_row': 46, 'operador_fantasia': 'Açougue e Minimercado "Côza" Gaúcha', 'cnpj_unidade': '13699717000115'},
+            {'source_row': 47, 'operador_fantasia': 'Acougue e Mini Mercado Prenda', 'cnpj_unidade': '42809219000186'},
+            {'source_row': 48, 'operador_fantasia': 'Açougue Morgental (Alimentos)', 'cnpj_unidade': '63154624000183'},
+            {'source_row': 49, 'operador_fantasia': 'Mercado do Peixe', 'cnpj_unidade': '07445396000120'},
+            {'source_row': 50, 'operador_fantasia': 'Armazém do peixe', 'cnpj_unidade': '49134931000171'},
+            {'source_row': 51, 'operador_fantasia': 'Fruteira Serrana', 'cnpj_unidade': '08358482000168'},
+            {'source_row': 52, 'operador_fantasia': 'Fl Hort Agro', 'cnpj_unidade': '36211275000111'},
+            {'source_row': 53, 'operador_fantasia': 'Stok Center', 'cnpj_unidade': '92016757008842'},
+            {'source_row': 54, 'operador_fantasia': 'Rancho Atacadista - Filial 25 (Rede Vivo Super Mercados)', 'cnpj_unidade': '91292987002598'},
+            {'source_row': 55, 'operador_fantasia': 'Mercado CDV', 'cnpj_unidade': '42597504000180'},
+          ]
+
+          curated = Path(f'.data/curated/base_territorial/cnpj_territorial_control/{__import__("os").environ["EXECUTION_ID"]}/cnpj_territorial_control.csv')
+          df = pd.read_csv(curated, dtype=str, keep_default_na=False)
+          src = pd.DataFrame(operators)
+          if len(src) != 47 or src['cnpj_unidade'].nunique() != 47:
+              raise SystemExit('Expected exactly 47 unique source CNPJs')
+          if df['cnpj'].duplicated().any():
+              raise SystemExit('Canonical territorial-control output has duplicated full CNPJ keys')
+
+          wanted_cols = [
+              'cnpj', 'situacao_cadastral', 'cnae_fiscal_principal',
+              'matrix_branch_label', 'matrix_cnpj', 'matrix_municipality_tom',
+              'matrix_municipality_name', 'matrix_uf', 'territorial_control_status',
+              'razao_social', 'nome_fantasia', 'porte_empresa', 'natureza_juridica'
+          ]
+          missing_cols = [c for c in wanted_cols if c not in df.columns]
+          if missing_cols:
+              raise SystemExit(f'Missing expected canonical columns: {missing_cols}')
+
+          joined = src.merge(df[wanted_cols], how='left', left_on='cnpj_unidade', right_on='cnpj', indicator=True)
+          joined['join_status'] = joined['_merge'].map({'both':'MATCH_EXATO_RFB_ATIVO_SAO_BORJA','left_only':'NAO_LOCALIZADO_BASE_ATIVA_SAO_BORJA','right_only':'INDEVIDO'})
+          joined = joined.drop(columns=['_merge'])
+          joined.to_csv('artifacts/operator_join/operadores_bens_essenciais_rfb_join_v001.csv', index=False)
+
+          unmatched = joined[joined['join_status'] != 'MATCH_EXATO_RFB_ATIVO_SAO_BORJA'].copy()
+          unmatched.to_csv('artifacts/operator_join/operadores_bens_essenciais_rfb_unmatched_v001.csv', index=False)
+
+          summary = {
+              'source_cnpjs': int(len(src)),
+              'source_unique_cnpjs': int(src['cnpj_unidade'].nunique()),
+              'matched_exact_active_sao_borja': int((joined['join_status'] == 'MATCH_EXATO_RFB_ATIVO_SAO_BORJA').sum()),
+              'unmatched_in_active_sao_borja_base': int(len(unmatched)),
+              'canonical_rows_sao_borja_active': int(len(df)),
+              'canonical_unique_cnpj': int(df['cnpj'].nunique()),
+              'competence': '2026-08',
+              'territorial_method': 'official RFB matrix/branch field + official municipality of matrix; no /0001 heuristic',
+              'limitation': 'An unmatched documentary CNPJ is not automatically inactive, closed, or absent; it requires case review against the official source and documentary reconciliation.'
+          }
+          Path('artifacts/operator_join/operadores_bens_essenciais_rfb_join_summary_v001.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          print(joined[['source_row','operador_fantasia','cnpj_unidade','join_status','matrix_branch_label','matrix_municipality_name','territorial_control_status']].to_string(index=False))
+          PY
+
+      - name: Preserve canonical validation and source hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp ".data/audit/base_territorial/cnpj_territorial_control/${EXECUTION_ID}/validation.csv" artifacts/operator_join/canonical_validation.csv
+          cp ".data/raw/rfb_cnpj/${COMPETENCE}/SHA256SUMS.txt" artifacts/operator_join/RFB_SHA256SUMS.txt
+
+      - name: Upload operator join outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bens-essenciais-operadores-rfb-join-v001
+          path: artifacts/operator_join/
+          if-no-files-found: error
+          retention-days: 30

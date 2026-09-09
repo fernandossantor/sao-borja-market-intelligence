@@ -102,19 +102,38 @@ Nesta etapa, não calcular:
 
 Faltam principalmente vendas por operador ou proxy validada, porte por unidade, situação cadastral/operacional consolidada e destino/origem do gasto — inclusive outros municípios, Argentina e comércio eletrônico.
 
-## 9. Próxima prioridade
+## 9. Matriz pré-join RFB
 
-Construir a matriz:
+Foi construída a matriz `matriz_operadores_bens_essenciais_prejoin_rfb_v001_20260908.xlsx` para as 54 linhas correntes de bens essenciais.
+
+**Dados calculados:**
+
+- CNPJ documental OK: **47/54**, ou **87,03704%**;
+- CNPJ em revisão por duplicidade: **2**;
+- sem CNPJ: **5**;
+- MATCH_POM: **52**;
+- ONLY_CURRENT: **2**.
+
+O CNPJ base — primeiros oito dígitos — é usado apenas como identificador de agrupamento, nunca como regra territorial. Duas bases com CNPJ OK aparecem em mais de uma unidade do recorte: Rede Vivo e Peruzzo, duas unidades mapeadas cada. Esse cálculo não representa o total de unidades das redes e não determina matriz/filial.
+
+**Controle metodológico:** `controle_local_externo` e `municipio_matriz` permanecem `PENDENTE_RFB_OFICIAL`. Nenhum operador é classificado por terminação `/0001`, endereço, telefone, razão social ou narrativa documental.
+
+**Interpretação:** aproximadamente 87% das linhas correntes já estão tecnicamente prontas para um join exato com a RFB 2026-08. Essa taxa mede prontidão da base atual, **não cobertura da oferta municipal**.
+
+## 10. Próxima prioridade
+
+Executar o join exato dos 47 CNPJs prontos com a RFB 2026-08 e resolver os sete registros ainda sem CNPJ validado, completando:
 
 `operador × formato × CNPJ/unidade × situação cadastral × CNAE × matriz/filial × município da matriz × controle local/externo × proxy de porte × confiança da reconciliação`.
 
 A classificação local/externa deve usar exclusivamente os campos oficiais da RFB. Só depois será defensável testar concentração por operadores, pressão competitiva e hipóteses de retenção territorial. Market share continuará exigindo vendas ou proxy explicitamente validada.
 
-## 10. Rastreabilidade
+## 11. Rastreabilidade
 
 - Caderno-Base v011: Drive `1dwyqUrPKs3QfMe6p5YMvbKYlZXaiDkBztdNoucvc6nc`;
 - demanda v005: Drive `1KS9glx_tES10Ry8vAGO0uQFhemOWJlO911EvliwTTTo`;
 - Censo da Oferta v002: Drive `14mOXvVHmwB195HA2_jxNgrIKtoZE28Y3`;
 - proxy capacidade/oferta v007: Drive `1mit1gNiFS2T4c3ax9wnyCaERuhkci0Wg`;
+- matriz pré-join RFB v001: Drive `1fSZO0sEqeoGuWgNacZvjQGcN2pdPWYki`;
 - nota nativa no Drive: `Oferta, demanda e controle territorial — bens essenciais — v007 — 20260908`, ID `1FjNvckIa49ULYyca3AMipugWFpzQtx2a0uLGlKZHdP4`;
 - diagnóstico integrado nativo v008: Drive `1WT02AzJXg-oGasuTOmtyV6XCppxXNdyBFBXFZuRa_Jw`.

@@ -15,7 +15,9 @@ jobs:
     timeout-minutes: 300
     env:
       COMPETENCE: '2026-08'
-      RFB_SHARE: 'https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj'
+      RFB_WEBDAV_BASE: 'https://arquivos.receitafederal.gov.br/public.php/webdav'
+      RFB_CNPJ_PATH: 'Dados/Cadastros/CNPJ'
+      RFB_SHARE_TOKEN: 'gn672Ad4CF8N6TK'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -142,21 +144,28 @@ jobs:
           set -euo pipefail
           raw='.data/tmp/rfb_targeted'
           : > artifacts/operator_join/RFB_SHA256SUMS.txt
+          : > artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
 
-          curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 \
-            --output "$raw/Municipios.zip" "${RFB_SHARE}/${COMPETENCE}/Municipios.zip"
-          unzip -tq "$raw/Municipios.zip" >/dev/null
-          sha256sum "$raw/Municipios.zip" >> artifacts/operator_join/RFB_SHA256SUMS.txt
+          download_rfb() {
+            local file="$1"
+            local out="$2"
+            local url="${RFB_WEBDAV_BASE}/${RFB_CNPJ_PATH}/${COMPETENCE}/${file}"
+            echo "${file}|${url}" >> artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
+            curl --fail --location --user "${RFB_SHARE_TOKEN}:" \
+              --retry 5 --retry-delay 5 --connect-timeout 30 --max-time 1800 \
+              --output "$out" "$url"
+            test -s "$out"
+            unzip -tq "$out" >/dev/null
+            sha256sum "$out" >> artifacts/operator_join/RFB_SHA256SUMS.txt
+          }
+
+          download_rfb 'Municipios.zip' "$raw/Municipios.zip"
 
           for i in {0..9}; do
             file="Estabelecimentos${i}.zip"
             out="$raw/$file"
-            echo "Downloading and scanning $file"
-            curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 \
-              --output "$out" "${RFB_SHARE}/${COMPETENCE}/${file}"
-            test -s "$out"
-            unzip -tq "$out" >/dev/null
-            sha256sum "$out" >> artifacts/operator_join/RFB_SHA256SUMS.txt
+            echo "Downloading and scanning $file from official RFB Nextcloud/WebDAV"
+            download_rfb "$file" "$out"
             python "$raw/scan_one.py" "$out"
             rm -f "$out"
             df -h .
@@ -232,7 +241,7 @@ jobs:
           joined.loc[found & is_branch & ~matrix_known, 'controle_territorial_rfb'] = 'FILIAL_MATRIZ_NAO_LOCALIZADA'
 
           joined['competencia_rfb'] = '2026-08'
-          joined['fonte_rfb'] = 'Receita Federal do Brasil — Dados Abertos CNPJ — Estabelecimentos e Municípios'
+          joined['fonte_rfb'] = 'Receita Federal do Brasil — Dados Abertos CNPJ — Estabelecimentos e Municípios — repositório oficial Nextcloud/WebDAV'
           joined['natureza_dado_rfb'] = 'observado'
 
           output_cols = [
@@ -260,7 +269,7 @@ jobs:
               'control_status_counts': {str(k): int(v) for k,v in status_counts.items()},
               'cadastral_status_counts': {str(k): int(v) for k,v in cadastral_counts.items()},
               'method': 'Exact full-CNPJ scan of official RFB Estabelecimentos 2026-08. Matrix/branch uses official identificador_matriz_filial; matrix municipality comes from the official matrix establishment row for the same root. No /0001 heuristic.',
-              'source_scope': 'RFB Dados Abertos CNPJ — Estabelecimentos0..9.zip + Municipios.zip, competência 2026-08',
+              'source_scope': 'Receita Federal do Brasil — Dados Abertos CNPJ — official Nextcloud/WebDAV share: Dados/Cadastros/CNPJ/2026-08; Estabelecimentos0..9.zip + Municipios.zip',
               'limitations': [
                   'This 52-CNPJ subset is a documentary operator subset, not an exhaustive census of all food retail establishments.',
                   'Control status is not market share, sales participation, profit remittance, retention or leakage.',

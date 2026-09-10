@@ -249,3 +249,15 @@ A aba `Respostas_analiticas` organiza o caderno em:
 `pergunta → resposta sustentada → natureza → evidência → implicação → limite`.
 
 Essa camada deve orientar a redação final: primeiro responder o que a base permite; depois registrar os limites.
+
+
+## Guia de uso empresarial
+
+Serviços: reputação, tempo de resposta, agendamento, automação com acesso humano e confiança.
+
+Alimentação: qualidade, preço, atendimento, ambiente, conteúdo digital, delivery e hospitalidade.
+
+Leitura central:
+**a tecnologia reduz fricção, mas não substitui automaticamente o valor do contato humano.**
+
+Market size e demanda total de visitantes permanecem não respondíveis com a base atual.

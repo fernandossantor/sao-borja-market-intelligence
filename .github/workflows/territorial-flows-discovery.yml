@@ -1,0 +1,110 @@
+name: territorial-flows-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/territorial-flows-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Inspect official SIDRA mobility metadata and REGIC layouts
+        run: |
+          python -m pip install --upgrade requests pandas openpyxl
+          mkdir -p artifacts/territorial_flows_discovery/raw
+          python - <<'PY'
+          import io, json, zipfile, hashlib
+          from pathlib import Path
+          import pandas as pd
+          import requests
+
+          out=Path("artifacts/territorial_flows_discovery")
+          raw=out/"raw"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI territorial flows schema discovery/1.0"})
+
+          sidra={}
+          for table in ("10329","10324"):
+              url=f"https://apisidra.ibge.gov.br/desctabapi.aspx?c={table}"
+              r=s.get(url,timeout=90)
+              (raw/f"sidra_{table}_metadata.json").write_bytes(r.content)
+              r.raise_for_status()
+              data=r.json()
+              sidra[table]={
+                  "url":url,
+                  "bytes":len(r.content),
+                  "sha256":hashlib.sha256(r.content).hexdigest(),
+                  "metadata":data,
+              }
+
+          regic_urls={
+              "hierarquia":"https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Hierarquia_e_regiao.xlsx",
+              "ligacoes_atracao":"https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Ligacoes_e_atracao_xlsx.zip",
+              "matriz_ligacoes":"https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Matriz_de_Ligacoes.xlsx",
+          }
+          regic={}
+          for key,url in regic_urls.items():
+              r=s.get(url,timeout=180)
+              r.raise_for_status()
+              suffix=".zip" if url.endswith(".zip") else ".xlsx"
+              p=raw/f"regic_{key}{suffix}"
+              p.write_bytes(r.content)
+              entry={"url":url,"bytes":len(r.content),"sha256":hashlib.sha256(r.content).hexdigest()}
+              if suffix==".zip":
+                  with zipfile.ZipFile(io.BytesIO(r.content)) as z:
+                      entry["members"]=[{"name":i.filename,"bytes":i.file_size} for i in z.infolist()]
+                      previews={}
+                      for i in z.infolist():
+                          if i.filename.lower().endswith(".xlsx"):
+                              b=z.read(i)
+                              xls=pd.ExcelFile(io.BytesIO(b))
+                              previews[i.filename]={}
+                              for sh in xls.sheet_names:
+                                  df=pd.read_excel(io.BytesIO(b),sheet_name=sh,nrows=8,header=None)
+                                  previews[i.filename][sh]={
+                                      "shape_preview":list(df.shape),
+                                      "rows":df.fillna("").astype(str).values.tolist()
+                                  }
+                      entry["xlsx_previews"]=previews
+              else:
+                  xls=pd.ExcelFile(io.BytesIO(r.content))
+                  entry["sheets"]=xls.sheet_names
+                  entry["previews"]={}
+                  for sh in xls.sheet_names:
+                      df=pd.read_excel(io.BytesIO(r.content),sheet_name=sh,nrows=10,header=None)
+                      entry["previews"][sh]={
+                          "shape_preview":list(df.shape),
+                          "rows":df.fillna("").astype(str).values.tolist()
+                      }
+              regic[key]=entry
+
+          result={
+              "sidra":sidra,
+              "regic":regic,
+              "status":"PASS",
+              "note":"Schema discovery only; no analytical values inferred."
+          }
+          (out/"discovery.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload discovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: territorial-flows-discovery-v001
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/territorial_flows_discovery/

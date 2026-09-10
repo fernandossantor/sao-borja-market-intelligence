@@ -8,6 +8,8 @@ Abrangência: São Borja/RS.
 Branch de trabalho: `feature/cnpj-territorial-control-v1`.  
 PR de integração: #41 — deve permanecer **aberto, draft e não mesclado** até autorização explícita.
 
+Checkpoint nativo no Google Drive: `Checkpoint — São Borja Inteligência Mercadológica — 20260909`, Drive ID `1EUFIFoP_2F0uZSSgLn0hdXIW9HAzUGlQ7wsnk_i5kSc`.
+
 ## 2. Caderno-Base corrente
 
 Caderno corrente no Google Drive:
@@ -16,11 +18,7 @@ Caderno corrente no Google Drive:
 
 Drive ID: `1dwyqUrPKs3QfMe6p5YMvbKYlZXaiDkBztdNoucvc6nc`.
 
-A v011 preserva as versões anteriores e contém, entre outras, as abas:
-
-- `Oferta_demanda_controle`;
-- `Qualidade_oferta`;
-- `Operadores_prejoin_RFB`.
+A v011 preserva as versões anteriores e contém, entre outras, as abas `Oferta_demanda_controle`, `Qualidade_oferta` e `Operadores_prejoin_RFB`.
 
 A v010 permanece histórica: Drive ID `1pTYhntxHJA24geADFVFiEOYoXvc8thtEYKP7901X9Ac`.
 
@@ -65,10 +63,6 @@ As massas monetárias de Censo, RAIS, INSS e Novo Bolsa Família não devem ser 
 Modelo v005:
 
 - fonte principal: IBGE POF 2017-2018 — Rio Grande do Sul — tabela 1.3.23.3;
-- alimentação no domicílio: R$ 487,00/família/mês no RS na referência da POF;
-- tamanho médio familiar: 2,72 pessoas;
-- per capita calculado: R$ 179,04412/mês;
-- fator de atualização de preços até junho de 2026: 1,781742384675;
 - benchmark atualizado: aproximadamente R$ 319,01/pessoa/mês;
 - demanda modelada mensal: **R$ 19.558.852,34**;
 - demanda modelada anual: **R$ 234.706.228,14**.
@@ -99,21 +93,11 @@ A preparação documental passou para:
 - **2 registros ainda sem CNPJ documental suficientemente confiável**;
 - 52 `MATCH_POM` e 2 `ONLY_CURRENT`.
 
-Derivado corrente:
+Derivado corrente: `matriz_operadores_bens_essenciais_prejoin_rfb_v002_20260909.xlsx`, Drive ID `12IKd7-zipN29iAYa16HNcoBT6PFa8k2S`.
 
-`matriz_operadores_bens_essenciais_prejoin_rfb_v002_20260909.xlsx`
+Nota metodológica no GitHub: `docs/caderno_base/operadores_bens_essenciais_prejoin_rfb_v002.md`.
 
-Drive ID: `12IKd7-zipN29iAYa16HNcoBT6PFa8k2S`.
-
-Nota metodológica no GitHub:
-
-`docs/caderno_base/operadores_bens_essenciais_prejoin_rfb_v002.md`.
-
-Nota nativa no Drive:
-
-`Operadores de bens essenciais — pré-join RFB v002 — 20260909`
-
-Drive ID: `1u8l0ll_TmR4PabMuNfAQvLlUFiyFcBjkLlV4G9BJyOg`.
+Nota nativa no Drive: `Operadores de bens essenciais — pré-join RFB v002 — 20260909`, Drive ID `1u8l0ll_TmR4PabMuNfAQvLlUFiyFcBjkLlV4G9BJyOg`.
 
 Pendências documentais restantes:
 
@@ -124,26 +108,15 @@ Não inferir CNPJ por similaridade nominal, telefone, endereço ou resultado com
 
 ## 5. Join oficial dos 52 CNPJs — estado técnico
 
-Workflow:
+Workflow: `.github/workflows/bens-essenciais-operadores-rfb-join.yml`.
 
-`.github/workflows/bens-essenciais-operadores-rfb-join.yml`
-
-Método previsto:
-
-1. usar 52 CNPJs completos documentalmente preparados;
-2. baixar `Municipios.zip` e `Estabelecimentos0..9.zip` da RFB, competência 2026-08;
-3. localizar cada CNPJ completo por correspondência exata;
-4. usar `identificador_matriz_filial` oficial da RFB;
-5. localizar o registro oficial da matriz da mesma raiz CNPJ;
-6. recuperar município/UF da matriz;
-7. classificar `MATRIZ_LOCAL`, `FILIAL_DE_MATRIZ_LOCAL`, `FILIAL_DE_MATRIZ_EXTERNA` ou situação indeterminada quando a fonte não permitir fechamento.
+Método previsto: usar 52 CNPJs completos documentalmente preparados; baixar `Municipios.zip` e `Estabelecimentos0..9.zip` da RFB, competência 2026-08; localizar cada CNPJ completo por correspondência exata; usar `identificador_matriz_filial` oficial; localizar a matriz oficial da mesma raiz; recuperar município/UF da matriz; classificar controle territorial.
 
 A execução não usa terminação `/0001` como heurística de matriz.
 
 ### Resultado da execução de 9 de setembro
 
-Run: **34417653207**.
-
+Run: **34417653207**.  
 Estado final: **failure**.
 
 A falha ocorreu no passo `Download municipalities and scan official establishment files sequentially`, antes da construção da matriz final e antes do upload do artifact.
@@ -165,7 +138,7 @@ Ordem recomendada:
 3. se não houver cópia preservada, tornar o downloader mais tolerante à indisponibilidade temporária ou executar a coleta por ambiente com acesso estável, preservando hashes e arquivos oficiais;
 4. somente após a obtenção íntegra dos arquivos, rodar o scan direcionado e gerar a matriz oficial;
 5. promover o resultado ao Drive;
-6. atualizar `Operadores_prejoin_RFB`/nova aba final no Caderno, diagnóstico, nota metodológica, README e corpo do PR #41;
+6. atualizar Caderno, diagnóstico, nota metodológica, README e corpo do PR #41;
 7. depois resolver, separadamente, os dois operadores ainda sem CNPJ documental validado.
 
 ## 7. Indicadores que permanecem bloqueados
@@ -185,9 +158,7 @@ Quando a classificação oficial por operador estiver concluída, construir:
 
 `operador × formato × CNPJ/unidade × situação cadastral × CNAE × matriz/filial × município da matriz × controle local/externo × proxy de porte × confiança da reconciliação`.
 
-Só então avançar para a pergunta substantiva:
-
-**como a demanda residente é distribuída entre formatos, operadores, canais e territórios, e que evidências podem sustentar retenção local ou saída de gasto?**
+Só então avançar para a pergunta substantiva: **como a demanda residente é distribuída entre formatos, operadores, canais e territórios, e que evidências podem sustentar retenção local ou saída de gasto?**
 
 Isso exigirá dados adicionais sobre destino do gasto, compras na Argentina/outros municípios, comércio eletrônico, participação de redes e fornecedores, ou pesquisa primária.
 
@@ -201,6 +172,7 @@ Isso exigirá dados adicionais sobre destino do gasto, compras na Argentina/outr
 - proxy oferta/capacidade v007: Drive `1mit1gNiFS2T4c3ax9wnyCaERuhkci0Wg`;
 - workflow do join: `.github/workflows/bens-essenciais-operadores-rfb-join.yml`;
 - run com falha de conectividade: `34417653207`;
+- checkpoint nativo no Drive: `1EUFIFoP_2F0uZSSgLn0hdXIW9HAzUGlQ7wsnk_i5kSc`;
 - PR: #41.
 
 ## 10. Regras de preservação

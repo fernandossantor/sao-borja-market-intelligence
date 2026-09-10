@@ -28,13 +28,15 @@ Auditorias marginais de bases já canonizadas deixam de ser caminho crítico. O 
 - Histórico imediato: v011 — Drive `1dwyqUrPKs3QfMe6p5YMvbKYlZXaiDkBztdNoucvc6nc`.
 - Diagnóstico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v011.md`.
 - Diagnóstico nativo no Drive: `16vtqP3xutEbPcbUS3m8ZvMUJfFlBGecypqNbzVSrxWg`.
+- Benchmark territorial: `docs/caderno_base/benchmark_territorial_comparavel_v001.md`.
+- Benchmark nativo no Drive: `1zyhYsURHYc3-Y2dUQ_Hvsz2OoD79ClcnzKKwFvz5Lho`.
 - Oferta × demanda × controle: `docs/caderno_base/oferta_demanda_controle_bens_essenciais_v007.md`.
 - Operadores pré-join: `docs/caderno_base/operadores_bens_essenciais_prejoin_rfb_v002.md`.
 - Demanda: `docs/caderno_base/demanda_potencial_bens_essenciais_v005.md`.
 - Mercado consumidor: `docs/caderno_base/mercado_consumidor_base_v006.md`.
 - Matriz monetária: `docs/caderno_base/matriz_fluxos_renda_transferencias_v001.md`.
 
-A v012 preserva todas as abas anteriores, corrige a prontidão documental do pré-join para **96,30%**, registra a depriorização do join por operador e acrescenta a aba `Sintese_territorial`.
+A v012 preserva todas as abas anteriores, corrige a prontidão documental do pré-join para **96,30%**, registra a depriorização do join por operador e acrescenta `Sintese_territorial` e `Benchmark_territorial`.
 
 ## Estado analítico consolidado
 
@@ -70,6 +72,29 @@ A v012 preserva todas as abas anteriores, corrige a prontidão documental do pr�
 - Novo Bolsa Família jan–jul/2026: fluxo corrente médio **R$ 1.502.070,14/mês**.
 
 As camadas monetárias não são somadas diretamente.
+
+## Benchmark territorial comparável v001
+
+Critério exploratório de escala: população estimada em 2025 dentro de **±25%** de São Borja, equivalente a 45.983–76.639 pessoas. É uma regra analítica transparente, não tipologia oficial.
+
+Comparáveis de escala no recorte regional inicial:
+
+- São Gabriel: **60.090** habitantes estimados em 2025, apenas **1,99% abaixo** de São Borja; perfil multivariado ainda parcial;
+- Santiago: **50.336** habitantes; PIB per capita 2023 **R$ 38.041,83**;
+- Alegrete: **74.285** habitantes; PIB per capita 2023 **R$ 42.840,36**.
+
+Referências funcionais de fronteira, sem equivalência de porte:
+
+- Sant'Ana do Livramento: **87.329** habitantes; PIB per capita 2023 **R$ 37.237,35**;
+- Uruguaiana: **120.819** habitantes; PIB per capita 2023 **R$ 33.406,32**.
+
+São Borja: **61.311** habitantes estimados em 2025; PIB per capita 2023 **R$ 42.737,25**.
+
+**Resultado calculado:** o PIB per capita de Alegrete está apenas **0,24% acima** do de São Borja; Santiago está **10,99% abaixo**.
+
+**Interpretação:** o benchmark v001 não sustenta excepcionalidade negativa de São Borja por porte populacional ou PIB per capita. A diferenciação territorial deve ser buscada em renda domiciliar, emprego, estrutura empresarial, centralidade e fluxos de consumo. PIB per capita não equivale a poder de compra.
+
+Fontes: IBGE Cidades e Estados; Censo 2022; PIB dos Municípios 2023; Estimativas da População 2025 atualizadas em 28/08/2026.
 
 ## Bens essenciais — demanda, oferta e controle
 
@@ -108,7 +133,7 @@ A granularização por operador permanece metodologicamente válida, mas **não 
 
 **Interpretação integrada:** São Borja combina predominância numérica de estruturas empresariais locais, dependência funcional seletiva de organizações externas — especialmente no varejo —, mercado consumidor de escala moderada e concentrado nas faixas inferiores de renda, fluxos recorrentes de benefícios/transferências e base fiscal/produtiva cíclica.
 
-A força competitiva territorial não pode ser inferida apenas pelo número de estabelecimentos. Escala operacional, renda, formato, canal, área de influência e origem/destino do gasto passam a ser as dimensões analíticas decisivas.
+O benchmark inicial acrescenta que porte populacional e PIB per capita, isoladamente, não explicam uma eventual limitação mercadológica de São Borja. A força competitiva territorial deve ser investigada por escala operacional, distribuição da renda, formato, canal, centralidade, área de influência e origem/destino do gasto.
 
 ## Principal lacuna decisória
 
@@ -124,18 +149,21 @@ A lacuna comum é **vendas + origem/destino do gasto**, não cadastro empresaria
 
 ## Próxima prioridade
 
-1. construir **benchmark territorial comparável** para contextualizar São Borja;
-2. transformar a Base Territorial comum em **quatro diagnósticos setoriais**;
-3. integrar as evidências das pesquisas POM aos fatos territoriais já canonizados;
-4. avançar para **área de influência e destino/origem do gasto** quando houver fonte adequada ou pesquisa primária;
-5. aprofundar séries históricas somente quando uma pergunta analítica exigir;
-6. manter o join operador × RFB como enriquecimento setorial depriorizado.
+1. ampliar o **benchmark territorial v001** com renda domiciliar, emprego/remuneração e estrutura empresarial usando definições e períodos equivalentes;
+2. completar o perfil oficial de São Gabriel antes de comparação multivariada;
+3. transformar a Base Territorial comum em **quatro diagnósticos setoriais**;
+4. integrar as evidências das pesquisas POM aos fatos territoriais já canonizados;
+5. avançar para **área de influência e destino/origem do gasto** quando houver fonte adequada ou pesquisa primária;
+6. aprofundar séries históricas somente quando uma pergunta analítica exigir;
+7. manter o join operador × RFB como enriquecimento setorial depriorizado.
 
 ## Rastreabilidade principal
 
 - checkpoint histórico 20260909: `docs/caderno_base/checkpoint_20260909.md`;
 - diagnóstico v011: `docs/caderno_base/diagnostico_analitico_integrado_v011.md`;
 - diagnóstico nativo v012: Drive `16vtqP3xutEbPcbUS3m8ZvMUJfFlBGecypqNbzVSrxWg`;
+- benchmark territorial v001: `docs/caderno_base/benchmark_territorial_comparavel_v001.md`;
+- benchmark nativo v001: Drive `1zyhYsURHYc3-Y2dUQ_Hvsz2OoD79ClcnzKKwFvz5Lho`;
 - POF raw: Drive `1BJiRJn8KoTYQBqlKcThFy7oCQqsv41PK`;
 - demanda v005: `1KS9glx_tES10Ry8vAGO0uQFhemOWJlO911EvliwTTTo`;
 - Censo da Oferta v002: `14mOXvVHmwB195HA2_jxNgrIKtoZE28Y3`;

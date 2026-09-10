@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Inspect official SIDRA mobility metadata and REGIC layouts
+      - name: Inspect official IBGE mobility metadata and REGIC layouts
         run: |
           python -m pip install --upgrade requests pandas openpyxl
           mkdir -p artifacts/territorial_flows_discovery/raw
@@ -34,13 +34,13 @@ jobs:
           out=Path("artifacts/territorial_flows_discovery")
           raw=out/"raw"
           s=requests.Session()
-          s.headers.update({"User-Agent":"SBMI territorial flows schema discovery/1.0"})
+          s.headers.update({"User-Agent":"SBMI territorial flows schema discovery/1.1"})
 
           sidra={}
           for table in ("10329","10324"):
-              url=f"https://apisidra.ibge.gov.br/desctabapi.aspx?c={table}"
+              url=f"https://servicodados.ibge.gov.br/api/v3/agregados/{table}/metadados"
               r=s.get(url,timeout=90)
-              (raw/f"sidra_{table}_metadata.json").write_bytes(r.content)
+              (raw/f"ibge_agregado_{table}_metadata.json").write_bytes(r.content)
               r.raise_for_status()
               data=r.json()
               sidra[table]={
@@ -104,7 +104,7 @@ jobs:
       - name: Upload discovery artifact
         uses: actions/upload-artifact@v4
         with:
-          name: territorial-flows-discovery-v001
+          name: territorial-flows-discovery-v002
           if-no-files-found: error
           retention-days: 30
           path: artifacts/territorial_flows_discovery/

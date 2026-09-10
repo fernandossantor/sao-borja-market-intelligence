@@ -95,3 +95,15 @@ Os documentos narrativos recebem igualmente:
 A origem deve identificar a operação estatística ou cadastro, e não apenas o órgão. Exemplo: **PIB dos Municípios — IBGE**, conforme metodologia integrada ao SCN/SCR e SNA 2008, em vez de apenas “PIB — IBGE”.
 
 No escopo atual, pesquisa primária é **não operacional**. Perguntas sem base compatível tornam-se limites explícitos.
+
+
+## Produto principal
+
+Cada caderno possui dois níveis:
+
+1. **Planilha** — lastro técnico, dados, cálculos, auditoria e fontes;
+2. **Documento narrativo** — entrega empresarial, com interpretação e decisão.
+
+Os quatro documentos narrativos possuem **Guia de uso empresarial**, explicitando para quem o caderno é útil, quais decisões pode apoiar, leitura central, oportunidades, riscos e o que não pode decidir.
+
+A planilha não deve ser encaminhada isoladamente como se fosse o relatório final.

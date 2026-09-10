@@ -201,3 +201,13 @@ A planilha `1YdVD_fNLg6s3pYR3s2XsLqprM41xs_3iU_KB_Ppgn2A` e o documento associad
 Escrever e aprofundar as respostas Classe A/B/C nos cadernos e na síntese final.
 
 Perguntas Classe D passam a compor a seção de limitações, sem abrir novas frentes de coleta.
+
+
+## Camada empresarial
+
+A matriz de questões respondíveis passa a conter também a aba `Painel_empresarial`.
+
+Documento executivo correspondente:
+`1zFKlv8kc1I3f6xTAI2bSyRAohB3r60MkCWsC9JaZ2aQ`.
+
+A síntese executiva é a porta de entrada empresarial; esta matriz permanece como sustentação metodológica das respostas.

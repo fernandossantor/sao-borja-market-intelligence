@@ -90,3 +90,59 @@ Padrão aplicado a:
 - Comércio de Bens Essenciais v001.
 
 Os quatro cadernos setoriais passaram também a possuir aba/seção `Respostas_analiticas`.
+
+
+## Papel dos artefatos
+
+### Planilhas e tabelas
+São o **lastro técnico e auditável**: dados observados, fórmulas, séries, metadados, validações, fontes, limitações e trilha de auditoria.
+
+**Não são o produto principal para empresas.**
+
+### Documentos narrativos
+São o **produto principal de entrega e decisão empresarial**. Devem ser autossuficientes para o leitor executivo; a compreensão das principais conclusões não pode depender da abertura da planilha.
+
+A planilha permanece como fonte e apêndice técnico.
+
+## Cadeia obrigatória de leitura
+
+Toda conclusão relevante deve, quando possível, seguir:
+
+**dado/evidência → interpretação → implicação mercadológica → decisão apoiada → limitação**.
+
+## Camada executiva obrigatória
+
+O documento empresarial deve contemplar:
+- como usar o caderno;
+- o que o caderno permite decidir;
+- principais fatos;
+- implicações para empresas;
+- oportunidades;
+- riscos;
+- estrutura competitiva;
+- comportamento do consumidor;
+- decisões por tipo de empresa/formato quando defensável;
+- recomendações práticas;
+- indicadores;
+- limitações.
+
+## Recomendações
+
+Classificar como:
+- **RECOMENDAÇÃO BASEADA EM EVIDÊNCIAS**;
+- **HIPÓTESE ESTRATÉGICA A TESTAR**;
+- **BOA PRÁTICA GERAL**, quando não derivar diretamente dos dados locais.
+
+## Público-alvo
+
+Empresas locais, redes, investidores, empreendedores, entidades empresariais, gestores públicos, consultores e instituições de ensino.
+
+## Função dos cadernos
+
+O Caderno-Base explica o **ambiente de mercado de São Borja**.  
+Os Cadernos Setoriais traduzem esse ambiente para **decisões de mercado específicas**.
+
+## Princípio de entrega
+
+A planilha é a fonte técnica.  
+O documento narrativo é o **produto consumível para decisão empresarial**.

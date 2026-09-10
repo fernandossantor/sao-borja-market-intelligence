@@ -122,8 +122,8 @@ jobs:
               raise SystemExit(f"10329 same municipality reconciliation failed for {name}")
             if abs(other-(other_return3+other_notreturn3))>1.1:
               raise SystemExit(f"10329 other municipality return reconciliation failed for {name}")
-            if abs(residual)>1.1:
-              raise SystemExit(f"10329 total reconciliation failed for {name}: residual={residual}")
+            if residual < -1.1:
+              raise SystemExit(f"10329 negative residual for {name}: residual={residual}")
             work_summary.append({
               "municipio_codigo":code,"municipio":name,
               "ocupados_universo_10329":total,
@@ -133,6 +133,8 @@ jobs:
               "trabalho_outro_municipio":other,
               "trabalho_pais_estrangeiro":foreign,
               "trabalho_mais_de_um_municipio_ou_pais":multiple,
+              "local_trabalho_ignorado_residual_calculado":residual,
+              "local_trabalho_ignorado_residual_pct_calculado":residual/total*100 if total else None,
               "fora_municipio_residencia_calculado":other+foreign+multiple,
               "fora_municipio_residencia_pct_calculado":(other+foreign+multiple)/total*100 if total else None,
               "outro_municipio_pct_calculado":other/total*100 if total else None,
@@ -142,7 +144,7 @@ jobs:
               "periodo":"Censo 2022",
               "fonte":"IBGE/SIDRA tabela 10329",
               "natureza":"observado + calculado",
-              "limitacao":"Resultados preliminares da amostra; universo exclui pensionista, empregado(a) doméstico(a) e parente do(a) empregado(a) doméstico(a). A categoria Outro município não identifica o destino."
+              "limitacao":"Resultados preliminares da amostra; universo exclui pensionista, empregado(a) doméstico(a) e parente do(a) empregado(a) doméstico(a). O Total inclui casos com local de trabalho ignorado; o residual é preservado separadamente. A categoria Outro município não identifica o destino."
             })
           write_csv("censo_work_mobility_summary_2022.csv",work_summary)
 
@@ -172,14 +174,16 @@ jobs:
             middle_total=pick(sr,code,79174,12122)
             middle_other=pick(sr,code,12164,12122)
             residual=total-(same+other+foreign)
-            if abs(residual)>1.1:
-              raise SystemExit(f"10324 reconciliation failed for {name}: residual={residual}")
+            if residual < -1.1:
+              raise SystemExit(f"10324 negative residual for {name}: residual={residual}")
             study_summary.append({
               "municipio_codigo":code,"municipio":name,
               "estudantes_universo_10324":total,
               "estudam_municipio_residencia":same,
               "estudam_outro_municipio":other,
               "estudam_pais_estrangeiro":foreign,
+              "local_estudo_ignorado_residual_calculado":residual,
+              "local_estudo_ignorado_residual_pct_calculado":residual/total*100 if total else None,
               "estudam_fora_municipio_pct_calculado":(other+foreign)/total*100 if total else None,
               "ensino_medio_total":middle_total,
               "ensino_medio_outro_municipio":middle_other,
@@ -193,7 +197,7 @@ jobs:
               "periodo":"Censo 2022",
               "fonte":"IBGE/SIDRA tabela 10324",
               "natureza":"observado + calculado",
-              "limitacao":"Resultados preliminares da amostra; a categoria Outro município não identifica o destino."
+              "limitacao":"Resultados preliminares da amostra; o Total pode incluir local de estudo ignorado, preservado como residual. A categoria Outro município não identifica o destino."
             })
           write_csv("censo_study_mobility_summary_2022.csv",study_summary)
 

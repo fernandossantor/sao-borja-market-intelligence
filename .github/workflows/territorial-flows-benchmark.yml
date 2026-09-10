@@ -1,0 +1,341 @@
+name: territorial-flows-benchmark
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/territorial-flows-benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Extract Censo 2022 mobility and REGIC 2018 territorial flows
+        run: |
+          python -m pip install --upgrade requests pandas openpyxl
+          mkdir -p artifacts/territorial_flows
+          python - <<'PY'
+          import csv, hashlib, io, json, math, time, zipfile
+          from pathlib import Path
+          import pandas as pd
+          import requests
+
+          OUT=Path("artifacts/territorial_flows")
+          MUNICIPALITIES={
+            "4300406":"Alegrete",
+            "4317103":"Sant'Ana do Livramento",
+            "4317400":"Santiago",
+            "4318002":"São Borja",
+            "4318309":"São Gabriel",
+            "4322400":"Uruguaiana",
+          }
+          CODES=",".join(MUNICIPALITIES)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI territorial flows benchmark/1.0"})
+
+          def fetch(url,name,timeout=180):
+            last=None
+            for attempt in range(1,6):
+              try:
+                r=s.get(url,timeout=timeout)
+                if r.status_code==200 and r.content:
+                  p=OUT/f"{name}"
+                  p.write_bytes(r.content)
+                  return r.content,{
+                    "url":url,"bytes":len(r.content),
+                    "sha256":hashlib.sha256(r.content).hexdigest(),
+                    "attempt":attempt,"http_status":r.status_code
+                  }
+                last=f"HTTP {r.status_code}: {r.content[:300]!r}"
+              except Exception as exc:
+                last=f"{type(exc).__name__}: {exc}"
+              time.sleep(4*attempt)
+            raise SystemExit(f"Failed {name}: {last}")
+
+          def num(v):
+            t=str(v).strip()
+            if not t or t in {"-","...","X"}: return None
+            if "," in t: t=t.replace(".","").replace(",",".")
+            try:return float(t)
+            except ValueError:return None
+
+          def write_csv(path,rows):
+            if not rows: raise SystemExit(f"No rows for {path}")
+            with (OUT/path).open("w",encoding="utf-8",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0]))
+              w.writeheader(); w.writerows(rows)
+
+          # ---- Censo 2022: trabalho ----
+          work_url=(
+            "https://apisidra.ibge.gov.br/values/t/10329/n6/"+CODES+
+            "/v/13373/p/2022/c469/79176,12167,12168,12169,12188,12189,12190"
+            "/c2087/79177,79178,79179/c2/6794/c386/9680/h/y/f/a/d/m"
+          )
+          work_raw,work_meta=fetch(work_url,"sidra_10329_work_2022.json",90)
+          work_payload=json.loads(work_raw)
+          if not isinstance(work_payload,list) or len(work_payload)<2: raise SystemExit("Invalid 10329 payload")
+
+          def dim_codes(row):
+            return {str(v) for k,v in row.items() if k.startswith("D") and k.endswith("C")}
+
+          wr=[]
+          for row in work_payload[1:]:
+            wr.append({
+              "municipio_codigo":row.get("D1C",""),
+              "municipio":row.get("D1N",""),
+              "codes":dim_codes(row),
+              "valor":num(row.get("V","")),
+            })
+
+          def pick(rows,mcode,*cats):
+            cats={str(x) for x in cats}
+            vals=[r["valor"] for r in rows if r["municipio_codigo"]==mcode and cats.issubset(r["codes"])]
+            vals=[v for v in vals if v is not None]
+            if len(vals)!=1:
+              raise SystemExit(f"Expected one value m={mcode} cats={cats}, got {vals}")
+            return vals[0]
+
+          work_summary=[]
+          for code,name in MUNICIPALITIES.items():
+            total=pick(wr,code,79176,79177)
+            same=pick(wr,code,12167,79177)
+            home=pick(wr,code,12168,79177)
+            same_outside=pick(wr,code,12169,79177)
+            other=pick(wr,code,12188,79177)
+            foreign=pick(wr,code,12189,79177)
+            multiple=pick(wr,code,12190,79177)
+            other_return3=pick(wr,code,12188,79178)
+            other_notreturn3=pick(wr,code,12188,79179)
+            residual=total-(same+other+foreign+multiple)
+            if abs(same-(home+same_outside))>1.1:
+              raise SystemExit(f"10329 same municipality reconciliation failed for {name}")
+            if abs(other-(other_return3+other_notreturn3))>1.1:
+              raise SystemExit(f"10329 other municipality return reconciliation failed for {name}")
+            if abs(residual)>1.1:
+              raise SystemExit(f"10329 total reconciliation failed for {name}: residual={residual}")
+            work_summary.append({
+              "municipio_codigo":code,"municipio":name,
+              "ocupados_universo_10329":total,
+              "trabalho_municipio_residencia":same,
+              "trabalho_no_domicilio":home,
+              "trabalho_fora_domicilio_mesmo_municipio":same_outside,
+              "trabalho_outro_municipio":other,
+              "trabalho_pais_estrangeiro":foreign,
+              "trabalho_mais_de_um_municipio_ou_pais":multiple,
+              "fora_municipio_residencia_calculado":other+foreign+multiple,
+              "fora_municipio_residencia_pct_calculado":(other+foreign+multiple)/total*100 if total else None,
+              "outro_municipio_pct_calculado":other/total*100 if total else None,
+              "outro_municipio_retorna_3dias_ou_mais":other_return3,
+              "outro_municipio_retorna_3dias_ou_mais_pct_do_outro_mun_calculado":other_return3/other*100 if other else None,
+              "trabalho_no_domicilio_pct_calculado":home/total*100 if total else None,
+              "periodo":"Censo 2022",
+              "fonte":"IBGE/SIDRA tabela 10329",
+              "natureza":"observado + calculado",
+              "limitacao":"Resultados preliminares da amostra; universo exclui pensionista, empregado(a) doméstico(a) e parente do(a) empregado(a) doméstico(a). A categoria Outro município não identifica o destino."
+            })
+          write_csv("censo_work_mobility_summary_2022.csv",work_summary)
+
+          # ---- Censo 2022: estudo ----
+          study_url=(
+            "https://apisidra.ibge.gov.br/values/t/10324/n6/"+CODES+
+            "/v/2021/p/2022/c468/79174,12163,12164,12165"
+            "/c2/6794/c58/95253/c11322/79175,91116,91117,121400,12121,12122,121405,12123/h/y/f/a/d/m"
+          )
+          study_raw,study_meta=fetch(study_url,"sidra_10324_study_2022.json",90)
+          study_payload=json.loads(study_raw)
+          if not isinstance(study_payload,list) or len(study_payload)<2: raise SystemExit("Invalid 10324 payload")
+          sr=[]
+          for row in study_payload[1:]:
+            sr.append({"municipio_codigo":row.get("D1C",""),"municipio":row.get("D1N",""),"codes":dim_codes(row),"valor":num(row.get("V",""))})
+
+          study_summary=[]
+          for code,name in MUNICIPALITIES.items():
+            total=pick(sr,code,79174,79175)
+            same=pick(sr,code,12163,79175)
+            other=pick(sr,code,12164,79175)
+            foreign=pick(sr,code,12165,79175)
+            grad_total=pick(sr,code,79174,121405)
+            grad_other=pick(sr,code,12164,121405)
+            post_total=pick(sr,code,79174,12123)
+            post_other=pick(sr,code,12164,12123)
+            middle_total=pick(sr,code,79174,12122)
+            middle_other=pick(sr,code,12164,12122)
+            residual=total-(same+other+foreign)
+            if abs(residual)>1.1:
+              raise SystemExit(f"10324 reconciliation failed for {name}: residual={residual}")
+            study_summary.append({
+              "municipio_codigo":code,"municipio":name,
+              "estudantes_universo_10324":total,
+              "estudam_municipio_residencia":same,
+              "estudam_outro_municipio":other,
+              "estudam_pais_estrangeiro":foreign,
+              "estudam_fora_municipio_pct_calculado":(other+foreign)/total*100 if total else None,
+              "ensino_medio_total":middle_total,
+              "ensino_medio_outro_municipio":middle_other,
+              "ensino_medio_outro_municipio_pct_calculado":middle_other/middle_total*100 if middle_total else None,
+              "graduacao_total":grad_total,
+              "graduacao_outro_municipio":grad_other,
+              "graduacao_outro_municipio_pct_calculado":grad_other/grad_total*100 if grad_total else None,
+              "pos_total":post_total,
+              "pos_outro_municipio":post_other,
+              "pos_outro_municipio_pct_calculado":post_other/post_total*100 if post_total else None,
+              "periodo":"Censo 2022",
+              "fonte":"IBGE/SIDRA tabela 10324",
+              "natureza":"observado + calculado",
+              "limitacao":"Resultados preliminares da amostra; a categoria Outro município não identifica o destino."
+            })
+          write_csv("censo_study_mobility_summary_2022.csv",study_summary)
+
+          # ---- REGIC 2018 ----
+          base="https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular"
+          hier_raw,hier_meta=fetch(base+"/REGIC2018_Municipios_Hierarquia_e_regiao.xlsx","REGIC2018_Municipios_Hierarquia_e_regiao.xlsx")
+          zip_raw,zip_meta=fetch(base+"/REGIC2018_Municipios_Ligacoes_e_atracao_xlsx.zip","REGIC2018_Municipios_Ligacoes_e_atracao_xlsx.zip")
+
+          h=pd.read_excel(io.BytesIO(hier_raw),sheet_name=0)
+          with zipfile.ZipFile(io.BytesIO(zip_raw)) as z:
+            attr_b=z.read("REGIC2018_Quest_Atracao_Municipios.xlsx")
+            links_b=z.read("REGIC2018_Quest_Ligacoes_entre_Municipios.xlsx")
+          attr=pd.read_excel(io.BytesIO(attr_b),sheet_name="BD_MUN_QUEST")
+          links=pd.read_excel(io.BytesIO(links_b),sheet_name="BD_LIG_MUN_QUEST")
+
+          target_codes=set(MUNICIPALITIES)
+          hsel=h[h["codmun"].astype(str).isin(target_codes)].copy()
+          if len(hsel)!=6: raise SystemExit(f"REGIC hierarchy expected 6 rows, got {len(hsel)}")
+          hrows=[]
+          for _,r in hsel.iterrows():
+            hrows.append({
+              "municipio_codigo":str(r["codmun"]),"municipio":r["Município"],
+              "categoria":r["Categoria"],"hierarquia":r["Hierarquia"],
+              "hierarquia_grupo":r["Hierarquia - grupo"],
+              "multiplas_subordinacoes":r["Múltiplas Subordinações"],
+              "vinculacao_imediata":r["Região de influência - vínculação imediata consolidada"],
+              "regiao_influencia_1":r["Região de influência 1"],
+              "regiao_influencia_2":r["Região de influência 2"],
+              "regiao_influencia_3":r["Região de influência 3"],
+              "regiao_influencia_4":r["Região de influência 4"],
+              "periodo":"REGIC 2018","fonte":"IBGE REGIC 2018 — Municípios: Hierarquia e região de influência"
+            })
+          write_csv("regic_hierarchy_benchmark_2018.csv",hrows)
+
+          asel=attr[attr["CODMUN"].astype(str).isin(target_codes)].copy()
+          if len(asel)!=6: raise SystemExit(f"REGIC attraction expected 6 rows, got {len(asel)}")
+          arows=[]
+          for _,r in asel.iterrows():
+            rec={
+              "municipio_codigo":str(int(r["CODMUN"])),"municipio":r["NOME_MUN"],
+              "hierarquia_municipio":r["HIERAR_MUN"],"pop2018":r["POP2018"],"IA":r["IA"],
+            }
+            for q in range(1,11): rec[f"IA_Q{q}"]=r[f"IA_Q{q}"]
+            rec.update({"periodo":"REGIC 2018","fonte":"IBGE REGIC 2018 — Índices de atração por município","natureza":"observado na base oficial"})
+            arows.append(rec)
+          write_csv("regic_attraction_benchmark_2018.csv",arows)
+
+          incoming=links[links["MUN_DESTINO"].astype(str).eq("4318002")].copy()
+          outgoing=links[links["MUN_ORIGEM"].astype(str).eq("4318002")].copy()
+          link_cols=["MUN_ORIGEM","NOME_ORIGEM","POP2018_O","HIERAR_MUN_O","MUN_DESTINO","NOME_DESTINO","POP2018_D","HIERAR_MUN_D"]+[f"Q{i}" for i in range(1,11)]+[f"IA_Q{i}" for i in range(1,11)]+["PERC_LIG","IA"]
+          incoming[link_cols].to_csv(OUT/"regic_sao_borja_incoming_links_2018.csv",index=False,encoding="utf-8")
+          outgoing[link_cols].to_csv(OUT/"regic_sao_borja_outgoing_links_2018.csv",index=False,encoding="utf-8")
+
+          # Validate IA decomposition for São Borja
+          sb_attr=attr[attr["CODMUN"].astype(str).eq("4318002")].iloc[0]
+          diffs={"IA":float(incoming["IA"].fillna(0).sum()-sb_attr["IA"])}
+          for q in range(1,11):
+            diffs[f"IA_Q{q}"]=float(incoming[f"IA_Q{q}"].fillna(0).sum()-sb_attr[f"IA_Q{q}"])
+          if any(abs(v)>1e-5 for v in diffs.values()):
+            raise SystemExit(f"REGIC IA reconciliation failed: {diffs}")
+
+          topic_names={
+            1:"Vestuário e calçados",2:"Móveis e eletroeletrônicos",3:"Saúde baixa/média complexidade",
+            4:"Saúde alta complexidade",5:"Ensino superior",6:"Atividades culturais",
+            7:"Atividades esportivas",8:"Aeroporto",9:"Jornais",10:"Transporte público coletivo"
+          }
+          topics=[]
+          for q,label in topic_names.items():
+            qcol=f"Q{q}"
+            incpos=incoming[incoming[qcol].fillna(0)>0].sort_values(qcol,ascending=False)
+            outpos=outgoing[outgoing[qcol].fillna(0)>0].sort_values(qcol,ascending=False)
+            topics.append({
+              "tema_codigo":qcol,"tema":label,
+              "indice_atracao_sao_borja":sb_attr[f"IA_Q{q}"],
+              "origens_que_apontam_sao_borja_n":int(len(incpos)),
+              "principal_origem_para_sao_borja":"" if incpos.empty else incpos.iloc[0]["NOME_ORIGEM"],
+              "participacao_sao_borja_na_origem_pct":None if incpos.empty else incpos.iloc[0][qcol],
+              "principal_destino_apontado_por_sao_borja":"" if outpos.empty else outpos.iloc[0]["NOME_DESTINO"],
+              "participacao_destino_para_sao_borja_origem_pct":None if outpos.empty else outpos.iloc[0][qcol],
+              "periodo":"REGIC 2018",
+              "fonte":"IBGE REGIC 2018 — Ligações e atração segundo temas",
+              "natureza":"observado na base oficial",
+              "limitacao":"Percentuais e índices da pesquisa REGIC representam atração/participação estimada segundo o questionário e sua metodologia; não são contagens observadas de pessoas ou vendas."
+            })
+          write_csv("regic_sao_borja_topic_summary_2018.csv",topics)
+
+          # Integrated six-municipality table
+          w={r["municipio_codigo"]:r for r in work_summary}
+          st={r["municipio_codigo"]:r for r in study_summary}
+          hh={r["municipio_codigo"]:r for r in hrows}
+          aa={r["municipio_codigo"]:r for r in arows}
+          integrated=[]
+          for code,name in MUNICIPALITIES.items():
+            integrated.append({
+              "municipio_codigo":code,"municipio":name,
+              "trabalham_fora_municipio_pct_censo2022":w[code]["fora_municipio_residencia_pct_calculado"],
+              "trabalham_outro_municipio_pct_censo2022":w[code]["outro_municipio_pct_calculado"],
+              "trabalhadores_outro_mun_retorna_3mais_pct":w[code]["outro_municipio_retorna_3dias_ou_mais_pct_do_outro_mun_calculado"],
+              "estudam_fora_municipio_pct_censo2022":st[code]["estudam_fora_municipio_pct_calculado"],
+              "graduacao_outro_municipio_pct_censo2022":st[code]["graduacao_outro_municipio_pct_calculado"],
+              "hierarquia_regic2018":hh[code]["hierarquia"],
+              "vinculacao_imediata_regic2018":hh[code]["vinculacao_imediata"],
+              "IA_geral_regic2018":aa[code]["IA"],
+              "IA_vestuario_regic2018":aa[code]["IA_Q1"],
+              "IA_moveis_eletro_regic2018":aa[code]["IA_Q2"],
+              "IA_ensino_superior_regic2018":aa[code]["IA_Q5"],
+              "controle_metodologico":"Censo 2022 mede residentes; REGIC 2018 mede rede urbana/atração com metodologia própria. Não combinar como mesma data/universo nem interpretar IA como pessoas."
+            })
+          write_csv("territorial_flows_integrated_benchmark.csv",integrated)
+
+          direct=h[h["Região de influência - vínculação imediata consolidada"].astype(str).str.contains("São Borja",case=False,regex=False)]
+          direct_rows=[{"municipio_codigo":str(r["codmun"]),"municipio":r["Município"],"hierarquia":r["Hierarquia"],"vinculacao_imediata":r["Região de influência - vínculação imediata consolidada"]} for _,r in direct.iterrows()]
+          if direct_rows: write_csv("regic_direct_hierarchical_links_to_sao_borja_2018.csv",direct_rows)
+
+          manifest={
+            "sources":{
+              "sidra_10329":work_meta,"sidra_10324":study_meta,
+              "regic_hierarchy":hier_meta,"regic_links_attraction":zip_meta,
+            },
+            "geography":MUNICIPALITIES,
+            "censo_period":"2022 — resultados preliminares da amostra",
+            "regic_period":"2018",
+            "status":"PASS"
+          }
+          (OUT/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+          validation={
+            "work_rows":len(work_summary),"study_rows":len(study_summary),"hierarchy_rows":len(hrows),
+            "attraction_rows":len(arows),"incoming_sao_borja_links":len(incoming),
+            "outgoing_sao_borja_links":len(outgoing),"direct_hierarchical_links_to_sao_borja":len(direct),
+            "regic_ia_reconciliation_max_abs":max(abs(v) for v in diffs.values()),
+            "status":"PASS"
+          }
+          (OUT/"validation.json").write_text(json.dumps(validation,ensure_ascii=False,indent=2),encoding="utf-8")
+          print((OUT/"territorial_flows_integrated_benchmark.csv").read_text(encoding="utf-8"))
+          print((OUT/"regic_sao_borja_topic_summary_2018.csv").read_text(encoding="utf-8"))
+          print(json.dumps(validation,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload territorial flows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: territorial-flows-benchmark-v001
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/territorial_flows/

@@ -14,30 +14,27 @@ Toda etapa que altere dados, indicadores, método, interpretação ou diagnósti
 
 Dado observado, cálculo, estimativa, hipótese, interpretação e recomendação permanecem separados. Versões anteriores são preservadas para auditoria histórica.
 
-## Checkpoint corrente
+## Mudança metodológica — 2026-09-10
 
-- `docs/caderno_base/checkpoint_20260909.md` — estado consolidado ao encerramento de 2026-09-09.
-- Checkpoint histórico anterior: `docs/caderno_base/checkpoint_20260908.md`.
+A partir da v012, a regra de trabalho passa a ser:
+
+**auditoria suficiente → síntese analítica → lacunas decisórias → nova coleta apenas quando necessária.**
+
+Auditorias marginais de bases já canonizadas deixam de ser caminho crítico. O join operador × CNPJ × RFB dos bens essenciais permanece preservado como enriquecimento setorial, mas foi **depriorizado** porque não resolve market share, destino do gasto ou retenção territorial.
 
 ## Versão corrente
 
-- Caderno: `caderno_base_territorial_v011_oferta_demanda_bens_essenciais_20260908` — Drive `1dwyqUrPKs3QfMe6p5YMvbKYlZXaiDkBztdNoucvc6nc`.
-- Histórico imediato: v010 — Drive `1pTYhntxHJA24geADFVFiEOYoXvc8thtEYKP7901X9Ac`.
-- Diagnóstico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v010.md`.
+- Caderno: `caderno_base_territorial_v012_diagnostico_analitico_20260910` — Drive `1XiKYhTFVSY8aKwAwIYB2ncIz3zLE6WK185qSNEs9DDE`.
+- Histórico imediato: v011 — Drive `1dwyqUrPKs3QfMe6p5YMvbKYlZXaiDkBztdNoucvc6nc`.
+- Diagnóstico corrente: `docs/caderno_base/diagnostico_analitico_integrado_v011.md`.
+- Diagnóstico nativo no Drive: `16vtqP3xutEbPcbUS3m8ZvMUJfFlBGecypqNbzVSrxWg`.
 - Oferta × demanda × controle: `docs/caderno_base/oferta_demanda_controle_bens_essenciais_v007.md`.
 - Operadores pré-join: `docs/caderno_base/operadores_bens_essenciais_prejoin_rfb_v002.md`.
 - Demanda: `docs/caderno_base/demanda_potencial_bens_essenciais_v005.md`.
 - Mercado consumidor: `docs/caderno_base/mercado_consumidor_base_v006.md`.
 - Matriz monetária: `docs/caderno_base/matriz_fluxos_renda_transferencias_v001.md`.
 
-Documentos nativos no Drive:
-
-- diagnóstico integrado v008 — `1WT02AzJXg-oGasuTOmtyV6XCppxXNdyBFBXFZuRa_Jw`;
-- oferta, demanda e controle v007 — `1FjNvckIa49ULYyca3AMipugWFpzQtx2a0uLGlKZHdP4`;
-- demanda de bens essenciais v005 — `19hu0twj8N1xt66zHaHW0xJbMC9pTdvyhchJYbVm2Qbg`;
-- operadores pré-join RFB v002 — `1u8l0ll_TmR4PabMuNfAQvLlUFiyFcBjkLlV4G9BJyOg`.
-
-A v011 preserva as abas anteriores e contém `Oferta_demanda_controle`, `Qualidade_oferta` e `Operadores_prejoin_RFB`.
+A v012 preserva todas as abas anteriores, corrige a prontidão documental do pré-join para **96,30%**, registra a depriorização do join por operador e acrescenta a aba `Sintese_territorial`.
 
 ## Estado analítico consolidado
 
@@ -46,10 +43,23 @@ A v011 preserva as abas anteriores e contém `Oferta_demanda_controle`, `Qualida
 - RFB 2026-08: 6.906 estabelecimentos empresariais; 284 de matriz externa; **4,1124%**.
 - RAIS 2025 × RFB: 8.595 vínculos; emprego externo estimado **25,1606%**; remuneração de dezembro externa estimada **29,6897%**.
 
+**Interpretação:** a base empresarial é numericamente local, mas estruturas externas têm peso funcional muito superior à sua presença cadastral.
+
+### Varejo amplo — divisão 47
+
+- presença cadastral externa: **6,627907%**;
+- emprego externo estimado: **37,460891%**;
+- remuneração de dezembro externa estimada: **38,163647%**;
+- amplificação funcional emprego/cadastro: **5,651994x**.
+
+**Interpretação:** o varejo é um nó central de assimetria entre presença cadastral e escala funcional. Esses indicadores não são market share, faturamento, retenção ou vazamento.
+
 ### Fiscalidade
 
-- IPM definitivo: 2003–2026; 2026 = 0,533647; variação 2026/2025 = **+1,092483%**.
-- VAF oficial: 1994–2025; 2025 = R$ 2.325.966.620,93; variação nominal 2025/2024 = **-19,9957%**.
+- IPM definitivo 2026: **0,533647**, ainda **6,89% abaixo** do pico de 2023;
+- VAF oficial publicado: 1994–2025; 2025 = **R$ 2.325.966.620,93**; variação nominal 2025/2024 = **-19,9957%**.
+
+**Interpretação:** a trajetória fiscal/produtiva é cíclica e não sustenta narrativa de crescimento linear. VAF e IPM permanecem conceitualmente separados.
 
 ### Mercado residente
 
@@ -83,79 +93,54 @@ Censo da Oferta v002:
 
 O inventário sustenta leitura estrutural, não censo exato de lojas ativas.
 
-### Capacidade por formato
-
-CEMPRE/SIDRA: a razão de intensidade de pessoal 47.11-3 / 47.12-1 foi **≈4,73x em 2022** e **≈1,97x em 2023**. A direção de maior escala dos generalistas é sustentada, mas a magnitude é instável; empresa ≠ unidade local.
-
-### Controle territorial — varejo amplo G47
-
-- presença cadastral externa: **6,627907%**;
-- emprego externo estimado: **37,460891%**;
-- remuneração de dezembro externa estimada: **38,163647%**;
-- amplificação funcional emprego/cadastro: **5,651994x**;
-- amplificação remuneração/cadastro: **≈5,76x**.
-
-Essas razões não são market share, faturamento, retenção ou vazamento.
-
-## Matriz de operadores — pré-join RFB v002
+### Matriz de operadores — pré-join RFB v002
 
 Derivado: `matriz_operadores_bens_essenciais_prejoin_rfb_v002_20260909.xlsx` — Drive `12IKd7-zipN29iAYa16HNcoBT6PFa8k2S`.
 
 - 54 linhas correntes;
 - **52 CNPJs documentais prontos = 96,2963%**;
 - 0 duplicidades documentais pendentes;
-- 2 linhas ainda sem CNPJ documental suficientemente confiável;
-- 52 `MATCH_POM` e 2 `ONLY_CURRENT`.
+- 2 linhas ainda sem CNPJ documental suficientemente confiável.
 
-Pendências restantes: `Bedi Padaria e Confeitaria (Mercearia)` e `Sabor mineiro da Lu Delícias caseiras`.
-
-`controle_local_externo` e `municipio_matriz` permanecem pendentes da RFB oficial. É proibido substituir o join oficial por heurística `/0001`, endereço, telefone ou narrativa documental.
-
-## Join oficial dos 52 CNPJs — bloqueio atual
-
-Workflow: `.github/workflows/bens-essenciais-operadores-rfb-join.yml`.
-
-Run **34417653207**: **failure** no passo de download/scan dos arquivos oficiais da RFB.
-
-Causa observada: timeout de conexão HTTPS com `dadosabertos.rfb.gov.br:443`; o runner não recebeu bytes após as tentativas configuradas. A matriz final e o artifact não foram produzidos.
-
-Natureza do bloqueio: **infraestrutura/acesso à fonte externa**, não falha conceitual da regra territorial e não evidência de problema nos 52 CNPJs preparados.
+A granularização por operador permanece metodologicamente válida, mas **não é mais prioridade do Caderno-Base**. Retomar somente se uma pergunta do caderno setorial exigir CNAE, situação cadastral ou matriz/filial por operador.
 
 ## Diagnóstico corrente
 
-**Interpretação:** a estrutura competitiva dos bens essenciais é assimétrica: poucos operadores generalistas de maior escala coexistem com rede numerosa de proximidade/especializados; no varejo amplo, estruturas externas têm peso funcional muito superior à presença cadastral.
+**Interpretação integrada:** São Borja combina predominância numérica de estruturas empresariais locais, dependência funcional seletiva de organizações externas — especialmente no varejo —, mercado consumidor de escala moderada e concentrado nas faixas inferiores de renda, fluxos recorrentes de benefícios/transferências e base fiscal/produtiva cíclica.
 
-Ainda não é possível repartir os **R$ 234,7 milhões/ano** entre operadores locais e externos.
+A força competitiva territorial não pode ser inferida apenas pelo número de estabelecimentos. Escala operacional, renda, formato, canal, área de influência e origem/destino do gasto passam a ser as dimensões analíticas decisivas.
 
-## Indicadores bloqueados
+## Principal lacuna decisória
 
-Não calcular ainda:
+Ainda não é possível calcular:
 
 - market share por operador/formato;
-- faturamento médio dividindo demanda por contagem de lojas;
-- saturação por simples número de estabelecimentos;
-- participação das redes externas na demanda alimentar aplicando diretamente o G47;
-- retenção/vazamento com base apenas na localização da matriz.
+- parcela da demanda capturada por firmas locais ou redes externas;
+- retenção/vazamento territorial;
+- compras em outros municípios ou na Argentina;
+- participação do comércio eletrônico na saída de gasto.
+
+A lacuna comum é **vendas + origem/destino do gasto**, não cadastro empresarial adicional.
 
 ## Próxima prioridade
 
-1. testar novamente a disponibilidade do endpoint oficial da RFB;
-2. verificar a existência de cópia canônica já preservada dos arquivos RFB 2026-08 antes de baixar novamente;
-3. obter de forma íntegra `Municipios.zip` e `Estabelecimentos0..9.zip`;
-4. executar o join exato dos **52 CNPJs**;
-5. promover resultado ao Drive e sincronizar Caderno, diagnóstico, README e PR;
-6. resolver separadamente os 2 operadores ainda sem CNPJ validado;
-7. depois avançar para destino do gasto por formato, operador, canal e território — inclusive Argentina, outros municípios e comércio eletrônico.
+1. construir **benchmark territorial comparável** para contextualizar São Borja;
+2. transformar a Base Territorial comum em **quatro diagnósticos setoriais**;
+3. integrar as evidências das pesquisas POM aos fatos territoriais já canonizados;
+4. avançar para **área de influência e destino/origem do gasto** quando houver fonte adequada ou pesquisa primária;
+5. aprofundar séries históricas somente quando uma pergunta analítica exigir;
+6. manter o join operador × RFB como enriquecimento setorial depriorizado.
 
 ## Rastreabilidade principal
 
-- checkpoint 20260909: `docs/caderno_base/checkpoint_20260909.md`;
+- checkpoint histórico 20260909: `docs/caderno_base/checkpoint_20260909.md`;
+- diagnóstico v011: `docs/caderno_base/diagnostico_analitico_integrado_v011.md`;
+- diagnóstico nativo v012: Drive `16vtqP3xutEbPcbUS3m8ZvMUJfFlBGecypqNbzVSrxWg`;
 - POF raw: Drive `1BJiRJn8KoTYQBqlKcThFy7oCQqsv41PK`;
 - demanda v005: `1KS9glx_tES10Ry8vAGO0uQFhemOWJlO911EvliwTTTo`;
 - Censo da Oferta v002: `14mOXvVHmwB195HA2_jxNgrIKtoZE28Y3`;
 - proxy oferta/capacidade v007: `1mit1gNiFS2T4c3ax9wnyCaERuhkci0Wg`;
 - matriz pré-join v002: `12IKd7-zipN29iAYa16HNcoBT6PFa8k2S`;
-- Caderno v011: `1dwyqUrPKs3QfMe6p5YMvbKYlZXaiDkBztdNoucvc6nc`;
-- run RFB com falha de conectividade: `34417653207`.
+- Caderno v012: `1XiKYhTFVSY8aKwAwIYB2ncIz3zLE6WK185qSNEs9DDE`.
 
 A configuração de escrita controlada permanece em `docs/drive_write_connection.md`. O PR #41 permanece **aberto, draft e sem merge** até autorização explícita.

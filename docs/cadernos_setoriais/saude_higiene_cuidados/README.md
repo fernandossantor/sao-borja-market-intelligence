@@ -120,3 +120,35 @@ com:
 ## Próximo caderno
 
 **Comércio de bens essenciais**, aproveitando demanda e oferta já auditadas e sem retornar ao join operador × RFB como caminho crítico.
+
+
+## Padrão editorial e de fontes — aplicado em 2026-09-10
+
+Regra de governança:
+`docs/governance/padrao_editorial_cadernos.md`.
+
+Todo caderno deve conter:
+- **Sumario**;
+- **Siglas**;
+- **Origem_dados**;
+- **Referencias_originais**;
+- e, nos cadernos setoriais, **Respostas_analiticas**.
+
+Os documentos narrativos recebem igualmente:
+- sumário textual;
+- lista de siglas e códigos;
+- nota conceitual das fontes;
+- síntese de respostas analíticas;
+- referências oficiais ao final.
+
+A origem deve identificar a operação estatística ou cadastro, e não apenas o órgão. Exemplo: **PIB dos Municípios — IBGE**, conforme metodologia integrada ao SCN/SCR e SNA 2008, em vez de apenas “PIB — IBGE”.
+
+No escopo atual, pesquisa primária é **não operacional**. Perguntas sem base compatível tornam-se limites explícitos.
+
+
+### Leitura prioritária
+
+A aba `Respostas_analiticas` organiza o caderno em:
+`pergunta → resposta sustentada → natureza → evidência → implicação → limite`.
+
+Essa camada deve orientar a redação final: primeiro responder o que a base permite; depois registrar os limites.

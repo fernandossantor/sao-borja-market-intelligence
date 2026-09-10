@@ -111,3 +111,48 @@ Não reabrir o join operador × RFB como caminho crítico.
 ## PR
 
 PR #41 permanece **aberto, draft e sem merge**.
+
+
+## Padrão editorial e de fontes — aplicado em 2026-09-10
+
+Regra de governança:
+`docs/governance/padrao_editorial_cadernos.md`.
+
+Todo caderno deve conter:
+- **Sumario**;
+- **Siglas**;
+- **Origem_dados**;
+- **Referencias_originais**;
+- e, nos cadernos setoriais, **Respostas_analiticas**.
+
+Os documentos narrativos recebem igualmente:
+- sumário textual;
+- lista de siglas e códigos;
+- nota conceitual das fontes;
+- síntese de respostas analíticas;
+- referências oficiais ao final.
+
+A origem deve identificar a operação estatística ou cadastro, e não apenas o órgão. Exemplo: **PIB dos Municípios — IBGE**, conforme metodologia integrada ao SCN/SCR e SNA 2008, em vez de apenas “PIB — IBGE”.
+
+No escopo atual, pesquisa primária é **não operacional**. Perguntas sem base compatível tornam-se limites explícitos.
+
+
+## Atualização editorial e analítica — 2026-09-10
+
+Padrão obrigatório formalizado no Drive:
+`10DMrhZAI7p3DliBxNeWNJPqkIQCLQDB7Fkgqcbv1NH0`.
+
+Aplicado ao Caderno-Base e aos quatro cadernos setoriais.
+
+Novos elementos:
+- Sumario;
+- Siglas;
+- Origem_dados;
+- Referencias_originais;
+- Respostas_analiticas nos quatro setoriais.
+
+As referências finais agora apontam para as fontes primárias institucionais, incluindo IBGE, Receita Federal, MTE, Receita Estadual/SEFAZ-RS, INSS e Portal da Transparência/MDS, conforme a fonte efetivamente utilizada.
+
+PIB passa a ser explicitado como **Produto Interno Bruto dos Municípios do IBGE**, com conceito/metodologia, período e limitação, e não apenas como rótulo genérico.
+
+A prioridade seguinte é aprofundar a redação final das respostas já sustentadas pela base existente.

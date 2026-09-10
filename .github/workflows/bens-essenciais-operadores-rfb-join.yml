@@ -15,9 +15,7 @@ jobs:
     timeout-minutes: 300
     env:
       COMPETENCE: '2026-08'
-      RFB_WEBDAV_BASE: 'https://arquivos.receitafederal.gov.br/public.php/webdav'
-      RFB_CNPJ_PATH: 'Dados/Cadastros/CNPJ'
-      RFB_SHARE_TOKEN: 'gn672Ad4CF8N6TK'
+      RFB_SHARE_BASE: 'https://arquivos.receitafederal.gov.br/index.php/s/gn672Ad4CF8N6TK'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -100,42 +98,26 @@ jobs:
           import sys
           import zipfile
           from pathlib import Path
-
           import pandas as pd
           from sbmi.cnpj_territorial_control import ESTABLISHMENT_COLUMNS, _full_cnpj
-
           operators = json.loads(Path('.data/tmp/rfb_targeted/operators.json').read_text(encoding='utf-8'))
           targets = {x['cnpj_unidade'] for x in operators}
           roots = {x[:8] for x in targets}
           zip_path = Path(sys.argv[1])
           exact_out = Path('artifacts/operator_join/_exact_parts.csv')
           matrix_out = Path('artifacts/operator_join/_matrix_parts.csv')
-
-          def append(frame: pd.DataFrame, path: Path) -> None:
-              if frame.empty:
-                  return
-              frame.to_csv(path, mode='a', index=False, header=not path.exists())
-
+          def append(frame, path):
+              if not frame.empty:
+                  frame.to_csv(path, mode='a', index=False, header=not path.exists())
           with zipfile.ZipFile(zip_path) as zf:
-              members = [m for m in zf.namelist() if not m.endswith('/')]
-              if not members:
-                  raise SystemExit(f'No table member in {zip_path}')
-              for member in members:
+              for member in [m for m in zf.namelist() if not m.endswith('/')]:
                   with zf.open(member) as fh:
-                      for chunk in pd.read_csv(
-                          fh, sep=';', header=None, names=ESTABLISHMENT_COLUMNS,
-                          dtype='string', encoding='latin1', keep_default_na=False,
-                          na_filter=False, chunksize=250000, low_memory=False,
-                      ):
-                          in_roots = chunk['cnpj_basico'].isin(roots)
-                          if not in_roots.any():
-                              continue
-                          sub = chunk.loc[in_roots].copy()
+                      for chunk in pd.read_csv(fh, sep=';', header=None, names=ESTABLISHMENT_COLUMNS, dtype='string', encoding='latin1', keep_default_na=False, na_filter=False, chunksize=250000, low_memory=False):
+                          sub = chunk.loc[chunk['cnpj_basico'].isin(roots)].copy()
+                          if sub.empty: continue
                           sub['cnpj'] = _full_cnpj(sub)
-                          exact = sub[sub['cnpj'].isin(targets)].copy()
-                          matrices = sub[sub['identificador_matriz_filial'] == '1'].copy()
-                          append(exact, exact_out)
-                          append(matrices, matrix_out)
+                          append(sub[sub['cnpj'].isin(targets)].copy(), exact_out)
+                          append(sub[sub['identificador_matriz_filial'] == '1'].copy(), matrix_out)
           PY
 
       - name: Download municipalities and scan official establishment files sequentially
@@ -145,26 +127,19 @@ jobs:
           raw='.data/tmp/rfb_targeted'
           : > artifacts/operator_join/RFB_SHA256SUMS.txt
           : > artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
-
           download_rfb() {
-            local file="$1"
-            local out="$2"
-            local url="${RFB_WEBDAV_BASE}/${RFB_CNPJ_PATH}/${COMPETENCE}/${file}"
+            local file="$1"; local out="$2"
+            local url="${RFB_SHARE_BASE}/download?path=%2F${COMPETENCE}&files=${file}"
             echo "${file}|${url}" >> artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
-            curl --fail --location --user "${RFB_SHARE_TOKEN}:" \
-              --retry 5 --retry-delay 5 --connect-timeout 30 --max-time 1800 \
-              --output "$out" "$url"
+            curl --fail --location --retry 5 --retry-delay 5 --connect-timeout 30 --max-time 1800 --output "$out" "$url"
             test -s "$out"
             unzip -tq "$out" >/dev/null
             sha256sum "$out" >> artifacts/operator_join/RFB_SHA256SUMS.txt
           }
-
           download_rfb 'Municipios.zip' "$raw/Municipios.zip"
-
           for i in {0..9}; do
-            file="Estabelecimentos${i}.zip"
-            out="$raw/$file"
-            echo "Downloading and scanning $file from official RFB Nextcloud/WebDAV"
+            file="Estabelecimentos${i}.zip"; out="$raw/$file"
+            echo "Downloading and scanning $file from official RFB Nextcloud public share"
             download_rfb "$file" "$out"
             python "$raw/scan_one.py" "$out"
             rm -f "$out"
@@ -180,116 +155,48 @@ jobs:
           from pathlib import Path
           import pandas as pd
           from sbmi.cnpj_territorial_control import _read_municipalities
-
           base = Path('artifacts/operator_join')
           operators = pd.DataFrame(json.loads(Path('.data/tmp/rfb_targeted/operators.json').read_text(encoding='utf-8')))
-          targets = set(operators['cnpj_unidade'])
-          roots = {x[:8] for x in targets}
-
-          if len(operators) != 52 or operators['cnpj_unidade'].nunique() != 52:
-              raise SystemExit('Expected exactly 52 unique documentary-ready CNPJs')
-
-          exact_path = base / '_exact_parts.csv'
-          matrix_path = base / '_matrix_parts.csv'
-          exact = pd.read_csv(exact_path, dtype=str, keep_default_na=False) if exact_path.exists() else pd.DataFrame()
-          matrices = pd.read_csv(matrix_path, dtype=str, keep_default_na=False) if matrix_path.exists() else pd.DataFrame()
-
-          if not exact.empty:
-              exact = exact.drop_duplicates(subset=['cnpj'], keep='first')
-          if not matrices.empty:
-              matrices = matrices.drop_duplicates(subset=['cnpj'], keep='first')
-
-          matrix_counts = matrices.groupby('cnpj_basico').size() if not matrices.empty else pd.Series(dtype=int)
-          bad_roots = matrix_counts[matrix_counts > 1]
-          if len(bad_roots):
-              raise SystemExit(f'More than one official matrix establishment found for roots: {bad_roots.to_dict()}')
-
-          municipalities = _read_municipalities(Path('.data/tmp/rfb_targeted/Municipios.zip'))
-          mun_map = municipalities.set_index('municipio')['municipio_nome'].to_dict()
-
-          exact_cols = [
-              'cnpj','cnpj_basico','cnpj_ordem','cnpj_dv','identificador_matriz_filial',
-              'nome_fantasia','situacao_cadastral','data_situacao_cadastral',
-              'cnae_fiscal_principal','uf','municipio','bairro','cep'
-          ]
-          matrix_cols = ['cnpj_basico','cnpj','situacao_cadastral','uf','municipio']
-          ex = exact[exact_cols].copy() if not exact.empty else pd.DataFrame(columns=exact_cols)
-          mx = matrices[matrix_cols].copy() if not matrices.empty else pd.DataFrame(columns=matrix_cols)
-          mx = mx.rename(columns={
-              'cnpj':'cnpj_matriz_rfb',
-              'situacao_cadastral':'situacao_matriz_rfb',
-              'uf':'uf_matriz_rfb',
-              'municipio':'municipio_matriz_tom_rfb',
-          })
-
-          joined = operators.merge(ex, how='left', left_on='cnpj_unidade', right_on='cnpj', validate='one_to_one')
-          joined = joined.merge(mx, how='left', on='cnpj_basico', validate='many_to_one')
-          joined['municipio_estabelecimento_rfb'] = joined['municipio'].map(mun_map)
-          joined['municipio_matriz_rfb'] = joined['municipio_matriz_tom_rfb'].map(mun_map)
-          joined['matriz_filial_oficial_rfb'] = joined['identificador_matriz_filial'].map({'1':'MATRIZ','2':'FILIAL'}).fillna('NAO_LOCALIZADO')
-          joined['status_join_rfb'] = joined['cnpj'].where(joined['cnpj'].fillna('') == '', 'MATCH_EXATO_RFB')
-          joined.loc[joined['cnpj'].fillna('') == '', 'status_join_rfb'] = 'NAO_LOCALIZADO_RFB_2026_08'
-          joined['controle_territorial_rfb'] = 'INDETERMINADO'
-          found = joined['status_join_rfb'] == 'MATCH_EXATO_RFB'
-          is_matrix = joined['identificador_matriz_filial'] == '1'
-          is_branch = joined['identificador_matriz_filial'] == '2'
-          matrix_known = joined['municipio_matriz_tom_rfb'].fillna('') != ''
-          joined.loc[found & is_matrix & (joined['municipio'] == '8863'), 'controle_territorial_rfb'] = 'MATRIZ_LOCAL'
-          joined.loc[found & is_matrix & (joined['municipio'] != '8863'), 'controle_territorial_rfb'] = 'MATRIZ_FORA_DE_SAO_BORJA'
-          joined.loc[found & is_branch & matrix_known & (joined['municipio_matriz_tom_rfb'] == '8863'), 'controle_territorial_rfb'] = 'FILIAL_DE_MATRIZ_LOCAL'
-          joined.loc[found & is_branch & matrix_known & (joined['municipio_matriz_tom_rfb'] != '8863'), 'controle_territorial_rfb'] = 'FILIAL_DE_MATRIZ_EXTERNA'
-          joined.loc[found & is_branch & ~matrix_known, 'controle_territorial_rfb'] = 'FILIAL_MATRIZ_NAO_LOCALIZADA'
-
-          joined['competencia_rfb'] = '2026-08'
-          joined['fonte_rfb'] = 'Receita Federal do Brasil — Dados Abertos CNPJ — Estabelecimentos e Municípios — repositório oficial Nextcloud/WebDAV'
-          joined['natureza_dado_rfb'] = 'observado'
-
-          output_cols = [
-              'source_row','operador_fantasia','cnpj_unidade','status_join_rfb',
-              'situacao_cadastral','data_situacao_cadastral','cnae_fiscal_principal',
-              'matriz_filial_oficial_rfb','cnpj_matriz_rfb','situacao_matriz_rfb',
-              'municipio_estabelecimento_rfb','uf','municipio_matriz_rfb','uf_matriz_rfb',
-              'controle_territorial_rfb','nome_fantasia','bairro','cep',
-              'competencia_rfb','fonte_rfb','natureza_dado_rfb'
-          ]
-          joined[output_cols].to_csv(base / 'operadores_bens_essenciais_rfb_join_v002.csv', index=False)
-
-          unmatched = joined[joined['status_join_rfb'] != 'MATCH_EXATO_RFB'][output_cols]
-          unmatched.to_csv(base / 'operadores_bens_essenciais_rfb_unmatched_v002.csv', index=False)
-
-          status_counts = joined['controle_territorial_rfb'].value_counts(dropna=False).to_dict()
-          cadastral_counts = joined['situacao_cadastral'].value_counts(dropna=False).to_dict()
-          summary = {
-              'competence': '2026-08',
-              'documentary_ready_cnpjs': 52,
-              'exact_rfb_matches_national_establishments': int((joined['status_join_rfb'] == 'MATCH_EXATO_RFB').sum()),
-              'not_located_rfb_2026_08': int((joined['status_join_rfb'] != 'MATCH_EXATO_RFB').sum()),
-              'matrix_records_found_for_target_roots': int(matrices['cnpj_basico'].nunique()) if not matrices.empty else 0,
-              'target_roots': len(roots),
-              'control_status_counts': {str(k): int(v) for k,v in status_counts.items()},
-              'cadastral_status_counts': {str(k): int(v) for k,v in cadastral_counts.items()},
-              'method': 'Exact full-CNPJ scan of official RFB Estabelecimentos 2026-08. Matrix/branch uses official identificador_matriz_filial; matrix municipality comes from the official matrix establishment row for the same root. No /0001 heuristic.',
-              'source_scope': 'Receita Federal do Brasil — Dados Abertos CNPJ — official Nextcloud/WebDAV share: Dados/Cadastros/CNPJ/2026-08; Estabelecimentos0..9.zip + Municipios.zip',
-              'limitations': [
-                  'This 52-CNPJ subset is a documentary operator subset, not an exhaustive census of all food retail establishments.',
-                  'Control status is not market share, sales participation, profit remittance, retention or leakage.',
-                  'Two current inventory rows remain without documentary CNPJ and are outside this exact join.'
-              ]
-          }
-          Path(base / 'operadores_bens_essenciais_rfb_join_summary_v002.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding='utf-8')
-          print(json.dumps(summary, ensure_ascii=False, indent=2))
-          print(joined[output_cols[:15]].to_string(index=False))
-
-          exact.to_csv(base / 'rfb_target_exact_rows_v002.csv', index=False)
-          matrices.to_csv(base / 'rfb_target_matrix_rows_v002.csv', index=False)
+          targets=set(operators.cnpj_unidade); roots={x[:8] for x in targets}
+          if len(operators)!=52 or operators.cnpj_unidade.nunique()!=52: raise SystemExit('Expected exactly 52 unique documentary-ready CNPJs')
+          exact_path=base/'_exact_parts.csv'; matrix_path=base/'_matrix_parts.csv'
+          exact=pd.read_csv(exact_path,dtype=str,keep_default_na=False) if exact_path.exists() else pd.DataFrame()
+          matrices=pd.read_csv(matrix_path,dtype=str,keep_default_na=False) if matrix_path.exists() else pd.DataFrame()
+          if not exact.empty: exact=exact.drop_duplicates(subset=['cnpj'])
+          if not matrices.empty: matrices=matrices.drop_duplicates(subset=['cnpj'])
+          counts=matrices.groupby('cnpj_basico').size() if not matrices.empty else pd.Series(dtype=int)
+          if (counts>1).any(): raise SystemExit(f'More than one official matrix establishment found: {counts[counts>1].to_dict()}')
+          mun_map=_read_municipalities(Path('.data/tmp/rfb_targeted/Municipios.zip')).set_index('municipio')['municipio_nome'].to_dict()
+          exact_cols=['cnpj','cnpj_basico','cnpj_ordem','cnpj_dv','identificador_matriz_filial','nome_fantasia','situacao_cadastral','data_situacao_cadastral','cnae_fiscal_principal','uf','municipio','bairro','cep']
+          matrix_cols=['cnpj_basico','cnpj','situacao_cadastral','uf','municipio']
+          ex=exact[exact_cols].copy() if not exact.empty else pd.DataFrame(columns=exact_cols)
+          mx=matrices[matrix_cols].copy() if not matrices.empty else pd.DataFrame(columns=matrix_cols)
+          mx=mx.rename(columns={'cnpj':'cnpj_matriz_rfb','situacao_cadastral':'situacao_matriz_rfb','uf':'uf_matriz_rfb','municipio':'municipio_matriz_tom_rfb'})
+          joined=operators.merge(ex,how='left',left_on='cnpj_unidade',right_on='cnpj',validate='one_to_one').merge(mx,how='left',on='cnpj_basico',validate='many_to_one')
+          joined['municipio_estabelecimento_rfb']=joined['municipio'].map(mun_map); joined['municipio_matriz_rfb']=joined['municipio_matriz_tom_rfb'].map(mun_map)
+          joined['matriz_filial_oficial_rfb']=joined['identificador_matriz_filial'].map({'1':'MATRIZ','2':'FILIAL'}).fillna('NAO_LOCALIZADO')
+          joined['status_join_rfb']='NAO_LOCALIZADO_RFB_2026_08'; joined.loc[joined['cnpj'].fillna('')!='','status_join_rfb']='MATCH_EXATO_RFB'
+          joined['controle_territorial_rfb']='INDETERMINADO'; found=joined.status_join_rfb.eq('MATCH_EXATO_RFB'); m=joined.identificador_matriz_filial.eq('1'); f=joined.identificador_matriz_filial.eq('2'); known=joined.municipio_matriz_tom_rfb.fillna('').ne('')
+          joined.loc[found&m&joined.municipio.eq('8863'),'controle_territorial_rfb']='MATRIZ_LOCAL'
+          joined.loc[found&m&~joined.municipio.eq('8863'),'controle_territorial_rfb']='MATRIZ_FORA_DE_SAO_BORJA'
+          joined.loc[found&f&known&joined.municipio_matriz_tom_rfb.eq('8863'),'controle_territorial_rfb']='FILIAL_DE_MATRIZ_LOCAL'
+          joined.loc[found&f&known&~joined.municipio_matriz_tom_rfb.eq('8863'),'controle_territorial_rfb']='FILIAL_DE_MATRIZ_EXTERNA'
+          joined.loc[found&f&~known,'controle_territorial_rfb']='FILIAL_MATRIZ_NAO_LOCALIZADA'
+          joined['competencia_rfb']='2026-08'; joined['fonte_rfb']='Receita Federal do Brasil — Dados Abertos CNPJ — Estabelecimentos e Municípios — compartilhamento público oficial Nextcloud'; joined['natureza_dado_rfb']='observado'
+          cols=['source_row','operador_fantasia','cnpj_unidade','status_join_rfb','situacao_cadastral','data_situacao_cadastral','cnae_fiscal_principal','matriz_filial_oficial_rfb','cnpj_matriz_rfb','situacao_matriz_rfb','municipio_estabelecimento_rfb','uf','municipio_matriz_rfb','uf_matriz_rfb','controle_territorial_rfb','nome_fantasia','bairro','cep','competencia_rfb','fonte_rfb','natureza_dado_rfb']
+          joined[cols].to_csv(base/'operadores_bens_essenciais_rfb_join_v003.csv',index=False)
+          joined[joined.status_join_rfb.ne('MATCH_EXATO_RFB')][cols].to_csv(base/'operadores_bens_essenciais_rfb_unmatched_v003.csv',index=False)
+          summary={'competence':'2026-08','documentary_ready_cnpjs':52,'exact_rfb_matches_national_establishments':int(joined.status_join_rfb.eq('MATCH_EXATO_RFB').sum()),'not_located_rfb_2026_08':int(joined.status_join_rfb.ne('MATCH_EXATO_RFB').sum()),'matrix_records_found_for_target_roots':int(matrices.cnpj_basico.nunique()) if not matrices.empty else 0,'target_roots':len(roots),'control_status_counts':{str(k):int(v) for k,v in joined.controle_territorial_rfb.value_counts(dropna=False).items()},'cadastral_status_counts':{str(k):int(v) for k,v in joined.situacao_cadastral.value_counts(dropna=False).items()},'method':'Exact full-CNPJ scan of official RFB Estabelecimentos 2026-08. Matrix/branch uses official identificador_matriz_filial; matrix municipality comes from official matrix establishment row for same root. No /0001 heuristic.','source_scope':'Receita Federal do Brasil — Dados Abertos CNPJ — official Nextcloud public share; Estabelecimentos0..9.zip + Municipios.zip, competência 2026-08','limitations':['This 52-CNPJ subset is a documentary operator subset, not an exhaustive census of all food retail establishments.','Control status is not market share, sales participation, profit remittance, retention or leakage.','Two current inventory rows remain without documentary CNPJ and are outside this exact join.']}
+          (base/'operadores_bens_essenciais_rfb_join_summary_v003.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          exact.to_csv(base/'rfb_target_exact_rows_v003.csv',index=False); matrices.to_csv(base/'rfb_target_matrix_rows_v003.csv',index=False)
           PY
-
           rm -f artifacts/operator_join/_exact_parts.csv artifacts/operator_join/_matrix_parts.csv
 
       - name: Upload operator join outputs
         uses: actions/upload-artifact@v4
         with:
-          name: bens-essenciais-operadores-rfb-join-v002
+          name: bens-essenciais-operadores-rfb-join-v003
           path: artifacts/operator_join/
           if-no-files-found: error
           retention-days: 30

@@ -156,3 +156,20 @@ As referências finais agora apontam para as fontes primárias institucionais, i
 PIB passa a ser explicitado como **Produto Interno Bruto dos Municípios do IBGE**, com conceito/metodologia, período e limitação, e não apenas como rótulo genérico.
 
 A prioridade seguinte é aprofundar a redação final das respostas já sustentadas pela base existente.
+
+
+## Camada empresarial — aplicada
+
+Documento narrativo principal do Caderno-Base v016:
+`Caderno-Base Territorial — São Borja — Diagnóstico empresarial v016 — 20260910`
+
+Drive:
+`1rnNqjkz4LjblWxT0UuDWBMmiICijPHVQ9uYv6f6oZKU`.
+
+Regra consolidada:
+- planilhas/tabelas = **lastro técnico e auditável**;
+- documentos narrativos = **produto principal para decisão empresarial**.
+
+Os quatro documentos setoriais receberam **GUIA DE USO EMPRESARIAL** com público, decisões apoiadas, leitura central, oportunidades, riscos e decisões não sustentadas.
+
+Próxima prioridade: aprofundar a redação e a apresentação executiva, usando tabelas e gráficos apenas quando ajudarem a responder perguntas de decisão.

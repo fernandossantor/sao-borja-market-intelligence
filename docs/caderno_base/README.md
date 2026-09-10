@@ -127,3 +127,17 @@ Regra:
 **planilha = lastro técnico; documento = produto consumível para decisões empresariais**.
 
 O documento v016 reúne guia de uso, resumo executivo, decisões apoiadas, fatos, implicações, oportunidades, riscos, decisões por tipo de empresa, indicadores, limitações e referências originais.
+
+
+## Porta de entrada empresarial
+
+Síntese Executiva Empresarial:
+`São Borja — Síntese Executiva Empresarial — Inteligência Mercadológica v001`
+
+Drive:
+`1zFKlv8kc1I3f6xTAI2bSyRAohB3r60MkCWsC9JaZ2aQ`.
+
+GitHub:
+`docs/sintese_transversal/sintese_executiva_empresarial_v001.md`.
+
+Essa síntese deve ser o primeiro documento entregue a empresas. Os cadernos aprofundam o tema; as planilhas permanecem como lastro técnico.

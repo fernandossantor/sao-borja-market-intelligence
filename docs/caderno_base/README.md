@@ -1,17 +1,23 @@
 # Caderno-Base Territorial — regra de consistência
 
-## Regra metodológica
+## Regra metodológica vigente
 
-**auditoria suficiente → síntese analítica → lacunas decisórias → nova coleta apenas quando necessária.**
+**auditoria suficiente → síntese analítica → perguntas respondíveis → limites explícitos.**
 
-O join operador × CNPJ × RFB de bens essenciais permanece preservado e **depriorizado**.
+Em 2026-09-10 foi definido que **não haverá aplicação de pesquisa primária** no escopo atual.
+
+Portanto:
+- não abrir survey, interceptação, mystery shopping, price audit ou painel de empresas como etapa operacional;
+- não retomar auditorias marginais sem necessidade decisória;
+- responder apenas o que a base existente sustenta;
+- questões irresolúveis tornam-se limitações, não pendências.
+
+O join operador × CNPJ × RFB permanece **depriorizado**.
 
 ## Base corrente
 
 `caderno_base_territorial_v016_fluxos_centralidade_20260910`  
 Drive `1RPMo8eqXsRv7VGXiTZA9_DLBdeFBrnUuNkbm6Bt5Jc4`.
-
-A Base é transversal. Resultados POM permanecem em camada de integração e cadernos setoriais.
 
 ## Camada Base × POM
 
@@ -19,68 +25,69 @@ Concluída:
 - planilha `1_044ZCqKQYeHc8r84IO8-sgLv8uUwUZIIcO4oMZUdWM`;
 - documento `1Z1hBNOVXDuu6HNXWdLGLsL_YNFJJRiEKsbBMoUL4PjQ`.
 
-## Cadernos setoriais v001 — TODOS CONCLUÍDOS
+## Cadernos setoriais v001
 
-### Bens não essenciais
+Todos concluídos:
 
-Drive:
-`1MdDWyEqlfgMUGnPhQMwwkHMAH8n6prKS9KJly89djwo`.
+- bens não essenciais — `1MdDWyEqlfgMUGnPhQMwwkHMAH8n6prKS9KJly89djwo`;
+- alimentação fora/serviços — `1t0bn0GJDRvMksqKC1f7sGAA797RNglc5fNnXAiko6j0`;
+- saúde/higiene — `1K1-QIVlvrE7_zRONAZVvzPQ805jajHHRlx4uHg7OL_0`;
+- bens essenciais — `13k3iYvb9kXNgDBWE2zZykHnO4u4idrXsYjo40-TXgUA`.
 
-Principal diagnóstico:
-dupla concorrência territorial + digital.
+## Síntese transversal — nova camada operacional
 
-### Alimentação fora do lar e serviços
-
-Drive:
-`1t0bn0GJDRvMksqKC1f7sGAA797RNglc5fNnXAiko6j0`.
-
-Principal diagnóstico:
-serviços exigem desagregação; foodservice exige medir demanda de visitantes.
-
-### Saúde, higiene e cuidados pessoais
+Planilha:
+`matriz_questoes_respondiveis_dados_existentes_v001_20260910`
 
 Drive:
-`1K1-QIVlvrE7_zRONAZVvzPQ805jajHHRlx4uHg7OL_0`.
+`1c8CZnWYqoGW9gEpSDI0v0rRZZSZf2GkoNkSeNkj5vNA`.
 
-Principal diagnóstico:
-farmácias/conveniência × especializadas/autoridade × e-commerce/preço.
+Documento:
+`1pQxUQM4LJLVm85UrddYIH2Hztc-uzUVmEqZfKxI0E3o`.
 
-Auditoria:
-mapeamento POM de farmácias possui inconsistência 13 × 10 no Centro e não é oferta canônica.
+Documentação:
+`docs/sintese_transversal/questoes_respondiveis_v001.md`.
 
-### Bens essenciais
+### Classes
 
-Drive:
-`13k3iYvb9kXNgDBWE2zZykHnO4u4idrXsYjo40-TXgUA`.
+A — respondível diretamente.  
+B — cálculo/estimativa.  
+C — indício/interpretação.  
+D — não respondível com a base atual.
 
-Principal diagnóstico:
-missões abastecimento × reposição.
+## Principais respostas já sustentadas
 
-Demanda:
-**R$ 234.706.228,14/ano — ESTIMATIVA MODELADA**.
+- São Borja não apresenta desvantagem excepcional apenas por população/PIB pc frente aos comparáveis usados.
+- Estrutura empresarial é numericamente local, mas estruturas externas têm escala funcional relevante no varejo.
+- Não há evidência de evasão laboral cotidiana generalizada dos residentes.
+- Centralidade é seletiva por função.
+- Bens não essenciais: concorrência territorial + digital.
+- Saúde/higiene: farmácia/conveniência × especializada/autoridade × e-commerce/preço.
+- Essenciais: abastecimento × reposição.
+- Serviços/alimentação: digital integra jornada, mas contato humano permanece relevante na amostra.
+- Market size monetário defensável já disponível: alimentação no domicílio, R$ 234.706.228,14/ano — estimativa modelada.
 
-Oferta:
-estrutural, não censitária.
+## Questões que permanecerão sem estimativa
+
+- market share;
+- retenção/vazamento monetário;
+- participação monetária do e-commerce;
+- gasto total de visitantes;
+- gasto na Argentina;
+- market size dos demais setores sem base compatível.
+
+A ausência desses indicadores não bloqueia a conclusão dos cadernos.
+
+## Agenda primária anterior
+
+`1YdVD_fNLg6s3pYR3s2XsLqprM41xs_3iU_KB_Ppgn2A`
+
+Status:
+**ARQUIVO METODOLÓGICO — NÃO OPERACIONAL**.
 
 ## Próxima prioridade
 
-Construir **agenda transversal de origem/destino do gasto**, capaz de medir numa única arquitetura:
-
-- mercado/categoria;
-- última compra/contratação;
-- valor;
-- frequência;
-- missão/ocasião;
-- formato;
-- canal;
-- São Borja;
-- outro município;
-- Argentina;
-- e-commerce;
-- origem do consumidor quando não residente;
-- motivos de escolha.
-
-A partir dessa camada, será possível decidir quais market sizes, retenções e vazamentos podem ser estimados com rigor.
+Produzir a síntese analítica final e aprofundar apenas as perguntas A/B/C com os dados já auditados.
 
 ## PR
 

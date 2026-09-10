@@ -1,69 +1,73 @@
 # Cadernos Setoriais
 
-Os cadernos setoriais usam a Base Territorial comum sem duplicar sua auditoria.
+Os quatro cadernos setoriais v001 estão concluídos.
 
-Fluxo:
+## Regra operacional atual
 
-`Base Territorial → integração Base × POM → evidência setorial → diagnóstico → lacuna decisória → pesquisa adicional somente quando necessária`.
+Não haverá pesquisa primária no escopo corrente.
 
-## Estado em 2026-09-10
+Os cadernos passam a seguir:
 
-### 1. Bens não essenciais — v001 CONCLUÍDO
+`evidência existente → resposta sustentada → interpretação → limite explícito`.
 
-Planilha:
+Não transformar lacunas em novas coletas.
+
+## Cadernos
+
+### Bens não essenciais
+
+Drive:
 `1MdDWyEqlfgMUGnPhQMwwkHMAH8n6prKS9KJly89djwo`
 
-Documento:
-`1eFcNnIlYNiisbSq0-i0g8b21grbGSw0OxwZpFj1WIso`
+Resposta central:
+São Borja apresenta centralidade temática intermediária em REGIC Q1/Q2 e enfrenta concorrência simultaneamente territorial e digital.
 
-Diagnóstico:
-dupla concorrência territorial + digital.
+### Alimentação fora do lar e serviços
 
-### 2. Alimentação fora do lar e serviços — v001 CONCLUÍDO
-
-Planilha:
+Drive:
 `1t0bn0GJDRvMksqKC1f7sGAA797RNglc5fNnXAiko6j0`
 
-Documento:
-`1kBEy-Al33bHK3Mt8Nv_75oFhmVmsNPa9BcIJILJFcBM`
+Resposta central:
+em serviços, busca/reputação/resposta integram a jornada; em alimentação, qualidade, experiência, digital e atendimento humano coexistem.
 
-Diagnóstico:
-serviços exigem desagregação por categoria; alimentação exige medir visitantes/origem/ocasião.
+### Saúde, higiene e cuidados pessoais
 
-### 3. Saúde, higiene e cuidados pessoais — v001 CONCLUÍDO
-
-Planilha:
+Drive:
 `1K1-QIVlvrE7_zRONAZVvzPQ805jajHHRlx4uHg7OL_0`
 
-Documento:
-`1NME-jQRVe2OYv8bxMwC86W4TSza3B2pwsku56A5-XlU`
+Resposta central:
+três arenas qualitativas — farmácia/conveniência, especializada/autoridade e e-commerce/preço.
 
-Diagnóstico:
-três arenas — farmácia/conveniência, especializada/autoridade e e-commerce/preço.
+### Comércio de bens essenciais
 
-### 4. Comércio de bens essenciais — v001 CONCLUÍDO
-
-Planilha:
+Drive:
 `13k3iYvb9kXNgDBWE2zZykHnO4u4idrXsYjo40-TXgUA`
 
+Resposta central:
+abastecimento e reposição são missões distintas.
+
+Market size potencial modelado:
+R$ 234.706.228,14/ano.
+
+## Limites
+
+Sem nova coleta, permanecerão sem estimativa:
+- market share;
+- retenção;
+- vazamento;
+- share monetário do e-commerce;
+- demanda total de visitantes;
+- market size monetário dos setores sem modelo compatível.
+
+Esses limites **não bloqueiam** os cadernos.
+
+## Síntese transversal
+
+Planilha:
+`1c8CZnWYqoGW9gEpSDI0v0rRZZSZf2GkoNkSeNkj5vNA`.
+
 Documento:
-`1QSk2VU5eVGdP2H42fLaKCIJP5Nq4E0P54C768AGgKvY`
+`1pQxUQM4LJLVm85UrddYIH2Hztc-uzUVmEqZfKxI0E3o`.
 
-Diagnóstico:
-abastecimento e reposição constituem missões distintas; demanda modelada anual de R$ 234,706 milhões não pode ser distribuída sem gasto observado.
-
-## Regras comuns
-
-- qualitativa = indício, não prevalência;
-- survey sem seleção probabilística demonstrada = descritivo da amostra;
-- macroambiente = Base Territorial canônica;
-- REGIC apenas com correspondência conceitual defensável;
-- market share, retenção e vazamento bloqueados sem dados de gasto;
-- oferta documental não vira censo por inferência;
-- não usar matriz externa como vazamento.
-
-## Nova etapa
-
-Com os quatro cadernos v001 concluídos, a prioridade deixa de ser construir mais diagnósticos separados.
-
-A próxima camada é uma **Agenda Transversal de Origem/Destino do Gasto e Lacunas Decisórias**, desenhada para responder simultaneamente aos quatro mercados e evitar pesquisas redundantes.
+Documentação:
+`docs/sintese_transversal/questoes_respondiveis_v001.md`.

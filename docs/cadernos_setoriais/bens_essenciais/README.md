@@ -200,3 +200,16 @@ A aba `Respostas_analiticas` organiza o caderno em:
 `pergunta → resposta sustentada → natureza → evidência → implicação → limite`.
 
 Essa camada deve orientar a redação final: primeiro responder o que a base permite; depois registrar os limites.
+
+
+## Guia de uso empresarial
+
+O documento organiza o mercado por duas missões:
+- **abastecimento/estoque**;
+- **reposição/conveniência**.
+
+Grandes formatos podem competir por preço, promoção, variedade e checkout.
+
+Vizinhança e especializados podem competir por proximidade, rapidez, disponibilidade e qualidade.
+
+O benchmark de **R$ 234.706.228,14/ano** é ESTIMATIVA MODELADA de alimentação no domicílio e não faturamento observado.

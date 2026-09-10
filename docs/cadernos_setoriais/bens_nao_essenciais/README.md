@@ -223,3 +223,13 @@ A aba `Respostas_analiticas` organiza o caderno em:
 `pergunta → resposta sustentada → natureza → evidência → implicação → limite`.
 
 Essa camada deve orientar a redação final: primeiro responder o que a base permite; depois registrar os limites.
+
+
+## Guia de uso empresarial
+
+O documento narrativo orienta decisões sobre integração físico-digital, catálogo e disponibilidade, atendimento e resposta, sortimento, crediário/troca e concorrência territorial/digital.
+
+Leitura central:
+**São Borja apresenta centralidade temática intermediária e o setor enfrenta dupla concorrência — centros urbanos superiores + e-commerce.**
+
+O documento não deve produzir market share ou vazamento sem gasto observado.

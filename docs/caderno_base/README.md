@@ -1,71 +1,57 @@
 # Caderno-Base Territorial — regra de consistência
 
-Este diretório acompanha a construção do Caderno-Base Territorial de São Borja.
-
-## Regra operacional
-
-Toda etapa substantiva deve sincronizar, quando aplicável:
-
-1. derivados auditáveis no Google Drive;
-2. manifestos, metadados e validações;
-3. narrativa em `docs/caderno_base/`, `docs/integracao_setorial/` ou `docs/cadernos_setoriais/`;
-4. versão corrente do artefato correspondente;
-5. PR/branch.
-
-Dado observado, cálculo, estimativa, hipótese, interpretação e recomendação permanecem separados. Versões anteriores são preservadas.
-
-## Regra metodológica vigente
+## Regra metodológica
 
 **auditoria suficiente → síntese analítica → lacunas decisórias → nova coleta apenas quando necessária.**
 
-Auditorias marginais não são caminho crítico. O join operador × CNPJ × RFB de bens essenciais permanece como enriquecimento setorial **depriorizado**.
+O join operador × CNPJ × RFB de bens essenciais permanece preservado e **depriorizado**.
 
-## Base Territorial corrente
+## Base corrente
 
 `caderno_base_territorial_v016_fluxos_centralidade_20260910`  
-Drive: `1RPMo8eqXsRv7VGXiTZA9_DLBdeFBrnUuNkbm6Bt5Jc4`.
+Drive `1RPMo8eqXsRv7VGXiTZA9_DLBdeFBrnUuNkbm6Bt5Jc4`.
 
-A Base permanece transversal e não recebe resultados específicos das POM.
+A Base é transversal. Resultados POM permanecem em camada de integração e cadernos setoriais.
 
-## Camada-ponte Base × POM
+## Camada Base × POM
 
 Concluída:
 - planilha `1_044ZCqKQYeHc8r84IO8-sgLv8uUwUZIIcO4oMZUdWM`;
-- documento `1Z1hBNOVXDuu6HNXWdLGLsL_YNFJJRiEKsbBMoUL4PjQ`;
-- docs: `docs/integracao_setorial/integracao_base_territorial_pom_v001.md`.
+- documento `1Z1hBNOVXDuu6HNXWdLGLsL_YNFJJRiEKsbBMoUL4PjQ`.
 
 ## Cadernos setoriais
 
-### 1. Bens não essenciais — v001 CONCLUÍDO
+### Bens não essenciais — v001
+Concluído e validado.
 
-Planilha:
+Drive:
 `1MdDWyEqlfgMUGnPhQMwwkHMAH8n6prKS9KJly89djwo`.
 
-Documento:
-`1eFcNnIlYNiisbSq0-i0g8b21grbGSw0OxwZpFj1WIso`.
-
 Diagnóstico:
-dupla concorrência externa — territorial + digital — com centralidade intermediária de São Borja em vestuário/calçados e móveis/eletroeletrônicos.
+concorrência territorial + digital; principal lacuna = destino monetário do gasto.
 
-Principal lacuna:
-origem/destino monetário do gasto.
+### Alimentação fora do lar e serviços — v001
+Concluído e validado.
 
-### Próximo
+Drive:
+`1t0bn0GJDRvMksqKC1f7sGAA797RNglc5fNnXAiko6j0`.
 
-Abrir **Alimentação fora do lar e serviços**, mantendo os dois módulos analíticos separados.
+Documento:
+`1kBEy-Al33bHK3Mt8Nv_75oFhmVmsNPa9BcIJILJFcBM`.
 
-## Síntese territorial vigente
+Serviços:
+responsividade, reputação, pesquisa online e agendamento integram a jornada; mercado precisa ser desagregado por categoria.
 
-São Borja combina:
-- renda domiciliar relativamente concentrada nas faixas inferiores;
-- base empresarial numericamente local;
-- peso funcional maior de organizações externas em alguns setores;
-- baixa saída intermunicipal dos trabalhadores residentes;
-- retenção educacional comparativamente relevante;
-- centralidade seletiva.
+Alimentação:
+qualidade, atendimento, ambiente, digital, delivery e hospitalidade compõem valor; principal lacuna = origem/ocasião/gasto de visitantes.
 
-A hipótese de “evasão generalizada dos residentes” não é sustentada.
+Auditoria POM:
+a questão sobre importância da presença ativa de alimentação nas redes sociais possui legenda duplicada; excluída da síntese até base bruta.
+
+## Próxima prioridade
+
+**Saúde, higiene e cuidados pessoais.**
 
 ## PR
 
-PR #41 permanece **aberto, draft e sem merge** até autorização explícita.
+PR #41 permanece aberto, draft e sem merge.

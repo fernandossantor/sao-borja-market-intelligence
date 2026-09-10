@@ -173,3 +173,23 @@ Regra consolidada:
 Os quatro documentos setoriais receberam **GUIA DE USO EMPRESARIAL** com público, decisões apoiadas, leitura central, oportunidades, riscos e decisões não sustentadas.
 
 Próxima prioridade: aprofundar a redação e a apresentação executiva, usando tabelas e gráficos apenas quando ajudarem a responder perguntas de decisão.
+
+
+## Síntese Executiva Empresarial — CRIADA
+
+Documento:
+`São Borja — Síntese Executiva Empresarial — Inteligência Mercadológica v001 — 20260910`
+
+Drive:
+`1zFKlv8kc1I3f6xTAI2bSyRAohB3r60MkCWsC9JaZ2aQ`.
+
+Painel técnico:
+`Painel_empresarial` na matriz transversal
+`1c8CZnWYqoGW9gEpSDI0v0rRZZSZf2GkoNkSeNkj5vNA`.
+
+Função:
+**porta de entrada para empresas**.
+
+O documento resume território, quatro mercados, oportunidades, riscos, dez decisões defensáveis, indicadores internos sugeridos e limites.
+
+Os cinco cadernos receberam também uma camada `Decisao_empresarial` no lastro técnico e `QUADRO DE DECISÃO EMPRESARIAL` no documento narrativo.

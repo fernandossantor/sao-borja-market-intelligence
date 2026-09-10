@@ -152,3 +152,15 @@ A aba `Respostas_analiticas` organiza o caderno em:
 `pergunta → resposta sustentada → natureza → evidência → implicação → limite`.
 
 Essa camada deve orientar a redação final: primeiro responder o que a base permite; depois registrar os limites.
+
+
+## Guia de uso empresarial
+
+O documento orienta farmácias e especializados sobre três arenas:
+- farmácia/conveniência;
+- especializada/autoridade técnica;
+- e-commerce/preço/pesquisa.
+
+Decisões apoiadas: proposta de valor, autoridade técnica, presença digital, visibilidade de mix, entrega/retirada e qualidade consultiva.
+
+Não transformar saliência de rede nem a contagem POM inconsistente em liderança ou market share.

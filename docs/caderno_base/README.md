@@ -116,3 +116,14 @@ Os documentos narrativos recebem igualmente:
 A origem deve identificar a operação estatística ou cadastro, e não apenas o órgão. Exemplo: **PIB dos Municípios — IBGE**, conforme metodologia integrada ao SCN/SCR e SNA 2008, em vez de apenas “PIB — IBGE”.
 
 No escopo atual, pesquisa primária é **não operacional**. Perguntas sem base compatível tornam-se limites explícitos.
+
+
+## Produto empresarial do Caderno-Base
+
+Documento narrativo principal v016:
+`1rnNqjkz4LjblWxT0UuDWBMmiICijPHVQ9uYv6f6oZKU`.
+
+Regra:
+**planilha = lastro técnico; documento = produto consumível para decisões empresariais**.
+
+O documento v016 reúne guia de uso, resumo executivo, decisões apoiadas, fatos, implicações, oportunidades, riscos, decisões por tipo de empresa, indicadores, limitações e referências originais.

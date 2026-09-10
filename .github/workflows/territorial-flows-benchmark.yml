@@ -100,11 +100,16 @@ jobs:
 
           def pick(rows,mcode,*cats):
             cats={str(x) for x in cats}
-            vals=[r["valor"] for r in rows if r["municipio_codigo"]==mcode and cats.issubset(r["codes"])]
-            vals=[v for v in vals if v is not None]
-            if len(vals)!=1:
-              raise SystemExit(f"Expected one value m={mcode} cats={cats}, got {vals}")
-            return vals[0]
+            matches=[r for r in rows if r["municipio_codigo"]==mcode and cats.issubset(r["codes"])]
+            if len(matches)!=1:
+              raise SystemExit(f"Expected one row m={mcode} cats={cats}, got {len(matches)}")
+            return matches[0]["valor"]
+
+          def pct(n,d):
+            return None if n is None or d in (None,0) else n/d*100
+
+          def sum_known(*vals):
+            return None if any(v is None for v in vals) else sum(vals)
 
           work_summary=[]
           for code,name in MUNICIPALITIES.items():
@@ -117,12 +122,13 @@ jobs:
             multiple=pick(wr,code,12190,79177)
             other_return3=pick(wr,code,12188,79178)
             other_notreturn3=pick(wr,code,12188,79179)
-            residual=total-(same+other+foreign+multiple)
-            if abs(same-(home+same_outside))>1.1:
+            level1_known=sum_known(same,other,foreign,multiple)
+            residual=None if level1_known is None or total is None else total-level1_known
+            if None not in (same,home,same_outside) and abs(same-(home+same_outside))>1.1:
               raise SystemExit(f"10329 same municipality reconciliation failed for {name}")
-            if abs(other-(other_return3+other_notreturn3))>1.1:
+            if None not in (other,other_return3,other_notreturn3) and abs(other-(other_return3+other_notreturn3))>1.1:
               raise SystemExit(f"10329 other municipality return reconciliation failed for {name}")
-            if residual < -1.1:
+            if residual is not None and residual < -1.1:
               raise SystemExit(f"10329 negative residual for {name}: residual={residual}")
             work_summary.append({
               "municipio_codigo":code,"municipio":name,
@@ -134,13 +140,13 @@ jobs:
               "trabalho_pais_estrangeiro":foreign,
               "trabalho_mais_de_um_municipio_ou_pais":multiple,
               "local_trabalho_ignorado_residual_calculado":residual,
-              "local_trabalho_ignorado_residual_pct_calculado":residual/total*100 if total else None,
-              "fora_municipio_residencia_calculado":other+foreign+multiple,
-              "fora_municipio_residencia_pct_calculado":(other+foreign+multiple)/total*100 if total else None,
-              "outro_municipio_pct_calculado":other/total*100 if total else None,
+              "local_trabalho_ignorado_residual_pct_calculado":pct(residual,total),
+              "fora_municipio_residencia_calculado":sum_known(other,foreign,multiple),
+              "fora_municipio_residencia_pct_calculado":pct(sum_known(other,foreign,multiple),total),
+              "outro_municipio_pct_calculado":pct(other,total),
               "outro_municipio_retorna_3dias_ou_mais":other_return3,
-              "outro_municipio_retorna_3dias_ou_mais_pct_do_outro_mun_calculado":other_return3/other*100 if other else None,
-              "trabalho_no_domicilio_pct_calculado":home/total*100 if total else None,
+              "outro_municipio_retorna_3dias_ou_mais_pct_do_outro_mun_calculado":pct(other_return3,other),
+              "trabalho_no_domicilio_pct_calculado":pct(home,total),
               "periodo":"Censo 2022",
               "fonte":"IBGE/SIDRA tabela 10329",
               "natureza":"observado + calculado",
@@ -173,8 +179,9 @@ jobs:
             post_other=pick(sr,code,12164,12123)
             middle_total=pick(sr,code,79174,12122)
             middle_other=pick(sr,code,12164,12122)
-            residual=total-(same+other+foreign)
-            if residual < -1.1:
+            level1_known=sum_known(same,other,foreign)
+            residual=None if level1_known is None or total is None else total-level1_known
+            if residual is not None and residual < -1.1:
               raise SystemExit(f"10324 negative residual for {name}: residual={residual}")
             study_summary.append({
               "municipio_codigo":code,"municipio":name,
@@ -183,17 +190,18 @@ jobs:
               "estudam_outro_municipio":other,
               "estudam_pais_estrangeiro":foreign,
               "local_estudo_ignorado_residual_calculado":residual,
-              "local_estudo_ignorado_residual_pct_calculado":residual/total*100 if total else None,
-              "estudam_fora_municipio_pct_calculado":(other+foreign)/total*100 if total else None,
+              "local_estudo_ignorado_residual_pct_calculado":pct(residual,total),
+              "estudam_fora_municipio_pct_calculado":pct(sum_known(other,foreign),total),
+              "estudam_outro_municipio_pct_calculado":pct(other,total),
               "ensino_medio_total":middle_total,
               "ensino_medio_outro_municipio":middle_other,
-              "ensino_medio_outro_municipio_pct_calculado":middle_other/middle_total*100 if middle_total else None,
+              "ensino_medio_outro_municipio_pct_calculado":pct(middle_other,middle_total),
               "graduacao_total":grad_total,
               "graduacao_outro_municipio":grad_other,
-              "graduacao_outro_municipio_pct_calculado":grad_other/grad_total*100 if grad_total else None,
+              "graduacao_outro_municipio_pct_calculado":pct(grad_other,grad_total),
               "pos_total":post_total,
               "pos_outro_municipio":post_other,
-              "pos_outro_municipio_pct_calculado":post_other/post_total*100 if post_total else None,
+              "pos_outro_municipio_pct_calculado":pct(post_other,post_total),
               "periodo":"Censo 2022",
               "fonte":"IBGE/SIDRA tabela 10324",
               "natureza":"observado + calculado",

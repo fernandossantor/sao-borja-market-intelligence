@@ -146,3 +146,38 @@ Os Cadernos Setoriais traduzem esse ambiente para **decisões de mercado especí
 
 A planilha é a fonte técnica.  
 O documento narrativo é o **produto consumível para decisão empresarial**.
+
+
+## Revisão obrigatória de PDFs e POM
+
+Catálogo:
+`docs/fontes/contexto_pdf_pom_v001.md`
+
+Drive:
+`1g27sC4__3O0vb5FtHBy0blQh5519j0SrZPafwYJS1V4`
+
+Nota metodológica:
+`1KWJKFtzca02SLpMJY53-VS27aiLZqxJUzCkT6jBtgmo`
+
+Antes de fechar qualquer caderno, revisar:
+- PDFs institucionais;
+- planos regionais/municipais;
+- diagnósticos históricos;
+- documentos acadêmicos/culturais;
+- mapas;
+- relatório POM correspondente.
+
+Classificar cada fonte relevante como:
+- canônica;
+- contexto regional;
+- planejamento;
+- histórica institucional;
+- acadêmica/cultural;
+- POM setorial;
+- pendente visual;
+- inacessível;
+- fora do escopo.
+
+Quando houver fonte oficial corrente para o mesmo indicador, ela prevalece. A fonte contextual entra para trajetória, enquadramento ou interpretação.
+
+A ausência de uso de uma fonte deve ser intencional e justificável, não decorrente de esquecimento.

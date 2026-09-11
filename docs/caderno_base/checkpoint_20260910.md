@@ -193,3 +193,36 @@ Função:
 O documento resume território, quatro mercados, oportunidades, riscos, dez decisões defensáveis, indicadores internos sugeridos e limites.
 
 Os cinco cadernos receberam também uma camada `Decisao_empresarial` no lastro técnico e `QUADRO DE DECISÃO EMPRESARIAL` no documento narrativo.
+
+
+## PDFs contextuais e POM — camada incorporada
+
+Catálogo:
+`1g27sC4__3O0vb5FtHBy0blQh5519j0SrZPafwYJS1V4`
+
+Nota metodológica:
+`1KWJKFtzca02SLpMJY53-VS27aiLZqxJUzCkT6jBtgmo`
+
+GitHub:
+`docs/fontes/contexto_pdf_pom_v001.md`
+
+Aba `Contexto_documental` adicionada ao Caderno-Base, quatro setoriais e matriz transversal.
+
+Documentos narrativos receberam contexto complementar e referências específicas.
+
+Principais novas camadas:
+- Perfil COREDE Fronteira Oeste 2025;
+- PED Fronteira Oeste 2022–2030;
+- Diagnóstico Municipal Cidade Empreendedora;
+- Perfil SEBRAE 2020;
+- contexto agro/Emater;
+- patrimônio/identidade missioneira;
+- quatro POMs 2026.
+
+Casos de controle:
+- `Sistema_motorizado.pdf` = PENDENTE VISUAL;
+- `PlanoDiretorMAPA.pdf` = INACESSÍVEL/404;
+- `admin,+1.pdf` = FORA DO ESCOPO.
+
+Regra:
+documentos antigos/regionais contextualizam, mas não substituem dados municipais canônicos atuais.

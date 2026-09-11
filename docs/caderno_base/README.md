@@ -141,3 +141,20 @@ GitHub:
 `docs/sintese_transversal/sintese_executiva_empresarial_v001.md`.
 
 Essa síntese deve ser o primeiro documento entregue a empresas. Os cadernos aprofundam o tema; as planilhas permanecem como lastro técnico.
+
+
+## Acervo contextual PDF/POM
+
+Catálogo:
+`1g27sC4__3O0vb5FtHBy0blQh5519j0SrZPafwYJS1V4`
+
+Nota de uso:
+`1KWJKFtzca02SLpMJY53-VS27aiLZqxJUzCkT6jBtgmo`
+
+Documentação:
+`docs/fontes/contexto_pdf_pom_v001.md`
+
+A Base v016 e os cadernos empresariais passaram a incorporar contexto regional, histórico, institucional, agropecuário e cultural proveniente do acervo PDF, além dos quatro POMs.
+
+Regra:
+fonte contextual enriquece a interpretação, mas não substitui indicador canônico mais recente ou conceitualmente superior.

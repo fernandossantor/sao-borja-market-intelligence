@@ -109,3 +109,37 @@ Saúde, higiene e cuidados pessoais:
 
 Bens essenciais:
 `1QSk2VU5eVGdP2H42fLaKCIJP5Nq4E0P54C768AGgKvY`
+
+
+## Contexto territorial ampliado
+
+A síntese executiva incorpora também o acervo PDF/POM, com uso controlado.
+
+### Fronteira Oeste
+
+O Perfil Socioeconômico COREDE Fronteira Oeste 2025 registra uma região altamente urbanizada, mas de baixo crescimento demográfico. Esse contexto sugere que expansão empresarial não deve ser projetada apenas sobre crescimento populacional, mas também sobre participação, frequência, ticket, diferenciação e atração regional.
+
+O mesmo documento identifica gargalos regionais de infraestrutura e conectividade. São fatores de risco a monitorar, não custos automaticamente atribuíveis a São Borja.
+
+### Fronteira
+
+O PED Fronteira Oeste 2022–2030 trata ligações internacionais, comércio, serviços, turismo e infraestrutura como dimensões estruturais. A fronteira deve integrar o ambiente de negócios, sem ser convertida em percentual de gasto/vazamento sem evidência monetária.
+
+### Agro
+
+Documentação municipal/Emater registra forte base agropecuária histórica. A hipótese de sazonalidade de determinados mercados em função de safra pode ser testada com dados internos das empresas, mas não é tratada como causalidade demonstrada pelo SBMI.
+
+### Ambiente empreendedor e universidades
+
+O Diagnóstico Municipal do Programa Cidade Empreendedora já propunha diversificação econômica, turismo/turismo rural e articulação com universidades e centros de pesquisa.
+
+### Identidade missioneira
+
+Fontes acadêmicas e do IBRAM documentam patrimônio e identidade jesuítico-missioneira de São Borja. Esse ativo pode diferenciar hospitalidade, gastronomia, eventos e comunicação territorial, mas não equivale a demanda turística observada.
+
+### POM 2026
+
+Os quatro POMs são a ponte entre contexto territorial e jornada de consumo. Suas evidências mantêm a classificação original do desenho: qualitativa = indício; survey digital = resultado descritivo da amostra quando não há seleção probabilística demonstrada.
+
+Catálogo completo:
+`docs/fontes/contexto_pdf_pom_v001.md`.

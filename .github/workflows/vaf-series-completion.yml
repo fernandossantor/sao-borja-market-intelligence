@@ -1,0 +1,199 @@
+name: vaf-series-completion
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/vaf-series-completion.yml"
+      - "src/sbmi/vaf_source_audit.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  complete-series:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: python -m pip install -e '.[dev]'
+      - name: Query missing official VAF ranges for Sao Borja
+        run: |
+          mkdir -p artifacts/raw_official
+          python - <<'PY'
+          import csv
+          import hashlib
+          import json
+          from decimal import Decimal
+          from pathlib import Path
+
+          import requests
+
+          from sbmi.vaf_source_audit import (
+              SAO_BORJA_RANGE_VALUE,
+              VAF_HISTORY_FORM_URL,
+              extract_table_rows,
+              parse_vaf_form,
+          )
+
+          ranges = [
+              ("1994", "2001"),
+              ("2002", "2008"),
+              ("2020", "2025"),
+          ]
+
+          session = requests.Session()
+          session.headers.update(
+              {"User-Agent": "SBMI territorial-market-intelligence source extraction/1.0"}
+          )
+
+          result = {
+              "nature": "observed_official_vaf_missing_ranges_extraction",
+              "geography": "Sao Borja/RS",
+              "municipality_range_value": SAO_BORJA_RANGE_VALUE,
+              "source_form": VAF_HISTORY_FORM_URL,
+              "currency_rule_observed": "Moeda a partir de 1994: REAL.",
+              "form_status": None,
+              "queries": [],
+          }
+          rows_out = []
+          form = None
+
+          try:
+              form_response = session.get(
+                  VAF_HISTORY_FORM_URL, timeout=20, allow_redirects=True
+              )
+              form_response.raise_for_status()
+              form = parse_vaf_form(form_response.text)
+              result["form_status"] = {
+                  "status": "reachable",
+                  "http_status": form_response.status_code,
+              }
+          except (requests.RequestException, ValueError) as exc:
+              result["form_status"] = {
+                  "status": "source_unavailable_or_parse_error",
+                  "error_type": type(exc).__name__,
+                  "error": str(exc),
+              }
+
+          for start, end in ranges:
+              query_record = {"start": start, "end": end, "response": None}
+              if form is None:
+                  query_record["response"] = {
+                      "status": "not_attempted_form_unavailable",
+                  }
+                  result["queries"].append(query_record)
+                  continue
+
+              try:
+                  response = session.post(
+                      form.action,
+                      data={
+                          "anoini": start,
+                          "anofim": end,
+                          "letramun": SAO_BORJA_RANGE_VALUE,
+                          "Action": "Consultar",
+                      },
+                      timeout=30,
+                      allow_redirects=True,
+                      headers={"Referer": VAF_HISTORY_FORM_URL},
+                  )
+                  response.raise_for_status()
+                  raw_path = Path("artifacts/raw_official") / f"vaf_post_{start}_{end}_response.html"
+                  raw_path.write_bytes(response.content)
+                  tables = extract_table_rows(response.text)
+
+                  found = False
+                  for table in tables:
+                      if not table:
+                          continue
+                      header = [cell["text"] for cell in table[0]["cells"]]
+                      for row in table[1:]:
+                          cells = [cell["text"] for cell in row["cells"]]
+                          if "SAO BORJA" not in cells:
+                              continue
+                          found = True
+                          municipality_index = cells.index("SAO BORJA")
+                          prefix_index = municipality_index + 1
+                          first_value_index = prefix_index + 1
+                          years = header[first_value_index:]
+                          values = cells[first_value_index:]
+                          for year, raw_value in zip(years, values, strict=True):
+                              normalized = Decimal(
+                                  raw_value.replace(".", "").replace(",", ".")
+                              )
+                              rows_out.append(
+                                  {
+                                      "municipio": "SAO BORJA",
+                                      "prefixo": cells[prefix_index],
+                                      "ano_rotulo_fonte": year,
+                                      "valor_adicionado_publicado_rs": format(normalized, "f"),
+                                      "valor_raw": raw_value,
+                                      "moeda": "REAL",
+                                      "dimensao_temporal_publicada": "ano de apuracao",
+                                      "natureza": "observado_em_fonte_oficial",
+                                      "source_url": response.url,
+                                      "raw_sha256": hashlib.sha256(response.content).hexdigest(),
+                                  }
+                              )
+                          break
+                      if found:
+                          break
+
+                  query_record["response"] = {
+                      "http_status": response.status_code,
+                      "response_bytes": len(response.content),
+                      "raw_file": str(raw_path),
+                      "raw_sha256": hashlib.sha256(response.content).hexdigest(),
+                      "sao_borja_found": found,
+                  }
+              except (requests.RequestException, ValueError) as exc:
+                  query_record["response"] = {
+                      "status": "query_error",
+                      "error_type": type(exc).__name__,
+                      "error": str(exc),
+                  }
+              result["queries"].append(query_record)
+
+          rows_out.sort(key=lambda row: int(row["ano_rotulo_fonte"]))
+          csv_path = Path("artifacts/vaf_sao_borja_missing_ranges.csv")
+          fieldnames = [
+              "municipio",
+              "prefixo",
+              "ano_rotulo_fonte",
+              "valor_adicionado_publicado_rs",
+              "valor_raw",
+              "moeda",
+              "dimensao_temporal_publicada",
+              "natureza",
+              "source_url",
+              "raw_sha256",
+          ]
+          with csv_path.open("w", encoding="utf-8", newline="") as handle:
+              writer = csv.DictWriter(handle, fieldnames=fieldnames)
+              writer.writeheader()
+              writer.writerows(rows_out)
+
+          result["row_count"] = len(rows_out)
+          result["years"] = [row["ano_rotulo_fonte"] for row in rows_out]
+          json_path = Path("artifacts/vaf_sao_borja_missing_ranges_manifest.json")
+          json_path.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          print(json_path.read_text(encoding="utf-8"))
+          print(csv_path.read_text(encoding="utf-8"))
+          PY
+      - name: Upload VAF completion artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaf-sao-borja-series-completion
+          path: |
+            artifacts/vaf_sao_borja_missing_ranges.csv
+            artifacts/vaf_sao_borja_missing_ranges_manifest.json
+            artifacts/raw_official/
+          retention-days: 14

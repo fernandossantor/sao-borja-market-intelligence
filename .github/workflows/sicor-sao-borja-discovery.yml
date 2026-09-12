@@ -19,66 +19,96 @@ permissions:
 jobs:
   discover:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Query official BCB SICOR OData metadata and municipal endpoint samples
+      - name: Discover official BCB MDCR resources via CKAN catalog
         run: |
           python - <<'PY'
-          import json, re, xml.etree.ElementTree as ET
+          import json
           from pathlib import Path
           import requests
 
           outdir = Path("artifacts/sicor_sao_borja_discovery")
           outdir.mkdir(parents=True, exist_ok=True)
-          base = "https://olinda.bcb.gov.br/olinda/servico/SICOR/versao/v2/odata"
-          s = requests.Session()
-          s.headers.update({"User-Agent":"SBMI audit/1.0","Accept":"application/json"})
-
-          meta_url = base + "/$metadata"
-          r = s.get(meta_url, timeout=60)
+          api = "https://dadosabertos.bcb.gov.br/api/3/action/package_show"
+          params = {"id":"matrizdadoscreditorural"}
+          r = requests.get(api, params=params, timeout=60, headers={"User-Agent":"SBMI audit/1.0"})
           r.raise_for_status()
-          (outdir/"metadata.xml").write_bytes(r.content)
-
-          root = ET.fromstring(r.content)
-          ns = {
-              "edm":"http://docs.oasis-open.org/odata/ns/edm",
-              "edmx":"http://docs.oasis-open.org/odata/ns/edmx",
+          js = r.json()
+          resources = js.get("result",{}).get("resources",[])
+          compact=[]
+          for x in resources:
+              compact.append({
+                  "id":x.get("id"),
+                  "name":x.get("name"),
+                  "format":x.get("format"),
+                  "url":x.get("url"),
+                  "last_modified":x.get("last_modified"),
+                  "created":x.get("created"),
+                  "description":x.get("description"),
+              })
+          out={
+              "source":"Banco Central do Brasil — SICOR / Matriz de Dados do Crédito Rural (MDCR)",
+              "catalog_api":r.url,
+              "resource_count":len(compact),
+              "resources":compact,
+              "status":"PASS_CATALOG",
           }
-          entity_sets = []
-          for es in root.findall(".//edm:EntitySet", ns):
-              entity_sets.append({"name":es.attrib.get("Name"),"entity_type":es.attrib.get("EntityType")})
+          (outdir/"ckan_resources.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:100000])
+          PY
 
-          candidates = [e for e in entity_sets if "municip" in (e["name"] or "").lower()]
-          result = {
-              "source":"Banco Central do Brasil — SICOR / Matriz de Dados do Crédito Rural",
-              "base_url":base,
-              "entity_sets":entity_sets,
-              "municipal_candidates":[],
-              "status":"DISCOVERY",
-          }
+      - name: Probe municipal resources and current structured-file publication
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          import requests
 
-          for e in candidates:
-              name=e["name"]
-              url=f"{base}/{name}?$top=5&$format=json"
-              item={"name":name,"entity_type":e["entity_type"],"url":url}
+          outdir=Path("artifacts/sicor_sao_borja_discovery")
+          data=json.loads((outdir/"ckan_resources.json").read_text(encoding="utf-8"))
+          rows=[]
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI audit/1.0","Accept":"application/json"})
+          for x in data["resources"]:
+              name=(x.get("name") or "")
+              url=x.get("url") or ""
+              if "munic" not in name.lower() and "munic" not in (x.get("description") or "").lower():
+                  continue
+              rec={"name":name,"format":x.get("format"),"url":url}
               try:
-                  q=s.get(url,timeout=60)
-                  q.raise_for_status()
-                  js=q.json()
-                  rows=js.get("value",[])
-                  item["sample_fields"]=sorted({k for row in rows for k in row.keys()})
-                  # Only schema/value-shape sample; no personal data exist in this aggregate dataset.
-                  item["sample_rows"]=rows[:3]
-                  item["status"]="OK"
+                  q=s.get(url,timeout=90)
+                  rec["http_status"]=q.status_code
+                  rec["content_type"]=q.headers.get("content-type")
+                  rec["final_url"]=q.url
+                  rec["bytes_received"]=len(q.content)
+                  ct=(q.headers.get("content-type") or "").lower()
+                  if "json" in ct and len(q.content) < 5_000_000:
+                      try:
+                          js=q.json()
+                          rec["json_top_keys"]=list(js)[:30] if isinstance(js,dict) else None
+                          if isinstance(js,dict) and isinstance(js.get("value"),list):
+                              rec["sample_rows"]=js["value"][:3]
+                          elif isinstance(js,list):
+                              rec["sample_rows"]=js[:3]
+                      except Exception as exc:
+                          rec["json_parse_error"]=repr(exc)
+                  else:
+                      rec["text_head"]=q.text[:1000] if "text" in ct or "html" in ct else None
               except Exception as exc:
-                  item["status"]="ERROR"
-                  item["error"]=repr(exc)
-              result["municipal_candidates"].append(item)
+                  rec["error"]=repr(exc)
+              rows.append(rec)
+          (outdir/"municipal_resource_probe.json").write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(rows,ensure_ascii=False,indent=2)[:100000])
 
-          (outdir/"discovery.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
-          print(json.dumps(result,ensure_ascii=False,indent=2)[:60000])
+          # Keep explicit note on the July/2026 format transition documented by BCB.
+          note={
+              "official_page":"https://www.bcb.gov.br/estabilidadefinanceira/micrrural/",
+              "method_note":"BCB announced that MDCR reports would transition on 2026-07-01 to structured CSV files compressed as ZIP. This discovery audits the current catalog/resource URLs before any municipal extraction.",
+          }
+          (outdir/"method_note.json").write_text(json.dumps(note,ensure_ascii=False,indent=2),encoding="utf-8")
           PY
 
       - name: Upload SICOR discovery artifact

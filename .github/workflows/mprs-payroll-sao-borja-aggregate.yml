@@ -1,0 +1,115 @@
+name: mprs-payroll-sao-borja-aggregate
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/mprs-payroll-sao-borja-aggregate.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/mprs-payroll-sao-borja-aggregate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Aggregate active MPRS payroll with explicit São Borja lotation
+        run: |
+          python - <<'PY'
+          import csv, json, re, unicodedata, urllib3
+          from collections import Counter, defaultdict
+          from pathlib import Path
+          import requests
+
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+          OUT=Path('artifacts/mprs_payroll_sao_borja_202607')
+          OUT.mkdir(parents=True,exist_ok=True)
+          base='https://transparencia.mprs.mp.br/contracheque/api/folha'
+          s=requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 SBMI audit'})
+
+          def norm(x):
+              x=unicodedata.normalize('NFKD',str(x or ''))
+              x=''.join(c for c in x if not unicodedata.combining(c))
+              return re.sub(r'\s+',' ',x).strip().upper()
+
+          money_fields=[
+              'vencimentos_tf','outras_verbas_tf','fg_cc_tf','gratificacao_natalina_tf',
+              'ferias_tf','abono_permanencia_tf','pagamentos_retroativos_tf',
+              'total_descontos_tf','total_liquido_tf'
+          ]
+          # Some deployments have a singular retroactive field name. Capture both without person-level export.
+          aliases={'pagamentos_retroativos_tf':['pagamentos_retroativos_tf','pagamentos_retroativo_tf']}
+          result=[]
+          lotacoes=Counter()
+
+          for tipo in ['S','M']:
+              params={'ano':'2026','mes':'07','tipo_folha':'NORMAL','tipo_pessoa':tipo}
+              r=s.get(base,params=params,timeout=90,verify=False)
+              r.raise_for_status()
+              js=r.json()
+              docs=js.get('response',{}).get('docs',[])
+              matched=[]
+              for d in docs:
+                  lot=norm(d.get('lotacao_s'))
+                  if 'SAO BORJA' not in lot:
+                      continue
+                  matched.append(d)
+                  lotacoes[(tipo,lot)] += 1
+
+              rec={'tipo_pessoa':tipo,'total_docs_api':len(docs),'matched_sao_borja':len(matched)}
+              for f in money_fields:
+                  vals=[]
+                  keys=aliases.get(f,[f])
+                  for d in matched:
+                      v=None
+                      for k in keys:
+                          if d.get(k) is not None:
+                              v=d.get(k); break
+                      try:
+                          if v is not None: vals.append(float(v))
+                      except Exception:
+                          pass
+                  rec[f'valid__{f}']=len(vals)
+                  rec[f'sum__{f}']=round(sum(vals),2)
+              result.append(rec)
+
+          with (OUT/'summary.csv').open('w',encoding='utf-8',newline='') as f:
+              fields=[]
+              for row in result:
+                  for k in row:
+                      if k not in fields: fields.append(k)
+              w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(result)
+
+          with (OUT/'lotacoes.csv').open('w',encoding='utf-8',newline='') as f:
+              w=csv.writer(f); w.writerow(['tipo_pessoa','lotacao_normalizada','qtd'])
+              for (tipo,lot),n in sorted(lotacoes.items()): w.writerow([tipo,lot,n])
+
+          meta={
+              'source':'Ministério Público do Rio Grande do Sul — Portal da Transparência — Contracheque',
+              'endpoint':base,
+              'period':'2026-07',
+              'tipo_folha':'NORMAL',
+              'groups':{'S':'servidores ativos','M':'membros ativos'},
+              'territorial_rule':'lotacao_s normalizada contém SAO BORJA',
+              'privacy':'No names, matrícula, CPF or person-level rows are exported; only aggregate counts, lotation labels and sums.',
+              'status':'AGGREGATED_EXPLICIT_LOTATION_ONLY',
+              'limitation':'Explicit lotation text may omit staff whose administrative record is centralized elsewhere; absence is not proof of zero local staff.'
+          }
+          (OUT/'metadata.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({'metadata':meta,'summary':result,'lotacoes':dict((f'{k[0]} | {k[1]}',v) for k,v in lotacoes.items())},ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mprs-payroll-sao-borja-202607
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mprs_payroll_sao_borja_202607/

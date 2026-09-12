@@ -1,0 +1,41 @@
+name: estban-direct-probe
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/estban-direct-probe.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe legacy and current ESTBAN URLs
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/estban_direct_probe
+          : > artifacts/estban_direct_probe/probe.tsv
+          for PERIOD in 202606 202605 202604 202603; do
+            for URL in               "https://www4.bcb.gov.br/fis/cosif/cont/estban/municipio/${PERIOD}_ESTBAN.ZIP"               "https://www.bcb.gov.br/content/estatisticas/Documents/Estban/${PERIOD}_ESTBAN.ZIP"               "https://www.bcb.gov.br/content/estabilidadefinanceira/estban/${PERIOD}_ESTBAN.ZIP"; do
+              CODE=$(curl -L -sS -o /tmp/estban.bin -w '%{http_code}' --connect-timeout 15 --max-time 60 "$URL" || true)
+              TYPE=$(file -b --mime-type /tmp/estban.bin 2>/dev/null || true)
+              SIZE=$(wc -c </tmp/estban.bin 2>/dev/null || echo 0)
+              printf '%s\t%s\t%s\t%s\t%s\n' "$PERIOD" "$CODE" "$TYPE" "$SIZE" "$URL" >> artifacts/estban_direct_probe/probe.tsv
+              if [ "$CODE" = "200" ] && [ "$SIZE" -gt 1000 ]; then
+                cp /tmp/estban.bin "artifacts/estban_direct_probe/${PERIOD}_candidate.zip" || true
+              fi
+            done
+          done
+          cat artifacts/estban_direct_probe/probe.tsv
+      - name: Remove invalid candidates
+        run: |
+          for f in artifacts/estban_direct_probe/*_candidate.zip; do
+            [ -e "$f" ] || continue
+            unzip -t "$f" >/dev/null 2>&1 || rm -f "$f"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estban-direct-probe
+          retention-days: 30
+          path: artifacts/estban_direct_probe/

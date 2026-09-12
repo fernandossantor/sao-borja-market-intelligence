@@ -21,13 +21,24 @@ jobs:
       - name: Install 7-Zip
         run: sudo apt-get update -qq && sudo apt-get install -y -qq p7zip-full
 
-      - name: Download official RAIS 2025 South worker archive
+      - name: Retrieve audited RAIS 2025 South worker archive
         run: |
           mkdir -p artifacts/rais_public_payroll_2025
-          URL='ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z'
-          curl --fail --location --retry 4 --retry-delay 5 --ftp-pasv "$URL" -o artifacts/rais_public_payroll_2025/RAIS_VINC_PUB_SUL.7z
-          test "$(stat -c%s artifacts/rais_public_payroll_2025/RAIS_VINC_PUB_SUL.7z)" = "704888712"
+          TARGET='artifacts/rais_public_payroll_2025/RAIS_VINC_PUB_SUL.7z'
+          OFFICIAL='ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z'
+          MIRROR='https://huggingface.co/datasets/selenelindsay/rais-caged-bronze/resolve/cc087930d43339cbf66dd9511ee6d39c661c3084/RAIS/2025/RAIS_VINC_PUB_SUL.7z?download=true'
+          set +e
+          curl --fail --location --connect-timeout 20 --max-time 150 --retry 1 --ftp-pasv "$OFFICIAL" -o "$TARGET"
+          RC=$?
+          set -e
+          if [ "$RC" -ne 0 ]; then
+            echo "Official FTP transport unavailable within timeout; using byte-verified transport mirror."
+            rm -f "$TARGET"
+            curl --fail --location --retry 4 --retry-delay 5 "$MIRROR" -o "$TARGET"
+          fi
+          test "$(stat -c%s "$TARGET")" = "704888712"
           echo 'c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0  artifacts/rais_public_payroll_2025/RAIS_VINC_PUB_SUL.7z' | sha256sum -c -
+          echo '{"official_source":"MTE/PDET RAIS 2025","official_url":"ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z","expected_sha256":"c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0","expected_bytes":704888712,"transport_note":"Official FTP attempted first; fallback transport accepted only after exact byte size and SHA-256 validation against the previously audited project master."}' > artifacts/rais_public_payroll_2025/retrieval_manifest.json
 
       - name: Aggregate São Borja public payroll
         run: |

@@ -40,7 +40,7 @@ jobs:
           echo 'c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0  artifacts/rais_public_payroll_2025/RAIS_VINC_PUB_SUL.7z' | sha256sum -c -
           echo '{"official_source":"MTE/PDET RAIS 2025","official_url":"ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z","expected_sha256":"c537caaaa8318b04e6f4cbbc7e59b130988668b7ea58ce67a0ab2caebf2f5bd0","expected_bytes":704888712,"transport_note":"Official FTP attempted first; fallback transport accepted only after exact byte size and SHA-256 validation against the previously audited project master."}' > artifacts/rais_public_payroll_2025/retrieval_manifest.json
 
-      - name: Aggregate São Borja public payroll
+      - name: Aggregate São Borja public payroll by work and establishment municipality
         run: |
           cat > /tmp/aggregate_public_payroll.py <<'PY'
           import csv, io, json, sys
@@ -50,9 +50,10 @@ jobs:
           OUT=Path("artifacts/rais_public_payroll_2025")
           MUNICIPALITY="431800"
 
-          FEDERAL={"1015","1040","1074","1104","1139","1163","1252","1341"}
-          STATE={"1023","1058","1082","1112","1147","1171","1236","1260"}
-          MUNICIPAL={"1031","1066","1090","1120","1155","1180","1244","1279"}
+          # Explicit CONCLA/IBGE 2021 public-administration sphere codes.
+          FEDERAL={"1015","1040","1074","1104","1139","1163","1252","1317","1341"}
+          STATE={"1023","1058","1082","1112","1147","1171","1236","1260","1325"}
+          MUNICIPAL={"1031","1066","1090","1120","1155","1180","1244","1279","1333"}
 
           def norm(v, width=None):
               s=str(v or "").strip().strip('"')
@@ -81,10 +82,16 @@ jobs:
               if n in {"2011","2038"}: return "empresa_estatal_esfera_nao_identificada"
               return "fora_escopo_publico"
 
+          def add(store,key,dec,avg):
+              a=store[key]
+              a[0]+=1
+              if dec is not None: a[1]+=1; a[2]+=dec
+              if avg is not None: a[3]+=1; a[4]+=avg
+
           txt=io.TextIOWrapper(sys.stdin.buffer, encoding="latin-1", errors="strict", newline="")
           reader=csv.DictReader(txt)
           required=[
-              "Município - Código","Natureza Jurídica - Código",
+              "Município - Código","Município Trab - Código","Natureza Jurídica - Código",
               "Ind Vínculo Ativo 31/12 - Código","Ind Vínculo Abandonado - Código",
               "Tipo Estabelecimento - Código","Vl Rem Dezembro Nom","Vl Rem Média Nom",
               "CNAE 2.0 Subclasse - Codigo"
@@ -92,77 +99,102 @@ jobs:
           missing=[c for c in required if c not in (reader.fieldnames or [])]
           if missing: raise SystemExit(f"Missing columns: {missing}")
 
-          by_nature=defaultdict(lambda: [0,0,0.0,0,0.0])
-          by_sphere=defaultdict(lambda: [0,0,0.0,0,0.0])
-          by_sphere_div=defaultdict(lambda: [0,0,0.0,0,0.0])
-          by_type=defaultdict(lambda: [0,0,0.0,0,0.0])
-          selected=0
-          municipal_rows=0
+          by_scope_sphere=defaultdict(lambda:[0,0,0.0,0,0.0])
+          by_scope_nature=defaultdict(lambda:[0,0,0.0,0,0.0])
+          by_work_sphere_div=defaultdict(lambda:[0,0,0.0,0,0.0])
+          by_work_sphere_type=defaultdict(lambda:[0,0,0.0,0,0.0])
+          work_missing=defaultdict(int)
+          active_public_any_locus=0
           active_nonabandoned=0
+          rows_source=0
 
           for row in reader:
-              if norm(row["Município - Código"]) != MUNICIPALITY:
-                  continue
-              municipal_rows += 1
+              rows_source += 1
               active=norm(row["Ind Vínculo Ativo 31/12 - Código"])
               abandoned=norm(row["Ind Vínculo Abandonado - Código"])
               if active!="1" or abandoned!="0":
                   continue
               active_nonabandoned += 1
+
               n=norm(row["Natureza Jurídica - Código"],4)
               sp=sphere(n)
               if sp=="fora_escopo_publico":
                   continue
-              selected += 1
+
+              work=norm(row["Município Trab - Código"])
+              estab=norm(row["Município - Código"])
+              if not work:
+                  work_missing[sp]+=1
+              work_here=work==MUNICIPALITY
+              estab_here=estab==MUNICIPALITY
+              if not (work_here or estab_here):
+                  continue
+
+              active_public_any_locus += 1
               dec=num(row["Vl Rem Dezembro Nom"])
               avg=num(row["Vl Rem Média Nom"])
               typ=norm(row["Tipo Estabelecimento - Código"])
               cnae=norm(row["CNAE 2.0 Subclasse - Codigo"],7)
               div=cnae[:2] if cnae else ""
 
-              for key,store in [
-                  (n,by_nature),
-                  (sp,by_sphere),
-                  ((sp,div),by_sphere_div),
-                  ((sp,typ),by_type),
-              ]:
-                  a=store[key]
-                  a[0]+=1
-                  if dec is not None: a[1]+=1; a[2]+=dec
-                  if avg is not None: a[3]+=1; a[4]+=avg
+              scopes=[]
+              if work_here: scopes.append("municipio_trabalho")
+              if estab_here: scopes.append("municipio_estabelecimento")
+              if work_here and estab_here: scopes.append("ambos")
+              elif work_here: scopes.append("somente_trabalho")
+              elif estab_here: scopes.append("somente_estabelecimento")
+
+              for scope in scopes:
+                  add(by_scope_sphere,(scope,sp),dec,avg)
+                  add(by_scope_nature,(scope,n,sp),dec,avg)
+              if work_here:
+                  add(by_work_sphere_div,(sp,div),dec,avg)
+                  add(by_work_sphere_type,(sp,typ),dec,avg)
 
           def write(path, header, rows):
               with (OUT/path).open("w",encoding="utf-8",newline="") as f:
                   w=csv.writer(f); w.writerow(header); w.writerows(rows)
 
-          write("by_nature.csv",
-                ["natureza_juridica","sphere_preliminary","active_links","dec_valid","dec_mass","avg_valid","avg_rem_sum"],
-                [[k,sphere(k),*v] for k,v in sorted(by_nature.items())])
-          write("by_sphere.csv",
-                ["sphere","active_links","dec_valid","dec_mass","avg_valid","avg_rem_sum"],
-                [[k,*v] for k,v in sorted(by_sphere.items())])
-          write("by_sphere_division.csv",
+          write("by_scope_sphere.csv",
+                ["scope","sphere","active_links","dec_valid","dec_mass","avg_valid","avg_rem_sum"],
+                [[scope,sp,*v] for (scope,sp),v in sorted(by_scope_sphere.items())])
+          write("by_scope_nature.csv",
+                ["scope","natureza_juridica","sphere_preliminary","active_links","dec_valid","dec_mass","avg_valid","avg_rem_sum"],
+                [[scope,n,sp,*v] for (scope,n,sp),v in sorted(by_scope_nature.items())])
+          write("by_work_sphere_division.csv",
                 ["sphere","cnae_division","active_links","dec_valid","dec_mass","avg_valid","avg_rem_sum"],
-                [[sp,div,*v] for (sp,div),v in sorted(by_sphere_div.items())])
-          write("by_sphere_establishment_type.csv",
+                [[sp,div,*v] for (sp,div),v in sorted(by_work_sphere_div.items())])
+          write("by_work_sphere_establishment_type.csv",
                 ["sphere","establishment_type","active_links","dec_valid","dec_mass","avg_valid","avg_rem_sum"],
-                [[sp,t,*v] for (sp,t),v in sorted(by_type.items())])
+                [[sp,t,*v] for (sp,t),v in sorted(by_work_sphere_type.items())])
+          write("work_municipality_missing.csv",
+                ["sphere","active_nonabandoned_rows_with_missing_work_municipality"],
+                [[sp,n] for sp,n in sorted(work_missing.items())])
 
           meta={
               "source":"MTE/PDET RAIS 2025 microdados públicos — vínculos Sul",
               "source_url":"ftp://ftp.mtps.gov.br/pdet/microdados/RAIS/2025/RAIS_VINC_PUB_SUL.7z",
               "municipality_code":"431800",
-              "municipal_rows":municipal_rows,
+              "rows_source":rows_source,
               "active_nonabandoned_all_natures":active_nonabandoned,
-              "public_or_state_company_rows_selected":selected,
+              "active_public_or_state_company_any_sao_borja_locus":active_public_any_locus,
+              "primary_territorial_measure":"Município Trab - Código = 431800",
+              "comparison_measure":"Município - Código = 431800",
               "filter":"active 31/12=1; abandoned=0; no establishment-type exclusion",
-              "classification_note":"Federal/estadual/municipal mapping uses explicit CONCLA 2021 administration-public codes; other group-1 codes remain ambiguous; 2011/2038 kept separate because nature alone does not identify government sphere.",
+              "classification_note":"Federal/estadual/municipal mapping uses explicit CONCLA 2021 public-administration codes. Other group-1 codes remain ambiguous. 2011/2038 are kept separate because legal nature alone does not identify controller sphere.",
+              "method_note":"Work municipality is preferred for territorial payroll because it records where the worker is working/providing service; establishment municipality is retained to audit centralized employer registration and territorial mismatch.",
               "status":"PASS"
           }
           (OUT/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
           print(json.dumps(meta,ensure_ascii=False,indent=2))
-          print((OUT/"by_sphere.csv").read_text(encoding="utf-8"))
-          print((OUT/"by_nature.csv").read_text(encoding="utf-8"))
+          print("--- by_scope_sphere.csv ---")
+          print((OUT/"by_scope_sphere.csv").read_text(encoding="utf-8"))
+          print("--- by_scope_nature.csv ---")
+          print((OUT/"by_scope_nature.csv").read_text(encoding="utf-8"))
+          print("--- by_work_sphere_division.csv ---")
+          print((OUT/"by_work_sphere_division.csv").read_text(encoding="utf-8"))
+          print("--- work_municipality_missing.csv ---")
+          print((OUT/"work_municipality_missing.csv").read_text(encoding="utf-8"))
           PY
           7z x -so artifacts/rais_public_payroll_2025/RAIS_VINC_PUB_SUL.7z RAIS_VINC_PUB_SUL.COMT | python /tmp/aggregate_public_payroll.py
 
@@ -172,7 +204,7 @@ jobs:
       - name: Upload public-payroll artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rais-public-payroll-sao-borja-2025-v001
+          name: rais-public-payroll-sao-borja-2025-v002
           retention-days: 30
           if-no-files-found: error
           path: artifacts/rais_public_payroll_2025/

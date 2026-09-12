@@ -118,3 +118,4 @@ jobs:
           retention-days: 30
           if-no-files-found: error
           path: artifacts/estban_sao_borja_snapshots/
+# Triggered after official BCB document-list endpoint was validated.

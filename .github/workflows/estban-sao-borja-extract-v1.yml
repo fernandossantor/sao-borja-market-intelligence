@@ -104,12 +104,20 @@ jobs:
                   q=s.get(url,timeout=180)
                   q.raise_for_status()
                   zbytes=q.content
-                  with zipfile.ZipFile(io.BytesIO(zbytes)) as zf:
-                      members=[n for n in zf.namelist() if n.lower().endswith((".csv",".txt"))]
-                      if not members:
-                          raise RuntimeError(f"no CSV/TXT member: {zf.namelist()[:20]}")
-                      name=members[0]
-                      raw=zf.read(name)
+                  bio=io.BytesIO(zbytes)
+                  if zipfile.is_zipfile(bio):
+                      bio.seek(0)
+                      with zipfile.ZipFile(bio) as zf:
+                          members=[n for n in zf.namelist() if n.lower().endswith((".csv",".txt"))]
+                          if not members:
+                              raise RuntimeError(f"no CSV/TXT member: {zf.namelist()[:20]}")
+                          name=members[0]
+                          raw=zf.read(name)
+                  else:
+                      # Some historical BCB metadata entries point directly to CSV,
+                      # notably 2023-01, instead of a ZIP archive.
+                      name=url.rsplit("/",1)[-1]
+                      raw=zbytes
                   text=raw.decode("latin-1",errors="replace")
                   lines=text.splitlines()
                   # BCB ESTBAN municipal files have two pre-header and two footer lines.

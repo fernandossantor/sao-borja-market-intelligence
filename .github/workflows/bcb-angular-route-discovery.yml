@@ -1,0 +1,84 @@
+name: bcb-angular-route-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/bcb-angular-route-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bcb-angular-route-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inspect BCB Angular assets for SICOR and ESTBAN download routes
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+
+          outdir=Path("artifacts/bcb_angular_route_discovery"); outdir.mkdir(parents=True,exist_ok=True)
+          root="https://www.bcb.gov.br/"
+          pages=[
+            root+"estabilidadefinanceira/micrrural/",
+            root+"estatisticas/estatisticabancariamunicipios?modalAberto=baixar-arquivos",
+          ]
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          assets=set()
+          for i,p in enumerate(pages):
+              r=s.get(p,timeout=60); r.raise_for_status()
+              (outdir/f"page_{i}.html").write_text(r.text,encoding="utf-8")
+              for pat in [r'<script[^>]+src=["\']([^"\']+)["\']',r'<link[^>]+href=["\']([^"\']+\.js)["\']']:
+                  for u in re.findall(pat,r.text,re.I):
+                      assets.add(urljoin(root,u))
+          report=[]
+          needles=("micrrural","estatisticabancariamunicipios","estban","mdcr","download","baixar","arquivo","zip","csv","gz","api/")
+          for u in sorted(assets):
+              try:
+                  q=s.get(u,timeout=60)
+                  if q.status_code!=200 or len(q.content)>20_000_000: continue
+                  txt=q.text
+                  # Persist only relatively small script files; main/chunks can be inspected through snippet artifact.
+                  snippets=[]
+                  lower=txt.lower()
+                  for needle in needles:
+                      pos=0
+                      seen=0
+                      while True:
+                          i=lower.find(needle,pos)
+                          if i<0 or seen>=60: break
+                          snippets.append({"needle":needle,"snippet":txt[max(0,i-500):i+1200]})
+                          pos=i+len(needle); seen+=1
+                  # Generic URL-ish strings mentioning relevant concepts.
+                  strings=sorted(set(re.findall(r'["\']([^"\']{1,500})["\']',txt)))
+                  likely=[x for x in strings if any(n in x.lower() for n in ("micrrural","estban","download","baixar","arquivo",".zip",".csv",".gz","api/"))][:1000]
+                  if snippets or likely:
+                      report.append({"asset":u,"bytes":len(q.content),"snippets":snippets[:500],"likely_strings":likely})
+              except Exception as exc:
+                  report.append({"asset":u,"error":repr(exc)})
+          out={"pages":pages,"assets":sorted(assets),"matches":report}
+          (outdir/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:180000])
+          PY
+
+      - name: Upload discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcb-angular-route-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/bcb_angular_route_discovery/

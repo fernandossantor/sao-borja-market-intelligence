@@ -47,6 +47,7 @@ jobs:
               try:
                   r=s.get(url,timeout=60,verify=False); r.raise_for_status()
                   html=r.text
+                  (OUT/f"{key}.html").write_text(html,encoding="utf-8")
                   links=[]
                   for href in re.findall(r'href=["\']([^"\']+)["\']',html,re.I):
                       full=urljoin(url,href)
@@ -60,6 +61,8 @@ jobs:
                       "sao_borja_occurrences":norm(html).count("SAO BORJA"),
                       "candidate_download_links":sorted(set(links)),
                       "contains_julho_2026":"JULHO/2026" in norm(html),
+                      "script_srcs":sorted(set(urljoin(url,x) for x in re.findall(r'<script[^>]+src=["\\\']([^"\\\']+)["\\\']',html,re.I))),
+                      "select_options":re.findall(r'<option[^>]*value=["\\\']?([^"\\\'> ]*)["\\\']?[^>]*>([^<]*)</option>',html,re.I)[:300],
                   }
               except Exception as exc:
                   out[key]={"url":url,"error":repr(exc)}

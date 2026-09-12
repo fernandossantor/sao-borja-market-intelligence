@@ -26,7 +26,7 @@ jobs:
         run: |
           python - <<'PY'
           import csv, json, re, unicodedata, urllib3
-          from collections import Counter, defaultdict
+          from collections import Counter
           from pathlib import Path
           import requests
 
@@ -41,12 +41,13 @@ jobs:
               x=''.join(c for c in x if not unicodedata.combining(c))
               return re.sub(r'\s+',' ',x).strip().upper()
 
+          # Exact field names audited in the official MPRS contracheque.js.
           money_fields=[
               'vencimentos_tf','outras_verbas_tf','fg_cc_tf','gratificacao_natalina_tf',
               'ferias_tf','abono_permanencia_tf','pagamentos_retroativos_tf',
-              'total_descontos_tf','total_liquido_tf'
+              'indenizacoes_tf','total_creditos_tf','previdencia_tf','ir_tf',
+              'estorno_de_teto_tf','total_descontos_tf','total_liquido_tf'
           ]
-          # Some deployments have a singular retroactive field name. Capture both without person-level export.
           aliases={'pagamentos_retroativos_tf':['pagamentos_retroativos_tf','pagamentos_retroativo_tf']}
           result=[]
           lotacoes=Counter()
@@ -55,8 +56,7 @@ jobs:
               params={'ano':'2026','mes':'07','tipo_folha':'NORMAL','tipo_pessoa':tipo}
               r=s.get(base,params=params,timeout=90,verify=False)
               r.raise_for_status()
-              js=r.json()
-              docs=js.get('response',{}).get('docs',[])
+              docs=r.json().get('response',{}).get('docs',[])
               matched=[]
               for d in docs:
                   lot=norm(d.get('lotacao_s'))
@@ -68,10 +68,9 @@ jobs:
               rec={'tipo_pessoa':tipo,'total_docs_api':len(docs),'matched_sao_borja':len(matched)}
               for f in money_fields:
                   vals=[]
-                  keys=aliases.get(f,[f])
                   for d in matched:
                       v=None
-                      for k in keys:
+                      for k in aliases.get(f,[f]):
                           if d.get(k) is not None:
                               v=d.get(k); break
                       try:
@@ -100,8 +99,9 @@ jobs:
               'tipo_folha':'NORMAL',
               'groups':{'S':'servidores ativos','M':'membros ativos'},
               'territorial_rule':'lotacao_s normalizada contém SAO BORJA',
+              'field_audit_source':'official contracheque.js; total_creditos_tf is Total Bruto (9), indenizacoes_tf is Indenizações (8)',
               'privacy':'No names, matrícula, CPF or person-level rows are exported; only aggregate counts, lotation labels and sums.',
-              'status':'AGGREGATED_EXPLICIT_LOTATION_ONLY',
+              'status':'AGGREGATED_EXPLICIT_LOTATION_WITH_GROSS_TOTAL',
               'limitation':'Explicit lotation text may omit staff whose administrative record is centralized elsewhere; absence is not proof of zero local staff.'
           }
           (OUT/'metadata.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf-8')

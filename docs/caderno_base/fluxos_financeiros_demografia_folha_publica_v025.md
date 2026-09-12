@@ -24,6 +24,25 @@ A v025 separa explicitamente dados observados, cálculos, interpretações e hip
 
 No período: 293 aberturas, 177 fechamentos e saldo aritmético de +116, enquanto o estoque caiu 125 empresas entre maio e julho. Portanto, o estoque ativo não reconcilia mecanicamente com `abertas - fechadas`; não usar esses fluxos como coorte de sobrevivência ou taxa oficial de mortalidade.
 
+## 2.1 Benchmark São Borja × Rio Grande do Sul
+
+A comparação usa os mesmos arquivos mensais oficiais MEMP/DREI de maio, junho e julho de 2026.
+
+| Período | Rotatividade-proxy SB | Rotatividade-proxy RS | Razão SB/RS | Fechamento/estoque SB | Fechamento/estoque RS | Tempo de abertura SB | Tempo de abertura RS |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 2026-05 | 1,81% | 2,63% | 0,688 | 0,63% | 1,06% | 49,2 dias | 16,9 dias |
+| 2026-06 | 2,66% | 2,75% | 0,966 | 1,10% | 1,06% | 39,5 dias | 19,8 dias |
+| 2026-07 | 2,42% | 2,76% | 0,877 | 0,86% | 1,03% | 14,7 dias | 12,0 dias |
+
+Na média simples dos três meses:
+- abertura/estoque: **1,43% em São Borja** e **1,66% no RS**;
+- fechamento/estoque: **0,87%** e **1,05%**;
+- rotatividade bruta/estoque: **2,30%** e **2,71%**.
+
+A rotatividade-proxy de São Borja ficou abaixo da estadual nos três meses. Isso **enfraquece**, mas não refuta definitivamente, a hipótese de churn/mortalidade empresarial anormalmente elevados. O período é curto, fechamento mensal não é mortalidade de coorte e estoque não reconcilia mecanicamente com aberturas menos fechamentos.
+
+O sinal distinto aparece no **tempo médio de abertura**: São Borja ficou muito acima do RS em maio e junho, com convergência em julho. É uma possível fricção operacional a acompanhar, não uma barreira estrutural já demonstrada.
+
 ## 3. SICOR/MDCR — crédito rural municipal
 
 **Fonte:** Banco Central do Brasil — SICOR / Matriz de Dados do Crédito Rural.  

@@ -1,0 +1,86 @@
+name: sicor-structured-file-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/sicor-structured-file-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sicor-structured-file-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover current structured MDCR file URLs from official BCB page
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          from bs4 import BeautifulSoup
+
+          outdir=Path("artifacts/sicor_structured_file_discovery")
+          outdir.mkdir(parents=True,exist_ok=True)
+          page="https://www.bcb.gov.br/estabilidadefinanceira/micrrural/"
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          r=s.get(page,timeout=60); r.raise_for_status()
+          html=r.text
+          (outdir/"page.html").write_text(html,encoding="utf-8")
+          soup=BeautifulSoup(html,"html.parser")
+          urls=set()
+          for tag in soup.find_all(["a","script","link"]):
+              u=tag.get("href") or tag.get("src")
+              if u: urls.add(urljoin(page,u))
+          raw_urls=set(re.findall(r'https?://[^"\'<>\s]+',html))
+          rel_files=set(re.findall(r'["\']([^"\']+\.(?:zip|gz|csv)(?:\?[^"\']*)?)["\']',html,re.I))
+          for u in rel_files: urls.add(urljoin(page,u))
+
+          js_hits=[]
+          for u in sorted(x for x in urls if ".js" in x.lower())[:100]:
+              try:
+                  q=s.get(u,timeout=40)
+                  if q.status_code!=200 or len(q.content)>10_000_000: continue
+                  txt=q.text
+                  hits=sorted(set(re.findall(r'(?:"|\')([^"\']+\.(?:zip|gz|csv)(?:\?[^"\']*)?)(?:"|\')',txt,re.I)))
+                  if hits:
+                      js_hits.append({"script":u,"files":[urljoin(page,h) for h in hits[:1000]]})
+              except Exception as exc:
+                  js_hits.append({"script":u,"error":repr(exc)})
+
+          candidates=sorted(set(
+              [u for u in urls|raw_urls if re.search(r'\.(zip|gz|csv)(\?|$)',u,re.I)]
+              + [f for x in js_hits for f in x.get("files",[])]
+          ))
+          probes=[]
+          for u in candidates[:500]:
+              try:
+                  q=s.head(u,allow_redirects=True,timeout=30)
+                  probes.append({"url":u,"status":q.status_code,"content_type":q.headers.get("content-type"),"content_length":q.headers.get("content-length"),"final_url":q.url})
+              except Exception as exc:
+                  probes.append({"url":u,"error":repr(exc)})
+
+          out={"page":page,"candidate_files":candidates,"probes":probes,"script_hits":js_hits}
+          (outdir/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:120000])
+          PY
+
+      - name: Upload structured-file discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: sicor-structured-file-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/sicor_structured_file_discovery/

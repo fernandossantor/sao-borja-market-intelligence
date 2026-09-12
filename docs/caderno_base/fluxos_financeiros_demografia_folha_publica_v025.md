@@ -100,10 +100,59 @@ Somado apenas como **ordem de grandeza documental** ao subtotal já auditado da 
 3. A hipótese de que o excedente agropecuário seja predominantemente gasto/investido fora de São Borja permanece **não verificada**. ESTBAN e SICOR não observam destino patrimonial do lucro.
 4. A folha pública não municipal é uma âncora material de circulação cotidiana e continua subestimada no subtotal disponível; o MPRS comprova mais uma camada fora do Executivo estadual.
 
+## 6.1 Aprofundamento em termos reais — IPCA mensal oficial
+
+**Fonte do ajuste:** IBGE/SIDRA, tabela 1737, variável 2266 — IPCA número-índice mensal.  
+**Cobertura:** jan/2013–ago/2026, 164 competências.  
+**Regra:** valor real-proxy_t = valor nominal_t × (índice IPCA da referência / índice IPCA_t).
+
+O IPCA é utilizado somente como **proxy geral de poder de compra**; não é deflator específico de crédito rural, insumos agropecuários ou ativos financeiros.
+
+### SICOR
+
+Em valores de agosto/2026:
+- 2013: R$ 564,36 milhões;
+- 2021: R$ 814,84 milhões;
+- 2022: R$ 953,74 milhões;
+- 2023: **R$ 1,026 bilhão**;
+- 2024: R$ 793,27 milhões (**-22,72%**);
+- 2025: R$ 591,90 milhões (**-25,38%**).
+
+Entre 2013 e 2025, o crédito rural cresce cerca de 105,3% nominalmente, mas apenas **4,88% em termos reais-proxy**. O padrão relevante é cíclico: expansão 2021–2023 e contração posterior.
+
+No recorte comparável janeiro–agosto:
+- 2023: R$ 681,58 milhões;
+- 2024: R$ 490,65 milhões (-28,01%);
+- 2025: R$ 414,61 milhões (-15,50%);
+- 2026: R$ 264,07 milhões (**-36,31%**).
+
+Isso não demonstra escassez de crédito ou queda de renda: custo de capital, demanda, política de crédito, composição por finalidade e calendário de safra podem mudar simultaneamente.
+
+### ESTBAN — controle sazonal por junho
+
+Em R$ de junho/2026:
+- operações de crédito (160): R$ 920,33 mi em jun/2021 → R$ 1,037 bi em jun/2026 (**+12,64%**);
+- financiamento rural agrícola (163): R$ 455,11 mi → R$ 514,47 mi (**+13,04%**);
+- participação 163/160: entre **47,64% e 55,55%** ao longo de 2021–2026.
+
+O resultado reforça que a centralidade financeira do agro permanece mesmo controlando mês e inflação geral.
+
+No mesmo recorte:
+- poupança: R$ 306,72 mi → R$ 170,07 mi (**-44,55%**);
+- depósitos a prazo: R$ 244,60 mi → R$ 150,02 mi (**-38,67%**).
+
+Essas quedas não são classificadas como fuga de capital e não podem ser atribuídas ao agro, pois a base não identifica origem setorial nem destino econômico final dos depósitos.
+
+### Integração com VAB e produtividade
+
+A razão entre fluxo nominal SICOR e VAB agropecuário foi 106,17% em 2019, 85,70% em 2020 e 78,41% em 2021. Trata-se apenas de comparação de escala: crédito é fluxo financeiro e VAB é valor adicionado, portanto a razão não mede endividamento.
+
+Os contrastes anuais também impedem uma relação mecânica crédito ↔ produtividade. Em 2020 o crédito real-proxy ficou praticamente estável (+0,64%) apesar da estiagem e das perdas em soja/trigo; em 2023 o crédito atingiu o pico real-proxy sem pico generalizado da produtividade física; em 2024 o crédito recuou 22,72% enquanto soja, milho e trigo recuperaram rendimento frente a 2023.
+
 ## 7. Próximas prioridades
 
 - ampliar Mapa de Empresas e construir benchmark;
-- deflacionar SICOR/ESTBAN e cruzar com produção, preços e choques climáticos;
+- aprofundar a explicação do ciclo SICOR/ESTBAN com juros, condições do crédito rural, preços e safra, sem inferir causalidade automaticamente;
 - decompor ESTBAN por instituição e auditar a mudança no verbete 167 a partir de 2025;
 - avançar em TJRS, DPERS, TCE e Legislativo, mantendo cada poder separado;
 - territorializar Forças Armadas, PF e PRF somente se houver fonte oficial segura;

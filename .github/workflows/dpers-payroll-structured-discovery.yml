@@ -1,0 +1,121 @@
+name: dpers-payroll-structured-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dpers-payroll-structured-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dpers-payroll-structured-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect official DPERS payroll and open-data pages
+        run: |
+          python - <<'PY'
+          import json,re,urllib.parse,urllib3
+          from pathlib import Path
+          import requests
+          from bs4 import BeautifulSoup
+
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+          OUT=Path("artifacts/dpers_payroll_structured_discovery")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          base="https://transparencia.defensoria.rs.def.br"
+          paths=[
+              "/dados-abertos",
+              "/folha-de-pagamento-defensores-ativos",
+              "/folha-de-pagamento-servidores-ativos",
+              "/servidores-ativos",
+              "/defensores-ativos",
+              "/contracheque-unico-servidores-ativos",
+              "/contracheque-unico-defensores-ativos",
+          ]
+          keywords=("csv","xlsx","xls","json","download","arquivo","export","folha","remuner","lotacao","lotação","unidade","cidade","municip","comarca","sao borja","são borja","api","ajax")
+          results={}
+          for path in paths:
+              url=urllib.parse.urljoin(base,path)
+              rec={"url":url,"links":[],"forms":[],"iframes":[],"scripts":[],"text_hits":[],"errors":[]}
+              try:
+                  r=s.get(url,timeout=60,verify=False,allow_redirects=True)
+                  rec.update({"status":r.status_code,"final_url":r.url,"content_type":r.headers.get("content-type"),"bytes":len(r.content)})
+                  r.raise_for_status()
+                  html=r.text
+                  key=re.sub(r'[^a-z0-9]+','_',path.lower()).strip('_')
+                  (OUT/f"{key}.html").write_text(html,encoding="utf-8",errors="ignore")
+                  soup=BeautifulSoup(html,"html.parser")
+                  for a in soup.find_all("a",href=True):
+                      href=urllib.parse.urljoin(r.url,a["href"])
+                      txt=" ".join(a.stripped_strings)
+                      blob=(href+" "+txt).lower()
+                      if any(k in blob for k in keywords):
+                          rec["links"].append({"text":txt[:300],"url":href})
+                  for form in soup.find_all("form"):
+                      fields=[]
+                      for el in form.find_all(["input","select","button","textarea"]):
+                          fields.append({
+                              "tag":el.name,"name":el.get("name"),"type":el.get("type"),
+                              "value":el.get("value"),"id":el.get("id")
+                          })
+                      rec["forms"].append({
+                          "action":urllib.parse.urljoin(r.url,form.get("action") or ""),
+                          "method":form.get("method") or "GET","fields":fields
+                      })
+                  for iframe in soup.find_all("iframe",src=True):
+                      rec["iframes"].append(urllib.parse.urljoin(r.url,iframe["src"]))
+                  for script in soup.find_all("script",src=True):
+                      u=urllib.parse.urljoin(r.url,script["src"])
+                      if "defensoria.rs.def.br" not in urllib.parse.urlparse(u).netloc: continue
+                      try:
+                          rr=s.get(u,timeout=45,verify=False)
+                          if rr.status_code!=200 or len(rr.content)>5_000_000: continue
+                          txt=rr.text
+                          hits=[]
+                          for m in re.finditer("|".join(map(re.escape,keywords)),txt,re.I):
+                              sn=txt[max(0,m.start()-250):min(len(txt),m.end()+650)]
+                              if any(k in sn.lower() for k in keywords):
+                                  hits.append(sn)
+                              if len(hits)>=40: break
+                          if hits: rec["scripts"].append({"url":u,"hits":hits})
+                      except Exception as e:
+                          rec["errors"].append({"script":u,"error":repr(e)})
+                  visible=" ".join(soup.stripped_strings)
+                  low=visible.lower()
+                  for k in ("são borja","sao borja","lotação","lotacao","cidade","município","municipio","comarca"):
+                      pos=low.find(k)
+                      if pos>=0:
+                          rec["text_hits"].append(visible[max(0,pos-300):pos+800])
+              except Exception as e:
+                  rec["errors"].append({"url":url,"error":repr(e)})
+              results[path]=rec
+
+          out={
+             "source":"Defensoria Pública do Estado do Rio Grande do Sul — Portal da Transparência",
+             "purpose":"Identify structured payroll/active-personnel export routes and determine whether territorial fields allow a São Borja aggregate.",
+             "privacy":"No person-level rows are exported. Only page/form/link/schema metadata are retained.",
+             "tls_note":"Runner fetched the public official portal with TLS verification disabled because its certificate chain was not validated in this environment.",
+             "results":results
+          }
+          (OUT/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:120000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dpers-payroll-structured-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/dpers_payroll_structured_discovery/

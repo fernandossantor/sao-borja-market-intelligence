@@ -126,7 +126,10 @@ jobs:
               w=csv.DictWriter(f,fieldnames=cols); w.writeheader(); w.writerows(rows)
 
           # Infer measure/time fields and create a compact annual/monthly aggregation when possible.
-          measure_candidates=[c for c in cols if any(t in norm(c) for t in ("VALOR","QTDE","QUANT","CONTRATO"))]
+          measure_candidates=[c for c in cols if (
+              norm(c).startswith("QTD") or norm(c).startswith("VL") or
+              "QUANT" in norm(c) or "VALOR" in norm(c)
+          )]
           year_candidates=[c for c in cols if "ANO" in norm(c)]
           month_candidates=[c for c in cols if "MES" in norm(c)]
 
@@ -141,7 +144,7 @@ jobs:
           measures=[]
           for c in measure_candidates:
               nc=norm(c)
-              if any(t in nc for t in ("VALOR","VL ","VLR","QUANTIDADE","QTDE","QTD")):
+              if nc.startswith("VL") or nc.startswith("QTD") or "VALOR" in nc or "QUANT" in nc:
                   measures.append(c)
 
           group_cols=[]

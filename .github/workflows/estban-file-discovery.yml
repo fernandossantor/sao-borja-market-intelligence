@@ -23,6 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install discovery parser dependency
+        run: python -m pip install --quiet beautifulsoup4
+
       - name: Discover official ESTBAN municipal CSV/ZIP file URLs
         run: |
           python - <<'PY'

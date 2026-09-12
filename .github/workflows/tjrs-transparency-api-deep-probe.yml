@@ -6,6 +6,11 @@ on:
       - feature/cnpj-territorial-control-v1
     paths:
       - ".github/workflows/tjrs-transparency-api-deep-probe.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tjrs-transparency-api-deep-probe.yml"
   workflow_dispatch:
 
 permissions:

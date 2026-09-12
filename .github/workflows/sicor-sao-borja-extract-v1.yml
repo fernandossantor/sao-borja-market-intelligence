@@ -1,0 +1,200 @@
+name: sicor-sao-borja-extract-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/sicor-sao-borja-extract-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sicor-sao-borja-extract-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract São Borja municipal rural-credit aggregates from official BCB SICOR OData
+        run: |
+          python - <<'PY'
+          import csv, json, re, unicodedata, xml.etree.ElementTree as ET
+          from pathlib import Path
+          from urllib.parse import urlencode
+          import requests
+
+          OUT=Path("artifacts/sicor_sao_borja_v1")
+          OUT.mkdir(parents=True,exist_ok=True)
+          BASE="https://olinda.bcb.gov.br/olinda/servico/SICOR/versao/v2/odata"
+          RESOURCE="CusteioInvestimentoComercialIndustrialSemFiltros"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI audit/1.0","Accept":"application/json"})
+
+          def norm(x):
+              x=unicodedata.normalize("NFKD",str(x or ""))
+              x="".join(c for c in x if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",x).strip().upper()
+
+          # Metadata
+          r=s.get(BASE+"/$metadata",timeout=60)
+          r.raise_for_status()
+          (OUT/"metadata.xml").write_bytes(r.content)
+          root=ET.fromstring(r.content)
+          ns={"edm":"http://docs.oasis-open.org/odata/ns/edm"}
+          target_type=None
+          for es in root.findall(".//edm:EntitySet",ns):
+              if es.attrib.get("Name")==RESOURCE:
+                  target_type=(es.attrib.get("EntityType") or "").split(".")[-1]
+          props=[]
+          for et in root.findall(".//edm:EntityType",ns):
+              if et.attrib.get("Name")==target_type:
+                  for p in et.findall("edm:Property",ns):
+                      props.append({"name":p.attrib.get("Name"),"type":p.attrib.get("Type")})
+          if not props:
+              raise RuntimeError("Could not resolve entity properties")
+
+          # Sample to reveal value encodings.
+          q=s.get(f"{BASE}/{RESOURCE}",params={"$format":"json","$top":"25"},timeout=60)
+          q.raise_for_status()
+          sample=q.json().get("value",[])
+          (OUT/"sample.json").write_text(json.dumps(sample,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          string_props=[p["name"] for p in props if p["type"]=="Edm.String"]
+          municipality_candidates=[p for p in string_props if any(t in norm(p) for t in ("MUNIC","CIDADE","LOCAL"))]
+          if not municipality_candidates:
+              municipality_candidates=string_props
+
+          attempts=[]
+          matched=None
+          # Prefer contains() so accents/casing/value suffixes do not require guessing exact label.
+          for prop in municipality_candidates:
+              filters=[
+                  f"contains(toupper({prop}),'BORJA')",
+                  f"{prop} eq 'SAO BORJA'",
+                  f"{prop} eq 'São Borja'",
+                  f"{prop} eq 'SÃO BORJA'",
+              ]
+              for filt in filters:
+                  try:
+                      u=s.get(f"{BASE}/{RESOURCE}",params={"$format":"json","$top":"50","$filter":filt},timeout=60)
+                      rec={"property":prop,"filter":filt,"status":u.status_code}
+                      if u.status_code==200:
+                          vals=u.json().get("value",[])
+                          rec["rows"]=len(vals)
+                          if vals:
+                              rec["sample"]=vals[:5]
+                              if any("SAO BORJA" in norm(v) for row in vals for v in row.values()):
+                                  matched=(prop,filt,vals)
+                                  attempts.append(rec)
+                                  break
+                      else:
+                          rec["text_head"]=u.text[:500]
+                      attempts.append(rec)
+                  except Exception as exc:
+                      attempts.append({"property":prop,"filter":filt,"error":repr(exc)})
+              if matched:
+                  break
+
+          discovery={"resource":RESOURCE,"entity_type":target_type,"properties":props,"municipality_candidates":municipality_candidates,"attempts":attempts,"matched_filter":matched[:2] if matched else None}
+          (OUT/"discovery.json").write_text(json.dumps(discovery,ensure_ascii=False,indent=2),encoding="utf-8")
+          if not matched:
+              raise RuntimeError("No São Borja municipal filter found")
+
+          prop,filt,_=matched
+
+          # Retrieve all rows for municipality. OData server can paginate; follow nextLink if present.
+          rows=[]
+          url=f"{BASE}/{RESOURCE}"
+          params={"$format":"json","$filter":filt,"$top":"10000"}
+          while url:
+              resp=s.get(url,params=params if "?" not in url else None,timeout=120)
+              resp.raise_for_status()
+              js=resp.json()
+              rows.extend(js.get("value",[]))
+              url=js.get("@odata.nextLink")
+              params=None
+
+          if not rows:
+              raise RuntimeError("Matched filter returned no rows on full extraction")
+
+          # Export raw aggregate rows (the source itself is already aggregated; no person-level data).
+          cols=[]
+          for row in rows:
+              for k in row.keys():
+                  if k not in cols: cols.append(k)
+          with (OUT/"sicor_sao_borja_raw_aggregate.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=cols); w.writeheader(); w.writerows(rows)
+
+          # Infer measure/time fields and create a compact annual/monthly aggregation when possible.
+          measure_candidates=[c for c in cols if any(t in norm(c) for t in ("VALOR","QTDE","QUANT","CONTRATO"))]
+          year_candidates=[c for c in cols if "ANO" in norm(c)]
+          month_candidates=[c for c in cols if "MES" in norm(c)]
+
+          def num(v):
+              if v is None or v=="": return None
+              if isinstance(v,(int,float)): return float(v)
+              x=str(v).strip().replace(".","").replace(",",".")
+              try:return float(x)
+              except:return None
+
+          # Do not accidentally sum categorical codes. Keep only clearly monetary/count measures.
+          measures=[]
+          for c in measure_candidates:
+              nc=norm(c)
+              if any(t in nc for t in ("VALOR","VL ","VLR","QUANTIDADE","QTDE","QTD")):
+                  measures.append(c)
+
+          group_cols=[]
+          if year_candidates: group_cols.append(year_candidates[0])
+          if month_candidates: group_cols.append(month_candidates[0])
+          agg={}
+          if group_cols and measures:
+              for row in rows:
+                  key=tuple(row.get(c) for c in group_cols)
+                  rec=agg.setdefault(key,{c:key[i] for i,c in enumerate(group_cols)})
+                  rec["rows"]=rec.get("rows",0)+1
+                  for c in measures:
+                      v=num(row.get(c))
+                      if v is not None:
+                          rec[c]=rec.get(c,0.0)+v
+              outrows=list(agg.values())
+              outcols=group_cols+["rows"]+measures
+              with (OUT/"sicor_sao_borja_time_aggregate.csv").open("w",encoding="utf-8",newline="") as f:
+                  w=csv.DictWriter(f,fieldnames=outcols); w.writeheader(); w.writerows(sorted(outrows,key=lambda r:tuple(str(r.get(c,"")) for c in group_cols)))
+
+          meta={
+              "source":"Banco Central do Brasil — SICOR / Matriz de Dados do Crédito Rural",
+              "endpoint":f"{BASE}/{RESOURCE}",
+              "municipality_filter":filt,
+              "municipality_property":prop,
+              "rows":len(rows),
+              "columns":cols,
+              "measure_candidates":measure_candidates,
+              "measures_aggregated":measures,
+              "year_candidates":year_candidates,
+              "month_candidates":month_candidates,
+              "geography":"São Borja/RS",
+              "status":"PASS_EXTRACTION_REVIEW_MEASURES",
+              "method_note":"SICOR values are rural-credit operations, not profit, income or retained surplus."
+          }
+          (OUT/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          print("SAMPLE ROWS")
+          print(json.dumps(rows[:5],ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload aggregate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sicor-sao-borja-extract-v1
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/sicor_sao_borja_v1/

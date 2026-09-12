@@ -1,0 +1,74 @@
+name: mprs-payroll-discovery-sao-borja
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/mprs-payroll-discovery-sao-borja.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/mprs-payroll-discovery-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Discover official MPRS active payroll CSV endpoints and São Borja lotations
+        run: |
+          python - <<'PY'
+          import json,re,unicodedata
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+
+          OUT=Path("artifacts/mprs_payroll_discovery_sao_borja")
+          OUT.mkdir(parents=True,exist_ok=True)
+          base="https://transparencia.mprs.mp.br"
+          pages={
+            "servidores_ativos":base+"/contracheque/remuneracao/S/",
+            "membros_ativos":base+"/contracheque/remuneracao/M/",
+          }
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          def norm(x):
+              x=unicodedata.normalize("NFKD",str(x or ""))
+              x="".join(c for c in x if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",x).strip().upper()
+          out={}
+          for key,url in pages.items():
+              try:
+                  r=s.get(url,timeout=60); r.raise_for_status()
+                  html=r.text
+                  links=[]
+                  for href in re.findall(r'href=["\']([^"\']+)["\']',html,re.I):
+                      full=urljoin(url,href)
+                      if "csv" in href.lower() or "download" in href.lower() or "export" in href.lower():
+                          links.append(full)
+                  # Do not export individual rows. Only aggregate discovery metadata.
+                  out[key]={
+                      "url":url,
+                      "status":r.status_code,
+                      "bytes":len(r.content),
+                      "sao_borja_occurrences":norm(html).count("SAO BORJA"),
+                      "candidate_download_links":sorted(set(links)),
+                      "contains_julho_2026":"JULHO/2026" in norm(html),
+                  }
+              except Exception as exc:
+                  out[key]={"url":url,"error":repr(exc)}
+          (OUT/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mprs-payroll-discovery-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mprs_payroll_discovery_sao_borja/

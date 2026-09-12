@@ -1,0 +1,120 @@
+name: estban-sao-borja-snapshots
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/estban-sao-borja-snapshots.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/estban-sao-borja-snapshots.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract December snapshots 2021-2025 plus latest ESTBAN for São Borja
+        run: |
+          python - <<'PY'
+          import csv,io,json,re,unicodedata,zipfile
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+
+          OUT=Path("artifacts/estban_sao_borja_snapshots"); OUT.mkdir(parents=True,exist_ok=True)
+          API="https://www.bcb.gov.br/api/servico/sitebcb/Documentos/byListGuid"
+          params={"tronco":"estatisticas","guidLista":"f6391806-fd85-43af-acf1-c86d5b8dd6df","ordem":"DataDocumento desc","pasta":"municipio"}
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit","Accept":"application/json, text/plain, */*"})
+          def norm(x):
+            x=unicodedata.normalize("NFKD",str(x or "")); x="".join(c for c in x if not unicodedata.combining(c))
+            return re.sub(r"\s+"," ",x).strip().upper()
+          def num(x):
+            x=str(x or "").strip()
+            if not x or x in {"-","..."}: return None
+            if "," in x and "." in x:
+              x=x.replace(".","").replace(",",".") if x.rfind(",")>x.rfind(".") else x.replace(",","")
+            elif "," in x: x=x.replace(".","").replace(",",".")
+            try:return float(x)
+            except:return None
+
+          r=s.get(API,params=params,timeout=90); r.raise_for_status()
+          meta=r.json(); docs=[]
+          for d in meta.get("conteudo",[]):
+            try: dt=datetime.strptime(str(d.get("Titulo") or "").strip(),"%m/%Y")
+            except: continue
+            docs.append((dt,d))
+          docs.sort()
+          chosen=[]
+          for y in range(2021,2026):
+            cand=[x for x in docs if x[0].year==y and x[0].month==12]
+            if cand: chosen.append(cand[-1])
+          if docs:
+            latest=docs[-1]
+            if latest not in chosen: chosen.append(latest)
+
+          outrows=[]; manifest=[]; errors=[]
+          for dt,d in chosen:
+            period=dt.strftime("%Y-%m"); url=urljoin("https://www.bcb.gov.br",d["Url"])
+            try:
+              q=s.get(url,timeout=180); q.raise_for_status()
+              with zipfile.ZipFile(io.BytesIO(q.content)) as zf:
+                members=[n for n in zf.namelist() if n.lower().endswith((".csv",".txt"))]
+                raw=zf.read(members[0])
+              lines=raw.decode("latin-1",errors="replace").splitlines()
+              parsed=None
+              for cand in (lines[2:-2],lines,lines[1:-2],lines[2:]):
+                if not cand: continue
+                sep=";" if cand[0].count(";")>=cand[0].count(",") else ","
+                rd=csv.DictReader(cand,delimiter=sep); fields=rd.fieldnames or []
+                if "CODMUN_IBGE" in fields and any("VERBETE" in norm(c) for c in fields):
+                  parsed=(list(rd),fields); break
+              if not parsed: raise RuntimeError("layout not recognized")
+              rows,fields=parsed
+              matches=[row for row in rows if re.sub(r"\D","",str(row.get("CODMUN_IBGE","")))=="4318002" or (norm(row.get("MUNICIPIO"))=="SAO BORJA" and norm(row.get("UF"))=="RS")]
+              if not matches: raise RuntimeError("São Borja not found")
+              for c in fields:
+                if "VERBETE" not in norm(c): continue
+                vals=[num(row.get(c)) for row in matches]; vals=[v for v in vals if v is not None]
+                m=re.search(r"VERBETE[_ ]*(\d+)",norm(c)); code=m.group(1) if m else ""
+                outrows.append({"periodo":period,"id_verbete":code,"descricao_coluna":c,"valor":round(sum(vals),2),"instituicoes_validas":len(vals),"linhas_sao_borja":len(matches)})
+              manifest.append({"periodo":period,"url":url,"linhas_sao_borja":len(matches),"bytes":len(q.content)})
+            except Exception as exc:
+              errors.append({"periodo":period,"url":url,"error":repr(exc)})
+
+          if not outrows: raise RuntimeError(f"no extracted rows: {errors}")
+          cols=["periodo","id_verbete","descricao_coluna","valor","instituicoes_validas","linhas_sao_borja"]
+          with (OUT/"estban_snapshots_long.csv").open("w",encoding="utf-8",newline="") as f:
+            w=csv.DictWriter(f,fieldnames=cols); w.writeheader(); w.writerows(outrows)
+          with (OUT/"manifest.json").open("w",encoding="utf-8") as f: json.dump({"selected":[x[0].strftime("%Y-%m") for x in chosen],"downloads":manifest,"errors":errors},f,ensure_ascii=False,indent=2)
+          # Select analytically relevant top-level labels by text, but retain exact headers.
+          relevant=[]
+          terms=("DEPOSIT","OPERACOES_DE_CREDITO","OPERAÇÕES_DE_CRÉDITO","EMPREST","FINANCIAMENT","POUPANCA","POUPANÇA")
+          for row in outrows:
+            n=norm(row["descricao_coluna"]).replace(" ","_")
+            if any(norm(t).replace(" ","_") in n for t in terms):
+              relevant.append(row)
+          with (OUT/"estban_relevant_labels.csv").open("w",encoding="utf-8",newline="") as f:
+            w=csv.DictWriter(f,fieldnames=cols); w.writeheader(); w.writerows(relevant)
+          audit={"source":"BCB ESTBAN document 4500","api":API,"params":params,"selected_periods":[x[0].strftime("%Y-%m") for x in chosen],"rows":len(outrows),"relevant_rows":len(relevant),"errors":errors,"status":"PASS" if outrows else "FAIL"}
+          (OUT/"audit.json").write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(audit,ensure_ascii=False,indent=2))
+          print("\nRELEVANT LABELS SAMPLE")
+          for row in relevant[:100]: print(row)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estban-sao-borja-snapshots
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/estban_sao_borja_snapshots/

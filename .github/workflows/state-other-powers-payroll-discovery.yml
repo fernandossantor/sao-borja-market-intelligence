@@ -1,0 +1,115 @@
+name: state-other-powers-payroll-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/state-other-powers-payroll-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/state-other-powers-payroll-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Discover official TJRS and DPERS payroll data routes
+        run: |
+          python - <<'PY'
+          import json, re, urllib.parse
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/state_other_powers_payroll_discovery")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          targets={
+            "TJRS":{
+              "url":"https://www.tjrs.jus.br/novo/institucional/transparencia/transparencia-e-prestacao-de-contas/gestao-de-pessoas/folha-de-pagamento-de-pessoal-consolidada/",
+              "host":"tjrs.jus.br"
+            },
+            "DPERS":{
+              "url":"https://transparencia.defensoria.rs.def.br/",
+              "host":"defensoria.rs.def.br"
+            }
+          }
+          keywords=("folha","remuner","pagamento","servid","pessoal","lotacao","lotação","municip","comarca","api","ajax","json","csv","xlsx","dados-abertos","dados_abertos","wp-json")
+          results={}
+          for org,cfg in targets.items():
+              rec={"start_url":cfg["url"],"pages":[],"candidate_links":[],"script_candidates":[],"errors":[]}
+              try:
+                  r=s.get(cfg["url"],timeout=90,allow_redirects=True)
+                  rec["http_status"]=r.status_code; rec["final_url"]=r.url
+                  r.raise_for_status()
+                  html=r.text
+                  (OUT/f"{org.lower()}_start.html").write_text(html,encoding="utf-8",errors="ignore")
+                  # href/src attributes
+                  attrs=re.findall(r'''(?:href|src)\s*=\s*["']([^"'#]+)''',html,re.I)
+                  links=[]
+                  for raw in attrs:
+                      u=urllib.parse.urljoin(r.url,raw)
+                      if not u.startswith(("http://","https://")): continue
+                      if any(k in u.lower() for k in keywords):
+                          links.append(u)
+                  rec["candidate_links"]=sorted(set(links))[:500]
+                  # scripts: inspect first-party and obvious transparency assets
+                  scripts=[]
+                  for raw in re.findall(r'''<script[^>]+src\s*=\s*["']([^"']+)''',html,re.I):
+                      u=urllib.parse.urljoin(r.url,raw)
+                      if cfg["host"] in urllib.parse.urlparse(u).netloc or "transpar" in u.lower():
+                          scripts.append(u)
+                  scripts=sorted(set(scripts))[:80]
+                  for u in scripts:
+                      try:
+                          rr=s.get(u,timeout=60)
+                          if rr.status_code!=200 or len(rr.content)>5_000_000: continue
+                          txt=rr.text
+                          hits=[]
+                          for m in re.finditer("|".join(map(re.escape,keywords)),txt,re.I):
+                              sn=txt[max(0,m.start()-350):min(len(txt),m.end()+700)]
+                              if any(x in sn.lower() for x in ("http","api","ajax","json","csv","xlsx","folha","remuner","lotacao","lotação","municip","comarca")):
+                                  hits.append(sn)
+                              if len(hits)>=30: break
+                          if hits:
+                              rec["script_candidates"].append({"url":u,"hits":hits})
+                      except Exception as e:
+                          rec["errors"].append({"url":u,"error":repr(e)})
+                  # Also probe common open-data/API patterns without assuming existence
+                  probes=[]
+                  base=f"{urllib.parse.urlparse(r.url).scheme}://{urllib.parse.urlparse(r.url).netloc}"
+                  for suffix in ["/wp-json/","/api/","/dados-abertos/","/dados_abertos/","/transparencia/api/"]:
+                      u=urllib.parse.urljoin(base,suffix)
+                      try:
+                          rr=s.get(u,timeout=25,allow_redirects=True)
+                          probes.append({"url":u,"status":rr.status_code,"content_type":rr.headers.get("content-type"),"final_url":rr.url,"bytes":len(rr.content)})
+                      except Exception as e:
+                          probes.append({"url":u,"error":repr(e)})
+                  rec["probes"]=probes
+              except Exception as e:
+                  rec["errors"].append({"url":cfg["url"],"error":repr(e)})
+              results[org]=rec
+          meta={
+            "purpose":"Identify machine-readable official payroll/remuneration routes for TJRS and DPERS before any territorial aggregation.",
+            "privacy":"No person-level payroll rows are exported. Output contains only URLs, endpoint metadata and code snippets for technical discovery.",
+            "territorial_requirement":"Do not quantify São Borja unless an official field safely identifies comarca, lotação, unidade de exercício or equivalent.",
+            "results":results
+          }
+          (OUT/"discovery.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2)[:120000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: state-other-powers-payroll-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/state_other_powers_payroll_discovery/

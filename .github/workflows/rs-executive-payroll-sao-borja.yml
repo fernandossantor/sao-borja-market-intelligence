@@ -141,6 +141,7 @@ jobs:
                               c:{"valid_rows":rem_valid[c],"sum":round(rem_sums[c],2)}
                               for c in rem_sums
                           }
+                      }
                       file_summaries.append(rec)
                       aggregate_rows.append([
                           name,rows,matches,

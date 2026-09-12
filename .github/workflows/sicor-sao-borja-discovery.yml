@@ -1,0 +1,90 @@
+name: sicor-sao-borja-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/sicor-sao-borja-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/sicor-sao-borja-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Query official BCB SICOR OData metadata and municipal endpoint samples
+        run: |
+          python - <<'PY'
+          import json, re, xml.etree.ElementTree as ET
+          from pathlib import Path
+          import requests
+
+          outdir = Path("artifacts/sicor_sao_borja_discovery")
+          outdir.mkdir(parents=True, exist_ok=True)
+          base = "https://olinda.bcb.gov.br/olinda/servico/SICOR/versao/v2/odata"
+          s = requests.Session()
+          s.headers.update({"User-Agent":"SBMI audit/1.0","Accept":"application/json"})
+
+          meta_url = base + "/$metadata"
+          r = s.get(meta_url, timeout=60)
+          r.raise_for_status()
+          (outdir/"metadata.xml").write_bytes(r.content)
+
+          root = ET.fromstring(r.content)
+          ns = {
+              "edm":"http://docs.oasis-open.org/odata/ns/edm",
+              "edmx":"http://docs.oasis-open.org/odata/ns/edmx",
+          }
+          entity_sets = []
+          for es in root.findall(".//edm:EntitySet", ns):
+              entity_sets.append({"name":es.attrib.get("Name"),"entity_type":es.attrib.get("EntityType")})
+
+          candidates = [e for e in entity_sets if "municip" in (e["name"] or "").lower()]
+          result = {
+              "source":"Banco Central do Brasil — SICOR / Matriz de Dados do Crédito Rural",
+              "base_url":base,
+              "entity_sets":entity_sets,
+              "municipal_candidates":[],
+              "status":"DISCOVERY",
+          }
+
+          for e in candidates:
+              name=e["name"]
+              url=f"{base}/{name}?$top=5&$format=json"
+              item={"name":name,"entity_type":e["entity_type"],"url":url}
+              try:
+                  q=s.get(url,timeout=60)
+                  q.raise_for_status()
+                  js=q.json()
+                  rows=js.get("value",[])
+                  item["sample_fields"]=sorted({k for row in rows for k in row.keys()})
+                  # Only schema/value-shape sample; no personal data exist in this aggregate dataset.
+                  item["sample_rows"]=rows[:3]
+                  item["status"]="OK"
+              except Exception as exc:
+                  item["status"]="ERROR"
+                  item["error"]=repr(exc)
+              result["municipal_candidates"].append(item)
+
+          (outdir/"discovery.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(result,ensure_ascii=False,indent=2)[:60000])
+          PY
+
+      - name: Upload SICOR discovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sicor-sao-borja-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/sicor_sao_borja_discovery/

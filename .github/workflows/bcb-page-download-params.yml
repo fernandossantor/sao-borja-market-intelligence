@@ -1,0 +1,86 @@
+name: bcb-page-download-params
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/bcb-page-download-params.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bcb-page-download-params.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Query BCB official page-content API for document-library parameters
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import requests
+
+          outdir=Path("artifacts/bcb_page_download_params")
+          outdir.mkdir(parents=True,exist_ok=True)
+          base="https://www.bcb.gov.br/api/servico/sitebcb"
+          cases=[
+            ("estatisticabancariamunicipios","Estatisticas"),
+            ("estatisticabancariamunicipios","estatisticas"),
+            ("micrrural","EstabilidadeFinanceira"),
+            ("micrrural","estabilidadefinanceira"),
+          ]
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit","Accept":"application/json"})
+          out=[]
+          for tipo,listsite in cases:
+              for endpoint in ("paginatipo","conteudopagina"):
+                  params={"tipo":f"'{tipo}'" if endpoint=="paginatipo" else tipo+"'","listsite":listsite}
+                  try:
+                      r=s.get(f"{base}/{endpoint}",params=params,timeout=60)
+                      rec={"tipo":tipo,"listsite":listsite,"endpoint":endpoint,"status":r.status_code,"url":r.url}
+                      if r.status_code==200:
+                          try:
+                              js=r.json()
+                              rec["json"]=js
+                          except Exception:
+                              rec["text"]=r.text[:10000]
+                      else:
+                          rec["text"]=r.text[:2000]
+                  except Exception as exc:
+                      rec={"tipo":tipo,"listsite":listsite,"endpoint":endpoint,"error":repr(exc)}
+                  out.append(rec)
+          (outdir/"page_content.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          # compact print of fields most useful for the download component
+          compact=[]
+          def walk(x,path=""):
+              if isinstance(x,dict):
+                  for k,v in x.items():
+                      p=f"{path}.{k}" if path else k
+                      if any(t in k.lower() for t in ("pasta","document","bibli","download","site","conteudo","sufixo","titulo")):
+                          compact.append((p,v if not isinstance(v,(dict,list)) else type(v).__name__))
+                      walk(v,p)
+              elif isinstance(x,list):
+                  for i,v in enumerate(x[:200]): walk(v,f"{path}[{i}]")
+          walk(out)
+          (outdir/"candidate_fields.tsv").write_text("\n".join(f"{p}\t{v}" for p,v in compact),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:100000])
+          print("\nCANDIDATE FIELDS")
+          print((outdir/"candidate_fields.tsv").read_text(encoding="utf-8")[:50000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bcb-page-download-params
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/bcb_page_download_params/

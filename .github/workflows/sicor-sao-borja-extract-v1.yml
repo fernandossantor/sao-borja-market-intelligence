@@ -43,34 +43,26 @@ jobs:
               x="".join(c for c in x if not unicodedata.combining(c))
               return re.sub(r"\s+"," ",x).strip().upper()
 
-          # Metadata
-          r=s.get(BASE+"/$metadata",timeout=60)
-          r.raise_for_status()
-          (OUT/"metadata.xml").write_bytes(r.content)
-          root=ET.fromstring(r.content)
-          ns={"edm":"http://docs.oasis-open.org/odata/ns/edm"}
-          target_type=None
-          for es in root.findall(".//edm:EntitySet",ns):
-              if es.attrib.get("Name")==RESOURCE:
-                  target_type=(es.attrib.get("EntityType") or "").split(".")[-1]
-          props=[]
-          for et in root.findall(".//edm:EntityType",ns):
-              if et.attrib.get("Name")==target_type:
-                  for p in et.findall("edm:Property",ns):
-                      props.append({"name":p.attrib.get("Name"),"type":p.attrib.get("Type")})
-          if not props:
-              raise RuntimeError("Could not resolve entity properties")
-
-          # Sample to reveal value encodings.
+          # The OData $metadata route intermittently returns HTTP 500. The data
+          # resource itself is available, so infer its schema from a small official
+          # sample instead of blocking the extraction on metadata.
           q=s.get(f"{BASE}/{RESOURCE}",params={"$format":"json","$top":"25"},timeout=60)
           q.raise_for_status()
           sample=q.json().get("value",[])
+          if not sample:
+              raise RuntimeError("SICOR resource sample returned no rows")
           (OUT/"sample.json").write_text(json.dumps(sample,ensure_ascii=False,indent=2),encoding="utf-8")
 
-          string_props=[p["name"] for p in props if p["type"]=="Edm.String"]
+          cols=[]
+          for row in sample:
+              for k in row.keys():
+                  if k not in cols: cols.append(k)
+          props=[{"name":k,"sample_types":sorted({type(row.get(k)).__name__ for row in sample if row.get(k) is not None})} for k in cols]
+          string_props=[k for k in cols if any(isinstance(row.get(k),str) for row in sample)]
           municipality_candidates=[p for p in string_props if any(t in norm(p) for t in ("MUNIC","CIDADE","LOCAL"))]
           if not municipality_candidates:
               municipality_candidates=string_props
+          target_type="schema-inferred-from-sample"
 
           attempts=[]
           matched=None

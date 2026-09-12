@@ -1,0 +1,177 @@
+name: federal-public-payroll-discovery-sao-borja
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/federal-public-payroll-discovery-sao-borja.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/federal-public-payroll-discovery-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover and download latest official CGU personnel archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/federal_public_payroll_discovery
+          BASE='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores'
+          : > artifacts/federal_public_payroll_discovery/download_manifest.tsv
+          for SUFFIX in Servidores_SIAPE Militares; do
+            FOUND=''
+            for PERIOD in 202608 202607 202606 202605; do
+              URL="$BASE/${PERIOD}_${SUFFIX}.zip"
+              if curl -fsSIL --connect-timeout 15 --max-time 60 "$URL" >/tmp/head.txt; then
+                FOUND="$PERIOD"
+                echo -e "${SUFFIX}\t${PERIOD}\t${URL}" >> artifacts/federal_public_payroll_discovery/download_manifest.tsv
+                curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 900 "$URL"                   -o "artifacts/federal_public_payroll_discovery/${PERIOD}_${SUFFIX}.zip"
+                break
+              fi
+            done
+            if [ -z "$FOUND" ]; then
+              echo "No archive found for $SUFFIX in tested periods" >&2
+            fi
+          done
+          ls -lh artifacts/federal_public_payroll_discovery/
+
+      - name: Inspect layouts and aggregate explicit São Borja unit matches without person-level output
+        run: |
+          cat > /tmp/discover_federal_payroll.py <<'PY'
+          import csv, io, json, re, unicodedata, zipfile
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          root = Path("artifacts/federal_public_payroll_discovery")
+          out = {
+              "method": (
+                  "Official CGU bulk personnel archives. Search is restricted to organizational/"
+                  "exercise/location-like columns; person-level values are never exported."
+              ),
+              "target": "SAO BORJA",
+              "archives": [],
+          }
+
+          def norm(s):
+              s = unicodedata.normalize("NFKD", str(s or ""))
+              s = "".join(c for c in s if not unicodedata.combining(c))
+              s = re.sub(r"\s+", " ", s).strip().upper()
+              return s
+
+          def number_br(s):
+              s = str(s or "").strip()
+              if not s:
+                  return None
+              s = s.replace(".", "").replace(",", ".")
+              try:
+                  return float(s)
+              except Exception:
+                  return None
+
+          location_tokens = (
+              "UORG", "ORGAO", "ÓRGÃO", "LOTAC", "EXERC", "LOCAL", "MUNIC", "UF",
+              "UNIDADE", "ESTAB", "CAMPUS", "REGIAO", "REGIÃO"
+          )
+          id_tokens = ("ID_SERVIDOR_PORTAL", "ID_SERVIDOR", "ID PESSOA", "ID_PESSOA")
+          remun_tokens = ("REMUN", "SALAR", "BRUTA", "LIQUID", "DEDU", "ABATE", "INDENIZ")
+
+          for zpath in sorted(root.glob("*.zip")):
+              arc = {"file": zpath.name, "members": []}
+              with zipfile.ZipFile(zpath) as zf:
+                  for member in zf.namelist():
+                      if not member.lower().endswith(".csv"):
+                          continue
+                      m = {"member": member}
+                      with zf.open(member) as raw:
+                          txt = io.TextIOWrapper(raw, encoding="latin-1", errors="replace", newline="")
+                          rd = csv.DictReader(txt, delimiter=";")
+                          fields = rd.fieldnames or []
+                          m["columns"] = fields
+                          loc_cols = [c for c in fields if any(t in norm(c) for t in map(norm, location_tokens))]
+                          id_cols = [c for c in fields if any(t in norm(c) for t in map(norm, id_tokens))]
+                          rem_cols = [c for c in fields if any(t in norm(c) for t in map(norm, remun_tokens))]
+                          m["location_like_columns"] = loc_cols
+                          m["id_like_columns"] = id_cols
+                          m["remuneration_like_columns"] = rem_cols
+
+                          rows = 0
+                          matched_rows = 0
+                          match_cols = Counter()
+                          match_values = defaultdict(Counter)
+                          rem_sums = defaultdict(float)
+                          rem_valid = Counter()
+                          for row in rd:
+                              rows += 1
+                              hits = []
+                              for c in loc_cols:
+                                  v = norm(row.get(c, ""))
+                                  if "SAO BORJA" in v:
+                                      hits.append((c, v))
+                              if not hits:
+                                  continue
+                              matched_rows += 1
+                              for c, v in hits:
+                                  match_cols[c] += 1
+                                  if len(match_values[c]) < 200 or v in match_values[c]:
+                                      match_values[c][v] += 1
+                              for c in rem_cols:
+                                  n = number_br(row.get(c, ""))
+                                  if n is not None:
+                                      rem_sums[c] += n
+                                      rem_valid[c] += 1
+
+                          m["rows"] = rows
+                          m["explicit_sao_borja_matches"] = matched_rows
+                          m["match_columns"] = dict(match_cols)
+                          m["match_values_aggregated"] = {
+                              c: dict(v.most_common(200)) for c, v in match_values.items()
+                          }
+                          m["remuneration_column_sums_for_matched_rows"] = {
+                              c: {"valid_rows": rem_valid[c], "sum": round(rem_sums[c], 2)}
+                              for c in rem_sums
+                          }
+                      arc["members"].append(m)
+              out["archives"].append(arc)
+
+          (root / "discovery.json").write_text(
+              json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          # Compact CSV summary.
+          with (root / "discovery_summary.csv").open("w", encoding="utf-8", newline="") as f:
+              w = csv.writer(f)
+              w.writerow(["archive","member","rows","explicit_sao_borja_matches","location_like_columns","remuneration_like_columns"])
+              for a in out["archives"]:
+                  for m in a["members"]:
+                      w.writerow([
+                          a["file"], m["member"], m["rows"], m["explicit_sao_borja_matches"],
+                          " | ".join(m["location_like_columns"]),
+                          " | ".join(m["remuneration_like_columns"]),
+                      ])
+
+          print(json.dumps(out, ensure_ascii=False, indent=2)[:60000])
+          PY
+          python /tmp/discover_federal_payroll.py
+
+      - name: Remove source archives before artifact upload
+        run: rm -f artifacts/federal_public_payroll_discovery/*.zip
+
+      - name: Upload aggregate discovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: federal-public-payroll-discovery-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/federal_public_payroll_discovery/

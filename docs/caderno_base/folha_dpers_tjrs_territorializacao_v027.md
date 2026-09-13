@@ -210,34 +210,92 @@ Não demonstra:
 - indisponibilidade pública geral;
 - ausência de campos territoriais.
 
-## 8. Pivô TJRS — relatório oficial de folha
+## 8. Pivô TJRS — roster territorial oficial validado
 
-A página oficial da Folha Consolidada permite selecionar ano, mês e tipo de folha.
+A auditoria localizou uma fonte oficial que elimina a dependência conceitual da API para territorialização:
 
-Um **espelho externo**, não oficial, de relatório do TJRS baseado na Resolução CNJ nº 102 — Anexo VIII sugere a existência de uma coluna **“Local de Origem (15)”**.
+**TJRS — Relação de Membros da Magistratura e Demais Agentes Públicos — Resolução CNJ nº 102/2009, Anexo V.**
 
-**Classificação atual:** INDÍCIO EXTERNO — NÃO PROMOVIDO.
+O relatório de **31/07/2026** é publicado oficialmente em PDF e CSV e possui as colunas `Nome`, `Numfunc`, `Tipo de Vínculo` e **`Lotação`**. A leitura documental confirma múltiplas lotações associadas a São Borja.
 
-A coluna somente poderá ser usada após verificação em documento ou resposta oficial do TJRS.
+Página oficial:
 
-Foi criado o workflow:
+`https://www.tjrs.jus.br/novo/institucional/transparencia/transparencia-e-prestacao-de-contas/gestao-de-pessoas/relacao-de-membros-da-magistratura-e-demais-agentes-publicos/`
 
-`tjrs-payroll-page-backend-discovery`
+PDF julho/2026:
 
-Objetivos:
+`https://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.pdf`
 
-1. baixar a página oficial da folha;
-2. identificar forms, scripts e endpoints;
-3. localizar a rota real usada pelo filtro;
-4. encontrar o relatório oficial;
-5. verificar se existe campo territorial no relatório.
+CSV oficial publicado:
 
-## 9. Critério de promoção TJRS
+`https://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.csv`
 
-Somente agregar valor TJRS/São Borja quando houver:
+**Resultado:** o TJRS passa de “chave territorial não demonstrada” para **ROSTER TERRITORIAL OFICIAL DISPONÍVEL**.
 
-1. campo territorial explícito na própria fonte remuneratória oficial; **ou**
-2. roster oficial mensal de lotação/unidade reconciliável com a folha nominal.
+### Limitação de transporte
+
+A URL do CSV é explicitamente publicada pelo TJRS, mas os canais técnicos usados nesta auditoria não conseguiram transferir o arquivo:
+
+- a navegação reconhece o URL/MIME `text/csv`, mas não o renderiza;
+- o container não conseguiu baixar o domínio;
+- o runner GitHub sofreu timeouts no domínio TJRS.
+
+Isso é uma limitação de transporte, não ausência da fonte. Não usar contagem manual de ocorrências do PDF como contagem canônica de vínculos.
+
+## 9. TJRS — estrutura de cargos providos
+
+**Fonte:** TJRS — Quantitativo de Cargos Providos nas Comarcas.  
+**Referência:** junho/2026.  
+**Unidade:** cargos providos.
+
+### São Borja
+
+| Cargo | Quantidade | Participação |
+|---|---:|---:|
+| Analista do Poder Judiciário — Área Administrativa | 1 | 3,13% |
+| Analista do Poder Judiciário — Área Judiciária | 2 | 6,25% |
+| Analista do Poder Judiciário — Serviço Social | 1 | 3,13% |
+| Auxiliar de Serviços Gerais | 1 | 3,13% |
+| Oficial Ajudante | 1 | 3,13% |
+| Oficial de Justiça Estadual | 7 | 21,88% |
+| Técnico do Poder Judiciário | 19 | 59,38% |
+| **Total** | **32** | **100,00%** |
+
+**Controle conceitual:** os 32 cargos providos em junho não equivalem à quantidade de pessoas do Anexo V de julho. Períodos e universos diferem.
+
+### Benchmark absoluto — mesma fonte e mês
+
+| Comarca | Cargos providos | Razão vs. São Borja |
+|---|---:|---:|
+| São Borja | 32 | 100,00% |
+| Alegrete | 30 | 93,75% |
+| São Gabriel | 29 | 90,63% |
+| Santiago | 36 | 112,50% |
+| Sant'Ana do Livramento | 36 | 112,50% |
+| Uruguaiana | 56 | 175,00% |
+
+**Interpretação:** São Borja ocupa posição intermediária no grupo selecionado em número absoluto de cargos providos.
+
+**Limitação:** não há normalização por população jurisdicionada, volume processual, quantidade de unidades, especialização ou extensão territorial.
+
+## 9.1 Critério de promoção remuneratória TJRS
+
+A existência de `Lotação` no Anexo V resolve a chave territorial, mas **não resolve automaticamente a massa remuneratória**.
+
+Próxima sequência:
+
+1. obter o CSV oficial do Anexo V por canal compatível;
+2. filtrar privadamente lotações contendo São Borja;
+3. obter a folha normal de julho/2026 em formato estruturado;
+4. reconciliar roster × folha;
+5. auditar duplicidades, vínculos múltiplos e parcelas eventuais;
+6. publicar somente agregados.
+
+**Status atual:**
+
+- roster territorial oficial: **VALIDADO**;
+- estrutura de cargos por comarca: **PROMOVIDA**;
+- massa remuneratória TJRS/São Borja: **NÃO PROMOVIDA**.
 
 Não usar cargo, nome, atuação processual, notícia, residência ou município de origem como proxy de lotação.
 

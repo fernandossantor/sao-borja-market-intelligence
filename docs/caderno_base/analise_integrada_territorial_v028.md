@@ -42,11 +42,11 @@ Contrastes entre tempo, municípios ou dimensões não são tratados como prova 
 
 ### 3.2. Estrutura produtiva versus emprego formal
 
-**DADO OBSERVADO.** VAB 2021: agropecuária 33,87%; indústria + construção 11,67%; serviços, comércio e administração 54,46%. Emprego formal RAIS 2022: agropecuária 12,39%; indústria + construção 19,00%; serviços 68,61%.
+**DADO OBSERVADO/CALCULADO — SAME-YEAR.** VAB 2021: agropecuária 33,87%; indústria + construção 11,67%; serviços, comércio e administração 54,46%. Emprego formal RAIS 2021: agropecuária 12,41%; indústria + construção 18,13%; comércio + serviços 69,45%.
 
 **INTERPRETAÇÃO.** O agro tem grande peso na geração de valor, mas menor participação no emprego formal direto; o terciário concentra a circulação cotidiana de trabalho e renda laboral.
 
-**LIMITAÇÃO.** Anos distintos e quebra de série da RAIS 2022. A diferença entre as participações não mede produtividade e não demonstra causalidade.
+**LIMITAÇÃO.** VAB e RAIS usam o mesmo ano de 2021 no contraste, mas têm conceitos distintos. A diferença entre as participações não mede produtividade e não demonstra causalidade; a RAIS capta vínculos formais, não toda a ocupação.
 
 ### 3.3. Arquitetura dos fluxos de renda
 
@@ -267,7 +267,7 @@ Planilha: `Agrodependencia_teste_v028`.
 
 A base bruta RAIS 2024 foi reprocessada com vínculo ativo em 31/12 e exclusão de vínculos marcados como abandonados, totalizando **13.125 vínculos**.
 
-**DISTRIBUIÇÃO SALARIAL.** Entre 12.156 remunerações positivas de dezembro, a média é **R$ 3.307,05** e a mediana **R$ 2.605,60**; **57,03%** estão até 2 salários mínimos e **81,42%** até 3 salários mínimos.
+**DISTRIBUIÇÃO SALARIAL.** Entre 12.156 remunerações positivas de dezembro, a média é **R$ 3.307,05** e a mediana **R$ 2.605,60**; **56,57%** estão até 2 salários mínimos e **81,33%** até 3 salários mínimos.
 
 **ESCOLARIDADE.** 50,16% dos vínculos possuem ensino médio completo; 74,94% estão até ensino médio completo; 20,79% possuem superior completo, mestrado ou doutorado.
 
@@ -286,7 +286,7 @@ Planilha: `Qualificacao_salarios_v028`.
 
 A estrutura laboral e de renda foi triangulada com POF e POM.
 
-**DADOS LOCAIS.** Renda domiciliar per capita mediana: R$ 1.100 em 2022; 85,79% do universo compatível sem rendimento ou até 2 SM per capita. Na RAIS 2024, 57,03% dos vínculos remunerados de dezembro estão até 2 SM e 81,42% até 3 SM.
+**DADOS LOCAIS.** Renda domiciliar per capita mediana: R$ 1.100 em 2022; 85,79% do universo compatível sem rendimento ou até 2 SM per capita. Na RAIS 2024, 56,57% dos vínculos remunerados de dezembro estão até 2 SM e 81,33% até 3 SM.
 
 **BENCHMARK POF 2017–2018 — BRASIL.** Na classe familiar de menor rendimento usada pela POF, alimentação representa **22,0% da despesa total**, contra 7,6% na classe superior; medicamentos, **4,2%**, contra 1,4%. Considerando apenas despesa de consumo, alimentação representa 23,8% e higiene/cuidados especiais 5,4%, contra 11,5% e 1,6% na classe superior.
 
@@ -352,3 +352,83 @@ A expressão promovida passa a ser:
 > **São Borja é uma economia agroancorada, financeiramente agroexposta e urbanamente multicircuital, com dependências seletivas por canal.**
 
 “Agroimportância alta” é sustentado. “Agrodependência global” não está demonstrado. A formulação também não significa independência do agro.
+
+
+## 19. Reexecução canônica RAIS 2024 — escolaridade × CBO × CNAE × remuneração
+
+A análise foi reexecutada **do zero**, sem reutilizar números da chamada interrompida.
+
+**FONTE/LINHAGEM.**
+- `rais_consolidated.csv` — Drive `1hUlMY-6OfvFmbkzx6TBwhmeMuESRx_Ki`; SHA-256 `028765779ad80d27ed54a6d125611e2a478ca72892fe66a23e272394087a5766`.
+- `rais_canonical.csv` — Drive `1iyx20-j8l4v7bULSGFOUiQc3LsBPfUgm`; SHA-256 `fb93c45b4a6135e973bd289901ee252cfccfedfaa0cfc70556f635f21adc1421`.
+- O consolidado é a fonte analítica porque preserva CBO e o indicador de vínculo abandonado; o canônico é controle de linhagem.
+
+**UNIVERSO.** O bloco `RAIS SB 2024.csv` possui 18.923 linhas; 13.233 vínculos estão ativos em 31/12. Desses, 108 estão marcados como abandonados e têm remuneração média e de dezembro igual a zero. O universo primário é, portanto, de **13.125 vínculos ativos não abandonados**. Vínculo não equivale a pessoa.
+
+**REMUNERAÇÃO.** Entre 12.156 vínculos com remuneração nominal positiva em dezembro, a média é **R$ 3.307,05** e a mediana **R$ 2.605,60**. Recalculando a partir do valor nominal e do salário mínimo de 2024 (R$ 1.412), **56,57%** ficam em até 2 SM e **81,33%** em até 3 SM. Esses valores substituem os percentuais preliminares da execução interrompida.
+
+**JORNADA.** **90,44%** dos vínculos têm jornada contratada de 40 horas ou mais; **4,91%**, menos de 30 horas; a mediana é 44 horas. No agregado, a remuneração nominal típica mais baixa dos setores intensivos em mão de obra não é explicada principalmente por jornadas curtas.
+
+**ESCOLARIDADE.** Ensino médio completo é a categoria modal (**50,16%**). Até médio completo somam **74,94%**; superior completo, mestrado ou doutorado, **20,79%**.
+
+**CBO.** GG4–GG9 somam **77,78%** dos vínculos; GG4+GG5, **45,97%**; GG5 — serviços e vendedores do comércio —, **28,57%**. A CBO trata nível de competência como atributo da ocupação, relacionado à complexidade das atividades; não se deve convertê-lo automaticamente em escolaridade individual ou chamar trabalhadores de “baixa qualificação” com base apenas na remuneração.
+
+### 19.1. Perfil setorial selecionado
+
+| Setor analítico | Vínculos | % do estoque | Mediana dezembro |
+|---|---:|---:|---:|
+| Varejo (47) | 2.824 | 21,52% | R$ 2.132,59 |
+| Administração pública (84) | 2.262 | 17,23% | R$ 3.592,57 |
+| Agropecuária/floresta/pesca (01–03) | 1.635 | 12,46% | R$ 2.824,91 |
+| Fabricação de alimentos (10) | 993 | 7,57% | R$ 2.922,49 |
+| Transporte/armazenagem/correio (49–53) | 873 | 6,65% | R$ 2.858,81 |
+| Administração/apoio (77–82) | 738 | 5,62% | R$ 2.045,61 |
+| Saúde/assistência social (86–88) | 721 | 5,49% | R$ 2.857,76 |
+| Atacado (46) | 474 | 3,61% | R$ 3.189,42 |
+| Alimentação fora do lar (56) | 339 | 2,58% | R$ 1.994,43 |
+
+O setor é definido pelo CNAE do empregador, não pela ocupação individual.
+
+### 19.2. Hipótese de remuneração e composição
+
+**INTERPRETAÇÃO SUSTENTADA.** A composição é material: varejo, serviços/vendas, administração/apoio e alimentação fora do lar concentram muitos vínculos e medianas abaixo da mediana geral; 45,97% dos vínculos estão nos GG4+GG5.
+
+**NÃO RESPONDIDO.** A base municipal isolada não permite saber quanto de uma eventual diferença salarial decorre de remuneração menor **dentro da mesma ocupação**. O teste requer RAIS 2024 de RS/pares por CBO, escolaridade e jornada.
+
+**CONTROLE COMPARATIVO.** O CEMPRE 2022 tampouco sustenta a premissa de salário médio excepcionalmente baixo em São Borja no grupo de escala usado: São Borja R$ 2.708,09; Santiago R$ 2.703,19; São Gabriel R$ 2.646,27; Alegrete R$ 2.630,97. CEMPRE e RAIS não são combinados em uma única estatística.
+
+## 20. Resultado sobre “agrodependência”
+
+**DADO OBSERVADO/CALCULADO.** Em 2021, agro = **33,87% do VAB** e **12,41% do emprego formal**; comércio + serviços = **69,45% do emprego**. Na RAIS 2024 reexecutada, agro 01–03 = **12,46% dos vínculos**. Um núcleo direto conservador 01–03 + divisão 10 reúne **20,02% dos vínculos** e **19,96% da massa salarial de dezembro**. Os demais CNAEs somam **79,98%** dos vínculos — o que não significa ausência de exposição indireta ao agro.
+
+**TRANSMISSÃO.** Em 2019–2021, agro real-proxy +118,85%; comércio/demais serviços privados -9,11%; indústria -2,80%; administração pública -6,78%. O beneficiamento de arroz é um elo local específico e forte: 953 vínculos e cerca de R$ 3,491 milhões de massa salarial em dezembro/2025. A exposição financeira também é alta: financiamento rural agrícola = 47,64%–55,55% das operações de crédito selecionadas no ESTBAN 2021–2026.
+
+**DECISÃO.**
+- “O agro é extremamente importante em São Borja”: **MANTER**.
+- “São Borja é agrodependente” como descrição global/homogênea: **RESTRINGIR/SUBSTITUIR**.
+- Formulação promovida: **São Borja é uma economia de forte centralidade agropecuária, financeiramente agroexposta e com base ocupacional, salarial e de demanda multissetorial; as dependências são seletivas por canal.**
+
+## 21. Relações econômicas entre setores
+
+A v028 passa a operar uma tipologia funcional, **analítica e não oficial**:
+
+1. **geradores de valor** — agro, agroindústria e atividades que capturam fluxos externos;
+2. **geradores de emprego/renda** — varejo, administração pública, agroindústria, transporte, saúde e apoio;
+3. **transmissores de ciclos** — agroindústria, crédito rural, logística/atacado e fornecedores B2B;
+4. **estabilizadores candidatos da demanda** — folha pública, INSS/transferências e parte dos circuitos institucionais de saúde/educação;
+5. **dependentes de outros circuitos** — varejo, alimentação e serviços cuja demanda depende de renda residente/empresarial;
+6. **conectores externos** — ponte/logística, atacado/transporte, agroexportação e centralidades de saúde/educação.
+
+A classificação de “estabilizador” permanece **HIPÓTESE PARCIALMENTE SUSTENTADA**, não prova de efeito anticíclico. Não há multiplicadores locais: a v028 não publica afirmações do tipo “R$ 1 no agro gera R$ X no comércio”.
+
+## 22. Tradução para os quatro cadernos POM
+
+**Bens essenciais.** A estrutura laboral de renda comprimida e os fluxos mensais recorrentes são compatíveis com demanda frequente por alimentação, higiene e necessidades domésticas; o POM local reforça recorrência e sensibilidade a preço/promoção. Isso não estima gasto local.
+
+**Saúde/higiene.** Separar medicamentos e higiene básica de cosméticos, perfumes e suplementos. A POF é apenas benchmark nacional; a RAIS caracteriza o lado da renda laboral, não a causalidade do consumo.
+
+**Bens não essenciais.** A leitura mais defensável é maior exposição à renda disponível, crédito e adiamento de compra. O ciclo agro não deve ser convertido automaticamente em vendas sem série setorial.
+
+**Alimentação fora do lar/serviços.** O circuito combina renda residente com potenciais fluxos externos da ponte, visitantes, estudantes, servidores e usuários de serviços regionais. Captura monetária local ainda não foi medida.
+
+Planilha técnica atualizada: `Emprego_qualificacao_v028`, `Perfil_trabalho_consumo_v028`, `Agrodependencia_teste_v028`, `Agrodependencia_matriz_v028`, `Qualificacao_salarios_v028`, `Piso_consumo_essencial_v028`, `Consumo_essencial_saude_v028`, `Agrodependencia_v028`, `Relacoes_intersetoriais_v028`, `Auditoria_v028`.

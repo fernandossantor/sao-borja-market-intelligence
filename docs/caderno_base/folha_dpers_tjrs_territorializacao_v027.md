@@ -320,3 +320,30 @@ PR #41 deve permanecer:
 Branch: `feature/cnpj-territorial-control-v1`.
 
 Nenhuma integração à `main` está autorizada sem aprovação explícita do usuário.
+
+
+## Atualização normativa CNJ — unidade de efetivo exercício
+
+**DADO NORMATIVO.** O art. 3º, VI, da Resolução CNJ nº 102/2009, com redação dada pela Resolução nº 151/2012, exige que a transparência remuneratória identifique nominalmente o beneficiário e a **unidade na qual efetivamente presta os seus serviços**.
+
+A disciplina posterior reforça essa chave territorial. A Resolução CNJ nº 215/2015, com redação da Resolução nº 273/2018, determina detalhamento individualizado da remuneração e da unidade de efetivo exercício. O Anexo I do marco consolidado, no quadro **“Detalhamento da folha de pagamento de pessoal”**, inclui explicitamente as colunas **Nome, Lotação e Cargo**, além das rubricas de rendimentos, descontos e rendimento líquido.
+
+Fontes oficiais CNJ:
+
+- Resolução nº 102/2009: `https://atos.cnj.jus.br/atos/detalhar/69`
+- Resolução nº 151/2012: `https://atos.cnj.jus.br/atos/detalhar/68`
+- Resolução nº 215/2015: `https://atos.cnj.jus.br/atos/detalhar/2236`
+- Resolução nº 273/2018: `https://atos.cnj.jus.br/atos/detalhar/2791`
+
+**DADO OBSERVADO — TJRS.** A página oficial **Detalhamento da Folha de Pagamento de Pessoal** (`https://www.tjrs.jus.br/novo/institucional/transparencia/fpp/`) permite selecionar ano, mês, tipo de folha, cargo e nome e informa que a consulta atende às normas de transparência do CNJ. A página-mãe de Gestão de Pessoas distingue esse detalhamento da Folha Consolidada e do Anexo V.
+
+**CONTROLE METODOLÓGICO.** A obrigação normativa não prova, sozinha, que o output TJRS recuperável pelo projeto já foi observado contendo `Lotação`. A implementação técnica do arquivo/resultado de julho de 2026 ainda precisa ser verificada.
+
+**ROTA PRIORITÁRIA ATUALIZADA:**
+
+1. recuperar o output oficial do Detalhamento da Folha de julho/2026 e verificar diretamente `Lotação`/unidade de efetivo exercício;
+2. se houver exportação estruturada com a chave territorial, agregar São Borja diretamente;
+3. se o detalhamento não puder ser extraído em lote ou não expuser a chave no formato acessível, usar o Anexo V mensal como roster oficial e reconciliá-lo com a Folha Consolidada ou consultas individuais;
+4. usar TLP e quantitativo de cargos apenas como controles de estrutura e plausibilidade.
+
+**STATUS:** chave territorial funcional **VALIDADA** pelo Anexo V; obrigação normativa de unidade de efetivo exercício **VALIDADA** pelo CNJ; output remuneratório TJRS com `Lotação` **AINDA NÃO OBSERVADO**; massa remuneratória TJRS/São Borja **NÃO PROMOVIDA**.

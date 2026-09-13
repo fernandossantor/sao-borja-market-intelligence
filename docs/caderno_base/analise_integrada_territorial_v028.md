@@ -299,3 +299,21 @@ Fonte: https://agenciadenoticias.ibge.gov.br/agencia-sala-de-imprensa/2013-agenc
 **CONTROLE.** Não generalizar “saúde” como bloco homogêneo: a POF mostra peso relativo maior de medicamentos em baixa renda, mas peso maior de planos de saúde nas classes superiores.
 
 Planilha: `Piso_consumo_essencial_v028`.
+
+
+## 15. Controle comparativo — salário médio e estrutura setorial
+
+O aprofundamento da RAIS 2024 explica a **distribuição interna** dos salários, mas o CEMPRE 2022 impede caracterizar São Borja como município de salário médio excepcionalmente baixo entre os comparáveis de escala.
+
+| Município | Salário médio mensal CEMPRE 2022 |
+|---|---:|
+| São Borja | R$ 2.708,09 |
+| Santiago | R$ 2.703,19 |
+| São Gabriel | R$ 2.646,27 |
+| Alegrete | R$ 2.630,97 |
+
+No mesmo CEMPRE, o comércio representa 32,58% do pessoal ocupado de São Borja, próximo de Alegrete (32,93%) e São Gabriel (34,06%) e abaixo de Santiago (39,44%). São Borja se diferencia mais pelo transporte: 7,60%, contra 2,42%–4,20% nos três pares.
+
+**INTERPRETAÇÃO.** A questão central não é uma penalidade salarial média excepcionalmente local, mas a composição: muitos vínculos em serviços, vendas e funções operacionais/intermediárias, combinados a uma cauda menor de salários públicos, profissionais e financeiros elevados. Isso faz a mediana ficar bem abaixo da média.
+
+**CONTROLE.** CEMPRE 2022 e RAIS 2024 têm universos e períodos distintos e não são combinados em uma mesma estatística.

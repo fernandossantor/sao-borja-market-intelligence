@@ -229,3 +229,17 @@ Documentos Drive:
 - Alimentação Fora do Lar e Serviços: `1OUmeyCMkQBAoZGt1Ps6JSri84N-ngI2gwrasrqtxPcU`.
 
 Cada documento contém: capa/expediente, considerações iniciais, resumo executivo, PESTEL, microambiente, consumidores/jornada, diagnóstico, SWOT, problematização, objetivos, metodologia, mensuração/reflexão, recomendações, indicadores, limitações e diretriz visual. A versão técnica antecedente permanece incorporada como Parte II — Dossiê Técnico/Rastreabilidade.
+
+
+### Cadernos setoriais v005 — revisão editorial e visual
+
+Documentação:
+`docs/cadernos/cadernos_setoriais_v005_editorial.md`.
+
+Drive:
+- Bens Essenciais: `1FT_gvUM8JFeyf2JAgZ97FbE22XxXbwB_t9AbDZTcsEA`;
+- Saúde, Higiene e Cuidados Pessoais: `12gjr6VcrC5Jp8Rdj-xRtKkrsz1RzlPBZB832uSS2vNA`;
+- Bens Não Essenciais: `1ysHC8ZkhG71eWy0hZEDqqadd5NOhOrAs0nXJHSon3pI`;
+- Alimentação Fora do Lar e Serviços: `1Z2s0hWM5amGT2aFpvlTti1-KT28OpMRduAJKFdCV76Q`.
+
+As versões v005 adicionam painéis executivos, visualizações analíticas e quadros de decisão sem alterar os controles metodológicos da v028.

@@ -36,7 +36,8 @@ A URL do CSV é explicitamente publicada pelo TJRS, mas:
 
 - a ferramenta de navegação reconheceu a URL e o MIME `text/csv`, sem renderizá-lo;
 - o ambiente de container não conseguiu baixar o domínio;
-- runners GitHub usados nesta auditoria também apresentaram timeout para o domínio TJRS.
+- runners GitHub usados nesta auditoria também apresentaram timeout para o domínio TJRS;
+- Google Sheets `IMPORTDATA`, testado em HTTPS e HTTP, também não conseguiu transferir o CSV.
 
 **Classificação:** limitação do canal de transporte, não ausência da fonte.
 

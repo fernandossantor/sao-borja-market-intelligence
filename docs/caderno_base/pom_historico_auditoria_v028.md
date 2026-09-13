@@ -135,3 +135,23 @@ A etapa seguinte foi implementada na aba `POM_circuitos_mercados_v028`, segundo 
 `circuito econômico → comportamento observado → mercado POM → implicação mercadológica → natureza da evidência → fonte/período → unidade/abrangência → limitação → prioridade`.
 
 A matriz é construída exclusivamente no nível dos quatro mercados de São Borja e não contém avaliações de operadores individuais.
+
+
+## 9. Achados históricos promovidos como triangulação
+
+Foi criada a aba `POM_historico_achados_v028`, separando o inventário documental da evidência efetivamente aproveitável.
+
+Cada linha registra:
+
+- macrosegmento;
+- período;
+- fonte anonimizada e ID técnico;
+- método e n;
+- dado observado;
+- uso analítico;
+- limitação/controle;
+- prioridade.
+
+Um controle importante surgiu para **bens não essenciais**: o macrosegmento não é sinônimo de compra sempre adiável. Em survey histórico local de 2025 sobre materiais elétricos e ferragens, com 103 respostas válidas, mais da metade dos respondentes declarou comprar no mesmo dia em que identificava a necessidade. O achado é usado para distinguir **compras aspiracionais/discricionárias** de **reposições funcionais/urgentes**, sem extrapolar o submercado para todo o segmento.
+
+Percentuais de estudos cujo denominador não foi identificado permanecem bloqueados.

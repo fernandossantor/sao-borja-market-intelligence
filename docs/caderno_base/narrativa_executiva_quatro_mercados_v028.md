@@ -167,7 +167,7 @@ Nos bens não essenciais, o **canal faz parte da proposta de valor**.
 
 O online entrega sobretudo escala de sortimento, velocidade de comparação e preço. O físico pode entregar tangibilidade, redução de risco, disponibilidade imediata, troca, suporte e crédito.
 
-Como a compra é mais adiável, renda disponível e crédito afetam fortemente a conversão da intenção em compra.
+Como regra agregada, o macrosegmento admite maior adiamento do que bens essenciais, mas é internamente heterogêneo. Um survey histórico local de 2025, com 103 respostas válidas em um submercado de materiais elétricos e ferragens, mostrou que mais da metade dos respondentes comprava no mesmo dia em que identificava a necessidade, em jornadas orientadas à reposição ou solução de problema. Assim, “não essencial” não deve ser confundido com “não urgente”. Em compras aspiracionais e discricionárias, renda disponível e crédito podem transformar intenção em postergação; em reposições funcionais, disponibilidade imediata, proximidade e capacidade de resolver o problema podem dominar a decisão.
 
 ### DIAGNÓSTICO
 

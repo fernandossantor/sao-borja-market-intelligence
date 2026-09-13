@@ -168,3 +168,20 @@ A bibliografia final, isoladamente, não substitui essa rastreabilidade no corpo
 ### Controle de classes socioeconômicas
 
 As faixas de rendimento do Censo 2022 não são convertidas em classes A/B/C/D/E. Para isso seria necessária uma aplicação/localização metodologicamente válida do Critério Brasil/CCEB. Até lá, o projeto usa **estratos operacionais de rendimento**, explicitamente rotulados como tais.
+
+## Atualização — Caderno Geral v005 e cadernos setoriais v007 — 2026-09-13
+
+Documentação detalhada:
+`docs/cadernos/cadernos_v005_v007_creditos_sao_borja_em_100.md`.
+
+Versões Drive:
+- Geral v005: `1BLYE38dNhMsgWUrKuNBsfcaeqF3-MWBtek5MLvIoDCo`;
+- Bens Essenciais v007: `1yy1SLWMEB1pUQOq6h_OeftQJoaFJwLSzK9kaoCz8l6k`;
+- Saúde/Higiene/Cuidados v007: `166Wqb-SkD4BP-TcsHhv4bJSq1n_k-CEzRUoSwZwFmYU`;
+- Bens Não Essenciais v007: `1XdrBrkvImrRlEp3QYN-ewIpYxbRKFTPlwSIiPmMJ2xk`;
+- Alimentação Fora do Lar e Serviços v007: `1O4Jw2q-mbQ9vRHPvLEXT-kCIY7sgyVd3rE96XurYY04`.
+
+O Caderno Geral recebeu o quadro integrado **São Borja em 100**, com cinco escalas didáticas e fontes explícitas. Os expedientes passaram a identificar Fernando Silva Santor na coordenação das pesquisas e docência, e a creditar os autores discentes dos reports utilizados. Os cadernos setoriais identificam nominalmente os autores do respectivo report POM 2026.
+
+Permanece obrigatória a referência próxima aos dados factuais/quantitativos fora dos exercícios mentais. A inclusão de créditos e infográficos não altera essa regra.
+

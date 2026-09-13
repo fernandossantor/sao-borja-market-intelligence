@@ -243,3 +243,30 @@ Drive:
 - Alimentação Fora do Lar e Serviços: `1Z2s0hWM5amGT2aFpvlTti1-KT28OpMRduAJKFdCV76Q`.
 
 As versões v005 adicionam painéis executivos, visualizações analíticas e quadros de decisão sem alterar os controles metodológicos da v028.
+
+
+### Exercícios de visualização + referências no corpo — 13/09/2026
+
+Nova regra:
+**dados e afirmações factuais da camada editorial devem manter a fonte/referência identificável no próprio parágrafo, bloco, visual ou indicação de fontes da seção.**
+
+Documentação:
+- `docs/caderno_geral/caderno_geral_v004_exercicios_fontes.md`;
+- `docs/cadernos/cadernos_setoriais_v006_exercicios_fontes.md`.
+
+Drive:
+- Geral v004: `1j4SYz6c_NytJsqyfgpOyemjYZ8fWElAMyW1ByTbMmYw`;
+- Bens Essenciais v006: `1GQSyM6HWMdwn029Ns48Ca5jT5xB_0Y8oII6ElqqAit8`;
+- Saúde/Higiene/Cuidados v006: `1GYGGacDKMs6zafXICtbJta7-u6LmVn7gjz8YvDiUfqM`;
+- Bens Não Essenciais v006: `1w-a5ykunpBnVbfzQgmbCEaPNGNq7k1bMITvAOxXkWU8`;
+- Alimentação Fora do Lar e Serviços v006: `10Ya8feE79mpb2CpA2tFrfARNDyH0exmxPSZ7p6K8Eo4`.
+
+Exercícios mentais incorporados:
+- 100 residentes por estrato de rendimento;
+- R$100 de VAB versus 100 empregos formais;
+- R$100 de consumo POF;
+- R$100 de massa salarial no núcleo agro direto;
+- escalas setoriais de alimentação, saúde/higiene, espaço orçamentário e normalização da amostra POM.
+
+Controle:
+**não converter renda censitária em classes A/B/C/D/E do CCEB/ABEP.**

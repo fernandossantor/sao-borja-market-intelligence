@@ -1,0 +1,122 @@
+name: cnj-remuneracao-qlik-engine-schema
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/cnj-remuneracao-qlik-engine-schema.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cnj-remuneracao-qlik-engine-schema.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read public CNJ Qlik Engine schema only
+        run: |
+          python - <<'PY'
+          import json, ssl, subprocess, sys, uuid
+          from pathlib import Path
+
+          OUT=Path("artifacts/cnj_remuneracao_qlik_engine_schema")
+          OUT.mkdir(parents=True,exist_ok=True)
+          appid="8ccb93ca-848f-4ffe-bf9b-96d57878c4d7"
+          host="paineisanalytics.cnj.jus.br"
+          result={
+            "source":"CNJ — Painel de Remuneração dos Magistrados (QlikSense)",
+            "appid":appid,
+            "purpose":"Retrieve application schema/field names only. No field values or person-level records are requested.",
+            "attempts":[],
+            "field_names":[],
+            "errors":[]
+          }
+
+          try:
+            subprocess.check_call([sys.executable,"-m","pip","install","-q","websocket-client"])
+            import websocket
+          except Exception as e:
+            result["errors"].append({"stage":"install_import","error":repr(e)})
+            (OUT/"schema_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2))
+            print(json.dumps(result,ensure_ascii=False,indent=2))
+            raise SystemExit(0)
+
+          def rpc(ws,method,handle,params,rid):
+            ws.send(json.dumps({"jsonrpc":"2.0","id":rid,"method":method,"handle":handle,"params":params}))
+            while True:
+              raw=ws.recv()
+              msg=json.loads(raw)
+              if msg.get("id")==rid:
+                return msg
+
+          urls=[
+            f"wss://{host}/app/{appid}",
+            f"wss://{host}/app/{appid}?identity={uuid.uuid4()}",
+          ]
+          for url in urls:
+            rec={"url":url}
+            try:
+              ws=websocket.create_connection(
+                url,timeout=35,
+                origin=f"https://{host}",
+                sslopt={"cert_reqs":ssl.CERT_REQUIRED},
+                cookie=""
+              )
+              rec["connected"]=True
+              opened=rpc(ws,"OpenDoc",-1,[appid,"","","",False],1)
+              rec["open_doc_error"]=opened.get("error")
+              h=(opened.get("result",{}).get("qReturn",{}) or {}).get("qHandle")
+              rec["doc_handle"]=h
+              if h:
+                prop={
+                  "qInfo":{"qType":"SBMI_FieldList"},
+                  "qFieldListDef":{
+                    "qShowSystem":False,
+                    "qShowHidden":False,
+                    "qShowSemantic":True,
+                    "qShowSrcTables":True
+                  }
+                }
+                created=rpc(ws,"CreateSessionObject",h,[prop],2)
+                rec["create_error"]=created.get("error")
+                oh=(created.get("result",{}).get("qReturn",{}) or {}).get("qHandle")
+                rec["object_handle"]=oh
+                if oh:
+                  layout=rpc(ws,"GetLayout",oh,[],3)
+                  rec["layout_error"]=layout.get("error")
+                  items=(layout.get("result",{}).get("qLayout",{}).get("qFieldList",{}) or {}).get("qItems",[])
+                  fields=[]
+                  for item in items:
+                    name=item.get("qName")
+                    if name: fields.append(name)
+                  result["field_names"]=fields
+                  rec["field_count"]=len(fields)
+              ws.close()
+              result["attempts"].append(rec)
+              if result["field_names"]: break
+            except Exception as e:
+              rec["connected"]=False
+              rec["error"]=repr(e)
+              result["attempts"].append(rec)
+
+          # Store only schema labels.
+          (OUT/"schema_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnj-remuneracao-qlik-engine-schema
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/cnj_remuneracao_qlik_engine_schema/

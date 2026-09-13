@@ -444,7 +444,7 @@ A tradução setorial foi aprofundada com a matriz `POM_circuitos_mercados_v028`
 
 **Saúde, higiene e cuidados pessoais.** O mercado é tratado em camadas: tratamento/necessidade, reposição de higiene, autocuidado/beleza e suplementação. Conveniência reduz custo de tempo; confiança e informação ganham peso nas escolhas de maior complexidade ou valor.
 
-**Bens não essenciais.** As entrevistas de 2026 e a triangulação histórica sustentam uma jornada estruturalmente híbrida. O digital amplia preço e variedade; o físico permanece relevante quando reduz risco por tangibilidade, disponibilidade, troca, suporte e crédito. A compra é mais adiável e sensível a renda disponível e condições financeiras.
+**Bens não essenciais.** As entrevistas de 2026 e a triangulação histórica sustentam uma jornada estruturalmente híbrida. O digital amplia preço e variedade; o físico permanece relevante quando reduz risco por tangibilidade, disponibilidade, troca, suporte e crédito. Em termos agregados, compras discricionárias são mais adiáveis e sensíveis a renda disponível e condições financeiras; contudo, o macrosegmento inclui reposições funcionais com alta urgência. Survey histórico local de 2025 em materiais elétricos/ferragens (103 respostas válidas) registrou mais da metade das compras no mesmo dia da identificação da necessidade, reforçando que “não essencial” não equivale a “não urgente”.
 
 **Alimentação fora do lar e serviços.** A demanda combina dimensões utilitárias e hedônicas, além de renda residente, circuitos institucionais e potencial fluxo externo. Tecnologia é promovida como instrumento de redução de fricção, não como substituta automática de hospitalidade e confiança.
 

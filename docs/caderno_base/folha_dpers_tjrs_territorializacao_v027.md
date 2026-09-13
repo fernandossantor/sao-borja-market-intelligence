@@ -157,23 +157,37 @@ Apenas uma parcela adicional de substituição/acumulação poderia ser territor
 
 A 3ª Defensoria vaga não gera salário titular fictício.
 
-## 6. Ordem de grandeza da folha pública não municipal
+## 6. Ordem de grandeza da folha pública não municipal — correção conceitual
 
-Subtotal documental já registrado na v025:
+A v025 registrou:
 
 **R$ 9.551.979,21/mês**
 
-Escopo do subtotal anterior: federal civil parcial + Executivo estadual + MPRS.
+como ordem de grandeza documental para federal civil parcial + Executivo estadual + MPRS.
 
-### Com DPERS — núcleo estrito de lotação
+### Auditoria conceitual
 
-**R$ 9.618.443,65/mês**
+A base v025 já combina conceitos remuneratórios não perfeitamente homogêneos:
 
-### Com DPERS — núcleo ampliado provável
+- federal civil: remuneração básica bruta;
+- Executivo estadual: remuneração bruta da fonte estadual;
+- MPRS: Total Bruto da folha normal.
 
-**R$ 9.627.669,64/mês**
+A DPERS permite separar **remuneração mensal bruta recorrente** de um **envelope bruto amplo [1]–[7]**.
 
-Esses valores continuam sendo **ordens de grandeza documentais**, não massa salarial pública total de São Borja.
+Por isso, a inclusão da DPERS é mantida como **SENSIBILIDADE**, e não como novo subtotal canônico.
+
+### Sensibilidade — componente recorrente DPERS
+
+- núcleo estrito: R$ 9.551.979,21 + R$ 66.464,44 = **R$ 9.618.443,65/mês**;
+- núcleo ampliado provável: R$ 9.551.979,21 + R$ 75.690,43 = **R$ 9.627.669,64/mês**.
+
+### Sensibilidade — envelope bruto amplo DPERS
+
+- núcleo estrito: R$ 9.551.979,21 + R$ 87.911,55 = **R$ 9.639.890,76/mês**;
+- núcleo ampliado provável: R$ 9.551.979,21 + R$ 99.804,37 = **R$ 9.651.783,58/mês**.
+
+**Regra:** nenhum dos quatro resultados é promovido como total homogêneo da folha pública. Eles demonstram apenas a sensibilidade da ordem de grandeza anterior à incorporação da DPERS sob conceitos alternativos.
 
 ## 7. TJRS — estado da auditoria
 
@@ -238,7 +252,9 @@ A URL do CSV é explicitamente publicada pelo TJRS, mas os canais técnicos usad
 
 - a navegação reconhece o URL/MIME `text/csv`, mas não o renderiza;
 - o container não conseguiu baixar o domínio;
-- o runner GitHub sofreu timeouts no domínio TJRS.
+- o runner GitHub sofreu timeouts no domínio TJRS;
+- Google Sheets `IMPORTDATA`, testado por HTTPS e HTTP, também não conseguiu transferir o CSV;
+- os workflows de proxy neutro para o CSV e para o PDF retornaram HTTP 422, sem recuperar o conteúdo.
 
 Isso é uma limitação de transporte, não ausência da fonte. Não usar contagem manual de ocorrências do PDF como contagem canônica de vínculos.
 
@@ -298,6 +314,28 @@ Próxima sequência:
 - massa remuneratória TJRS/São Borja: **NÃO PROMOVIDA**.
 
 Não usar cargo, nome, atuação processual, notícia, residência ou município de origem como proxy de lotação.
+
+
+
+## 9.2 Controle estrutural — TLP × cargos providos
+
+As Tabelas de Lotação de Pessoal do TJRS fornecem um controle adicional independente.
+
+**TLP 1 — referência 31/12/2025:** seis unidades judiciárias de São Borja somam `LR_EFET = 16`.
+
+**TLP 2 — referência 01/01/2026:** quatro unidades de apoio direto identificadas em São Borja somam `LR_EFET = 16`.
+
+**TLP 3 — referência 01/01/2026:** não foi localizada unidade territorial em São Borja na busca documental.
+
+Portanto:
+
+`LR_EFET TLP1 + TLP2 = 16 + 16 = 32`.
+
+O relatório **Quantitativo de Cargos Providos nas Comarcas**, de junho/2026, registra também **32 cargos providos** em São Borja.
+
+**DADO CALCULADO:** diferença = 0; razão de consistência = 100%.
+
+**Classificação:** **COERÊNCIA CRUZADA FORTE**, não prova de identidade. Os períodos e conceitos diferem; movimentações podem ocorrer mantendo a mesma contagem. O valor 32 deve ser usado como controle estrutural do núcleo efetivo, não como total de pessoas remuneradas pelo TJRS no município.
 
 ## 10. Limitações
 

@@ -45,9 +45,12 @@ jobs:
               with zf.open(name) as raw:
                   rd=csv.DictReader(io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline=""),delimiter=";")
                   headers=rd.fieldnames or []
-                  structural=[h for h in headers if any(k in norm(h) for k in (
-                      "ORG","UORG","UNIDADE","LOCAL","MUNIC","CIDADE","UF","EXERC","LOTAC","COMANDO","FORCA","OM"
-                  ))]
+                  structural=[h for h in headers if (
+                      h.startswith("COD_UORG_") or h.startswith("UORG_") or
+                      h.startswith("COD_ORG_") or h.startswith("ORG_") or
+                      h.startswith("COD_ORGSUP_") or h.startswith("ORGSUP_") or
+                      h=="UF_EXERCICIO"
+                  )]
                   counts={h:Counter() for h in structural}
                   total=0
                   for r in rd:
@@ -88,6 +91,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: military-cadastro-schema-audit
-          retention-days: 30
+          retention-days: 1
           if-no-files-found: error
           path: artifacts/military_cadastro_schema/

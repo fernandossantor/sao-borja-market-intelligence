@@ -164,3 +164,17 @@ Contrastes entre tempo, municípios ou dimensões não são tratados como prova 
 A v028 altera a pergunta central do Caderno-Base: de **“quanto existe?”** para **“como fluxos, estoques, populações e âncoras institucionais verificadas se combinam para formar demanda, risco, centralidade e capacidade de captura do gasto?”**.
 
 A mudança não encerra a auditoria. Ela estabelece um critério de suficiência: lacunas continuam documentadas e podem ser retomadas quando surgir evidência genuinamente nova, enquanto o projeto avança para interpretação territorial e aplicação mercadológica com rastreabilidade.
+
+## 7. Mapa de estabilidade, volatilidade e exposição mercadológica
+
+A planilha técnica recebeu a aba `Mapa_estabilidade_v028`.
+
+**CLASSIFICAÇÃO.** Quadro analítico qualitativo; não é indicador oficial, escore estatístico ou modelo causal.
+
+**DADO OBSERVADO / INTERPRETAÇÃO.** A demografia e a composição domiciliar operam em ritmo estrutural lento. Renda laboral, benefícios previdenciários, Novo Bolsa Família e parcela material da folha pública formam fluxos de cadência mensal ou relativamente recorrente. Produção agropecuária, preços e contratação de crédito rural são mais sazonais e voláteis. O estoque de crédito bancário é mais persistente que o fluxo de novas contratações. Cheias e eventos climáticos combinam menor frequência com potencial de alta severidade.
+
+**TESE ANALÍTICA.** São Borja não possui um único ciclo econômico aplicável a todos os mercados. A exposição depende da camada predominante no público-alvo: renda recorrente, ciclo agrofinanceiro, centralidade regional, estrutura empresarial ou risco climático/logístico.
+
+**IMPLICAÇÃO MERCADOLÓGICA.** Bens essenciais e serviços cotidianos tendem a responder mais a recorrência e restrição orçamentária; negócios rurais/B2B, materiais e compras de maior valor tendem a ser mais sensíveis a safra, preços e crédito; cadeias dependentes de transporte, estoque e perecibilidade exigem maior gestão de continuidade.
+
+**RECOMENDAÇÃO.** Monitorar as dimensões em painel conjunto, preservando suas unidades e conceitos. Não fundi-las em um índice único sem pesos, normalização, série comparável e validação estatística.

@@ -432,3 +432,22 @@ A classificação de “estabilizador” permanece **HIPÓTESE PARCIALMENTE SUST
 **Alimentação fora do lar/serviços.** O circuito combina renda residente com potenciais fluxos externos da ponte, visitantes, estudantes, servidores e usuários de serviços regionais. Captura monetária local ainda não foi medida.
 
 Planilha técnica atualizada: `Emprego_qualificacao_v028`, `Perfil_trabalho_consumo_v028`, `Agrodependencia_teste_v028`, `Agrodependencia_matriz_v028`, `Qualificacao_salarios_v028`, `Piso_consumo_essencial_v028`, `Consumo_essencial_saude_v028`, `Agrodependencia_v028`, `Relacoes_intersetoriais_v028`, `Auditoria_v028`.
+
+
+## 23. Arquitetura executiva dos quatro mercados POM
+
+A tradução setorial foi aprofundada com a matriz `POM_circuitos_mercados_v028` e com a narrativa específica `docs/caderno_base/narrativa_executiva_quatro_mercados_v028.md`.
+
+**REGRA EDITORIAL.** A unidade de análise é o mercado de São Borja. Nomes de empresas, clientes ou operadores não são utilizados na narrativa executiva e avaliações originadas em estudos individuais não são promovidas como avaliações de operadores.
+
+**Bens essenciais.** A evidência sustenta duas missões distintas: abastecimento planejado, mais orientado por economia total da cesta e variedade, e reposição, mais orientada por proximidade, disponibilidade e rapidez. A necessidade é recorrente, mas marca, quantidade, canal e estabelecimento permanecem móveis.
+
+**Saúde, higiene e cuidados pessoais.** O mercado é tratado em camadas: tratamento/necessidade, reposição de higiene, autocuidado/beleza e suplementação. Conveniência reduz custo de tempo; confiança e informação ganham peso nas escolhas de maior complexidade ou valor.
+
+**Bens não essenciais.** As entrevistas de 2026 e a triangulação histórica sustentam uma jornada estruturalmente híbrida. O digital amplia preço e variedade; o físico permanece relevante quando reduz risco por tangibilidade, disponibilidade, troca, suporte e crédito. A compra é mais adiável e sensível a renda disponível e condições financeiras.
+
+**Alimentação fora do lar e serviços.** A demanda combina dimensões utilitárias e hedônicas, além de renda residente, circuitos institucionais e potencial fluxo externo. Tecnologia é promovida como instrumento de redução de fricção, não como substituta automática de hospitalidade e confiança.
+
+**LIMITE.** Fluxos da fronteira indicam potencial de circulação adicional, mas não medem gasto, permanência, ticket ou captura monetária em São Borja.
+
+A matriz preserva em cada linha: natureza da evidência, fonte/período, unidade/abrangência, interpretação, limitação, implicação executiva e prioridade.

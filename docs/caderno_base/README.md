@@ -212,3 +212,20 @@ Regra:
 **dados oficiais/localizados descrevem São Borja; pesquisas nacionais contextualizam; tendências fazem horizon scanning; guias/frameworks não são promovidos como dados observados.**
 
 O novo acervo fortalece sobretudo as dimensões Econômica, Social e Tecnológica dos quatro POM. Política, Legal e Demográfica permanecem ancoradas prioritariamente em fontes oficiais e territoriais.
+
+
+## Programa editorial — cinco cadernos
+
+Em 13/09/2026 foi iniciada a redação editorial dos cinco produtos finais, combinando camada executiva/mercadológica com preservação integral do dossiê técnico.
+
+Documentação:
+`docs/cadernos/programa_editorial_cinco_cadernos_v001.md`.
+
+Documentos Drive:
+- Caderno Geral: `1URr09SaVZ_FX8VEfa3YUFG4fn9nhOE8sAYNyC3vbL58`;
+- Bens Essenciais: `12hkqVo5eLOSlJkaZneLkWQki5AHECVFwUuUUbHaAEtk`;
+- Saúde, Higiene e Cuidados Pessoais: `1WGK5PrtkGX0X1d6gPNLgecTTBdwkTDzGRT1O64SogHw`;
+- Bens Não Essenciais: `1fTXgDv0uVHppWeNO1ouNFjJhHSmkphTjBEtBUFGlZb8`;
+- Alimentação Fora do Lar e Serviços: `1OUmeyCMkQBAoZGt1Ps6JSri84N-ngI2gwrasrqtxPcU`.
+
+Cada documento contém: capa/expediente, considerações iniciais, resumo executivo, PESTEL, microambiente, consumidores/jornada, diagnóstico, SWOT, problematização, objetivos, metodologia, mensuração/reflexão, recomendações, indicadores, limitações e diretriz visual. A versão técnica antecedente permanece incorporada como Parte II — Dossiê Técnico/Rastreabilidade.

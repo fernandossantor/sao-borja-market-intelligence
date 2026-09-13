@@ -188,3 +188,27 @@ Documentação:
 - `docs/caderno_base/narrativa_executiva_quatro_mercados_v028.md`.
 
 Os reports históricos são usados como triangulação comportamental, sem soma de amostras, sem série temporal artificial e sem extrapolação de avaliações de operadores para o conjunto do mercado.
+
+
+## Contexto macroambiental / PESTEL — v028
+
+Pasta:
+`_sao_borja/new_files/07_contexto_macro`
+
+Drive folder:
+`1Zt6EY2CEF5kuIf2Q8fKEFWb9L01zdvtR`
+
+**DADO OBSERVADO:** 25 PDFs foram auditados.
+
+Abas técnicas na planilha canônica:
+- `Contexto_macro_catalogo_v028`;
+- `Contexto_macro_achados_v028`;
+- `Contexto_macro_PESTEL_v028`.
+
+Documentação:
+`docs/caderno_base/contexto_macro_pestel_v028.md`.
+
+Regra:
+**dados oficiais/localizados descrevem São Borja; pesquisas nacionais contextualizam; tendências fazem horizon scanning; guias/frameworks não são promovidos como dados observados.**
+
+O novo acervo fortalece sobretudo as dimensões Econômica, Social e Tecnológica dos quatro POM. Política, Legal e Demográfica permanecem ancoradas prioritariamente em fontes oficiais e territoriais.

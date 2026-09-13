@@ -118,3 +118,24 @@ Os cinco documentos possuem a nova camada editorial redigida. O Caderno Geral av
 - aplicar o padrão editorial aprovado aos quatro cadernos setoriais.
 
 Esta documentação não autoriza merge do PR #41. O PR deve permanecer aberto, draft e sem merge até autorização explícita do usuário.
+
+
+## Atualização — cadernos setoriais v005 — 2026-09-13
+
+Os quatro cadernos setoriais passaram por uma revisão editorial/visual comum, documentada em:
+`docs/cadernos/cadernos_setoriais_v005_editorial.md`.
+
+Novas versões de trabalho no Drive:
+- Bens Essenciais: `1FT_gvUM8JFeyf2JAgZ97FbE22XxXbwB_t9AbDZTcsEA`;
+- Saúde, Higiene e Cuidados Pessoais: `12gjr6VcrC5Jp8Rdj-xRtKkrsz1RzlPBZB832uSS2vNA`;
+- Bens Não Essenciais: `1ysHC8ZkhG71eWy0hZEDqqadd5NOhOrAs0nXJHSon3pI`;
+- Alimentação Fora do Lar e Serviços: `1Z2s0hWM5amGT2aFpvlTti1-KT28OpMRduAJKFdCV76Q`.
+
+Cada v005 recebeu:
+- painel executivo com cinco teses de leitura;
+- dois visuais orientados à pergunta analítica;
+- leitura executiva dos visuais;
+- quadro de decisão empresarial com prioridades e indicadores.
+
+Regra mantida:
+**não quantificar evidência qualitativa apenas para produzir gráfico**.

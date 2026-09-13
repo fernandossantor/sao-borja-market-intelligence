@@ -139,3 +139,32 @@ Cada v005 recebeu:
 
 Regra mantida:
 **não quantificar evidência qualitativa apenas para produzir gráfico**.
+
+
+## Atualização — exercícios de visualização e política de fontes — 2026-09-13
+
+Foi adicionada uma nova camada editorial aos cinco cadernos para traduzir indicadores abstratos em escalas intuitivas, sem criar fatos novos.
+
+Documentação:
+- Caderno Geral v004: `docs/caderno_geral/caderno_geral_v004_exercicios_fontes.md`;
+- Cadernos setoriais v006: `docs/cadernos/cadernos_setoriais_v006_exercicios_fontes.md`.
+
+Versões Drive:
+- Geral v004: `1j4SYz6c_NytJsqyfgpOyemjYZ8fWElAMyW1ByTbMmYw`;
+- Bens Essenciais v006: `1GQSyM6HWMdwn029Ns48Ca5jT5xB_0Y8oII6ElqqAit8`;
+- Saúde/Higiene/Cuidados v006: `1GYGGacDKMs6zafXICtbJta7-u6LmVn7gjz8YvDiUfqM`;
+- Bens Não Essenciais v006: `1w-a5ykunpBnVbfzQgmbCEaPNGNq7k1bMITvAOxXkWU8`;
+- Alimentação Fora do Lar e Serviços v006: `10Ya8feE79mpb2CpA2tFrfARNDyH0exmxPSZ7p6K8Eo4`.
+
+### Regra editorial obrigatória de referências
+
+Toda afirmação factual ou quantitativa da camada editorial deve manter fonte/referência identificável:
+- no próprio parágrafo;
+- na legenda de quadro/gráfico;
+- ou em indicação explícita de “fontes da seção”.
+
+A bibliografia final, isoladamente, não substitui essa rastreabilidade no corpo do produto.
+
+### Controle de classes socioeconômicas
+
+As faixas de rendimento do Censo 2022 não são convertidas em classes A/B/C/D/E. Para isso seria necessária uma aplicação/localização metodologicamente válida do Critério Brasil/CCEB. Até lá, o projeto usa **estratos operacionais de rendimento**, explicitamente rotulados como tais.

@@ -230,3 +230,16 @@ Planilha: `Fronteira_logistica_v028`.
 - “comércio e serviços são anticíclicos” = **não demonstrado**.
 
 Planilha: `Estabilidade_setorial_v028`.
+
+
+## 11. Complemento turístico — fluxo migratório internacional
+
+**DADO OBSERVADO.** O Relatório 2024 das Rotas de Integração Sul-Americana, com dados da Polícia Federal, registra **206 mil atendimentos** no posto de São Borja em 2023, equivalentes a **10,8%** dos 1,9 milhão de atendimentos nos postos da Rota 5.
+
+No conjunto da Rota 5, **1,69 milhão de atendimentos (88,7%)** foram classificados como `Turista/Visita Turismo`.
+
+**CONTROLE.** Os 88,7% referem-se ao conjunto da Rota 5 e **não** são aplicados aos 206 mil atendimentos de São Borja sem cruzamento por posto e motivo. Atendimento migratório também não equivale a pessoa única, turista hospedado, pernoite ou gasto local.
+
+Fonte oficial: https://www.gov.br/planejamento/pt-br/assuntos/articulacao-institucional/rotas-de-integracao/relatorio-2024-rotas-de-integracao.pdf
+
+**IMPLICAÇÃO.** A posição de São Borja como portão terrestre internacional é empiricamente relevante; o próximo problema é medir **captura** — qual parcela do fluxo permanece, pernoita e gasta no município.

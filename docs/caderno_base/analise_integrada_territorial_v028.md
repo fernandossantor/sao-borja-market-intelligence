@@ -317,3 +317,38 @@ No mesmo CEMPRE, o comércio representa 32,58% do pessoal ocupado de São Borja,
 **INTERPRETAÇÃO.** A questão central não é uma penalidade salarial média excepcionalmente local, mas a composição: muitos vínculos em serviços, vendas e funções operacionais/intermediárias, combinados a uma cauda menor de salários públicos, profissionais e financeiros elevados. Isso faz a mediana ficar bem abaixo da média.
 
 **CONTROLE.** CEMPRE 2022 e RAIS 2024 têm universos e períodos distintos e não são combinados em uma mesma estatística.
+
+
+## 16. Relações econômicas entre os setores
+
+A v028 passa a distinguir três papéis analíticos, não oficiais e não mutuamente exclusivos:
+
+1. **geração/atração de renda e demanda externa** — agro, corredor internacional, folhas públicas externas, previdência/transferências e fluxos institucionais;
+2. **transformação/ancoragem** — agroindústria, logística, atacado e finanças;
+3. **recirculação da renda residente** — varejo, alimentação, saúde/higiene e demais serviços.
+
+**EVIDÊNCIA LOCAL.** O beneficiamento de arroz possui 953 vínculos e cerca de R$ 3,491 milhões de massa remuneratória em dezembro/2025. Na RAIS 2024, transporte + armazenagem reúnem 845 vínculos; atacado, 474; varejo, 2.824; saúde + assistência social, 721; alojamento + alimentação, 419. Os períodos e conceitos são preservados separadamente.
+
+**CO-MOVIMENTO, NÃO CAUSALIDADE.** Entre 2003 e 2021, usando ajuste uniforme pelo IPCA apenas como proxy, a correlação do crescimento agro com o VAB privado não agro foi r=0,305; com serviços, r=0,380; com indústria, r=-0,037. Agro(t) versus privado não agro(t+1) resultou em r=-0,062; versus serviços(t+1), r=-0,114. Esses coeficientes não demonstram independência, mas tampouco sustentam transmissão linear forte e automática do agro a toda a economia urbana.
+
+**INTERPRETAÇÃO.** O agro funciona como importante âncora de base, mas a demanda urbana corrente é alimentada e recirculada por diversos circuitos de renda. Varejo essencial e categorias básicas de saúde/higiene são sobretudo **camadas de recirculação e retenção de renda**, não fontes autônomas de renda externa.
+
+Planilha: `Relacoes_intersetoriais_v028`.
+
+## 17. Referência de insumo-produto e limite dos multiplicadores
+
+A Matriz de Insumo-Produto do Rio Grande do Sul de 2019, produzida por SEFAZ-RS/SPGG-DEE/UFRJ, é incorporada apenas como **referência metodológica**. Ela formaliza demanda intermediária e final e trata margens de comércio e transporte como componentes da distribuição dos produtos.
+
+Fonte: https://dee.rs.gov.br/matriz-insumo-produto
+
+Nenhum coeficiente estadual é aplicado automaticamente a São Borja. A v028 **não publica multiplicadores locais** do tipo “R$ 1 no agro gera R$ X no comércio”.
+
+A próxima etapa possível é regionalizar a MIP-RS 2019 para São Borja com metodologia explícita, usando emprego, massa salarial, estabelecimentos e VAB/produção locais, seguida de análise de sensibilidade. Até isso ser feito, os encadeamentos permanecem classificados como observados, estruturais ou hipotéticos conforme a evidência disponível.
+
+## 18. Formulação consolidada sobre agrodependência
+
+A expressão promovida passa a ser:
+
+> **São Borja é uma economia agroancorada, financeiramente agroexposta e urbanamente multicircuital, com dependências seletivas por canal.**
+
+“Agroimportância alta” é sustentado. “Agrodependência global” não está demonstrado. A formulação também não significa independência do agro.

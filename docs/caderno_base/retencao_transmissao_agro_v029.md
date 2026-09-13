@@ -1,5 +1,7 @@
 # Caderno-Base Territorial — v029 — retenção territorial e transmissão do agro
 
+**STATUS DE GOVERNANÇA:** fonte auxiliar histórica. A v028 — análise integrada territorial — é a versão corrente. Este documento pode ser reaproveitado criticamente, mas **não substitui** a v028.
+
 **Data:** 2026-09-12  
 **Geografia:** São Borja/RS  
 **Objetivo:** integrar as evidências já auditadas sobre geração de valor agropecuário, ancoragem operacional, renda do trabalho, controle empresarial, transmissão fiscal, crédito e retenção patrimonial, sem criar uma taxa sintética de “retenção”.

@@ -16,8 +16,15 @@ O join operador × CNPJ × RFB permanece **depriorizado**.
 
 ## Base corrente
 
-`caderno_base_territorial_v016_fluxos_centralidade_20260910`  
-Drive `1RPMo8eqXsRv7VGXiTZA9_DLBdeFBrnUuNkbm6Bt5Jc4`.
+**Caderno-Base Territorial v028 — análise integrada territorial** (corrente em 13/09/2026).
+
+- Planilha técnica: `17Sk5Hu_CQ-hKJYTNEfYSN4F97MiuZrfrU9o_VxEg0Rc`
+- Caderno narrativo: `1EdWubBnx7kUqTDdeXBafOf9cw_l9IT9gizORycVAMFI`
+- Registro metodológico: `1EkUaN9AnscTou06BMpwOxUrmWkHctBfuqrT9JqfCCt8`
+- A v029 de retenção/transmissão do agro é **fonte auxiliar histórica**, reaproveitada criticamente; não substitui a v028 corrente.
+- PR #41 permanece **aberto, draft e sem merge**.
+
+A v028 incorpora, entre outras, a reexecução RAIS 2024 de escolaridade × CBO × CNAE × remuneração e a matriz de relações intersetoriais.
 
 ## Camada Base × POM
 

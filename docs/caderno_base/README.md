@@ -180,6 +180,7 @@ Regra editorial: **não utilizar nomes de empresas, clientes ou operadores na na
 
 Lastro técnico na planilha canônica v028:
 - `POM_historico_auditoria_v028` — inventário metodológico anonimizado do acervo histórico;
+- `POM_historico_achados_v028` — achados históricos aproveitáveis, com método/n, uso e limitações;
 - `POM_circuitos_mercados_v028` — circuito territorial → evidência → interpretação → implicação → limitação → recomendação.
 
 Documentação:

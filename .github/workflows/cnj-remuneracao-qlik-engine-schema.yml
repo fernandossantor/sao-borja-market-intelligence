@@ -26,7 +26,7 @@ jobs:
       - name: Read public CNJ Qlik Engine schema only
         run: |
           python - <<'PY'
-          import json, ssl, subprocess, sys, uuid
+          import base64, hashlib, json, os, socket, ssl, struct, uuid
           from pathlib import Path
 
           OUT=Path("artifacts/cnj_remuneracao_qlik_engine_schema")
@@ -42,37 +42,121 @@ jobs:
             "errors":[]
           }
 
-          try:
-            subprocess.check_call([sys.executable,"-m","pip","install","-q","websocket-client"])
-            import websocket
-          except Exception as e:
-            result["errors"].append({"stage":"install_import","error":repr(e)})
-            (OUT/"schema_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2))
-            print(json.dumps(result,ensure_ascii=False,indent=2))
-            raise SystemExit(0)
+          class WS:
+            def __init__(self,host,path,protocol=None,timeout=35):
+              self.sock=ssl.create_default_context().wrap_socket(
+                socket.create_connection((host,443),timeout=timeout),
+                server_hostname=host
+              )
+              self.sock.settimeout(timeout)
+              key=base64.b64encode(os.urandom(16)).decode()
+              headers=[
+                f"GET {path} HTTP/1.1",
+                f"Host: {host}",
+                "Upgrade: websocket",
+                "Connection: Upgrade",
+                f"Sec-WebSocket-Key: {key}",
+                "Sec-WebSocket-Version: 13",
+                f"Origin: https://{host}",
+              ]
+              if protocol:
+                headers.append(f"Sec-WebSocket-Protocol: {protocol}")
+              req="\r\n".join(headers)+"\r\n\r\n"
+              self.sock.sendall(req.encode())
+              buf=b""
+              while b"\r\n\r\n" not in buf:
+                part=self.sock.recv(4096)
+                if not part: break
+                buf+=part
+                if len(buf)>65536: break
+              head=buf.split(b"\r\n\r\n",1)[0].decode("latin1","replace")
+              self.handshake=head
+              status=head.split("\r\n",1)[0] if head else ""
+              if " 101 " not in status:
+                raise RuntimeError(f"WebSocket handshake failed: {status}; headers={head[:2000]}")
+              accept=None
+              for line in head.split("\r\n")[1:]:
+                if line.lower().startswith("sec-websocket-accept:"):
+                  accept=line.split(":",1)[1].strip()
+              expected=base64.b64encode(hashlib.sha1((key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+              if accept and accept!=expected:
+                raise RuntimeError("Bad Sec-WebSocket-Accept")
+              self.buf=buf.split(b"\r\n\r\n",1)[1] if b"\r\n\r\n" in buf else b""
+
+            def _readn(self,n):
+              out=b""
+              if self.buf:
+                take=min(n,len(self.buf)); out=self.buf[:take]; self.buf=self.buf[take:]
+              while len(out)<n:
+                p=self.sock.recv(n-len(out))
+                if not p: raise EOFError("socket closed")
+                out+=p
+              return out
+
+            def send_text(self,text):
+              payload=text.encode()
+              fin_opcode=0x81
+              maskbit=0x80
+              n=len(payload)
+              if n<126:
+                hdr=bytes([fin_opcode,maskbit|n])
+              elif n<65536:
+                hdr=bytes([fin_opcode,maskbit|126])+struct.pack("!H",n)
+              else:
+                hdr=bytes([fin_opcode,maskbit|127])+struct.pack("!Q",n)
+              mask=os.urandom(4)
+              masked=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+              self.sock.sendall(hdr+mask+masked)
+
+            def recv_text(self):
+              chunks=[]
+              while True:
+                b1,b2=self._readn(2)
+                fin=(b1>>7)&1; opcode=b1&0x0f
+                masked=(b2>>7)&1; n=b2&0x7f
+                if n==126: n=struct.unpack("!H",self._readn(2))[0]
+                elif n==127: n=struct.unpack("!Q",self._readn(8))[0]
+                mask=self._readn(4) if masked else None
+                payload=self._readn(n) if n else b""
+                if masked and mask:
+                  payload=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+                if opcode==0x8: raise EOFError("server closed websocket")
+                if opcode==0x9:
+                  self._send_control(0xA,payload); continue
+                if opcode in (0x1,0x0):
+                  chunks.append(payload)
+                  if fin: return b"".join(chunks).decode("utf-8","replace")
+                elif opcode==0xA:
+                  continue
+
+            def _send_control(self,opcode,payload=b""):
+              mask=os.urandom(4); n=len(payload)
+              hdr=bytes([0x80|opcode,0x80|n])
+              masked=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+              self.sock.sendall(hdr+mask+masked)
+
+            def close(self):
+              try: self._send_control(0x8,b"")
+              except Exception: pass
+              try: self.sock.close()
+              except Exception: pass
 
           def rpc(ws,method,handle,params,rid):
-            ws.send(json.dumps({"jsonrpc":"2.0","id":rid,"method":method,"handle":handle,"params":params}))
-            while True:
-              raw=ws.recv()
-              msg=json.loads(raw)
+            ws.send_text(json.dumps({"jsonrpc":"2.0","id":rid,"method":method,"handle":handle,"params":params}))
+            for _ in range(200):
+              msg=json.loads(ws.recv_text())
               if msg.get("id")==rid:
                 return msg
+            raise RuntimeError("RPC response not found")
 
-          urls=[
-            f"wss://{host}/app/{appid}",
-            f"wss://{host}/app/{appid}?identity={uuid.uuid4()}",
-          ]
-          for url in urls:
-            rec={"url":url}
+          protocols=[None,"qlik-json-protocol"]
+          for protocol in protocols:
+            identity=str(uuid.uuid4())
+            path=f"/app/{appid}?identity={identity}"
+            rec={"path":path,"protocol":protocol}
             try:
-              ws=websocket.create_connection(
-                url,timeout=35,
-                origin=f"https://{host}",
-                sslopt={"cert_reqs":ssl.CERT_REQUIRED},
-                cookie=""
-              )
-              rec["connected"]=True
+              ws=WS(host,path,protocol=protocol)
+              rec["handshake_status"]=ws.handshake.split("\r\n",1)[0]
               opened=rpc(ws,"OpenDoc",-1,[appid,"","","",False],1)
               rec["open_doc_error"]=opened.get("error")
               h=(opened.get("result",{}).get("qReturn",{}) or {}).get("qHandle")
@@ -95,21 +179,16 @@ jobs:
                   layout=rpc(ws,"GetLayout",oh,[],3)
                   rec["layout_error"]=layout.get("error")
                   items=(layout.get("result",{}).get("qLayout",{}).get("qFieldList",{}) or {}).get("qItems",[])
-                  fields=[]
-                  for item in items:
-                    name=item.get("qName")
-                    if name: fields.append(name)
+                  fields=[x.get("qName") for x in items if x.get("qName")]
                   result["field_names"]=fields
                   rec["field_count"]=len(fields)
               ws.close()
               result["attempts"].append(rec)
               if result["field_names"]: break
             except Exception as e:
-              rec["connected"]=False
               rec["error"]=repr(e)
               result["attempts"].append(rec)
 
-          # Store only schema labels.
           (OUT/"schema_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
           print(json.dumps(result,ensure_ascii=False,indent=2))
           PY

@@ -270,3 +270,20 @@ Exercícios mentais incorporados:
 
 Controle:
 **não converter renda censitária em classes A/B/C/D/E do CCEB/ABEP.**
+
+
+### Aprofundamento dos exercícios e auditoria de fontes — 13/09/2026
+
+O Caderno Geral v004 passou a incluir dois tradutores adicionais:
+- distribuição de 100 vínculos com remuneração positiva por faixas salariais de dezembro/2024;
+- comparação entre 100 empregos formais e R$100 de massa de remuneração média em quatro circuitos analíticos mutuamente exclusivos.
+
+Os cadernos setoriais v006 também foram aprofundados:
+- Saúde/Higiene/Cuidados: peso de medicamentos em R$100 de despesa total por classes de rendimento POF;
+- Bens Não Essenciais: escala de 100 vínculos para contextualizar restrição salarial e sensibilidade a preço/crédito;
+- Alimentação Fora do Lar e Serviços: escala do CNAE 56 no emprego formal local;
+- Bens Essenciais: fontes adjacentes adicionadas ao benchmark modelado, base CNPJ, POM e RAIS.
+
+Foi executada auditoria de rastreabilidade no corpo editorial. Dados quantitativos centrais do resumo do Caderno Geral e trechos-chave dos quatro setoriais agora possuem fonte adjacente. O mapa de fontes e as referências finais permanecem como complemento, não substituto.
+
+Controle mantido: classes A/B/C/D/E não são estimadas para São Borja sem aplicação local do CCEB/ABEP.

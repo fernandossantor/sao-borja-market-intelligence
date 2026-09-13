@@ -243,3 +243,59 @@ No conjunto da Rota 5, **1,69 milhão de atendimentos (88,7%)** foram classifica
 Fonte oficial: https://www.gov.br/planejamento/pt-br/assuntos/articulacao-institucional/rotas-de-integracao/relatorio-2024-rotas-de-integracao.pdf
 
 **IMPLICAÇÃO.** A posição de São Borja como portão terrestre internacional é empiricamente relevante; o próximo problema é medir **captura** — qual parcela do fluxo permanece, pernoita e gasta no município.
+
+
+## 12. Agroimportância versus agrodependência
+
+A v028 passa a tratar **importância do agro** e **dependência sistêmica do agro** como perguntas distintas.
+
+**DADOS OBSERVADOS/CALCULADOS — 2002–2021.** A participação agropecuária no VAB apresentou média de **21,73%**, mediana de **21,36%**, mínimo de **16,10%** (2012) e máximo de **33,87%** (2021). Apenas **3 dos 20 anos (15%)** ficaram em 25% ou mais. O pico de 2021 está 12,14 p.p. acima da média de longo prazo.
+
+**DIVERSIFICAÇÃO.** O bloco calculado de comércio e demais serviços privados, excluída a administração pública, teve média de **47,61%** do VAB e superou o agro em **20/20 anos**. A administração pública teve média de 16,66% e a indústria, 13,99%.
+
+**TRANSMISSÃO 2019–2021 — PROXY IPCA.** Agro +118,85%; comércio/demais serviços privados −9,11%; indústria −2,80%; VAB público −6,78%. O VAF aumentou 30,92% e tributos municipais próprios selecionados 11,41%. A expansão agro não se transmitiu contemporaneamente de forma proporcional aos demais blocos.
+
+**EMPREGO E SALÁRIOS — RAIS 2024.** A divisão CNAE 01 responde por **12,46% dos vínculos ativos não abandonados** e **11,54% da massa salarial positiva de dezembro**. A aproximação ampla CNAE 01 + divisão 10 alcança cerca de **20%** dos vínculos e da massa salarial, sem que isso autorize atribuir toda a indústria de alimentos ao agro local.
+
+**FINANÇAS.** O financiamento rural agrícola representou entre **47,64% e 55,55%** das operações de crédito selecionadas no ESTBAN, mostrando que a exposição ao agro é muito mais forte no canal financeiro.
+
+**DIAGNÓSTICO.** A formulação promovida é: **economia diversificada com forte âncora agrofinanceira e dependências seletivas**. “São Borja é agrodependente” como descrição geral **não está demonstrado**; a dependência é forte em alguns canais e sensivelmente menor em emprego, salários diretos e transmissão imediata para o terciário.
+
+Planilha: `Agrodependencia_teste_v028`.
+
+## 13. Estrutura ocupacional e remuneração típica
+
+A base bruta RAIS 2024 foi reprocessada com vínculo ativo em 31/12 e exclusão de vínculos marcados como abandonados, totalizando **13.125 vínculos**.
+
+**DISTRIBUIÇÃO SALARIAL.** Entre 12.156 remunerações positivas de dezembro, a média é **R$ 3.307,05** e a mediana **R$ 2.605,60**; **57,03%** estão até 2 salários mínimos e **81,42%** até 3 salários mínimos.
+
+**ESCOLARIDADE.** 50,16% dos vínculos possuem ensino médio completo; 74,94% estão até ensino médio completo; 20,79% possuem superior completo, mestrado ou doutorado.
+
+**CBO.** Os grandes grupos 4 a 9, majoritariamente classificados pelo MTE no nível de competência 2, somam **77,78%** dos vínculos. O GG5 — trabalhadores de serviços e vendedores do comércio — sozinho representa **28,57%**, com remuneração média nominal de R$ 2.355,05 e mediana de R$ 2.085,61.
+
+Fonte CBO: https://www.gov.br/trabalho-e-emprego/pt-br/assuntos/cbo/informacoes-gerais  
+Controle RAIS 2024: https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/estatisticas-trabalho/comunicados/comunicado-microdados-rais-2024
+
+**VAREJO.** CNAE 47 é a maior divisão em vínculos: **2.824 (21,52%)**. A mediana da remuneração de dezembro é **R$ 2.132,59**. No varejo, 63,07% possuem ensino médio completo e 84,35% estão até esse nível.
+
+**INTERPRETAÇÃO.** A formulação recomendada é **predomínio de empregos de qualificação ocupacional intermediária e remuneração baixa/intermediária**, e não “mão de obra pouco qualificada” de maneira genérica. Uma camada menor de ocupações públicas, profissionais e financeiras com remuneração muito superior eleva a média, fazendo da mediana uma medida importante do trabalhador típico.
+
+Planilha: `Qualificacao_salarios_v028`.
+
+## 14. Piso de consumo essencial
+
+A estrutura laboral e de renda foi triangulada com POF e POM.
+
+**DADOS LOCAIS.** Renda domiciliar per capita mediana: R$ 1.100 em 2022; 85,79% do universo compatível sem rendimento ou até 2 SM per capita. Na RAIS 2024, 57,03% dos vínculos remunerados de dezembro estão até 2 SM e 81,42% até 3 SM.
+
+**BENCHMARK POF 2017–2018 — BRASIL.** Na classe familiar de menor rendimento usada pela POF, alimentação representa **22,0% da despesa total**, contra 7,6% na classe superior; medicamentos, **4,2%**, contra 1,4%. Considerando apenas despesa de consumo, alimentação representa 23,8% e higiene/cuidados especiais 5,4%, contra 11,5% e 1,6% na classe superior.
+
+Fonte: https://agenciadenoticias.ibge.gov.br/agencia-sala-de-imprensa/2013-agencia-de-noticias/releases/25598-pof-2017-2018-familias-com-ate-r-1-9-mil-destinam-61-2-de-seus-gastos-a-alimentacao-e-habitacao
+
+**EVIDÊNCIA LOCAL QUALITATIVA.** No POM de bens essenciais, compras maiores aparecem associadas ao recebimento do salário e a reposição de itens essenciais ocorre semanalmente/diariamente; preço e promoções são centrais. No POM de saúde/higiene, produtos básicos de higiene aparecem com reposição relatada em aproximadamente 15–20 dias e farmácias são associadas à conveniência cotidiana.
+
+**INTERPRETAÇÃO.** A evidência é consistente com um **piso de consumo essencial relativamente resiliente**, alimentado por salários privados, benefícios, transferências e folha pública em cadências recorrentes. A necessidade pode ser resistente; operador, marca, ticket, margem e canal não necessariamente são.
+
+**CONTROLE.** Não generalizar “saúde” como bloco homogêneo: a POF mostra peso relativo maior de medicamentos em baixa renda, mas peso maior de planos de saúde nas classes superiores.
+
+Planilha: `Piso_consumo_essencial_v028`.

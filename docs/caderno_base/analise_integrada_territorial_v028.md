@@ -178,3 +178,55 @@ A planilha técnica recebeu a aba `Mapa_estabilidade_v028`.
 **IMPLICAÇÃO MERCADOLÓGICA.** Bens essenciais e serviços cotidianos tendem a responder mais a recorrência e restrição orçamentária; negócios rurais/B2B, materiais e compras de maior valor tendem a ser mais sensíveis a safra, preços e crédito; cadeias dependentes de transporte, estoque e perecibilidade exigem maior gestão de continuidade.
 
 **RECOMENDAÇÃO.** Monitorar as dimensões em painel conjunto, preservando suas unidades e conceitos. Não fundi-las em um índice único sem pesos, normalização, série comparável e validação estatística.
+
+
+## 8. Agro pós-2021 — proxy direcional, não VAB estimado
+
+A ausência do VAB agropecuário municipal pós-2021 na camada corrente não impede identificar a direção recente da atividade, desde que valor bruto da produção, volume físico e crédito permaneçam conceitualmente separados.
+
+**DADOS OBSERVADOS/CALCULADOS.** O valor bruto agregado de arroz, soja, milho e trigo passou de R$ 1,035 bilhão em 2021 para R$ 821,835 milhões em 2022 (-20,62%), R$ 838,545 milhões em 2023 (+2,03%) e R$ 1,153 bilhão em 2024 (+37,56%). No mesmo intervalo, o SICOR real-proxy avançou até R$ 1,026 bilhão em 2023 e recuou 22,72% em 2024.
+
+**CONTROLE.** A razão mecânica entre o VAB agro observado de 2021 (R$ 795,875 milhões) e o valor bruto dessas quatro culturas em 2021 é 76,87%. Aplicá-la aos anos posteriores geraria sensibilidades de R$ 631,739 milhões (2022), R$ 644,584 milhões (2023) e R$ 886,662 milhões (2024). Esses números **NÃO são promovidos como estimativas de VAB**: quatro culturas não cobrem toda a agropecuária e valor bruto não desconta consumo intermediário.
+
+**DECISÃO.** Promover somente um **proxy direcional pós-2021**, combinando PAM, produtividade, SICOR e ESTBAN. A direção do ciclo é informativa; o nível de VAB permanece desconhecido até nova fonte oficial comparável.
+
+Planilha: `Agro_proxy_pos2021_v028`.
+
+## 9. Ponte internacional — logística, mobilidade e potencial turístico
+
+**ESCALA LOGÍSTICA.** O EVTEA da INFRA S.A. registra mais de 90 mil caminhões em 2011; mais de 19 mil caminhões carregados no primeiro trimestre de 2018 (+26% frente ao mesmo período de 2017); e 75.108 caminhões em 2019 contra 68.000 em 2020 (-9,46%).  
+Fonte: https://delconcomab.com.br/2024/wp-content/uploads/2025/06/Minuta-EVTEA-Estudo-economico-financeiro.pdf
+
+**CENTRALIDADE NACIONAL.** O MPO registra que São Borja assumiu em 2022 a primeira posição nacional entre as aduanas de saída das exportações rodoviárias, com 29% do total. Aplicados aos US$ 20,1 bilhões de exportações rodoviárias nacionais informados pela fonte, isso equivale a aproximadamente US$ 5,829 bilhões — cálculo sobre valores arredondados. Em 2024, o MPO registra diretamente US$ 5,64 bilhões e novamente 29%.  
+Fontes:
+- https://www.gov.br/planejamento/pt-br/assuntos/articulacao-institucional/publicacoes/relatorio-2023-rotas-de-integracao-sul-americana
+- https://www.gov.br/planejamento/pt-br/assuntos/articulacao-institucional/arquivos/apresentacao-rotas-de-integracao.pdf
+
+**MOBILIDADE FRONTEIRIÇA.** Após o fim do pedágio vicinal em julho/2023, a série divulgada pela Unipampa/Labpoliter, atribuída à Mercovia, passou de aproximadamente 10 mil para 23 mil veículos vicinais por mês no sentido Brasil→Argentina (+130%). Esse universo inclui carros, motocicletas e ônibus e **não deve ser tratado como fluxo turístico**.  
+Fonte: https://unipampa.edu.br/saoborja/fim-do-pedagio-na-ponte-da-integracao-sao-borja-san-tome-representa-um-aumento-de-130-no-aumento-do
+
+**INTEGRAÇÃO INSTITUCIONAL.** A Receita Federal classifica São Borja/Santo Tomé como ACI integrada tanto para trânsito vicinal/turístico quanto para cargas rodoviárias.  
+Fonte: https://www.gov.br/receitafederal/pt-br/assuntos/aduana-e-comercio-exterior/importacao-e-exportacao/recinto-aduaneiros/area-de-controle-integrado-aci
+
+**POTENCIAL DE CAPTURA LOCAL.** O EVTEA projeta crescimento médio de 2,01% a.a. para pesados e 2,91% a.a. para leves; para estes, inclui turismo, intercâmbio cultural, viagens de negócios e mobilidade regional. O estudo recomenda, como intervenções não obrigatórias, escritórios, lojas, serviços/entretenimento, postos, oficinas, hotéis e áreas de estacionamento/espera.
+
+**DIAGNÓSTICO.** A ponte deve ser tratada como dimensão econômica própria do território, separando: (1) logística/comércio exterior; (2) mobilidade binacional cotidiana; e (3) turismo/permanência. Os dois primeiros já possuem evidência quantitativa robusta; o terceiro permanece oportunidade plausível, ainda sem mensuração local de hóspedes, permanência ou gasto.
+
+Planilha: `Fronteira_logistica_v028`.
+
+## 10. Comércio e serviços como piso potencial de estabilidade
+
+**EVIDÊNCIA ESTRUTURAL.** Em 2021, o agro correspondia a 33,87% do VAB; no cruzamento estrutural com RAIS 2022, respondia por 12,39% do emprego formal. Serviços, comércio e administração somavam 54,46% do VAB e 68,61% do emprego formal.
+
+**EVIDÊNCIA DE FLUXOS RECORRENTES.** A RAIS empresarial 2025 registra R$ 23,940 milhões de remuneração informada em dezembro; o varejo CNAE 47 responde por R$ 6,782 milhões. Em julho/2026, INSS/SUIBE registra R$ 24,535 milhões em créditos; o Novo Bolsa Família teve média de R$ 1,502 milhão/mês entre janeiro e julho; e a folha pública não municipal documentada na base v025 permanece em R$ 9,552 milhões/mês como ordem de grandeza parcial.
+
+**INTERPRETAÇÃO.** Esses circuitos têm cadências distintas do agro e dão fundamento a um **piso potencial de estabilidade da demanda**. A diversificação das fontes de renda pode amortecer parcialmente choques agrofinanceiros.
+
+**LIMITAÇÃO.** A função anticíclica ainda não foi demonstrada em série temporal. Comércio e serviços também podem depender indiretamente da renda do agro.
+
+**STATUS.**
+- “há circuitos de renda menos sincronizados à safra” = interpretação sustentada;
+- “esses circuitos formam piso potencial de estabilidade” = hipótese parcialmente sustentada;
+- “comércio e serviços são anticíclicos” = **não demonstrado**.
+
+Planilha: `Estabilidade_setorial_v028`.

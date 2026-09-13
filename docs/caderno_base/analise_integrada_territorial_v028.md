@@ -451,3 +451,25 @@ A tradução setorial foi aprofundada com a matriz `POM_circuitos_mercados_v028`
 **LIMITE.** Fluxos da fronteira indicam potencial de circulação adicional, mas não medem gasto, permanência, ticket ou captura monetária em São Borja.
 
 A matriz preserva em cada linha: natureza da evidência, fonte/período, unidade/abrangência, interpretação, limitação, implicação executiva e prioridade.
+
+
+## 24. Camada contextual macroambiental — 07_contexto_macro
+
+A v028 incorpora uma nova camada de **contexto PESTEL** proveniente da pasta `_sao_borja/new_files/07_contexto_macro` (25 PDFs).
+
+**REGRA.** O acervo complementa os POM 2026, mas não substitui fontes oficiais/localizadas. Pesquisas nacionais entram como **benchmark externo**; relatórios de tendências entram como **horizon scanning**; guias/frameworks ficam reservados à interpretação, recomendações e indicadores.
+
+**RESULTADO DA AUDITORIA.**
+- ganho muito alto em **Econômica**: inflação/repriorização, custos, crédito/pagamentos, frete e competição digital;
+- ganho alto em **Social**: influência digital, beleza/bem-estar, pets, moda, sociabilidade e comportamento jovem;
+- ganho muito alto em **Tecnológica**: m-commerce, Pix/QR/aproximação, IA na descoberta, omnicanalidade, e-commerce e logística;
+- ganho moderado em **Ambiental**;
+- ganho baixo em **Política, Legal e Demográfica**, que continuam dependentes de fontes oficiais e do IBGE.
+
+**CONTROLES.** Nenhum percentual nacional é convertido em estimativa de São Borja. Perfis amostrais não são usados como demografia municipal. Materiais prospectivos não são fonte normativa.
+
+**IMPLICAÇÃO PARA OS QUATRO MERCADOS.** A futura reescrita dos diagnósticos deverá separar explicitamente: dado observado local, benchmark externo, horizon scanning, interpretação para São Borja e recomendação.
+
+Lastro técnico: `Contexto_macro_catalogo_v028`, `Contexto_macro_achados_v028` e `Contexto_macro_PESTEL_v028`.
+
+Documentação: `docs/caderno_base/contexto_macro_pestel_v028.md`.

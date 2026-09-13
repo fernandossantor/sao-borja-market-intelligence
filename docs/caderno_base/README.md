@@ -165,3 +165,25 @@ A Base v016 e os cadernos empresariais passaram a incorporar contexto regional, 
 
 Regra:
 fonte contextual enriquece a interpretação, mas não substitui indicador canônico mais recente ou conceitualmente superior.
+
+
+## Narrativa executiva dos quatro mercados — v028
+
+A arquitetura territorial foi transposta para análise exclusivamente no nível dos quatro macrosegmentos de São Borja:
+
+- bens essenciais;
+- saúde, higiene e cuidados pessoais;
+- bens não essenciais;
+- alimentação fora do lar e serviços.
+
+Regra editorial: **não utilizar nomes de empresas, clientes ou operadores na narrativa executiva e não converter avaliações de estudos individuais em avaliações de empresas**.
+
+Lastro técnico na planilha canônica v028:
+- `POM_historico_auditoria_v028` — inventário metodológico anonimizado do acervo histórico;
+- `POM_circuitos_mercados_v028` — circuito territorial → evidência → interpretação → implicação → limitação → recomendação.
+
+Documentação:
+- `docs/caderno_base/pom_historico_auditoria_v028.md`;
+- `docs/caderno_base/narrativa_executiva_quatro_mercados_v028.md`.
+
+Os reports históricos são usados como triangulação comportamental, sem soma de amostras, sem série temporal artificial e sem extrapolação de avaliações de operadores para o conjunto do mercado.

@@ -32,9 +32,23 @@ Adicionar exercícios de visualização que traduzam indicadores abstratos para 
    - Núcleo CNAE 01–03 + divisão 10 = 19,96% da massa salarial de dezembro; demais CNAEs = 80,04%.
    - Controle: demais CNAEs podem ter exposição indireta ao agro.
 
+5. **100 vínculos formais por faixa de remuneração — dezembro/2024.**
+   - Fonte: MTE/RAIS 2024; salário mínimo nominal de 2024 = R$ 1.412.
+   - Denominador: 12.156 vínculos com remuneração positiva.
+   - Distribuição aproximada: 5,45% até 1 SM; 23,62% entre 1 e 1,5 SM; 27,50% entre 1,5 e 2 SM; 24,76% entre 2 e 3 SM; 9,36% entre 3 e 4 SM; 3,98% entre 4 e 5 SM; 5,32% acima de 5 SM.
+   - Leitura acumulada: 56,57% até 2 SM; 81,33% até 3 SM.
+   - Controle: vínculo não equivale a pessoa; remuneração do vínculo não equivale a renda domiciliar.
+
+6. **100 empregos e R$100 de massa de remuneração média por circuitos analíticos — RAIS 2024.**
+   - Circuito institucional (administração pública + educação + saúde/assistência): 24,32% dos vínculos e 31,57% da massa.
+   - Núcleo agro direto + alimentos: 20,02% dos vínculos e 20,38% da massa.
+   - Varejo + alojamento/alimentação + administração/apoio: 30,33% dos vínculos e 22,36% da massa.
+   - Demais setores: 25,33% dos vínculos e 25,70% da massa.
+   - Controle: agrupamentos construídos pelo SBMI para leitura analítica; não são categorias oficiais e massa de remuneração não equivale a gasto local.
+
 ## Política de fontes
 
-Nova regra editorial obrigatória:
+Regra editorial obrigatória:
 
 > Toda afirmação factual ou numerada da camada executiva deve manter a fonte ou referência identificável no próprio parágrafo, bloco, quadro, visual ou na indicação explícita de “fontes da seção”.
 
@@ -45,6 +59,19 @@ Isso vale também para:
 - exercícios ilustrativos.
 
 Interpretações e recomendações devem permanecer diferenciadas das evidências que as sustentam.
+
+## Auditoria de rastreabilidade aplicada
+
+O resumo executivo do Caderno Geral passou a conter fontes adjacentes para:
+- população 2022 e estimativa 2025 — IBGE;
+- centralidade REGIC 2018 — IBGE;
+- emprego, remuneração, escolaridade, CBO e jornadas — MTE/RAIS 2024;
+- estrutura agro e comércio/serviços — MTE/RAIS 2024;
+- VAB agro 2021 × emprego formal 2021 — IBGE/PIB dos Municípios + MTE/RAIS;
+- corredor internacional 2024 — MPO;
+- mobilidade vicinal e atendimentos migratórios 2023 — Mercovia/Unipampa e MPO/Polícia Federal.
+
+O mapa de fontes e as referências finais permanecem como complementos; não substituem a origem próxima do dado.
 
 ## Critério Brasil
 

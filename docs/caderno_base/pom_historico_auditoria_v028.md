@@ -4,67 +4,49 @@
 **Pasta-fonte:** `_sao_borja/new_files/06_pom_anteriores`  
 **Drive folder ID:** `1i5sP-dx8zOqgtQzR-1E8LFa71r7D4Kbj`  
 **Planilha canônica:** `caderno_base_territorial_v028_analise_integrada_20260913`  
-**Aba criada:** `POM_historico_auditoria_v028`
+**Aba:** `POM_historico_auditoria_v028`
 
-## 1. Delimitação
+## 1. Delimitação e regra editorial
 
-Esta auditoria inventaria e classifica reports históricos de Pesquisa de Opinião e Mercado (POM) para possível uso complementar na construção da narrativa executiva dos quatro mercados de 2026:
+Esta auditoria inventaria e classifica reports históricos de Pesquisa de Opinião e Mercado (POM) para uso complementar na narrativa executiva dos quatro mercados de São Borja:
 
 1. comércio de bens essenciais;
 2. saúde, higiene e cuidados pessoais;
 3. bens não essenciais;
 4. alimentação fora do lar e serviços.
 
-Os reports históricos **não substituem** as bases oficiais nem os POM 2026. Seu valor principal é preencher lacunas comportamentais, de jornada de compra, canais, preço, confiança, frequência e ocasiões de consumo.
+**REGRA EDITORIAL:** os conteúdos são utilizados para compreender mercados, comportamentos e jornadas de consumo de São Borja. Nomes de empresas, clientes ou operadores pesquisados não são promovidos para a análise executiva. A rastreabilidade é preservada pelos IDs de Drive e pela classificação temática interna.
+
+Os reports históricos **não substituem** bases oficiais nem os POM 2026. Seu valor principal é preencher lacunas comportamentais relacionadas a jornada de compra, canais, preço, confiança, frequência, ocasiões de consumo e experiência.
 
 ## 2. Inventário
 
 **DADO OBSERVADO:** 23 arquivos foram localizados na pasta.
 
-**DADO OBSERVADO:** há uma duplicata textual exata confirmada:
+**DADO OBSERVADO:** há uma duplicata textual exata entre dois arquivos de um mesmo estudo de móveis planejados, IDs de Drive:
 
-- `Relatório-Humberto.pdf` — Drive ID `196VAu64zWFVPcdFYhkz-hqNffMVIHs38`;
-- `Relatório de pesquisa-Humberto Móveis.pdf` — Drive ID `1RM9_OKgvYP8ab3MUQcxmcSEm-xh2XgKR`.
+- `196VAu64zWFVPcdFYhkz-hqNffMVIHs38`;
+- `1RM9_OKgvYP8ab3MUQcxmcSEm-xh2XgKR`.
 
-O conteúdo textual recuperado é idêntico nos dois arquivos. Portanto, os 23 arquivos correspondem a **pelo menos 22 conteúdos textuais distintos**, sem descontar pares relatório/apresentação que registram a mesma pesquisa em formatos complementares.
+O conteúdo textual recuperado é idêntico. Portanto, os 23 arquivos correspondem a **pelo menos 22 conteúdos textuais distintos**, sem descontar pares relatório/apresentação que registram a mesma pesquisa em formatos complementares.
 
 ## 3. Cobertura por mercado
 
 ### Bens não essenciais — cobertura forte
 
-Reports diretamente relacionados:
+O acervo contém estudos históricos sobre móveis, decoração, iluminação, materiais elétricos, vestuário, moda jovem, bicicletas e manutenção.
 
-- Modular Móveis (2025);
-- Pira Skate & Surf (2025);
-- Espaço Luz (2025);
-- Iluminar (2025);
-- Dúnia Modas (2025);
-- Encanto Decor (2025);
-- Moda casual/Geração Z/Fronteira Oeste (2024);
-- Cimar/bicicletas (2016);
-- Humberto Móveis (2016).
-
-**INTERPRETAÇÃO:** este é o bloco com maior potencial de ganho imediato, sobretudo para omnicanalidade, pesquisa de preço, meios de pagamento, confiança local, showroom/catálogo, concorrência regional/digital e frequência de reposição.
+**INTERPRETAÇÃO:** este é o bloco com maior potencial de ganho imediato, sobretudo para omnicanalidade, pesquisa de preço, meios de pagamento, confiança local, showroom/catálogo, concorrência regional/digital, qualidade/durabilidade e frequência de reposição.
 
 ### Alimentação fora do lar e serviços — cobertura moderada/forte
 
-Reports diretamente ou transversalmente relacionados:
+Há estudos relacionados a bebidas, ocasiões sociais de consumo, música e eventos, artes, cultura, mídia, tecnologia e serviços criativos.
 
-- Drinks (2024);
-- Central Bebidas;
-- César Oliveira e Rogério Melo (2021);
-- Rossini Rodrigues (2022);
-- núcleos da Indústria Criativa de 2023: cultura, mídia/editorial/audiovisual, tecnologia e consumo de serviços criativos.
-
-**INTERPRETAÇÃO:** o acervo permite investigar ocasiões de consumo, sociabilidade, eventos, disposição a pagar, mídia, compra online e função social de estabelecimentos.
+**INTERPRETAÇÃO:** o acervo permite investigar ocasiões de consumo, sociabilidade, eventos, disposição a pagar, mídia, compra online e função social dos espaços de consumo.
 
 ### Bens essenciais — cobertura direta limitada, mas útil
 
-Principal report novo:
-
-- Bella Vista / queijo artesanal.
-
-Possíveis contribuições transversais de outros reports:
+Há estudo específico sobre laticínios/queijo artesanal, além de achados transversais relativos a:
 
 - preço;
 - frequência;
@@ -73,29 +55,29 @@ Possíveis contribuições transversais de outros reports:
 - confiança local;
 - compra em mercados versus estabelecimentos especializados.
 
-### Saúde, higiene e cuidados pessoais — lacuna permanece
+### Saúde, higiene e cuidados pessoais — lacuna histórica direta
 
-**DADO OBSERVADO:** nesta pasta histórica não foi identificado, na triagem inicial, um report primário diretamente dedicado a saúde, higiene e cuidados pessoais.
+**DADO OBSERVADO:** nesta pasta histórica não foi identificado, na triagem inicial, um report primário diretamente dedicado ao macrosegmento de saúde, higiene e cuidados pessoais.
 
-**IMPLICAÇÃO:** o POM 2026 desse mercado deve permanecer a principal fonte comportamental, complementado por dados territoriais e por evidências transversais apenas quando metodologicamente justificável.
+**IMPLICAÇÃO:** o POM 2026 desse mercado permanece a principal fonte comportamental, complementado pelos dados territoriais e por evidências transversais somente quando metodologicamente justificável.
 
-## 4. Auditoria metodológica dos principais reports
+## 4. Auditoria metodológica dos principais conteúdos
 
-| Report | Método / base | n efetivo identificado | Uso recomendado |
+| Conteúdo anonimizado | Método / base | n efetivo identificado | Uso recomendado |
 |---|---|---:|---|
-| Iluminar 2025 | survey, questionário presencial/digital, conveniência | 103 válidas; 181 planejadas | alto |
-| Modular 2025 | grupo focal | 4 entrevistadas; 12 planejadas | qualitativo |
-| Espaço Luz 2025 | entrevistas em profundidade com arquitetos | 10 | qualitativo/B2B |
-| Pira 2025 | entrevistas em profundidade em 5 cidades | 12; apenas 2 em São Borja | regional/extralocal |
-| Encanto Decor 2025 | pesquisa em profundidade | 11 | exploratório |
-| Drinks 2024 | grupo focal | 9 | ocasiões/sociabilidade |
-| Moda casual 2024 | recrutamento + profundidade | 56 recrutados; 9 entrevistados | segmento jovem/regional |
-| Humberto Móveis 2016 | questionário com clientes | 11 de 100 clientes | exploratório |
-| Cimar 2016 | conveniência, rua + Google Forms | 88 | indicativo |
-| César Oliveira/Rogério Melo 2021 | 5 profundidade + questionário ramificado | 5; pergunta norteadora 83; subrotas 9/23/32 | comportamento/mídia |
-| Indústria Criativa 2023 | survey municipal com núcleos | divergências entre desenho 1.043 e recortes 39/40 | condicional |
-| Bella Vista | questionário em pontos de venda | denominador ainda não localizado | condicional |
-| Central Bebidas | método misto descrito | denominador ainda não localizado | condicional |
+| Materiais elétricos e ferragens, 2025 | survey presencial/digital por conveniência | 103 válidas; 181 planejadas | alto |
+| Móveis, 2025 | grupo focal | 4 entrevistadas; 12 planejadas | qualitativo |
+| Iluminação/arquitetura, 2025 | entrevistas em profundidade com arquitetos | 10 | qualitativo/B2B |
+| Varejo jovem/streetwear, 2025 | entrevistas em profundidade em 5 cidades | 12; apenas 2 em São Borja | regional/extralocal |
+| Decoração, 2025 | pesquisa em profundidade | 11 | exploratório |
+| Drinks, 2024 | grupo focal | 9 | ocasiões/sociabilidade |
+| Moda casual/Geração Z, 2024 | recrutamento + profundidade | 56 recrutados; 9 entrevistados | segmento jovem/regional |
+| Móveis planejados, 2016 | questionário com clientes | 11 de 100 clientes | exploratório |
+| Bicicletas/manutenção, 2016 | conveniência, rua + Google Forms | 88 | indicativo |
+| Música nativista/eventos, 2021 | 5 profundidade + questionário ramificado | 5; pergunta norteadora 83; subrotas 9/23/32 | comportamento/mídia |
+| Indústria Criativa, 2023 | survey municipal com núcleos | divergências entre desenho 1.043 e recortes 39/40 | condicional |
+| Laticínios/queijo artesanal | questionário em pontos de venda | denominador ainda não localizado | condicional |
+| Bebidas/ponto de encontro | método misto descrito | denominador ainda não localizado | condicional |
 
 ## 5. Problema específico da pesquisa municipal de 2023
 
@@ -117,56 +99,39 @@ Essa hipótese **não está confirmada**. Nenhum percentual desses reports deve 
 
 ## 6. Regras de uso
 
-1. Não agregar percentuais entre anos ou reports heterogêneos.
-2. Não construir série histórica sem equivalência metodológica.
-3. Em qualitativos, descrever o que ocorreu **entre os participantes**, sem extrapolar para São Borja.
-4. Em pesquisas de clientes, não extrapolar automaticamente para o mercado municipal.
-5. Em pesquisas regionais, separar São Borja das demais cidades quando possível.
-6. Promover como **DADO OBSERVADO** apenas achados com universo, método, período e denominador identificados.
-7. Separar sempre observação, interpretação e recomendação.
-8. Preservar a formulação original quando um report não sustenta uma conclusão mais ampla.
+1. Não citar nomes de empresas ou operadores na narrativa executiva.
+2. Não transformar a avaliação de um cliente pesquisado em avaliação de uma empresa específica.
+3. Não agregar percentuais entre anos ou reports heterogêneos.
+4. Não construir série histórica sem equivalência metodológica.
+5. Em qualitativos, descrever o que ocorreu **entre os participantes**, sem extrapolar a prevalência para São Borja.
+6. Em pesquisas de clientes, não extrapolar automaticamente para o mercado municipal.
+7. Em pesquisas regionais, separar São Borja das demais cidades quando possível.
+8. Promover como **DADO OBSERVADO** apenas achados com universo, método, período e denominador identificados.
+9. Separar sempre observação, interpretação e recomendação.
+10. Usar repetição de temas entre pesquisas independentes como **triangulação**, não como soma de amostras ou estimativa conjunta.
 
-## 7. Prioridade de aprofundamento
+## 7. Prioridade de aprofundamento por mercado
 
-### Prioridade 1 — bens não essenciais
+### Bens não essenciais
 
-Extrair sistematicamente:
+Eixos prioritários: preço, pagamento, digital/presencial, catálogo/showroom, qualidade, conveniência, diferenciação de sortimento, concorrência externa e ciclo de reposição.
 
-- Iluminar;
-- Espaço Luz;
-- Encanto Decor;
-- Modular;
-- Pira;
-- Moda 2024;
-- Cimar;
-- Humberto.
+### Alimentação fora do lar e serviços
 
-Eixos: preço, pagamento, digital/presencial, catálogo/showroom, qualidade, conveniência, concorrência externa, ciclo de reposição.
+Eixos prioritários: ocasião, sociabilidade, lazer, preço versus valor, eventos, mídia, frequência, disposição a pagar, reputação e demanda externa.
 
-### Prioridade 2 — alimentação fora do lar e serviços
+### Bens essenciais
 
-Extrair:
+Aprofundar o estudo de laticínios/queijo artesanal e cruzar apenas achados transversais confiáveis dos demais reports.
 
-- Drinks;
-- Central Bebidas;
-- César Oliveira/Rogério Melo;
-- Rossini;
-- Indústria Criativa 2023, após reconciliação metodológica.
+### Saúde, higiene e cuidados pessoais
 
-Eixos: ocasião, sociabilidade, lazer, preço versus valor, eventos, mídia, frequência, disposição a pagar, demanda externa.
+Manter o POM 2026 como fonte primária comportamental, pois o acervo histórico novo não trouxe equivalente direto.
 
-### Prioridade 3 — bens essenciais
+## 8. Matriz derivada
 
-Aprofundar Bella Vista e cruzar apenas achados transversais confiáveis dos demais reports.
+A etapa seguinte foi implementada na aba `POM_circuitos_mercados_v028`, segundo a estrutura:
 
-### Prioridade 4 — saúde/higiene
+`circuito econômico → comportamento observado → mercado POM → implicação mercadológica → natureza da evidência → fonte/período → unidade/abrangência → limitação → prioridade`.
 
-Manter o POM 2026 como fonte primária e buscar lacunas em outras fontes do projeto, pois o acervo histórico novo não trouxe equivalente direto.
-
-## 8. Próxima matriz
-
-A próxima saída deve ser uma matriz auditável:
-
-`circuito econômico → comportamento observado → mercado POM afetado → implicação mercadológica → tipo de evidência → fonte → período → universo/n → limitação`.
-
-Essa matriz será a ponte entre a arquitetura territorial v028 e a narrativa executiva dos quatro mercados.
+A matriz é construída exclusivamente no nível dos quatro mercados de São Borja e não contém avaliações de operadores individuais.

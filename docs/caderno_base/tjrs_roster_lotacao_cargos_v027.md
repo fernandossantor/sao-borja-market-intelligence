@@ -181,3 +181,47 @@ Fontes oficiais CNJ:
 4. usar TLP e quantitativo de cargos apenas como controles de estrutura e plausibilidade.
 
 **STATUS:** chave territorial funcional **VALIDADA** pelo Anexo V; obrigação normativa de unidade de efetivo exercício **VALIDADA** pelo CNJ; output remuneratório TJRS com `Lotação` **AINDA NÃO OBSERVADO**; massa remuneratória TJRS/São Borja **NÃO PROMOVIDA**.
+
+
+## Atualização v027 — contracheque único e envelope estatutário TJRS
+
+### Regra CNJ vigente em 2026
+
+A Resolução CNJ nº 681/2026 introduziu o **contracheque único**. No texto compilado da Resolução CNJ nº 215/2015, os dados remuneratórios publicados devem originar-se exclusivamente do contracheque único, vedada a divulgação de informações parciais ou fragmentadas que não correspondam ao total efetivamente pago no mês.
+
+Isso muda a regra de agregação do SBMI: os tipos de folha `Normal`, `Complementar`, `Mensal Complementar` e `Complementar Extraordinária` **não podem ser somados mecanicamente**. O objetivo é obter um único total mensal por vínculo/pessoa, territorializado por `Lotação`/unidade de efetivo exercício.
+
+Fontes CNJ:
+
+- Resolução nº 215/2015: `https://atos.cnj.jus.br/atos/detalhar/2236`
+- Resolução nº 273/2018: `https://atos.cnj.jus.br/atos/detalhar/2791`
+- Resolução nº 681/2026: `https://atos.cnj.jus.br/atos/detalhar/1349`
+
+### Envelope estatutário de vencimento básico
+
+**Estrutura observada:** 32 cargos providos na Comarca de São Borja em junho/2026.
+
+| Grupo | Qtde. | Mínimo legal | Máximo legal | Piso ponderado | Teto ponderado |
+|---|---:|---:|---:|---:|---:|
+| Analista do Poder Judiciário | 4 | R$ 9.226,01 | R$ 18.452,01 | R$ 36.904,04 | R$ 73.808,04 |
+| Técnico do Poder Judiciário | 19 | R$ 4.843,63 | R$ 11.993,81 | R$ 92.028,97 | R$ 227.882,39 |
+| Oficial de Justiça Estadual | 7 | R$ 7.982,58 | R$ 17.529,42 | R$ 55.878,06 | R$ 122.705,94 |
+| Auxiliar de Serviços Gerais | 1 | R$ 2.463,19 | R$ 4.926,38 | R$ 2.463,19 | R$ 4.926,38 |
+| Oficial Ajudante | 1 | R$ 8.491,68 | R$ 16.983,37 | R$ 8.491,68 | R$ 16.983,37 |
+| **Total** | **32** |  |  | **R$ 195.765,94** | **R$ 446.306,12** |
+
+**Fonte normativa:** Lei Estadual nº 16.390/2025, que altera a Lei nº 15.737/2021.  
+Fonte primária DOE-RS: `https://www.diariooficial.rs.gov.br/materia?id=1351751`.
+
+**Classificação:** DADO CALCULADO / ENVELOPE MECÂNICO DE CONTROLE.
+
+Esse intervalo **não é folha real**, não é estimativa central e não entra no subtotal de renda pública. Exclui vantagens pessoais, funções, gratificações, GEA, indenizações, férias, eventuais/retroativos, magistrados e agentes fora do núcleo efetivo de 32.
+
+### Estado do TJRS
+
+- chave territorial: **VALIDADA**;
+- estrutura de 32 cargos efetivos: **VALIDADA por duas famílias documentais**;
+- envelope estatutário: **PROMOVIDO somente como controle de plausibilidade**;
+- massa remuneratória real: **NÃO PROMOVIDA** enquanto faltar output estruturado compatível com contracheque único.
+
+A camada estadual de outros poderes pode ser considerada **fechada no limite documental atual**: MPRS promovido; DPERS promovido por envelopes; TJRS estruturado, mas sem folha real; TCE-RS e ALRS com decisão explícita de não promoção.

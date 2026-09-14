@@ -1,11 +1,17 @@
 # Cadernos finalizados — 13/09/2026
 
-Conjunto final consolidado dos cinco cadernos do projeto **São Borja — Inteligência Mercadológica**, arquivado no Google Drive em:
+> **RECLASSIFICAÇÃO EDITORIAL — 14/09/2026**
+>
+> O conjunto abaixo foi preservado por rastreabilidade, mas deixou de ser considerado produto editorial final. Após revisão crítica de legibilidade, argumentação e utilidade para consumo humano, os cinco documentos foram reclassificados como **VERSÕES TÉCNICAS INTERMEDIÁRIAS**. Os dados, auditorias e fontes continuam válidos; o que mudou foi o status editorial.
+>
+> A reconstrução publicável passou para `new_files/cadernos_editoriais_em_producao`.
+
+Conjunto consolidado em 13/09/2026 no Google Drive:
 
 - `new_files/cadernos_finalizados`
 - Drive folder ID: `1YfX6cmvQHKZ0fpTRwZ0tf5GFLUECWVXA`
 
-## Arquivos finais
+## Arquivos preservados como versões técnicas intermediárias
 
 1. Caderno Geral — Inteligência Mercadológica Territorial de São Borja  
    Drive ID: `17YhBwt8PC5enB5KFmPmX74EiRdR0H5d99V400NKmi9A`
@@ -25,16 +31,17 @@ Conjunto final consolidado dos cinco cadernos do projeto **São Borja — Inteli
 Documento de índice e proveniência no mesmo diretório:  
 `00_LEIA-ME_CADERNOS_FINALIZADOS_20260913`, Drive ID `1G1vGcaZu8xjoSMJNjaoNjBePKWROVzacg-UHSy3JvMM`.
 
-## Critérios editoriais preservados
+## Motivo da reclassificação
 
-- Base técnica canônica: Caderno-Base Territorial v028 e planilha técnica v028.
-- Distinção explícita entre dado observado, dado calculado, estimativa, benchmark externo, interpretação, recomendação e não respondível.
-- Fontes mantidas junto às evidências relevantes; referências finais e mapas de fontes não substituem rastreabilidade local.
-- Exercícios mentais tratados como recursos didáticos, com universo, período e limitações declarados.
-- Regra de não usar nomes de empresas como objeto de avaliação mercadológica executiva.
-- Expedientes atualizados com Fernando Silva Santor como coordenador das pesquisas e docente de Pesquisa de Opinião e Mercado, Planejamento e Pesquisa de Mídia e Marketing de Varejo e Promoção de Vendas.
-- Créditos discentes preservados: todos os grupos dos reports usados no Caderno Geral e o respectivo grupo POM 2026 em cada setorial.
+A revisão de 14/09/2026 identificou excesso de estruturas telegráficas, frases curtas, repetição de versões dentro do mesmo arquivo, reprodução excessiva do dossiê técnico, baixo desenvolvimento das relações entre evidência e argumento e insuficiência de gráficos, exemplos e exercícios mentais para o padrão de report empresarial pretendido.
+
+A nova regra editorial separa:
+1. report empresarial para leitura;
+2. apêndice técnico seletivo;
+3. dossiê técnico/auditoria externo ao fluxo principal.
+
+Os modelos de referência mantidos são o relatório de Análise Macroambiental CET/UnB–Sebrae/MTur e o Mapeamento da Indústria Criativa no Brasil 2022 da Firjan.
 
 ## Governança
 
-O PR #41 deve permanecer **aberto, draft e sem merge**. Esta etapa somente congela cópias editoriais finais no Drive; não integra a branch à `main`.
+O PR #41 deve permanecer **aberto, draft e sem merge**. A reclassificação e a reconstrução editorial não integram a branch à `main`.

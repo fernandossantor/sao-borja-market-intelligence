@@ -1,0 +1,142 @@
+name: tjrs-transparency-api-deep-probe
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/tjrs-transparency-api-deep-probe.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tjrs-transparency-api-deep-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Probe official TJRS open-data Swagger routes
+        shell: bash
+        run: |
+          set -u
+          mkdir -p artifacts/tjrs_transparency_api_deep_probe
+
+          python - <<'PY'
+          import json, re, socket, subprocess, urllib.parse
+          from pathlib import Path
+
+          OUT = Path("artifacts/tjrs_transparency_api_deep_probe")
+          host = "adm-inter.tjrs.jus.br"
+          base = "https://adm-inter.tjrs.jus.br/public/api/transparencia"
+
+          candidate_paths = [
+              "/swagger-ui/index.html",
+              "/swagger-ui/swagger-initializer.js",
+              "/swagger-ui/swagger-config",
+              "/v3/api-docs",
+              "/v3/api-docs/swagger-config",
+              "/swagger-resources",
+              "/api-docs",
+              "/openapi.json",
+              "/swagger.json",
+          ]
+
+          result = {
+              "source": "Tribunal de Justiça do Estado do Rio Grande do Sul — API de Dados Abertos",
+              "official_parent_page": "https://www.tjrs.jus.br/novo/api-de-dados-abertos/",
+              "host": host,
+              "dns": [],
+              "probes": [],
+              "discovered_spec_candidates": [],
+              "privacy": "Only endpoint metadata and OpenAPI/Swagger schema fragments are retained; no person-level payroll records are requested.",
+              "territorial_goal": "Identify whether an official remuneration endpoint exposes comarca, foro, lotacao, unidade or equivalent before any São Borja aggregation."
+          }
+
+          try:
+              infos = socket.getaddrinfo(host, 443, type=socket.SOCK_STREAM)
+              result["dns"] = sorted({x[4][0] for x in infos})
+          except Exception as e:
+              result["dns_error"] = repr(e)
+
+          def run_curl(url, ipv4=False):
+              body = OUT / ("body_" + re.sub(r"[^A-Za-z0-9]+", "_", urllib.parse.urlparse(url).path).strip("_")[:100] + ("_v4" if ipv4 else "") + ".txt")
+              hdr = body.with_name(body.stem + "_headers.txt")
+              cmd = [
+                  "curl", "--silent", "--show-error", "--location",
+                  "--connect-timeout", "12", "--max-time", "30",
+                  "--retry", "1", "--retry-delay", "1",
+                  "-A", "Mozilla/5.0 SBMI territorial audit",
+                  "-D", str(hdr), "-o", str(body),
+                  "-w", "%{http_code}|%{content_type}|%{remote_ip}|%{url_effective}|%{size_download}",
+              ]
+              if ipv4:
+                  cmd.insert(1, "-4")
+              cmd.append(url)
+              p = subprocess.run(cmd, text=True, capture_output=True)
+              meta = {
+                  "url": url,
+                  "ipv4_forced": ipv4,
+                  "returncode": p.returncode,
+                  "curl_meta": p.stdout.strip(),
+                  "stderr": p.stderr.strip()[-2000:],
+                  "body_file": str(body) if body.exists() else None,
+                  "headers_file": str(hdr) if hdr.exists() else None,
+              }
+              if body.exists():
+                  raw = body.read_bytes()
+                  meta["bytes"] = len(raw)
+                  txt = raw[:3_000_000].decode("utf-8", errors="ignore")
+                  meta["contains_openapi"] = bool(re.search(r'["\\\']openapi["\\\']|swagger\s*:', txt, re.I))
+                  meta["contains_territorial_terms"] = sorted(set(re.findall(r'(?i)comarca|foro|lota(?:c|ç)ao|unidade|municipio|município|localidade|sede', txt)))[:50]
+                  urls = re.findall(r'https?://[^"\\\'\s<>]+', txt)
+                  rel = re.findall(r'(?i)(?:url|configUrl)\s*[:=]\s*["\\\']([^"\\\']+)', txt)
+                  for x in urls + [urllib.parse.urljoin(url, y) for y in rel]:
+                      if host in urllib.parse.urlparse(x).netloc and any(k in x.lower() for k in ("api-docs","swagger","openapi")):
+                          result["discovered_spec_candidates"].append(x)
+              return meta
+
+          for path in candidate_paths:
+              url = base + path
+              result["probes"].append(run_curl(url, ipv4=False))
+              result["probes"].append(run_curl(url, ipv4=True))
+
+          result["discovered_spec_candidates"] = sorted(set(result["discovered_spec_candidates"]))
+
+          # Probe any discovered schema/config URL once, without forcing IPv4.
+          already = {x["url"] for x in result["probes"]}
+          for url in result["discovered_spec_candidates"][:20]:
+              if url not in already:
+                  result["probes"].append(run_curl(url, ipv4=False))
+
+          # Summarize schema files without copying person-level data.
+          schemas = []
+          for p in OUT.glob("body_*.txt"):
+              try:
+                  txt = p.read_text(encoding="utf-8", errors="ignore")
+              except Exception:
+                  continue
+              if not re.search(r'["\\\'](?:openapi|swagger)["\\\']', txt, re.I):
+                  continue
+              paths = sorted(set(re.findall(r'["\\\'](/[^"\\\']*(?:folha|remuner|servid|magistr|pessoal)[^"\\\']*)["\\\']', txt, re.I)))[:200]
+              terms = sorted(set(re.findall(r'(?i)comarca|foro|lota(?:c|ç)ao|unidade|municipio|município|localidade|sede', txt)))
+              schemas.append({"file": str(p), "candidate_paths": paths, "territorial_terms": terms})
+          result["schema_summary"] = schemas
+
+          (OUT / "probe_summary.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(result, ensure_ascii=False, indent=2)[:100000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tjrs-transparency-api-deep-probe
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/tjrs_transparency_api_deep_probe/

@@ -1,0 +1,268 @@
+name: benchmark-income-sidra
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/benchmark-income-sidra.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-benchmark-income:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch official SIDRA 10295 and 10296 for benchmark municipalities
+        run: |
+          python -m pip install --upgrade requests
+          mkdir -p artifacts/benchmark_income/raw
+          python - <<'PY'
+          import csv
+          import hashlib
+          import json
+          import time
+          import unicodedata
+          from pathlib import Path
+
+          import requests
+
+          MUNICIPALITIES = {
+              "4300406": "Alegrete",
+              "4317103": "Sant'Ana do Livramento",
+              "4317400": "Santiago",
+              "4318002": "São Borja",
+              "4318309": "São Gabriel",
+              "4322400": "Uruguaiana",
+          }
+          CODES = ",".join(MUNICIPALITIES)
+
+          def norm(s):
+              s = unicodedata.normalize("NFKD", str(s))
+              return "".join(c for c in s if not unicodedata.combining(c)).upper().strip()
+
+          def number(v):
+              s = str(v).strip()
+              if not s or s in {"-", "...", "X"}:
+                  return None
+              if "," in s:
+                  s = s.replace(".", "").replace(",", ".")
+              try:
+                  return float(s)
+              except ValueError:
+                  return None
+
+          session = requests.Session()
+          session.headers.update({"User-Agent": "SBMI benchmark territorial SIDRA extraction/1.0"})
+
+          def fetch(url, name):
+              last = None
+              for attempt in range(1, 6):
+                  try:
+                      r = session.get(url, timeout=90)
+                      raw = r.content
+                      Path(f"artifacts/benchmark_income/raw/{name}.json").write_bytes(raw)
+                      if r.status_code == 200:
+                          payload = r.json()
+                          if isinstance(payload, list) and len(payload) > 1:
+                              return payload, raw, {
+                                  "url": url,
+                                  "http_status": r.status_code,
+                                  "bytes": len(raw),
+                                  "sha256": hashlib.sha256(raw).hexdigest(),
+                                  "attempt": attempt,
+                              }
+                      last = f"HTTP {r.status_code}; body={raw[:300]!r}"
+                  except Exception as exc:
+                      last = f"{type(exc).__name__}: {exc}"
+                  time.sleep(5 * attempt)
+              raise SystemExit(f"Failed {name}: {last}")
+
+          url95 = (
+              "https://apisidra.ibge.gov.br/values/t/10295/n6/"
+              + CODES
+              + "/v/13431,13534/p/2022/h/y/f/a/d/m"
+          )
+          url96 = (
+              "https://apisidra.ibge.gov.br/values/t/10296/n6/"
+              + CODES
+              + "/v/13604,1013604/p/2022/c2/0/c86/0/c386/all/h/y/f/a/d/m"
+          )
+
+          p95, raw95, m95 = fetch(url95, "sidra_10295_benchmark_2022")
+          p96, raw96, m96 = fetch(url96, "sidra_10296_benchmark_2022")
+
+          clean95 = []
+          for row in p95[1:]:
+              clean95.append({
+                  "municipio_codigo": row.get("D1C", ""),
+                  "municipio": row.get("D1N", ""),
+                  "variavel_codigo": row.get("D2C", ""),
+                  "variavel": row.get("D2N", ""),
+                  "periodo": row.get("D3N", ""),
+                  "unidade": row.get("MN", ""),
+                  "valor_raw": row.get("V", ""),
+                  "valor_num": number(row.get("V", "")),
+                  "natureza": "observado_em_fonte_oficial",
+                  "source_url": url95,
+                  "raw_sha256": hashlib.sha256(raw95).hexdigest(),
+              })
+
+          clean96 = []
+          for row in p96[1:]:
+              clean96.append({
+                  "municipio_codigo": row.get("D1C", ""),
+                  "municipio": row.get("D1N", ""),
+                  "variavel_codigo": row.get("D2C", ""),
+                  "variavel": row.get("D2N", ""),
+                  "periodo": row.get("D3N", ""),
+                  "sexo": row.get("D4N", ""),
+                  "cor_raca": row.get("D5N", ""),
+                  "classe_rendimento_codigo": row.get("D6C", ""),
+                  "classe_rendimento": row.get("D6N", ""),
+                  "unidade": row.get("MN", ""),
+                  "valor_raw": row.get("V", ""),
+                  "valor_num": number(row.get("V", "")),
+                  "natureza": "observado_em_fonte_oficial",
+                  "source_url": url96,
+                  "raw_sha256": hashlib.sha256(raw96).hexdigest(),
+              })
+
+          codes95 = {r["municipio_codigo"] for r in clean95}
+          codes96 = {r["municipio_codigo"] for r in clean96}
+          missing95 = sorted(set(MUNICIPALITIES) - codes95)
+          missing96 = sorted(set(MUNICIPALITIES) - codes96)
+          if missing95 or missing96:
+              raise SystemExit(f"Missing municipalities: 10295={missing95}; 10296={missing96}")
+
+          vars95 = {r["variavel_codigo"] for r in clean95}
+          vars96 = {r["variavel_codigo"] for r in clean96}
+          if not {"13431", "13534"}.issubset(vars95):
+              raise SystemExit(f"10295 missing expected variables: {vars95}")
+          if not {"13604", "1013604"}.issubset(vars96):
+              raise SystemExit(f"10296 missing expected variables: {vars96}")
+
+          def write_csv(path, rows):
+              with Path(path).open("w", encoding="utf-8", newline="") as f:
+                  w = csv.DictWriter(f, fieldnames=list(rows[0]))
+                  w.writeheader()
+                  w.writerows(rows)
+
+          write_csv("artifacts/benchmark_income/sidra_10295_benchmark_2022.csv", clean95)
+          write_csv("artifacts/benchmark_income/sidra_10296_benchmark_2022.csv", clean96)
+
+          by95 = {}
+          for r in clean95:
+              by95.setdefault(r["municipio_codigo"], {})[r["variavel_codigo"]] = r["valor_num"]
+
+          pct = {}
+          total_people = {}
+          classes_seen = {}
+          for r in clean96:
+              code = r["municipio_codigo"]
+              if r["variavel_codigo"] == "1013604":
+                  pct.setdefault(code, {})[norm(r["classe_rendimento"])] = r["valor_num"]
+              elif r["variavel_codigo"] == "13604":
+                  cls = norm(r["classe_rendimento"])
+                  classes_seen.setdefault(code, set()).add(cls)
+                  if cls == "TOTAL":
+                      total_people[code] = r["valor_num"]
+
+          def sum_labels(d, labels):
+              values = []
+              for label in labels:
+                  v = d.get(norm(label))
+                  if v is None:
+                      return None
+                  values.append(v)
+              return sum(values)
+
+          le1_labels = [
+              "Sem rendimento",
+              "Até 1/4 de salário mínimo",
+              "Mais de 1/4 a 1/2 salário mínimo",
+              "Mais de 1/2 a 1 salário mínimo",
+          ]
+          one_to_two = "Mais de 1 a 2 salários mínimos"
+          gt5_labels = [
+              "Mais de 5 a 10 salários mínimos",
+              "Mais de 10 a 15 salários mínimos",
+              "Mais de 15 a 20 salários mínimos",
+              "Mais de 20 salários mínimos",
+          ]
+
+          summary = []
+          for code, name in MUNICIPALITIES.items():
+              d = pct.get(code, {})
+              le1 = sum_labels(d, le1_labels)
+              le2 = None if le1 is None or d.get(norm(one_to_two)) is None else le1 + d[norm(one_to_two)]
+              gt5 = sum_labels(d, gt5_labels)
+              mean = by95.get(code, {}).get("13431")
+              median = by95.get(code, {}).get("13534")
+              summary.append({
+                  "municipio_codigo": code,
+                  "municipio": name,
+                  "rendimento_medio_pc_mensal_rs": mean,
+                  "rendimento_mediano_pc_mensal_rs": median,
+                  "media_sobre_mediana_pct_calculado": None if mean is None or median in (None, 0) else (mean / median - 1) * 100,
+                  "moradores_universo_10296": total_people.get(code),
+                  "sem_rendimento_ou_ate_1sm_pct_calculado": le1,
+                  "sem_rendimento_ou_ate_2sm_pct_calculado": le2,
+                  "mais_de_5sm_pct_calculado": gt5,
+                  "periodo": "Censo 2022",
+                  "fonte": "IBGE/SIDRA tabelas 10295 e 10296",
+                  "natureza": "observado + calculado",
+                  "limitacao": "Rendimento domiciliar per capita não equivale a renda disponível, classe social ou comportamento de compra.",
+              })
+
+          write_csv("artifacts/benchmark_income/benchmark_income_summary_2022.csv", summary)
+
+          validation = {
+              "municipalities_expected": MUNICIPALITIES,
+              "municipalities_10295": sorted(codes95),
+              "municipalities_10296": sorted(codes96),
+              "rows_10295": len(clean95),
+              "rows_10296": len(clean96),
+              "variables_10295": sorted(vars95),
+              "variables_10296": sorted(vars96),
+              "classes_10296_by_municipality": {k: sorted(v) for k, v in classes_seen.items()},
+              "summary_rows": len(summary),
+              "status": "PASS" if len(summary) == 6 and not missing95 and not missing96 else "FAIL",
+          }
+          Path("artifacts/benchmark_income/validation.json").write_text(
+              json.dumps(validation, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          manifest = {
+              "source": "IBGE/SIDRA",
+              "tables": ["10295", "10296"],
+              "geography": "Alegrete; Sant'Ana do Livramento; Santiago; São Borja; São Gabriel; Uruguaiana — RS",
+              "period": "Censo 2022",
+              "units": ["R$/pessoa/mês", "pessoas", "%"],
+              "requests": [m95, m96],
+              "status": validation["status"],
+              "method_note": "Same table, variables, filters, period and extraction run for all municipalities.",
+          }
+          Path("artifacts/benchmark_income/manifest.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          print(Path("artifacts/benchmark_income/benchmark_income_summary_2022.csv").read_text(encoding="utf-8"))
+          print(json.dumps(validation, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload benchmark income artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-income-sidra-2022-v001
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/benchmark_income/

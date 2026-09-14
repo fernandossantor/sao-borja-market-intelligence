@@ -1,0 +1,166 @@
+name: tjrs-anexo-v-proxy-extract
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/tjrs-anexo-v-proxy-extract.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tjrs-anexo-v-proxy-extract.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch official TJRS Anexo V CSV through neutral text proxy and aggregate São Borja
+        shell: bash
+        run: |
+          set -u
+          mkdir -p artifacts/tjrs_anexo_v_proxy_extract
+
+          python - <<'PY'
+          import csv, io, json, re, unicodedata
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/tjrs_anexo_v_proxy_extract")
+          official="https://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.csv"
+          proxies=[
+              "https://r.jina.ai/http://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.csv",
+              "https://r.jina.ai/https://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.csv",
+          ]
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          report={
+              "official_source":official,
+              "period":"2026-07",
+              "transport":"neutral text proxy used only because automated environments time out on tjrs.jus.br; official PDF and page remain the authority",
+              "attempts":[],
+              "status":"not_recovered"
+          }
+
+          def norm(x):
+              return unicodedata.normalize("NFKD", x or "").encode("ascii","ignore").decode().casefold().strip()
+
+          payload=None
+          used=None
+          for u in proxies:
+              try:
+                  r=s.get(u,timeout=90)
+                  rec={"url":u,"status":r.status_code,"bytes":len(r.content),"content_type":r.headers.get("content-type")}
+                  report["attempts"].append(rec)
+                  if r.status_code==200 and len(r.content)>100:
+                      txt=r.content.decode("utf-8",errors="replace")
+                      # Accept only if the response visibly contains the expected schema terms.
+                      head=norm(txt[:5000])
+                      if "numfunc" in head and "lotacao" in head and "tipo de vinculo" in head:
+                          payload=txt
+                          used=u
+                          break
+              except Exception as e:
+                  report["attempts"].append({"url":u,"error":repr(e)})
+
+          if payload is None:
+              (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps(report,ensure_ascii=False,indent=2))
+              raise SystemExit(0)
+
+          # Jina may prepend plain-text/markdown metadata. Locate header row.
+          lines=payload.splitlines()
+          header_idx=None
+          for i,line in enumerate(lines[:500]):
+              n=norm(line)
+              if "nome" in n and "numfunc" in n and "tipo de vinculo" in n and "lotacao" in n:
+                  header_idx=i
+                  break
+          if header_idx is None:
+              report["status"]="schema_not_located"
+              (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps(report,ensure_ascii=False,indent=2))
+              raise SystemExit(0)
+
+          text="\n".join(lines[header_idx:])
+          sample=text[:30000]
+          try:
+              dialect=csv.Sniffer().sniff(sample,delimiters=";,\t|")
+              delim=dialect.delimiter
+          except Exception:
+              delim=";"
+
+          rdr=csv.DictReader(io.StringIO(text),delimiter=delim)
+          raw_headers=rdr.fieldnames or []
+          map_h={norm(h):h for h in raw_headers if h is not None}
+
+          def hfind(*needles):
+              for nh,orig in map_h.items():
+                  if all(x in nh for x in needles):
+                      return orig
+              return None
+
+          h_nome=hfind("nome")
+          h_num=hfind("numfunc")
+          h_tipo=hfind("tipo","vinculo")
+          h_lot=hfind("lotacao")
+          if not all([h_num,h_tipo,h_lot]):
+              report.update({"status":"headers_incomplete","headers":raw_headers})
+              (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps(report,ensure_ascii=False,indent=2))
+              raise SystemExit(0)
+
+          total=0
+          sb=[]
+          for row in rdr:
+              total+=1
+              lot=(row.get(h_lot) or "").strip()
+              if "sao borja" in norm(lot):
+                  sb.append({
+                      "numfunc":(row.get(h_num) or "").strip(),
+                      "tipo":(row.get(h_tipo) or "").strip(),
+                      "lotacao":lot,
+                  })
+
+          # De-duplicate by employee identifier when available; keep only aggregate outputs.
+          ids={r["numfunc"] for r in sb if r["numfunc"]}
+          by_tipo={}
+          by_lot={}
+          for r in sb:
+              by_tipo[r["tipo"]]=by_tipo.get(r["tipo"],0)+1
+              by_lot[r["lotacao"]]=by_lot.get(r["lotacao"],0)+1
+
+          report.update({
+              "status":"recovered_and_aggregated",
+              "transport_url":used,
+              "delimiter":delim,
+              "headers":raw_headers,
+              "total_rows_excluding_header":total,
+              "sao_borja_rows":len(sb),
+              "sao_borja_unique_numfunc":len(ids),
+              "by_tipo_vinculo":dict(sorted(by_tipo.items(),key=lambda x:(-x[1],x[0]))),
+              "by_lotacao":dict(sorted(by_lot.items(),key=lambda x:(-x[1],x[0]))),
+              "privacy":"No names or employee identifiers are written to the summary or logs."
+          })
+
+          # Raw proxy payload is retained only as short-lived workflow artifact for audit, not committed.
+          (OUT/"source_payload.txt").write_text(payload,encoding="utf-8")
+          (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          safe=dict(report)
+          print(json.dumps(safe,ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tjrs-anexo-v-proxy-extract
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/tjrs_anexo_v_proxy_extract/

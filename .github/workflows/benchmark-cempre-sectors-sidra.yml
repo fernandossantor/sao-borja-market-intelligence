@@ -1,0 +1,174 @@
+name: benchmark-cempre-sectors-sidra
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/benchmark-cempre-sectors-sidra.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-cempre-sectors:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch section-level CEMPRE 9528
+        run: |
+          python -m pip install --upgrade requests
+          mkdir -p artifacts/benchmark_cempre_sectors/raw
+          python - <<'PY'
+          import csv, hashlib, json, time
+          from pathlib import Path
+          import requests
+
+          MUNICIPALITIES={
+            "4300406":"Alegrete","4317103":"Sant'Ana do Livramento","4317400":"Santiago",
+            "4318002":"São Borja","4318309":"São Gabriel","4322400":"Uruguaiana"
+          }
+          SECTIONS={
+            "117897":"Total",
+            "116830":"A Agricultura, pecuária, produção florestal, pesca e aquicultura",
+            "116880":"B Indústrias extrativas",
+            "116910":"C Indústrias de transformação",
+            "117296":"D Eletricidade e gás",
+            "117307":"E Água, esgoto, atividades de gestão de resíduos e descontaminação",
+            "117329":"F Construção",
+            "117363":"G Comércio; reparação de veículos automotores e motocicletas",
+            "117484":"H Transporte, armazenagem e correio",
+            "117543":"I Alojamento e alimentação",
+            "117555":"J Informação e comunicação",
+            "117608":"K Atividades financeiras, de seguros e serviços relacionados",
+            "117666":"L Atividades imobiliárias",
+            "117673":"M Atividades profissionais, científicas e técnicas",
+            "117714":"N Atividades administrativas e serviços complementares",
+            "117774":"O Administração pública, defesa e seguridade social",
+            "117788":"P Educação",
+            "117810":"Q Saúde humana e serviços sociais",
+            "117838":"R Artes, cultura, esporte e recreação",
+            "117861":"S Outras atividades de serviços",
+            "117888":"T Serviços domésticos",
+            "117892":"U Organismos internacionais e outras instituições extraterritoriais"
+          }
+          variables={"706":"Número de unidades locais","707":"Pessoal ocupado total","708":"Pessoal ocupado assalariado","662":"Salários e outras remunerações"}
+          codes=",".join(MUNICIPALITIES); cats=",".join(SECTIONS); vars_=",".join(variables)
+          url=f"https://apisidra.ibge.gov.br/values/t/9528/n6/{codes}/v/{vars_}/p/2022/c12762/{cats}/h/y/f/a/d/m"
+          s=requests.Session(); s.headers.update({"User-Agent":"SBMI CEMPRE sector benchmark/1.0"})
+          payload=raw=meta=None; last=None
+          for attempt in range(1,6):
+            try:
+              r=s.get(url,timeout=90); raw=r.content
+              Path("artifacts/benchmark_cempre_sectors/raw/sidra_9528_sections_2022.json").write_bytes(raw)
+              if r.status_code==200:
+                data=r.json()
+                if isinstance(data,list) and len(data)>1:
+                  payload=data; meta={"url":url,"http_status":200,"bytes":len(raw),"sha256":hashlib.sha256(raw).hexdigest(),"attempt":attempt}; break
+              last=f"HTTP {r.status_code}: {raw[:500]!r}"
+            except Exception as exc: last=f"{type(exc).__name__}: {exc}"
+            time.sleep(5*attempt)
+          if payload is None: raise SystemExit(f"SIDRA 9528 failed: {last}")
+
+          def num(v):
+            t=str(v).strip()
+            if not t or t in {"-","...","X"}: return None
+            if "," in t: t=t.replace(".","").replace(",",".")
+            try:return float(t)
+            except ValueError:return None
+
+          rows=[]
+          for x in payload[1:]:
+            rows.append({
+              "municipio_codigo":x.get("D1C",""),"municipio":x.get("D1N",""),
+              "variavel_codigo":x.get("D2C",""),"variavel":x.get("D2N",""),
+              "periodo":x.get("D3N",""),"cnae_categoria_codigo":x.get("D4C",""),
+              "cnae_categoria":x.get("D4N",""),"unidade":x.get("MN",""),
+              "valor_raw":x.get("V",""),"valor_num":num(x.get("V","")),
+              "source_url":url,"raw_sha256":hashlib.sha256(raw).hexdigest()
+            })
+          found_m={r["municipio_codigo"] for r in rows}; found_v={r["variavel_codigo"] for r in rows}; found_c={r["cnae_categoria_codigo"] for r in rows}
+          if set(MUNICIPALITIES)-found_m: raise SystemExit(f"Missing municipalities: {set(MUNICIPALITIES)-found_m}")
+          if set(variables)-found_v: raise SystemExit(f"Missing variables: {set(variables)-found_v}")
+          if set(SECTIONS)-found_c: raise SystemExit(f"Missing section categories: {set(SECTIONS)-found_c}")
+
+          def write(path,data):
+            with Path(path).open("w",encoding="utf-8",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=list(data[0])); w.writeheader(); w.writerows(data)
+          write("artifacts/benchmark_cempre_sectors/sidra_9528_sections_2022.csv",rows)
+
+          lookup={}
+          for r in rows:
+            lookup[(r["municipio_codigo"],r["cnae_categoria_codigo"],r["variavel_codigo"])]=r["valor_num"]
+          analytic=[]
+          top=[]
+          for mcode,mname in MUNICIPALITIES.items():
+            total_occ=lookup.get((mcode,"117897","707"))
+            total_units=lookup.get((mcode,"117897","706"))
+            total_sal=lookup.get((mcode,"117897","708"))
+            total_pay=lookup.get((mcode,"117897","662"))
+            mrows=[]
+            for ccode,cname in SECTIONS.items():
+              if ccode=="117897": continue
+              units=lookup.get((mcode,ccode,"706")); occ=lookup.get((mcode,ccode,"707")); sal=lookup.get((mcode,ccode,"708")); pay=lookup.get((mcode,ccode,"662"))
+              rec={
+                "municipio_codigo":mcode,"municipio":mname,"secao_codigo":ccode,"secao":cname,
+                "unidades_locais":units,"pessoal_ocupado_total":occ,"pessoal_assalariado":sal,
+                "salarios_outras_remuneracoes_mil_rs":pay,
+                "participacao_ocupados_pct_calculado":None if occ is None or total_occ in (None,0) else occ/total_occ*100,
+                "participacao_unidades_pct_calculado":None if units is None or total_units in (None,0) else units/total_units*100,
+                "participacao_salarios_pct_calculado":None if pay is None or total_pay in (None,0) else pay/total_pay*100,
+                "assalariados_sobre_ocupados_pct_calculado":None if sal is None or occ in (None,0) else sal/occ*100,
+                "periodo":"2022","fonte":"IBGE/SIDRA CEMPRE tabela 9528","natureza":"observado + calculado",
+                "limitacao":"Células com valor suprimido na fonte permanecem ausentes; seção CNAE não explica causalmente renda domiciliar."
+              }
+              analytic.append(rec)
+              if rec["participacao_ocupados_pct_calculado"] is not None:mrows.append(rec)
+            mrows=sorted(mrows,key=lambda z:z["participacao_ocupados_pct_calculado"],reverse=True)
+            for rank,rec in enumerate(mrows[:6],1):
+              top.append({
+                "municipio_codigo":mcode,"municipio":mname,"rank_ocupados":rank,
+                "secao_codigo":rec["secao_codigo"],"secao":rec["secao"],
+                "pessoal_ocupado_total":rec["pessoal_ocupado_total"],
+                "participacao_ocupados_pct_calculado":rec["participacao_ocupados_pct_calculado"],
+                "participacao_unidades_pct_calculado":rec["participacao_unidades_pct_calculado"],
+                "participacao_salarios_pct_calculado":rec["participacao_salarios_pct_calculado"],
+                "periodo":"2022"
+              })
+            top4=sum(r["participacao_ocupados_pct_calculado"] for r in mrows[:4]) if len(mrows)>=4 else None
+            top.append({
+              "municipio_codigo":mcode,"municipio":mname,"rank_ocupados":"TOP4_SHARE",
+              "secao_codigo":"","secao":"Participação acumulada das 4 maiores seções em pessoal ocupado",
+              "pessoal_ocupado_total":"","participacao_ocupados_pct_calculado":top4,
+              "participacao_unidades_pct_calculado":"","participacao_salarios_pct_calculado":"","periodo":"2022"
+            })
+          write("artifacts/benchmark_cempre_sectors/benchmark_cempre_sections_2022.csv",analytic)
+          write("artifacts/benchmark_cempre_sectors/top_sections_summary_2022.csv",top)
+
+          validation={
+            "municipalities":MUNICIPALITIES,"variables":variables,"classification":"12762 — CNAE 2.0",
+            "categories_expected":SECTIONS,"categories_found":sorted(found_c),
+            "raw_rows":len(rows),"analytic_rows":len(analytic),"top_rows":len(top),
+            "suppressed_cells":sum(1 for r in rows if r["valor_num"] is None),
+            "status":"PASS"
+          }
+          Path("artifacts/benchmark_cempre_sectors/validation.json").write_text(json.dumps(validation,ensure_ascii=False,indent=2),encoding="utf-8")
+          manifest={"source":"IBGE/SIDRA — CEMPRE","table":"9528","period":"2022","geography":list(MUNICIPALITIES.values()),"classification":"CNAE 2.0 — sections + total","request":meta,"status":"PASS"}
+          Path("artifacts/benchmark_cempre_sectors/manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(Path("artifacts/benchmark_cempre_sectors/top_sections_summary_2022.csv").read_text(encoding="utf-8"))
+          print(json.dumps(validation,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload sector benchmark artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-cempre-sectors-sidra-2022-v001
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/benchmark_cempre_sectors/

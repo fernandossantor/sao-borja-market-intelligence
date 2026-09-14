@@ -1,0 +1,307 @@
+name: vaf-source-audit
+
+on:
+  pull_request:
+    paths:
+      - "src/sbmi/vaf_source_audit.py"
+      - "tests/test_vaf_source_audit.py"
+      - ".github/workflows/vaf-source-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: python -m pip install -e '.[dev]'
+      - name: Run focused tests and Ruff
+        run: |
+          python -m pytest tests/test_vaf_source_audit.py
+          python -m ruff check src/sbmi/vaf_source_audit.py tests/test_vaf_source_audit.py
+      - name: Audit official VAF source routes, 2025 result and split historical overlap
+        run: |
+          mkdir -p artifacts/raw_official
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          import requests
+
+          from sbmi.vaf_source_audit import (
+              PORTAL_IPM_URL,
+              SAO_BORJA_RANGE_VALUE,
+              VAF_ARCHIVE_1989_1997_XLS_URL,
+              VAF_ARCHIVE_2009_2012_XLS_URL,
+              VAF_ARCHIVE_URL,
+              VAF_HISTORY_FORM_URL,
+              VAF_LEGACY_1989_1997_BINARY_URL,
+              VAF_LEGACY_DOWNLOAD_INDEX_URL,
+              VAF_WRAPPER_URL,
+              extract_iframe_sources,
+              extract_official_links,
+              extract_table_rows,
+              find_table_rows_containing,
+              official_source_catalog,
+              parse_vaf_form,
+              summarize_form,
+          )
+
+          session = requests.Session()
+          session.headers.update(
+              {"User-Agent": "SBMI territorial-market-intelligence source audit/1.0"}
+          )
+
+          result = {
+              "nature": "observed_official_source_and_query_structure_audit",
+              "source_catalog": list(official_source_catalog()),
+              "routes": {},
+              "archive_links": [],
+              "legacy_download_links": [],
+              "wrapper_iframes": [],
+              "legacy_form": None,
+              "raw_binary_snapshots": [],
+              "minimal_query": {
+                  "requested_apuracao_start": "2025",
+                  "requested_apuracao_end": "2025",
+                  "municipality_range_value": SAO_BORJA_RANGE_VALUE,
+                  "submit_value": "Consultar",
+                  "nature": "observed_form_parameters_used_for_read_only_query",
+                  "response": None,
+              },
+              "historical_overlap_queries": [
+                  {
+                      "requested_apuracao_start": "2009",
+                      "requested_apuracao_end": "2016",
+                      "municipality_range_value": SAO_BORJA_RANGE_VALUE,
+                      "submit_value": "Consultar",
+                      "nature": "observed_form_parameters_used_for_read_only_query",
+                      "response": None,
+                  },
+                  {
+                      "requested_apuracao_start": "2017",
+                      "requested_apuracao_end": "2019",
+                      "municipality_range_value": SAO_BORJA_RANGE_VALUE,
+                      "submit_value": "Consultar",
+                      "nature": "observed_form_parameters_used_for_read_only_query",
+                      "response": None,
+                  },
+              ],
+          }
+
+          def fetch(url: str, timeout: int) -> requests.Response | None:
+              try:
+                  response = session.get(url, timeout=timeout, allow_redirects=True)
+                  result["routes"][url] = {
+                      "status": "reachable" if response.ok else "http_error",
+                      "http_status": response.status_code,
+                      "response_bytes": len(response.content),
+                      "final_url": response.url,
+                      "content_type": response.headers.get("Content-Type"),
+                      "content_disposition": response.headers.get("Content-Disposition"),
+                      "last_modified": response.headers.get("Last-Modified"),
+                  }
+                  return response
+              except requests.RequestException as exc:
+                  result["routes"][url] = {
+                      "status": "network_error",
+                      "error_type": type(exc).__name__,
+                      "error": str(exc),
+                  }
+                  return None
+
+          def preserve_opaque_binary(
+              response: requests.Response | None,
+              *,
+              source_url: str,
+              file_name: str,
+          ) -> None:
+              if response is None or not response.ok:
+                  return
+              payload = response.content
+              output = Path("artifacts/raw_official") / file_name
+              output.write_bytes(payload)
+              result["raw_binary_snapshots"].append(
+                  {
+                      "source_url": source_url,
+                      "file_name": file_name,
+                      "response_bytes": len(payload),
+                      "sha256": hashlib.sha256(payload).hexdigest(),
+                      "content_type": response.headers.get("Content-Type"),
+                      "content_disposition": response.headers.get("Content-Disposition"),
+                      "last_modified": response.headers.get("Last-Modified"),
+                      "nature": "observed_official_raw_binary_preserved_without_execution_or_semantic_parsing",
+                  }
+              )
+
+          def query_period(form_action: str, start: str, end: str, raw_name: str) -> dict[str, object]:
+              payload = {
+                  "anoini": start,
+                  "anofim": end,
+                  "letramun": SAO_BORJA_RANGE_VALUE,
+                  "Action": "Consultar",
+              }
+              response = session.post(
+                  form_action,
+                  data=payload,
+                  timeout=30,
+                  allow_redirects=True,
+                  headers={"Referer": VAF_HISTORY_FORM_URL},
+              )
+              response.raise_for_status()
+              raw_post = Path("artifacts/raw_official") / raw_name
+              raw_post.write_bytes(response.content)
+              tables = extract_table_rows(response.text)
+              matches = find_table_rows_containing(response.text, "SAO BORJA")
+              matching_table_indexes = sorted(
+                  {int(match["table_index"]) for match in matches}
+              )
+              return {
+                  "http_status": response.status_code,
+                  "final_url": response.url,
+                  "response_bytes": len(response.content),
+                  "encoding": response.encoding,
+                  "raw_response_file": str(raw_post),
+                  "raw_response_sha256": hashlib.sha256(response.content).hexdigest(),
+                  "table_count": len(tables),
+                  "all_tables": [
+                      {"table_index": index, "rows": list(table)}
+                      for index, table in enumerate(tables)
+                  ],
+                  "sao_borja_match_count": len(matches),
+                  "sao_borja_rows": list(matches),
+                  "matching_tables": [
+                      {
+                          "table_index": index,
+                          "rows": list(tables[index]),
+                      }
+                      for index in matching_table_indexes
+                  ],
+                  "nature": "observed_visible_result_cells_without_column_relabeling",
+              }
+
+          # Prioridade: recuperar a consulta que responde ao objetivo analítico atual.
+          legacy = fetch(VAF_HISTORY_FORM_URL, 20)
+          if legacy is not None and legacy.ok:
+              try:
+                  form = parse_vaf_form(legacy.text)
+                  result["legacy_form"] = summarize_form(form)
+              except ValueError as exc:
+                  form = None
+                  result["legacy_form"] = {
+                      "status": "parse_error",
+                      "error_type": type(exc).__name__,
+                      "error": str(exc),
+                  }
+
+              if form is not None:
+                  overlap_specs = [
+                      ("2009", "2016", "vaf_post_2009_2016_response.html"),
+                      ("2017", "2019", "vaf_post_2017_2019_response.html"),
+                  ]
+                  for query, (start, end, raw_name) in zip(
+                      result["historical_overlap_queries"], overlap_specs, strict=True
+                  ):
+                      try:
+                          query["response"] = query_period(form.action, start, end, raw_name)
+                      except requests.RequestException as exc:
+                          query["response"] = {
+                              "status": "query_error",
+                              "error_type": type(exc).__name__,
+                              "error": str(exc),
+                          }
+
+                  try:
+                      result["minimal_query"]["response"] = query_period(
+                          form.action,
+                          "2025",
+                          "2025",
+                          "vaf_post_2025_response.html",
+                      )
+                  except requests.RequestException as exc:
+                      result["minimal_query"]["response"] = {
+                          "status": "query_error",
+                          "error_type": type(exc).__name__,
+                          "error": str(exc),
+                      }
+
+          # Rotas secundárias são auditadas depois e não bloqueiam a consulta principal.
+          portal = fetch(PORTAL_IPM_URL, 10)
+          archive = fetch(VAF_ARCHIVE_URL, 10)
+          wrapper = fetch(VAF_WRAPPER_URL, 10)
+          legacy_download_index = fetch(VAF_LEGACY_DOWNLOAD_INDEX_URL, 10)
+          archive_2009_2012 = fetch(VAF_ARCHIVE_2009_2012_XLS_URL, 10)
+          archive_1989_1997 = fetch(VAF_ARCHIVE_1989_1997_XLS_URL, 10)
+          legacy_1989_1997 = fetch(VAF_LEGACY_1989_1997_BINARY_URL, 10)
+
+          if archive is not None and archive.ok:
+              result["archive_links"] = list(
+                  extract_official_links(
+                      archive.text,
+                      source_url=archive.url,
+                      text_terms=("Valor Adicionado Municipios", "Layout Sistema Proprio"),
+                  )
+              )
+
+          if legacy_download_index is not None and legacy_download_index.ok:
+              result["legacy_download_links"] = list(
+                  extract_official_links(
+                      legacy_download_index.text,
+                      source_url=legacy_download_index.url,
+                      text_terms=("Valor adicionado mun",),
+                  )
+              )
+
+          preserve_opaque_binary(
+              archive_2009_2012,
+              source_url=VAF_ARCHIVE_2009_2012_XLS_URL,
+              file_name="vaf_municipios_2009_2012_official.xls",
+          )
+          preserve_opaque_binary(
+              archive_1989_1997,
+              source_url=VAF_ARCHIVE_1989_1997_XLS_URL,
+              file_name="vaf_municipios_1989_1997_official.xls",
+          )
+          preserve_opaque_binary(
+              legacy_1989_1997,
+              source_url=VAF_LEGACY_1989_1997_BINARY_URL,
+              file_name="tabvalor_1989_1997_official_opaque.exe",
+          )
+
+          if wrapper is not None and wrapper.ok:
+              result["wrapper_iframes"] = list(
+                  extract_iframe_sources(wrapper.text, source_url=wrapper.url)
+              )
+
+          result["portal_content_seen"] = bool(portal is not None and portal.ok)
+          result["archive_content_seen"] = bool(archive is not None and archive.ok)
+          result["legacy_download_index_seen"] = bool(
+              legacy_download_index is not None and legacy_download_index.ok
+          )
+          result["current_query_content_seen"] = bool(legacy is not None and legacy.ok)
+
+          output = Path("artifacts/vaf_source_and_minimal_query_audit.json")
+          output.write_text(
+              json.dumps(result, ensure_ascii=False, indent=2),
+              encoding="utf-8",
+          )
+          print(output.read_text(encoding="utf-8"))
+          print("STATUS=VAF_SOURCE_AND_MINIMAL_QUERY_AUDIT_COMPLETED")
+          PY
+      - name: Upload compact source audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaf-source-and-minimal-query-audit
+          path: |
+            artifacts/vaf_source_and_minimal_query_audit.json
+            artifacts/raw_official/
+          retention-days: 14

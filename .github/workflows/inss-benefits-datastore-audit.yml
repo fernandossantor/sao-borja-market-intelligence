@@ -1,0 +1,78 @@
+name: inss-benefits-datastore-audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/inss-benefits-datastore-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe-datastore:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Probe CKAN datastore for July 2026 emitted benefits
+        run: |
+          python -m pip install --upgrade requests
+          mkdir -p artifacts
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urlencode
+          import requests
+
+          rid = "63467992-f291-4549-8a07-b1d5ee27a1a2"
+          base = "https://dadosabertos.inss.gov.br/api/3/action"
+          s = requests.Session()
+          s.headers.update({"User-Agent": "SBMI CKAN datastore probe/1.0"})
+
+          report = {"resource_id": rid, "reference_period": "2026-07", "nature": "source_audit_only"}
+
+          for action, params in [
+              ("resource_show", {"id": rid}),
+              ("datastore_search", {"resource_id": rid, "limit": 5}),
+          ]:
+              url = f"{base}/{action}?{urlencode(params)}"
+              entry = {"url": url}
+              try:
+                  r = s.get(url, timeout=45)
+                  entry["http_status"] = r.status_code
+                  entry["content_type"] = r.headers.get("content-type")
+                  entry["bytes"] = len(r.content)
+                  Path(f"artifacts/{action}_raw.json").write_bytes(r.content)
+                  try:
+                      payload = r.json()
+                      entry["success"] = payload.get("success")
+                      result = payload.get("result") or {}
+                      if action == "resource_show":
+                          entry["datastore_active"] = result.get("datastore_active")
+                      else:
+                          entry["total"] = result.get("total")
+                          entry["fields"] = [
+                              {"id": f.get("id"), "type": f.get("type")} for f in result.get("fields", [])
+                          ]
+                          entry["records_sample"] = result.get("records", [])[:2]
+                  except ValueError:
+                      entry["json_parse"] = False
+              except Exception as exc:
+                  entry["error_type"] = type(exc).__name__
+                  entry["error"] = str(exc)
+              report[action] = entry
+
+          Path("artifacts/inss_datastore_audit.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inss-benefits-datastore-audit-202607
+          retention-days: 30
+          path: artifacts/

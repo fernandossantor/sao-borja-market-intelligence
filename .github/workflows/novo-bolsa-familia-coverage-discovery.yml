@@ -1,0 +1,104 @@
+name: novo-bolsa-familia-coverage-discovery
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/novo-bolsa-familia-coverage-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover-coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Probe official monthly download endpoints without reading beneficiary files
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade requests
+          mkdir -p artifacts
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          import requests
+
+          BASE = "https://portaldatransparencia.gov.br/download-de-dados/novo-bolsa-familia"
+          candidates = [f"2023{m:02d}" for m in range(1,13)]
+          candidates += [f"2024{m:02d}" for m in range(1,13)]
+          candidates += [f"2025{m:02d}" for m in range(1,13)]
+          candidates += [f"2026{m:02d}" for m in range(1,8)]
+
+          session = requests.Session()
+          session.headers.update({
+              "User-Agent": "SBMI Novo Bolsa Familia coverage probe/2.0",
+              "Referer": BASE,
+          })
+
+          report = {
+              "source_page": BASE,
+              "objective": "discover official temporal coverage from monthly download endpoints without reading or persisting beneficiary-level file bodies",
+              "pii_downloaded": False,
+              "method": "HTTP GET with stream=True, redirects followed, response closed without iterating body",
+              "probes": [],
+              "available_months": [],
+          }
+
+          for month in candidates:
+              url = f"{BASE}/{month}"
+              entry = {"month": month, "url": url}
+              try:
+                  with session.get(url, stream=True, timeout=(20, 45), allow_redirects=True) as r:
+                      content_type = (r.headers.get("content-type") or "").lower()
+                      length = r.headers.get("content-length")
+                      final_url = r.url
+                      available = (
+                          r.status_code == 200
+                          and ("zip" in content_type or str(final_url).lower().endswith(".zip"))
+                          and length not in (None, "0")
+                      )
+                      entry.update({
+                          "status": r.status_code,
+                          "final_url": final_url,
+                          "content_type": r.headers.get("content-type"),
+                          "content_length": length,
+                          "etag": r.headers.get("etag"),
+                          "last_modified": r.headers.get("last-modified"),
+                          "available": available,
+                          "body_read": False,
+                      })
+                      if available:
+                          report["available_months"].append(month)
+              except Exception as exc:
+                  entry["error"] = f"{type(exc).__name__}: {exc}"
+                  entry["available"] = False
+              report["probes"].append(entry)
+
+          report["available_months_count"] = len(report["available_months"])
+          if not report["available_months"]:
+              raise SystemExit("Coverage probe found no available monthly ZIP endpoints")
+
+          Path("artifacts/novo_bolsa_familia_official_coverage_v002.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          Path("artifacts/novo_bolsa_familia_official_available_months_v002.txt").write_text(
+              "\n".join(report["available_months"]) + "\n", encoding="utf-8"
+          )
+          print(json.dumps({
+              "available_months_count": report["available_months_count"],
+              "available_months": report["available_months"],
+          }, ensure_ascii=False, indent=2))
+          PY
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: novo-bolsa-familia-official-coverage-v002
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30

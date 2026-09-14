@@ -1,0 +1,122 @@
+name: inss-benefits-residence-source-audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/inss-benefits-residence-source-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Audit official INSS CKAN resource and download endpoint
+        run: |
+          python -m pip install --upgrade requests
+          mkdir -p artifacts
+          python - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          import requests
+
+          resource_id = "63467992-f291-4549-8a07-b1d5ee27a1a2"
+          api_url = f"https://dadosabertos.inss.gov.br/api/3/action/resource_show?id={resource_id}"
+          headers = {"User-Agent": "SBMI territorial-market-intelligence source audit/1.0"}
+          s = requests.Session()
+          s.headers.update(headers)
+
+          report = {
+              "source": "INSS Portal de Dados Abertos / SUIBE",
+              "dataset": "Benefícios emitidos - Plano de Dados Abertos Jun/2023 a jun/2027",
+              "resource_label": "Benefícios Emitidos Julho 2026",
+              "resource_id": resource_id,
+              "reference_period": "2026-07",
+              "intended_geography_filter": "município de residência = São Borja/RS",
+              "intended_measure": "valor líquido de benefícios emitidos",
+              "nature": "source_audit_only",
+              "ckan_api_url": api_url,
+          }
+
+          try:
+              r = s.get(api_url, timeout=45)
+              report["ckan_http_status"] = r.status_code
+              report["ckan_content_type"] = r.headers.get("content-type")
+              report["ckan_response_bytes"] = len(r.content)
+              report["ckan_sha256"] = hashlib.sha256(r.content).hexdigest()
+              Path("artifacts/inss_resource_show_raw.json").write_bytes(r.content)
+              r.raise_for_status()
+              payload = r.json()
+              report["ckan_success"] = payload.get("success")
+              resource = payload.get("result") or {}
+              keep = [
+                  "id", "name", "format", "mimetype", "url", "url_type",
+                  "created", "last_modified", "metadata_modified", "size",
+                  "cache_url", "cache_last_updated"
+              ]
+              report["resource_metadata"] = {k: resource.get(k) for k in keep if k in resource}
+              download_url = resource.get("url")
+          except Exception as exc:
+              report["ckan_error_type"] = type(exc).__name__
+              report["ckan_error"] = str(exc)
+              download_url = None
+
+          if download_url:
+              try:
+                  h = s.head(download_url, allow_redirects=True, timeout=45)
+                  report["download_head"] = {
+                      "status": h.status_code,
+                      "final_url": h.url,
+                      "content_type": h.headers.get("content-type"),
+                      "content_length": h.headers.get("content-length"),
+                      "accept_ranges": h.headers.get("accept-ranges"),
+                      "etag": h.headers.get("etag"),
+                      "last_modified": h.headers.get("last-modified"),
+                  }
+              except Exception as exc:
+                  report["download_head_error"] = {"type": type(exc).__name__, "message": str(exc)}
+
+              try:
+                  g = s.get(download_url, headers={**headers, "Range": "bytes=0-65535"}, stream=True, timeout=60)
+                  first = b""
+                  for chunk in g.iter_content(chunk_size=65536):
+                      first += chunk
+                      break
+                  report["download_probe"] = {
+                      "status": g.status_code,
+                      "final_url": g.url,
+                      "content_type": g.headers.get("content-type"),
+                      "content_length": g.headers.get("content-length"),
+                      "content_range": g.headers.get("content-range"),
+                      "bytes_read": len(first),
+                      "first_4_hex": first[:4].hex(),
+                      "first_chunk_sha256": hashlib.sha256(first).hexdigest() if first else None,
+                  }
+                  Path("artifacts/inss_resource_first_chunk.bin").write_bytes(first)
+              except Exception as exc:
+                  report["download_probe_error"] = {"type": type(exc).__name__, "message": str(exc)}
+
+          Path("artifacts/inss_benefits_residence_source_audit.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+
+          if report.get("ckan_http_status") != 200:
+              raise SystemExit("Official CKAN metadata endpoint was not recovered")
+          PY
+      - name: Upload source audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: inss-benefits-residence-source-audit-202607
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/

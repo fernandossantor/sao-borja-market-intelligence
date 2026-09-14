@@ -1,0 +1,218 @@
+name: benchmark-cempre-sidra
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/benchmark-cempre-sidra.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch-benchmark-cempre:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch official CEMPRE/SIDRA 9509 benchmark
+        run: |
+          python -m pip install --upgrade requests
+          mkdir -p artifacts/benchmark_cempre/raw
+          python - <<'PY'
+          import csv
+          import hashlib
+          import json
+          import time
+          from pathlib import Path
+
+          import requests
+
+          MUNICIPALITIES = {
+              "4300406": "Alegrete",
+              "4317103": "Sant'Ana do Livramento",
+              "4317400": "Santiago",
+              "4318002": "São Borja",
+              "4318309": "São Gabriel",
+              "4322400": "Uruguaiana",
+          }
+          CODES = ",".join(MUNICIPALITIES)
+          VARIABLES = {
+              "367": "Número de empresas e outras organizações atuantes",
+              "706": "Número de unidades locais",
+              "707": "Pessoal ocupado total",
+              "708": "Pessoal ocupado assalariado",
+              "5944": "Pessoal assalariado médio",
+              "662": "Salários e outras remunerações",
+              "1606": "Salário médio mensal",
+              "10143": "Salário médio mensal em reais",
+          }
+          VARS = ",".join(VARIABLES)
+          url = (
+              "https://apisidra.ibge.gov.br/values/t/9509/n6/"
+              + CODES
+              + "/v/" + VARS
+              + "/p/2022/h/y/f/a/d/m"
+          )
+
+          s = requests.Session()
+          s.headers.update({"User-Agent": "SBMI benchmark territorial CEMPRE extraction/1.0"})
+          last = None
+          payload = raw = None
+          meta = None
+          for attempt in range(1, 6):
+              try:
+                  r = s.get(url, timeout=90)
+                  raw = r.content
+                  Path("artifacts/benchmark_cempre/raw/sidra_9509_benchmark_2022.json").write_bytes(raw)
+                  if r.status_code == 200:
+                      data = r.json()
+                      if isinstance(data, list) and len(data) > 1:
+                          payload = data
+                          meta = {
+                              "url": url,
+                              "http_status": r.status_code,
+                              "bytes": len(raw),
+                              "sha256": hashlib.sha256(raw).hexdigest(),
+                              "attempt": attempt,
+                          }
+                          break
+                  last = f"HTTP {r.status_code}; body={raw[:500]!r}"
+              except Exception as exc:
+                  last = f"{type(exc).__name__}: {exc}"
+              time.sleep(5 * attempt)
+
+          if payload is None:
+              raise SystemExit(f"Failed SIDRA 9509: {last}")
+
+          def number(v):
+              text = str(v).strip()
+              if not text or text in {"-", "...", "X"}:
+                  return None
+              if "," in text:
+                  text = text.replace(".", "").replace(",", ".")
+              try:
+                  return float(text)
+              except ValueError:
+                  return None
+
+          rows = []
+          for row in payload[1:]:
+              rows.append({
+                  "municipio_codigo": row.get("D1C", ""),
+                  "municipio": row.get("D1N", ""),
+                  "variavel_codigo": row.get("D2C", ""),
+                  "variavel": row.get("D2N", ""),
+                  "periodo_codigo": row.get("D3C", ""),
+                  "periodo": row.get("D3N", ""),
+                  "unidade_codigo": row.get("MC", ""),
+                  "unidade": row.get("MN", ""),
+                  "valor_raw": row.get("V", ""),
+                  "valor_num": number(row.get("V", "")),
+                  "natureza": "observado_em_fonte_oficial",
+                  "source_url": url,
+                  "raw_sha256": hashlib.sha256(raw).hexdigest(),
+              })
+
+          codes_found = {r["municipio_codigo"] for r in rows}
+          vars_found = {r["variavel_codigo"] for r in rows}
+          missing_codes = sorted(set(MUNICIPALITIES) - codes_found)
+          missing_vars = sorted(set(VARIABLES) - vars_found)
+          if missing_codes or missing_vars:
+              raise SystemExit(
+                  f"Missing expected dimensions: municipalities={missing_codes}; variables={missing_vars}; "
+                  f"vars_found={sorted(vars_found)}"
+              )
+
+          observed_names = {}
+          observed_units = {}
+          for r in rows:
+              observed_names.setdefault(r["variavel_codigo"], set()).add(r["variavel"])
+              observed_units.setdefault(r["variavel_codigo"], set()).add(r["unidade"])
+
+          def write_csv(path, data):
+              with Path(path).open("w", encoding="utf-8", newline="") as f:
+                  w = csv.DictWriter(f, fieldnames=list(data[0]))
+                  w.writeheader()
+                  w.writerows(data)
+
+          write_csv("artifacts/benchmark_cempre/sidra_9509_benchmark_2022.csv", rows)
+
+          by = {}
+          for r in rows:
+              by.setdefault(r["municipio_codigo"], {})[r["variavel_codigo"]] = r["valor_num"]
+
+          summary = []
+          for code, name in MUNICIPALITIES.items():
+              d = by.get(code, {})
+              firms = d.get("367")
+              units = d.get("706")
+              total = d.get("707")
+              salaried = d.get("708")
+              salaried_avg = d.get("5944")
+              wage_sm = d.get("1606")
+              wage_rs = d.get("10143")
+              summary.append({
+                  "municipio_codigo": code,
+                  "municipio": name,
+                  "empresas_organizacoes_atuantes": firms,
+                  "unidades_locais": units,
+                  "pessoal_ocupado_total": total,
+                  "pessoal_ocupado_assalariado": salaried,
+                  "pessoal_assalariado_medio": salaried_avg,
+                  "salario_medio_mensal_sm": wage_sm,
+                  "salario_medio_mensal_rs": wage_rs,
+                  "pessoal_por_unidade_local_calculado": None if units in (None, 0) or total is None else total / units,
+                  "assalariados_sobre_ocupados_pct_calculado": None if total in (None, 0) or salaried is None else salaried / total * 100,
+                  "unidades_por_empresa_calculado": None if firms in (None, 0) or units is None else units / firms,
+                  "periodo": "2022",
+                  "fonte": "IBGE/SIDRA — Cadastro Central de Empresas — tabela 9509",
+                  "natureza": "observado + calculado",
+                  "limitacao": "CEMPRE cobre empresas e outras organizações formalmente constituídas; não equivale à população ocupada total, informalidade ou renda domiciliar.",
+              })
+          write_csv("artifacts/benchmark_cempre/benchmark_cempre_summary_2022.csv", summary)
+
+          validation = {
+              "municipalities_expected": MUNICIPALITIES,
+              "municipalities_found": sorted(codes_found),
+              "variables_requested": VARIABLES,
+              "variables_found": sorted(vars_found),
+              "observed_variable_names": {k: sorted(v) for k, v in observed_names.items()},
+              "observed_units": {k: sorted(v) for k, v in observed_units.items()},
+              "rows": len(rows),
+              "summary_rows": len(summary),
+              "status": "PASS",
+          }
+          Path("artifacts/benchmark_cempre/validation.json").write_text(
+              json.dumps(validation, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          manifest = {
+              "source": "IBGE/SIDRA — Cadastro Central de Empresas",
+              "table": "9509",
+              "geography": "Alegrete; Sant'Ana do Livramento; Santiago; São Borja; São Gabriel; Uruguaiana — RS",
+              "period": "2022",
+              "request": meta,
+              "status": "PASS",
+              "method_note": "Same table, variables, year and extraction run for all six municipalities.",
+          }
+          Path("artifacts/benchmark_cempre/manifest.json").write_text(
+              json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          print(Path("artifacts/benchmark_cempre/benchmark_cempre_summary_2022.csv").read_text(encoding="utf-8"))
+          print(json.dumps(validation, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Upload CEMPRE benchmark artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-cempre-sidra-2022-v001
+          if-no-files-found: error
+          retention-days: 30
+          path: artifacts/benchmark_cempre/

@@ -1,0 +1,220 @@
+name: estban-sao-borja-extract-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/estban-sao-borja-extract-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/estban-sao-borja-extract-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract official BCB ESTBAN monthly municipal balances for São Borja
+        run: |
+          python - <<'PY'
+          import csv, io, json, re, unicodedata, zipfile
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+
+          OUT=Path("artifacts/estban_sao_borja_v1")
+          OUT.mkdir(parents=True,exist_ok=True)
+          API="https://www.bcb.gov.br/api/servico/sitebcb/Documentos/byListGuid"
+          PARAMS={
+              "tronco":"estatisticas",
+              "guidLista":"f6391806-fd85-43af-acf1-c86d5b8dd6df",
+              "ordem":"DataDocumento desc",
+              "pasta":"municipio",
+          }
+          HEADERS={
+              "User-Agent":"Mozilla/5.0 SBMI audit",
+              "Accept":"application/json, text/plain, */*",
+          }
+          s=requests.Session(); s.headers.update(HEADERS)
+
+          def norm(x):
+              x=unicodedata.normalize("NFKD",str(x or ""))
+              x="".join(c for c in x if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",x).strip().upper()
+
+          def num(x):
+              x=str(x or "").strip()
+              if not x or x in {"-", "..."}: return None
+              x=x.replace("R$","").strip()
+              if "," in x and "." in x:
+                  if x.rfind(",")>x.rfind("."): x=x.replace(".","").replace(",",".")
+                  else: x=x.replace(",","")
+              elif "," in x:
+                  x=x.replace(".","").replace(",",".")
+              try:return float(x)
+              except:return None
+
+          r=s.get(API,params=PARAMS,timeout=90)
+          r.raise_for_status()
+          meta=r.json()
+          (OUT/"metadata_official_bcb.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          docs=meta.get("conteudo",[])
+          indexed=[]
+          for d in docs:
+              title=str(d.get("Titulo") or "").strip()
+              try: dt=datetime.strptime(title,"%m/%Y")
+              except: continue
+              indexed.append((dt,d))
+          indexed.sort()
+          coverage={
+              "metadata_document_count":len(docs),
+              "dated_document_count":len(indexed),
+              "first_period":indexed[0][0].strftime("%Y-%m") if indexed else None,
+              "last_period":indexed[-1][0].strftime("%Y-%m") if indexed else None,
+          }
+
+          # Requested analytical horizon: 2021 onward. If official metadata exposes
+          # less, retain everything it exposes and state the observed coverage.
+          selected=[(dt,d) for dt,d in indexed if dt.year>=2021]
+          if not selected:
+              selected=indexed[-12:]
+
+          long_rows=[]
+          source_rows=[]
+          errors=[]
+          for dt,d in selected:
+              period=dt.strftime("%Y-%m")
+              rel=d.get("Url")
+              if not rel:
+                  errors.append({"period":period,"error":"missing Url"})
+                  continue
+              url=urljoin("https://www.bcb.gov.br",rel)
+              try:
+                  q=s.get(url,timeout=180)
+                  q.raise_for_status()
+                  zbytes=q.content
+                  bio=io.BytesIO(zbytes)
+                  if zipfile.is_zipfile(bio):
+                      bio.seek(0)
+                      with zipfile.ZipFile(bio) as zf:
+                          members=[n for n in zf.namelist() if n.lower().endswith((".csv",".txt"))]
+                          if not members:
+                              raise RuntimeError(f"no CSV/TXT member: {zf.namelist()[:20]}")
+                          name=members[0]
+                          raw=zf.read(name)
+                  else:
+                      # Some historical BCB metadata entries point directly to CSV,
+                      # notably 2023-01, instead of a ZIP archive.
+                      name=url.rsplit("/",1)[-1]
+                      raw=zbytes
+                  text=raw.decode("latin-1",errors="replace")
+                  lines=text.splitlines()
+                  # BCB ESTBAN municipal files have two pre-header and two footer lines.
+                  candidates=[lines[2:-2],lines,lines[1:-2],lines[2:]]
+                  parsed=None
+                  for cand in candidates:
+                      if not cand: continue
+                      first=cand[0]
+                      sep=";" if first.count(";")>=first.count(",") else ","
+                      rd=csv.DictReader(cand,delimiter=sep)
+                      fields=rd.fieldnames or []
+                      if any(norm(c)=="CODMUN_IBGE" for c in fields) and any("VERBETE" in norm(c) for c in fields):
+                          parsed=(list(rd),fields,sep)
+                          break
+                  if parsed is None:
+                      raise RuntimeError("layout not recognized")
+                  rows,fields,sep=parsed
+                  matches=[]
+                  for row in rows:
+                      code=re.sub(r"\D","",str(row.get("CODMUN_IBGE","")))
+                      city=norm(row.get("MUNICIPIO"))
+                      uf=norm(row.get("UF"))
+                      if code=="4318002" or (city=="SAO BORJA" and uf=="RS"):
+                          matches.append(row)
+                  if not matches:
+                      raise RuntimeError("São Borja row not found")
+
+                  sums=defaultdict(float); valid=defaultdict(int)
+                  for row in matches:
+                      for c in fields:
+                          if "VERBETE" not in norm(c): continue
+                          v=num(row.get(c))
+                          if v is not None:
+                              sums[c]+=v; valid[c]+=1
+                  for c in fields:
+                      if "VERBETE" not in norm(c): continue
+                      code_match=re.search(r"VERBETE[_ ]*(\d+)",norm(c))
+                      verbete=code_match.group(1) if code_match else ""
+                      long_rows.append({
+                          "periodo":period,
+                          "id_verbete":verbete,
+                          "descricao_coluna":c,
+                          "valor_soma_municipio":round(sums.get(c,0.0),2),
+                          "linhas_instituicoes_validas":valid.get(c,0),
+                          "instituicoes_linhas_sao_borja":len(matches),
+                      })
+                  source_rows.append({
+                      "periodo":period,
+                      "titulo":d.get("Titulo"),
+                      "data_documento":d.get("DataDocumento"),
+                      "url":url,
+                      "arquivo_interno":name,
+                      "linhas_sao_borja":len(matches),
+                      "separador":sep,
+                      "bytes_zip":len(zbytes),
+                  })
+              except Exception as exc:
+                  errors.append({"period":period,"url":url,"error":repr(exc)})
+
+          if not long_rows:
+              raise RuntimeError(f"No ESTBAN São Borja observations extracted. Errors: {errors[:10]}")
+
+          with (OUT/"estban_sao_borja_long.csv").open("w",encoding="utf-8",newline="") as f:
+              cols=["periodo","id_verbete","descricao_coluna","valor_soma_municipio","linhas_instituicoes_validas","instituicoes_linhas_sao_borja"]
+              w=csv.DictWriter(f,fieldnames=cols); w.writeheader(); w.writerows(long_rows)
+          with (OUT/"source_manifest.csv").open("w",encoding="utf-8",newline="") as f:
+              cols=["periodo","titulo","data_documento","url","arquivo_interno","linhas_sao_borja","separador","bytes_zip"]
+              w=csv.DictWriter(f,fieldnames=cols); w.writeheader(); w.writerows(source_rows)
+          (OUT/"errors.json").write_text(json.dumps(errors,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          periods=sorted({r["periodo"] for r in long_rows})
+          descriptions={}
+          for row in long_rows:
+              descriptions.setdefault(row["id_verbete"],row["descricao_coluna"])
+          audit={
+              "source":"Banco Central do Brasil — ESTBAN, documento 4500 — arquivo por município",
+              "metadata_api":API,
+              "metadata_params":PARAMS,
+              "geography":"São Borja/RS — CODMUN_IBGE 4318002",
+              "requested_horizon":"2021 onward",
+              "metadata_coverage":coverage,
+              "extracted_period_count":len(periods),
+              "extracted_first_period":periods[0],
+              "extracted_last_period":periods[-1],
+              "verbete_count":len(descriptions),
+              "verbete_headers":descriptions,
+              "failed_periods":errors,
+              "status":"PASS_OFFICIAL_BCB_EXTRACTION",
+              "method_note":"Each verbete is summed across reporting institutions within São Borja. Verbetes must be interpreted individually; do not sum balance-sheet categories because parent/subcategory overlap can double count."
+          }
+          (OUT/"audit.json").write_text(json.dumps(audit,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(audit,ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estban-sao-borja-extract-v1
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/estban_sao_borja_v1/

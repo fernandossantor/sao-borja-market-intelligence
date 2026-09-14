@@ -1,0 +1,107 @@
+name: ipm-definitive-layout-audit
+
+on:
+  pull_request:
+    paths:
+      - "src/sbmi/ipm_archive_audit.py"
+      - "src/sbmi/ipm_archive_audit_cli.py"
+      - "src/sbmi/ipm_definitive_sources.py"
+      - "src/sbmi/ipm_definitive_series.py"
+      - "src/sbmi/ipm_definitive_series_cli.py"
+      - "tests/test_ipm_archive_audit.py"
+      - "tests/test_ipm_definitive_sources.py"
+      - "tests/test_ipm_definitive_series.py"
+      - ".github/workflows/ipm-definitive-layout-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install project
+        run: |
+          python -m pip install -e '.[dev]'
+      - name: Run focused tests
+        run: |
+          python -m pytest \
+            tests/test_ipm_archive_audit.py \
+            tests/test_ipm_definitive_sources.py \
+            tests/test_ipm_definitive_series.py
+          python -m ruff check \
+            src/sbmi/ipm_archive_audit.py \
+            src/sbmi/ipm_archive_audit_cli.py \
+            src/sbmi/ipm_definitive_sources.py \
+            src/sbmi/ipm_definitive_series.py \
+            src/sbmi/ipm_definitive_series_cli.py \
+            tests/test_ipm_archive_audit.py \
+            tests/test_ipm_definitive_sources.py \
+            tests/test_ipm_definitive_series.py
+      - name: Download official definitive IPM archives 2003-2026
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import requests
+          from sbmi.ipm_definitive_sources import (
+              IPM_DEFINITIVE_ARCHIVE_URLS,
+              validate_source_registry,
+          )
+
+          validate_source_registry()
+          target = Path('.data/staging/ipm_definitive_layout')
+          target.mkdir(parents=True, exist_ok=True)
+          session = requests.Session()
+          for year, url in sorted(IPM_DEFINITIVE_ARCHIVE_URLS.items()):
+              path = target / f'ipm_{year}.zip'
+              response = session.get(url, timeout=60)
+              response.raise_for_status()
+              path.write_bytes(response.content)
+              print(f'year={year} bytes={path.stat().st_size} url={url}')
+          PY
+      - name: Audit archive layout
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from sbmi.ipm_archive_audit import audit_ipm_archive, audit_results_table
+
+          root = Path('.data/staging/ipm_definitive_layout')
+          results = [
+              audit_ipm_archive(root / f'ipm_{year}.zip', distribution_year=year)
+              for year in range(2003, 2027)
+          ]
+          table = audit_results_table(results)
+          if len(table) != 24 or table['distribution_year'].nunique() != 24:
+              raise RuntimeError(
+                  f"Cobertura inesperada: rows={len(table)} "
+                  f"years={table.distribution_year.nunique()}"
+              )
+          output = Path('artifacts/ipm_definitive_layout_audit.csv')
+          output.parent.mkdir(parents=True, exist_ok=True)
+          table.to_csv(output, index=False)
+          print(f'archives={len(results)} rows={len(table)} years={table.distribution_year.nunique()}')
+          print('STATUS=IPM_DEFINITIVE_LAYOUT_AUDIT_2003_2026_OK')
+          PY
+      - name: Build canonical São Borja definitive IPM series
+        run: |
+          python -m sbmi.ipm_definitive_series_cli \
+            --archive-root .data/staging/ipm_definitive_layout \
+            --execution-id ipm-definitive-sao-borja-2003-2026-v001 \
+            --output-dir artifacts/ipm-definitive-sao-borja-2003-2026-v001
+          cat artifacts/ipm-definitive-sao-borja-2003-2026-v001/validation.csv
+          cat artifacts/ipm-definitive-sao-borja-2003-2026-v001/sao_borja_ipm_definitive_2003_2026.csv
+      - name: Upload compact audit and canonical series
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipm-definitive-sao-borja-2003-2026-v001
+          path: |
+            artifacts/ipm_definitive_layout_audit.csv
+            artifacts/ipm-definitive-sao-borja-2003-2026-v001/
+          retention-days: 14

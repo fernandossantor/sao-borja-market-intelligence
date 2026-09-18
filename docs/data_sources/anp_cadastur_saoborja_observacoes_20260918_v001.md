@@ -182,8 +182,34 @@ Frentes parcialmente fechadas:
 - Cadastur hospedagem: **2T2026 RECUPERADO**;
 - Cadastur agências: **2T2026 RECUPERADO**.
 
+GLP também foi recuperado após ajuste do parser ao schema específico da fonte.
+
+DADOS OBSERVADOS — 2024:
+- P13: **1.124.934 kg**;
+- OUTROS: **210.685 kg**.
+
+DADOS OBSERVADOS — 2023:
+- P13: 1.447.655 kg;
+- OUTROS: 229.030 kg.
+
+DADOS CALCULADOS:
+- P13 2023→2024: **-22,29%**;
+- OUTROS 2023→2024: **-8,01%**;
+- total P13+OUTROS: 1.676.685 kg em 2023 e 1.335.619 kg em 2024;
+- variação do total calculado: **-20,34%**.
+
+Fórmula do total:
+`P13 + OUTROS`.
+
+O arquivo original preserva as duas colunas separadas; o total existe apenas como derivação SBMI.
+
+### Auditoria do GLP
+
+O recorte municipal possui 25 observações anuais entre 2000 e 2024.
+
+Ao contrário das séries de gasolina, etanol e diesel, o GLP não apresentou a duplicação de 1990/1991 porque a série municipal recuperada começa em 2000.
+
 Ainda pendentes:
-- GLP — schema específico P13/OUTROS em auditoria;
 - demais categorias Cadastur;
 - SINAC/SIMEI municipal;
 - Comex municipal;

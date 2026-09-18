@@ -1,0 +1,186 @@
+name: cadastur-2t2026-sao-borja-all
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/cadastur-2t2026-sao-borja-all.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pandas openpyxl requests xlrd
+
+      - name: Discover and extract all Cadastur 2T2026 categories for São Borja
+        run: |
+          cat > /tmp/cadastur_all.py <<'PY'
+          import io, json, re, unicodedata
+          from pathlib import Path
+          import pandas as pd
+          import requests
+
+          OUT=Path("artifacts/cadastur_2t2026_sao_borja")
+          OUT.mkdir(parents=True,exist_ok=True)
+          API="https://dados.turismo.gov.br/api/3/action/package_search"
+
+          def norm(x):
+              s="" if x is None else str(x)
+              s=unicodedata.normalize("NFKD",s)
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+
+          def find_col(cols, needles):
+              for c in cols:
+                  n=norm(c)
+                  if all(k in n for k in needles):
+                      return c
+              return None
+
+          packages=[]
+          seen={}
+          for q in ["Prestadores de serviços turísticos","Cadastur","prestadores turisticos"]:
+              r=requests.get(API,params={"q":q,"rows":100},timeout=60)
+              r.raise_for_status()
+              data=r.json()["result"]["results"]
+              for p in data:
+                  seen[p["id"]]=p
+          packages=list(seen.values())
+
+          selected=[]
+          for p in packages:
+              for res in p.get("resources",[]):
+                  nm=norm(res.get("name",""))
+                  fmt=norm(res.get("format",""))
+                  if "SEGUNDO TRIMESTRE" in nm and "2026" in nm and fmt in {"XLSX","XLS"}:
+                      selected.append({
+                          "package_id":p["id"],
+                          "package_name":p.get("name"),
+                          "category":p.get("title") or p.get("name"),
+                          "resource_id":res.get("id"),
+                          "resource_name":res.get("name"),
+                          "format":res.get("format"),
+                          "url":res.get("url"),
+                          "last_modified":res.get("last_modified") or res.get("created"),
+                      })
+
+          (OUT/"resources_2t2026.json").write_text(json.dumps(selected,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          summaries=[]
+          raw_frames=[]
+          failures=[]
+          for item in selected:
+              try:
+                  rr=requests.get(item["url"],timeout=180)
+                  rr.raise_for_status()
+                  suffix=".xlsx" if item["format"].upper()=="XLSX" else ".xls"
+                  raw_path=OUT/f'{item["package_name"]}_{item["resource_id"]}{suffix}'
+                  raw_path.write_bytes(rr.content)
+
+                  # Try every sheet; keep rows explicitly matching São Borja.
+                  book=pd.ExcelFile(io.BytesIO(rr.content))
+                  matched=[]
+                  schemas=[]
+                  for sh in book.sheet_names:
+                      df=pd.read_excel(io.BytesIO(rr.content),sheet_name=sh,dtype=str)
+                      df.columns=[str(c).strip() for c in df.columns]
+                      schemas.append({"sheet":sh,"columns":list(df.columns),"rows":len(df)})
+                      mun=find_col(df.columns,["MUNIC"])
+                      uf=find_col(df.columns,["UF"])
+                      if not mun:
+                          continue
+                      mask=df[mun].map(norm).eq("SAO BORJA")
+                      if uf:
+                          mask &= df[uf].map(norm).eq("RS")
+                      sub=df.loc[mask].copy()
+                      if not sub.empty:
+                          sub.insert(0,"_sheet",sh)
+                          matched.append(sub)
+                  if matched:
+                      allm=pd.concat(matched,ignore_index=True)
+                  else:
+                      allm=pd.DataFrame()
+
+                  category=item["category"]
+                  summaries.append({
+                      **item,
+                      "download_bytes":len(rr.content),
+                      "sheets":len(book.sheet_names),
+                      "matched_rows":len(allm),
+                      "schema_json":json.dumps(schemas,ensure_ascii=False),
+                      "natureza":"DADO OBSERVADO",
+                      "limitacao":"Cadastur mede prestadores cadastrados; obrigatoriedade varia por categoria e não mede demanda, ocupação ou gasto."
+                  })
+                  if not allm.empty:
+                      allm.insert(0,"_category",category)
+                      allm.insert(1,"_package_name",item["package_name"])
+                      raw_frames.append(allm)
+              except Exception as exc:
+                  failures.append({**item,"error":repr(exc)})
+
+          pd.DataFrame(summaries).to_csv(OUT/"category_summary.csv",index=False)
+          pd.DataFrame(failures).to_csv(OUT/"failures.csv",index=False)
+          if raw_frames:
+              # outer concat preserves category-specific schemas without inventing harmonization
+              pd.concat(raw_frames,ignore_index=True,sort=False).to_csv(OUT/"sao_borja_rows_all_categories.csv",index=False)
+          else:
+              pd.DataFrame().to_csv(OUT/"sao_borja_rows_all_categories.csv",index=False)
+
+          report={
+              "discovered_packages":len(packages),
+              "resources_2t2026":len(selected),
+              "categories_with_sao_borja":sum(1 for x in summaries if x["matched_rows"]>0),
+              "total_sao_borja_rows":sum(x["matched_rows"] for x in summaries),
+              "failures":len(failures),
+              "rule":"Exploratory only; no canonical promotion. Category coverage is reported without forcing comparability across mandatory/optional Cadastur categories.",
+          }
+          (OUT/"run_summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+          python /tmp/cadastur_all.py
+
+      - name: Persist exploratory evidence
+        run: |
+          mkdir -p docs/data_sources/cadastur_2t2026_sao_borja
+          cp artifacts/cadastur_2t2026_sao_borja/resources_2t2026.json docs/data_sources/cadastur_2t2026_sao_borja/
+          cp artifacts/cadastur_2t2026_sao_borja/category_summary.csv docs/data_sources/cadastur_2t2026_sao_borja/
+          cp artifacts/cadastur_2t2026_sao_borja/sao_borja_rows_all_categories.csv docs/data_sources/cadastur_2t2026_sao_borja/
+          cp artifacts/cadastur_2t2026_sao_borja/failures.csv docs/data_sources/cadastur_2t2026_sao_borja/
+          cp artifacts/cadastur_2t2026_sao_borja/run_summary.json docs/data_sources/cadastur_2t2026_sao_borja/
+          cat > docs/data_sources/cadastur_2t2026_sao_borja/README.md <<'EOF'
+          # Cadastur — São Borja — 2T2026 — varredura de categorias
+
+          Camada exploratória. A rotina descobre recursos oficiais do 2º trimestre de 2026,
+          materializa os XLS/XLSX e filtra explicitamente São Borja/RS.
+
+          Não harmoniza à força schemas distintos e não transforma cadastro em demanda.
+          Categorias de cadastro obrigatório e opcional devem permanecer metodologicamente distintas.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/cadastur_2t2026_sao_borja
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: audit all Cadastur 2T2026 categories for São Borja"
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cadastur-2t2026-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/cadastur_2t2026_sao_borja/

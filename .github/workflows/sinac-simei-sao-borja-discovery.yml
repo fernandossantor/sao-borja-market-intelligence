@@ -28,7 +28,7 @@ jobs:
       - name: Reproduce official SINAC/SIMEI municipal queries
         run: |
           cat > /tmp/sinac_simei_sb.py <<'PY'
-          import asyncio, csv, json, re
+          import asyncio, csv, json, re, unicodedata
           from pathlib import Path
           from playwright.async_api import async_playwright
 
@@ -36,217 +36,199 @@ jobs:
           OUT.mkdir(parents=True, exist_ok=True)
 
           PAGES = {
-              "sinac_total": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
-              "simei_total": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?optanteSimei=&tipoConsulta=2",
-              "sinac_cnae": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?tipoConsulta=1",
-              "simei_cnae": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?optanteSimei=&tipoConsulta=2",
+              "sinac_total": ("https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1", "total"),
+              "simei_total": ("https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?optanteSimei=&tipoConsulta=2", "total"),
+              "sinac_cnae": ("https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?tipoConsulta=1", "cnae"),
+              "simei_cnae": ("https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?optanteSimei=&tipoConsulta=2", "cnae"),
           }
+          SB_INTERNAL = "8863"
 
           def norm(s):
-              return re.sub(r"\s+", " ", (s or "")).strip()
+              s = unicodedata.normalize("NFKD", str(s or ""))
+              s = "".join(ch for ch in s if not unicodedata.combining(ch))
+              return re.sub(r"\s+", " ", s).strip().upper()
 
-          async def select_snapshot(page):
-              out=[]
-              sels=page.locator("select")
-              for i in range(await sels.count()):
-                  s=sels.nth(i)
+          async def settle(page, ms=1000):
+              try:
+                  await page.wait_for_load_state("networkidle", timeout=12000)
+              except Exception:
+                  pass
+              await page.wait_for_timeout(ms)
+
+          async def select_and_postback(page, selector, value, log):
+              loc=page.locator(selector)
+              if not await loc.count():
+                  log.append({"action":"select_missing","selector":selector,"value":value})
+                  return False
+              await loc.select_option(value=value, force=True)
+              log.append({"action":"select","selector":selector,"value":value})
+              await settle(page,1600)
+              return True
+
+          async def snapshot(page, tag):
+              sels=[]
+              for i in range(await page.locator("select").count()):
+                  s=page.locator("select").nth(i)
                   try:
-                      opts=await s.locator("option").evaluate_all(
-                          "(els)=>els.map(o=>({text:o.textContent,value:o.value,selected:o.selected}))"
-                      )
-                      out.append({
+                      sels.append({
                           "index":i,
                           "id":await s.get_attribute("id"),
                           "name":await s.get_attribute("name"),
-                          "multiple":await s.get_attribute("multiple"),
-                          "options":opts[:3000],
+                          "visible":await s.is_visible(),
+                          "value":await s.input_value(),
+                          "options":await s.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value,selected:o.selected}))"),
                       })
                   except Exception as exc:
-                      out.append({"index":i,"error":repr(exc)})
-              return out
+                      sels.append({"index":i,"error":repr(exc)})
+              return {
+                  "tag":tag,
+                  "url":page.url,
+                  "title":await page.title(),
+                  "selects":sels,
+                  "hidden":{
+                      "municipios":await page.locator("#ctl00_ctl00_Conteudo_AposTabela_hfMunicipios").input_value() if await page.locator("#ctl00_ctl00_Conteudo_AposTabela_hfMunicipios").count() else None,
+                      "uf":await page.locator("#ctl00_ctl00_Conteudo_AposTabela_hfUF").input_value() if await page.locator("#ctl00_ctl00_Conteudo_AposTabela_hfUF").count() else None,
+                      "check":await page.locator("#ctl00_ctl00_Conteudo_AposTabela_hfCheck").input_value() if await page.locator("#ctl00_ctl00_Conteudo_AposTabela_hfCheck").count() else None,
+                  },
+                  "body":(await page.locator("body").inner_text())[:200000],
+              }
 
-          async def controls_snapshot(page):
-              out=[]
-              loc=page.locator("input,button,a")
-              n=min(await loc.count(),2000)
-              for i in range(n):
-                  el=loc.nth(i)
-                  try:
-                      out.append({
-                          "tag":await el.evaluate("(e)=>e.tagName"),
-                          "id":await el.get_attribute("id"),
-                          "name":await el.get_attribute("name"),
-                          "type":await el.get_attribute("type"),
-                          "value":await el.get_attribute("value"),
-                          "title":await el.get_attribute("title"),
-                          "aria":await el.get_attribute("aria-label"),
-                          "text":norm(await el.inner_text(timeout=300)),
-                      })
-                  except Exception:
-                      pass
-              return out
-
-          async def wait_settle(page):
+          async def set_filter(page, log):
+              # The site loads a hidden jQuery-UI filter whose source list is populated
+              # client-side after the UF changes. Wait for São Borja explicitly.
+              uf=page.locator("#ctl00_ctl00_Conteudo_AposTabela_ddlUf")
+              if not await uf.count():
+                  log.append({"action":"filter_uf_missing"})
+                  return False
+              await uf.select_option(value="RS", force=True)
+              log.append({"action":"filter_uf","value":"RS"})
               try:
-                  await page.wait_for_load_state("networkidle", timeout=15000)
+                  await page.locator(f'#lbOrigem option[value="{SB_INTERNAL}"]').wait_for(state="attached",timeout=12000)
               except Exception:
                   await page.wait_for_timeout(2500)
-
-          async def choose_rs(page, log):
-              sels=page.locator("select")
-              for i in range(await sels.count()):
-                  s=sels.nth(i)
-                  try:
-                      opts=await s.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value}))")
-                  except Exception:
-                      continue
+              source=page.locator("#lbOrigem")
+              found=False
+              if await source.count():
+                  opts=await source.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value}))")
                   for o in opts:
-                      t=norm(o.get("text","")).upper()
-                      if t == "RS - RIO GRANDE DO SUL" or t.startswith("RS - RIO GRANDE DO SUL"):
-                          await s.select_option(value=o.get("value"), force=True)
-                          log.append({"action":"select_rs","select_index":i,"id":await s.get_attribute("id"),"value":o.get("value"),"text":o.get("text")})
-                          await wait_settle(page)
-                          return True
-              return False
-
-          async def choose_sao_borja(page, log):
-              sels=page.locator("select")
-              target=None
-              opt=None
-              for i in range(await sels.count()):
-                  s=sels.nth(i)
-                  try:
-                      opts=await s.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value}))")
-                  except Exception:
-                      continue
-                  for o in opts:
-                      t=norm(o.get("text","")).upper()
-                      if "SÃO BORJA" in t or "SAO BORJA" in t:
-                          target=(i,s)
-                          opt=o
+                      if norm(o.get("text"))=="SAO BORJA":
+                          await source.select_option(value=o.get("value"),force=True)
+                          log.append({"action":"select_sao_borja","value":o.get("value"),"text":o.get("text")})
+                          found=True
                           break
-                  if target:
-                      break
-              if not target:
+              if not found:
+                  log.append({"action":"sao_borja_not_found","available_count":await source.locator("option").count() if await source.count() else 0})
                   return False
-              i,s=target
-              await s.select_option(value=opt.get("value"), force=True)
-              log.append({"action":"select_sao_borja","select_index":i,"id":await s.get_attribute("id"),"value":opt.get("value"),"text":opt.get("text")})
-              await page.wait_for_timeout(800)
-
-              # Dual-list interfaces commonly require a transfer button.
-              buttons=page.locator("input[type=button],input[type=submit],button")
-              candidates=[]
-              for j in range(await buttons.count()):
-                  b=buttons.nth(j)
-                  try:
-                      blob=" | ".join(filter(None,[
-                          await b.get_attribute("value"),
-                          await b.get_attribute("title"),
-                          await b.get_attribute("aria-label"),
-                          norm(await b.inner_text(timeout=200)),
-                          await b.get_attribute("id"),
-                          await b.get_attribute("name"),
-                      ]))
-                  except Exception:
-                      continue
-                  if re.search(r"(^|\s)(>|adicionar|incluir|selecionar)(\s|$)", blob, re.I) and "todos" not in blob.lower():
-                      candidates.append((j,b,blob))
-              for j,b,blob in candidates[:3]:
-                  try:
-                      await b.click(timeout=4000, force=True)
-                      log.append({"action":"transfer_municipality","button_index":j,"control":blob})
-                      await wait_settle(page)
-                      break
-                  except Exception as exc:
-                      log.append({"action":"transfer_failed","button_index":j,"control":blob,"error":repr(exc)})
+              if await page.locator("#btnInserir").count():
+                  await page.locator("#btnInserir").click(force=True)
+                  log.append({"action":"insert_sao_borja"})
+                  await page.wait_for_timeout(500)
+              dest=page.locator("#lbDestino")
+              destvals=await dest.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value}))") if await dest.count() else []
+              log.append({"action":"destination_snapshot","options":destvals})
+              # Reproduce the modal's OK semantics directly if the dialog is visible;
+              # otherwise set the same hidden fields explicitly from the selected destination.
+              ok=page.locator('.ui-dialog:has(#divModalFiltroIrpf) button:has-text("Ok")')
+              if await ok.count() and await ok.first.is_visible():
+                  await ok.first.click(force=True)
+                  log.append({"action":"filter_ok"})
+                  await page.wait_for_timeout(700)
+              else:
+                  vals=[x.get("value") for x in destvals if x.get("value")]
+                  await page.evaluate("""({vals})=>{
+                    const m=document.querySelector('#ctl00_ctl00_Conteudo_AposTabela_hfMunicipios');
+                    const u=document.querySelector('#ctl00_ctl00_Conteudo_AposTabela_hfUF');
+                    const c=document.querySelector('#ctl00_ctl00_Conteudo_AposTabela_hfCheck');
+                    if(m) m.value=vals.join(',');
+                    if(u) u.value='RS';
+                    if(c) c.value='false';
+                  }""",{"vals":vals})
+                  log.append({"action":"hidden_filter_set","municipios":vals,"uf":"RS"})
               return True
 
-          async def click_consultar(page, log):
-              controls=page.locator("input[type=submit],input[type=button],button,a")
-              for i in range(await controls.count()):
-                  c=controls.nth(i)
-                  try:
-                      blob=" | ".join(filter(None,[
-                          await c.get_attribute("value"),
-                          await c.get_attribute("title"),
-                          await c.get_attribute("aria-label"),
-                          norm(await c.inner_text(timeout=200)),
-                          await c.get_attribute("id"),
-                          await c.get_attribute("name"),
-                      ]))
-                  except Exception:
-                      continue
-                  if "consult" in blob.lower() or "pesquis" in blob.lower():
-                      try:
-                          await c.click(timeout=5000, force=True)
-                          log.append({"action":"click_consultar","control":blob})
-                          await wait_settle(page)
-                          return True
-                      except Exception as exc:
-                          log.append({"action":"consultar_failed","control":blob,"error":repr(exc)})
-              return False
+          async def click_exibir(page, log):
+              b=page.locator("#ctl00_ctl00_Conteudo_AntesTabela_btnExibir")
+              if not await b.count():
+                  log.append({"action":"exibir_missing"})
+                  return False
+              await b.click(force=True)
+              log.append({"action":"click_exibir"})
+              await settle(page,2200)
+              return True
 
           async def extract_tables(page):
-              tables=[]
-              loc=page.locator("table")
-              for i in range(await loc.count()):
-                  t=loc.nth(i)
+              out=[]
+              tables=page.locator("table")
+              for ti in range(await tables.count()):
                   rows=[]
-                  tr=t.locator("tr")
-                  for r in range(await tr.count()):
-                      cells=tr.nth(r).locator("th,td")
+                  trs=tables.nth(ti).locator("tr")
+                  for ri in range(await trs.count()):
+                      cells=trs.nth(ri).locator("th,td")
                       vals=[]
-                      for c in range(await cells.count()):
+                      for ci in range(await cells.count()):
                           try:
-                              vals.append(norm(await cells.nth(c).inner_text(timeout=500)))
+                              vals.append(re.sub(r"\s+"," ",(await cells.nth(ci).inner_text()).strip()))
                           except Exception:
                               vals.append("")
                       if vals and any(vals):
                           rows.append(vals)
-                  if rows:
-                      tables.append(rows)
-              return tables
+                  if rows: out.append(rows)
+              return out
 
-          def rows_with_sb(tables):
-              found=[]
-              for ti,table in enumerate(tables):
-                  for ri,row in enumerate(table):
-                      joined=" | ".join(row).upper()
-                      if "SÃO BORJA" in joined or "SAO BORJA" in joined:
-                          found.append({"table":ti,"row":ri,"cells":row})
-              return found
+          def result_rows(tables):
+              hits=[]
+              for ti,t in enumerate(tables):
+                  for ri,row in enumerate(t):
+                      # Avoid treating the selector list itself as a result row.
+                      joined=" | ".join(row)
+                      if norm(joined).find("SAO BORJA")>=0 and len(joined)<4000:
+                          hits.append({"table":ti,"row":ri,"cells":row})
+              return hits
 
-          async def run_one(context, name, url):
+          async def run_one(context, name, url, kind):
               page=await context.new_page()
-              log=[]
-              rec={"name":name,"url":url}
+              rec={"name":name,"url":url,"kind":kind,"log":[],"snapshots":[]}
               try:
                   resp=await page.goto(url,wait_until="domcontentloaded",timeout=120000)
                   rec["http_status"]=resp.status if resp else None
-                  await wait_settle(page)
-                  rec["title_before"]=await page.title()
-                  rec["body_before"]=norm(await page.locator("body").inner_text())[:120000]
-                  rec["selects_before"]=await select_snapshot(page)
-                  rec["controls_before"]=await controls_snapshot(page)
+                  await settle(page,800)
+                  rec["snapshots"].append(await snapshot(page,"initial"))
 
-                  rec["rs_selected"]=await choose_rs(page,log)
-                  rec["selects_after_rs"]=await select_snapshot(page)
-                  rec["sb_selected"]=await choose_sao_borja(page,log)
-                  rec["selects_after_sb"]=await select_snapshot(page)
-                  rec["consult_clicked"]=await click_consultar(page,log)
-                  await page.wait_for_timeout(2500)
+                  if kind=="total":
+                      await select_and_postback(page,"#ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao","Por Município",rec["log"])
+                      # Use the latest month offered by the official page, not a hard-coded period.
+                      month=page.locator("#ctl00_ctl00_Conteudo_AntesTabela_droplistMes")
+                      if await month.count():
+                          options=await month.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value})).filter(o=>o.value)")
+                          if options:
+                              latest=options[-1]
+                              await month.select_option(value=latest["value"],force=True)
+                              rec["log"].append({"action":"latest_month","value":latest["value"],"text":latest["text"]})
+                  else:
+                      await select_and_postback(page,"#ctl00_ctl00_Conteudo_AntesTabela_ddlColuna","Município",rec["log"])
 
-                  rec["final_url"]=page.url
-                  rec["body_after"]=norm(await page.locator("body").inner_text())[:250000]
+                  # Set official UF/municipality filter and then request the table.
+                  rec["filter_ok"]=await set_filter(page,rec["log"])
+                  rec["snapshots"].append(await snapshot(page,"after_filter"))
+                  rec["exibir_ok"]=await click_exibir(page,rec["log"])
+
+                  # Some page states open the filter only on the first Exibir; if so,
+                  # reproduce filter once more and submit again.
+                  if not rec["filter_ok"]:
+                      rec["filter_ok"]=await set_filter(page,rec["log"])
+                      if rec["filter_ok"]:
+                          rec["exibir_ok"]=await click_exibir(page,rec["log"])
+
+                  rec["snapshots"].append(await snapshot(page,"final"))
                   rec["tables"]=await extract_tables(page)
-                  rec["sao_borja_rows"]=rows_with_sb(rec["tables"])
-                  rec["log"]=log
+                  rec["result_rows"]=result_rows(rec["tables"])
+                  rec["final_url"]=page.url
+                  rec["final_html"]=await page.content()
+                  (OUT/f"{name}.html").write_text(rec["final_html"],encoding="utf-8")
                   await page.screenshot(path=str(OUT/f"{name}.png"),full_page=True)
-                  (OUT/f"{name}.html").write_text(await page.content(),encoding="utf-8")
+                  rec.pop("final_html",None)
               except Exception as exc:
                   rec["error"]=repr(exc)
-                  rec["log"]=log
               finally:
                   (OUT/f"{name}.json").write_text(json.dumps(rec,ensure_ascii=False,indent=2),encoding="utf-8")
                   await page.close()
@@ -255,10 +237,10 @@ jobs:
           async def main():
               async with async_playwright() as p:
                   browser=await p.chromium.launch(headless=True)
-                  context=await browser.new_context(locale="pt-BR",viewport={"width":1800,"height":1200})
+                  ctx=await browser.new_context(locale="pt-BR",viewport={"width":1800,"height":1400})
                   results=[]
-                  for name,url in PAGES.items():
-                      results.append(await run_one(context,name,url))
+                  for name,(url,kind) in PAGES.items():
+                      results.append(await run_one(ctx,name,url,kind))
                   await browser.close()
 
               summary=[]
@@ -266,23 +248,24 @@ jobs:
                   summary.append({
                       "name":r["name"],
                       "http_status":r.get("http_status"),
-                      "rs_selected":r.get("rs_selected"),
-                      "sb_selected":r.get("sb_selected"),
-                      "consult_clicked":r.get("consult_clicked"),
-                      "sao_borja_rows":r.get("sao_borja_rows",[]),
+                      "filter_ok":r.get("filter_ok"),
+                      "exibir_ok":r.get("exibir_ok"),
+                      "result_rows":r.get("result_rows",[]),
                       "error":r.get("error"),
+                      "log":r.get("log",[]),
                   })
               (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
-
-              # Flatten any São Borja result rows for easy review.
               with (OUT/"sao_borja_rows.csv").open("w",newline="",encoding="utf-8") as f:
                   w=csv.writer(f)
                   w.writerow(["query","table_index","row_index","cells_json"])
                   for r in results:
-                      for row in r.get("sao_borja_rows",[]):
+                      for row in r.get("result_rows",[]):
                           w.writerow([r["name"],row["table"],row["row"],json.dumps(row["cells"],ensure_ascii=False)])
-
               print(json.dumps(summary,ensure_ascii=False,indent=2))
+
+              # A green workflow is not evidence unless the municipal filter was applied.
+              if not all(r.get("filter_ok") for r in results):
+                  raise SystemExit("SINAC/SIMEI municipal filter was not reproduced for all four queries")
 
           asyncio.run(main())
           PY

@@ -48,7 +48,7 @@ COMEX_MUNICIPAL_REQUIRED = {
 def _ascii_upper(value: object) -> str:
     text = "" if pd.isna(value) else str(value)
     normalized = unicodedata.normalize("NFKD", text)
-    return "".join(char for char in normalized if not unicodedata.combining(char)).upper().strip()
+    return (\n        "".join(char for char in normalized if not unicodedata.combining(char))\n        .upper()\n        .strip()\n    )
 
 
 def _require_columns(frame: pd.DataFrame, required: set[str], source: str) -> None:

@@ -179,7 +179,7 @@ def _summarize_composition(
         return pd.DataFrame()
     work = frame.copy()
     work["_ncm"] = _clean_ncm(work[mapping["ncm"]])
-    work = work[work["_ncm"].isin(RICE_NCMS)].copy()
+    work = work[work["_ncm"].isin(ncm_basket)].copy()
     if work.empty:
         return pd.DataFrame()
 
@@ -218,7 +218,7 @@ def _summarize_composition(
     out["demanda_rs"] = out[["int_rs", "ouf", "ext"]].sum(axis=1, min_count=1)
     out["part_rs"] = out["int_rs"] / out["demanda_rs"].where(out["demanda_rs"] != 0)
     out["dependencia_nt"] = out["part_rs"].map(_dependency)
-    out["descricao_ncm"] = out["ncm"].map(RICE_NCM_DESCRIPTIONS)
+    out["descricao_ncm"] = out["ncm"].map(ncm_basket)
     out["source_file"] = source_file
     out["natureza"] = "DADO_CALCULADO_SOBRE_DADO_OBSERVADO"
     out["formula_part_rs"] = "INT/(INT+OUF+EXT) — NT CIET 05/2026"
@@ -302,15 +302,15 @@ def audit_radar_open_data(
 
         work = frame.copy()
         work["_ncm"] = _clean_ncm(work[mapping["ncm"]])
-        matches = work[work["_ncm"].isin(RICE_NCMS)].copy()
+        matches = work[work["_ncm"].isin(basket)].copy()
         if not matches.empty:
             matches.insert(0, "source_file", path.name)
             matches.insert(1, "file_type", file_type)
             matches.insert(2, "ncm_sbmi", matches.pop("_ncm"))
-            matches.insert(3, "descricao_ncm_sbmi", matches["ncm_sbmi"].map(RICE_NCM_DESCRIPTIONS))
+            matches.insert(3, "descricao_ncm_sbmi", matches["ncm_sbmi"].map(basket))
             match_frames.append(matches)
 
-        summary = _summarize_composition(frame, mapping, path.name)
+        summary = _summarize_composition(frame, mapping, path.name, basket)
         if not summary.empty:
             composition_frames.append(summary)
         elif file_type == "composicao_mercado":
@@ -349,15 +349,15 @@ def audit_radar_open_data(
             "DADO_CALCULADO",
             "PASS",
         ),
-        ("rice_ncms_expected", len(RICE_NCMS), "PARÂMETRO", "PASS"),
+        ("ncm_codes_expected", len(basket), "PARÂMETRO", "PASS"),
         (
-            "rice_ncms_found_any_file",
+            "ncm_codes_found_any_file",
             len(found_ncms),
             "DADO_CALCULADO",
             "PASS" if found_ncms else "WARN",
         ),
         (
-            "rice_ncms_with_composition",
+            "ncm_codes_with_composition",
             len(calculated_ncms),
             "DADO_CALCULADO",
             "PASS" if calculated_ncms else "WARN",

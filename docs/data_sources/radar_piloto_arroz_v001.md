@@ -232,3 +232,130 @@ Sem os valores do Radar, ainda não é possível concluir:
 
 Arquivo estruturado desta camada:
 `docs/data_sources/radar_piloto_arroz_capacidade_local_v001.csv`
+
+
+## Etapa 4C.2 — posição produtiva estadual e fontes complementares
+
+### Beneficiamento estadual — IRGA
+
+Ranking 2023:
+- total RS: **5.722.235 t**;
+- 157 unidades ativas.
+
+Ranking 2024 corrigido:
+- total RS: **5.233.168 t**;
+- 157 unidades ativas.
+
+Cálculo SBMI:
+
+`((5.233.168 / 5.722.235) - 1) × 100 = -8,55%`
+
+### Subconjunto nominalmente identificável de São Borja
+
+Com crosswalk institucional IRGA + Sindarroz-RS, foram identificadas quatro empresas em São Borja presentes nos dois rankings:
+- Pirahy Alimentos;
+- Cerealista Albaruska;
+- Ciagro Alimentos;
+- Cerealista Streck.
+
+Beneficiamento somado:
+- 2023: **303.619 t**;
+- 2024: **325.033 t**.
+
+Variação:
+`((325.033 / 303.619) - 1) × 100 = +7,05%`
+
+Participação somada no RS:
+- 2023: **5,30%**;
+- 2024: **6,22%**;
+- variação: **+0,92 p.p.**
+
+Esse indicador é denominado **mínimo identificável** porque:
+- não cobre os 20 estabelecimentos ativos do CNAE 10.61-9/01 registrados na v028;
+- a lista do Sindarroz-RS não é censo;
+- o ranking IRGA é por empresa, não por município.
+
+Portanto, **6,22% não é o market share total de São Borja**.
+
+### Destaques individuais
+
+Pirahy:
+- 3ª posição em 2023 e 2024;
+- 216.780 t → 237.880 t;
+- +9,73%;
+- 3,79% → 4,55% do beneficiamento estadual.
+
+Ciagro:
+- 64ª → 47ª posição;
+- 20.814 t → 27.017 t;
+- +29,80%.
+
+### Pulso estadual mais recente
+
+Série IRGA/Taxa CDO “Beneficiamento e saídas de arroz — base casca”:
+
+jan–abr/2025:
+**2.331.192 t**.
+
+jan–abr/2026:
+**2.578.193 t**.
+
+Cálculo:
+`((2.578.193 / 2.331.192) - 1) × 100 = +10,60%`
+
+A comparação cobre apenas quatro meses e usa uma série diferente do ranking anual por empresa.
+
+### RS360 — escala econômica histórica
+
+Publicação oficial da Sefaz/RS de 23/04/2024 informa, para a indústria arrozeira:
+- **R$ 20,28 bilhões** em vendas acumuladas em 12 meses;
+- crescimento de **17,3%**;
+- aumento absoluto de **R$ 2,99 bilhões**;
+- vendas para outras UFs: **+32%**.
+
+Esse dado é estadual e setorial; não equivale a NCM individual nem a faturamento de São Borja.
+
+### Comex Stat — próxima camada
+
+A API e os dados abertos do MDIC/SECEX foram confirmados.
+
+Plano:
+- RS: sete NCMs do piloto em nível de 8 dígitos;
+- São Borja: SH4 `1006` no módulo municipal;
+- métricas: kg líquido, valor FOB e países.
+
+Limitação:
+no módulo municipal, município = **domicílio fiscal da empresa exportadora/importadora**, não origem física da mercadoria.
+
+Arquivos novos:
+- `docs/data_sources/irga_beneficiamento_sao_borja_identificado_v001.csv`
+- `docs/data_sources/irga_beneficiamento_sao_borja_auditoria_v001.md`
+- `docs/data_sources/arroz_contexto_mercado_estadual_v001.csv`
+- `docs/data_sources/rs360_arroz_auditoria_v001.md`
+- `docs/data_sources/comexstat_arroz_plano_extracao_v001.md`
+
+Planilha exploratória:
+- `IRGA_benef_SB`;
+- `Arroz_contexto_RS`.
+
+## Diagnóstico atualizado
+
+Já é possível afirmar, com evidências separadas:
+
+**DADO OBSERVADO/CALCULADO**
+- São Borja é grande produtor primário de arroz;
+- possui estrutura de beneficiamento local material;
+- possui empresas locais com participação mensurável no beneficiamento estadual;
+- o subconjunto identificável dessas empresas ganhou participação relativa entre 2023 e 2024;
+- o mercado estadual da indústria arrozeira possui elevada escala de vendas e relevante circulação interestadual.
+
+**INTERPRETAÇÃO**
+A cadeia do arroz é um caso prioritário de inteligência de mercado territorial porque São Borja combina produção agrícola, transformação industrial e operadores com alcance estadual.
+
+**AINDA NÃO CONCLUÍVEL**
+- demanda estadual por cada NCM;
+- dependência de OUF/importações por produto;
+- market share financeiro de São Borja;
+- origem/destino doméstico específico das empresas locais;
+- faturamento ou lucro das empresas;
+- causalidade entre produção primária e desempenho industrial.

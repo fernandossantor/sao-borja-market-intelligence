@@ -323,3 +323,123 @@ A arquitetura passa a operar em dois níveis simultâneos:
 O arroz será um dos casos de validação do nível produto. A análise principal permanece multissetorial e territorial.
 
 Nenhuma base ou caderno canônico foi alterado.
+
+## 15. Estrutura competitiva: presença cadastral local, escala funcional externa
+
+A camada RFB×RAIS já auditada permite aprofundar a concorrência sem confundir número de estabelecimentos com peso econômico.
+
+### Método exploratório
+
+Para cada divisão:
+
+`razão de intensidade funcional externa = participação estimada do emprego externo / participação cadastral externa`
+
+e
+
+`razão de intensidade remuneratória externa = participação estimada da remuneração externa / participação cadastral externa`.
+
+Essas razões **não são market share**, não medem faturamento e não demonstram remessa de lucros. São apenas um teste de escala média relativa das estruturas externas dentro do modelo RAIS×RFB.
+
+### Resultados selecionados
+
+- Varejo: 6,63% dos estabelecimentos externos, 37,46% do emprego externo estimado e 38,16% da remuneração externa estimada. Razões: **5,65** e **5,76**.
+- Transporte terrestre: 4,15% dos estabelecimentos, 29,95% do emprego e 42,76% da remuneração. Razões: **7,22** e **10,30**.
+- Comércio/reparação de veículos: 2,49% dos estabelecimentos, 19,54% do emprego e 23,32% da remuneração. Razões: **7,85** e **9,37**.
+- Serviços de escritório/apoio: 3,20% dos estabelecimentos, 37,40% do emprego e 42,96% da remuneração. Razões: **11,69** e **13,42**.
+- Atacado: 18,75% dos estabelecimentos, 34,47% do emprego e 33,35% da remuneração. Razões: **1,84** e **1,78**.
+- Finanças: 32,50% dos estabelecimentos, 96,73% do emprego e 98,70% da remuneração. Razões: **2,98** e **3,04**.
+
+### Interpretação
+
+A estrutura econômica local é predominantemente cadastrada em matrizes locais, mas isso não significa que a competição tenha escala predominantemente local.
+
+Em vários setores, **poucas estruturas externas parecem operar unidades médias muito maiores em emprego e folha**.
+
+O efeito é especialmente relevante em:
+- varejo;
+- transporte;
+- veículos;
+- serviços empresariais;
+- finanças.
+
+Para inteligência mercadológica isso muda a pergunta de concorrência:
+
+> não basta contar concorrentes; é preciso distinguir quantidade de operadores de escala funcional.
+
+### Implicação
+
+Os cadernos setoriais devem evitar usar apenas “número de empresas” como proxy de estrutura competitiva.
+
+Quando possível, combinar:
+- estabelecimentos;
+- vínculos;
+- remuneração;
+- controle territorial matriz/filial;
+- vendas/faturamento quando a fonte permitir;
+- origem/destino de fluxos.
+
+### Limitações
+
+- emprego e remuneração externos são estimativas do modelo RAIS×RFB;
+- RFB e RAIS têm universos e competências diferentes;
+- empresas não são identificadas na RAIS pública;
+- as razões ficam instáveis em setores com poucos vínculos;
+- nenhuma dessas métricas é participação de mercado.
+
+Artefato:
+`docs/data_sources/controle_externo_setorial_intensidade_20260918_v001.csv`.
+
+## 16. Estrutura da massa salarial por circuito
+
+A RAIS 2024 mostra três perfis contrastantes.
+
+### Circuitos de consumo/serviço intensivos em emprego
+
+Varejo + alojamento/alimentação + administração/apoio:
+- **30,33% dos vínculos**;
+- **22,36% da massa de remuneração média**.
+
+Razão de intensidade remuneratória:
+
+`22,36 / 30,33 = 0,74`.
+
+Interpretação:
+é uma base muito importante de emprego e circulação cotidiana, mas com remuneração média agregada proporcionalmente menor.
+
+### Bloco institucional
+
+Administração pública + educação + saúde/assistência:
+- **24,32% dos vínculos**;
+- **31,57% da massa de remuneração média**.
+
+Razão:
+
+`31,57 / 24,32 = 1,30`.
+
+Interpretação:
+o bloco institucional possui peso remuneratório maior que seu peso ocupacional.
+
+### Núcleo agro direto + indústria alimentar
+
+- **20,02% dos vínculos**;
+- **20,38% da massa de remuneração média**.
+
+Razão:
+
+`20,38 / 20,02 = 1,02`.
+
+Interpretação:
+no agregado RAIS 2024, o núcleo direto agro+alimentos tem participação em massa salarial aproximadamente proporcional à participação no emprego.
+
+### Implicação mercadológica
+
+A demanda urbana não é apenas multissetorial; ela também possui **qualidades de renda diferentes por circuito**.
+
+Isso ajuda a explicar por que:
+- varejo e alimentação precisam operar com forte disciplina de valor/preço;
+- mercados de serviços profissionais, saúde e consumo recorrente podem encontrar nichos sustentados por rendas institucionais;
+- o ciclo agro é material, mas não é a única fonte de poder de compra.
+
+Isso não autoriza classificar indivíduos por setor nem inferir gasto a partir de salário.
+
+

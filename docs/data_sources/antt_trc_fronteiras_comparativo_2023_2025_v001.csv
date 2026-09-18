@@ -1,0 +1,9 @@
+fronteira,uf,paises_destino,volume_2023_t,volume_2024_t,volume_2025_t,var_23_24_pct,var_24_25_pct,participacao_2025_seis_pct,ranking_volume_2025,ranking_crescimento_24_25,natureza,fonte,limitacao
+"Uruguaiana","RS","AR/BO/CL/PY/PE/UY",1693722,1606158,2010512,-5,25,33.30,1,1,"DADO OBSERVADO + CÁLCULO SBMI","ANTT Anuário TRC 2025 / Comex Stat","Seis principais fronteiras da tabela, não universo nacional"
+"Foz do Iguaçu","PR","AR/BO/CL/PY/PE/UY",1874402,1757522,1860606,-6,6,30.82,2,3,"DADO OBSERVADO + CÁLCULO SBMI","ANTT Anuário TRC 2025 / Comex Stat","Seis principais fronteiras da tabela, não universo nacional"
+"São Borja","RS","AR/CL/PY/PE/UY",859348,800435,979151,-7,22,16.22,3,2,"DADO OBSERVADO + CÁLCULO SBMI","ANTT Anuário TRC 2025 / Comex Stat","Seis principais fronteiras da tabela, não universo nacional"
+"Corumbá","MS","AR/BO/CL/PY/PE/UY",666601,544660,566840,-18,4,9.39,4,4,"DADO OBSERVADO + CÁLCULO SBMI","ANTT Anuário TRC 2025 / Comex Stat","Seis principais fronteiras da tabela, não universo nacional"
+"Chuí","RS","AR/BO/CL/PY/UY",508021,512316,534186,1,4,8.85,5,4,"DADO OBSERVADO + CÁLCULO SBMI","ANTT Anuário TRC 2025 / Comex Stat","Seis principais fronteiras da tabela, não universo nacional"
+"Pacaraima","RR","VE",323376,193946,85635,-40,-56,1.42,6,6,"DADO OBSERVADO + CÁLCULO SBMI","ANTT Anuário TRC 2025 / Comex Stat","Seis principais fronteiras da tabela, não universo nacional"
+"Total seis","—","—",5925470,5415037,6036930,-9,12,100.00,,, "DADO OBSERVADO","ANTT Anuário TRC 2025 / Comex Stat","Total apenas dos seis pontos apresentados"
+"Três fronteiras RS","RS","Uruguaiana + São Borja + Chuí",3061091,2918909,3523849,-4.65,20.72,58.37,,, "DADO CALCULADO","SBMI sobre ANTT Tabela 10","Agregação analítica dos três pontos gaúchos da tabela"

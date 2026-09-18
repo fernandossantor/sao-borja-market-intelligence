@@ -1,0 +1,34 @@
+﻿flow,year,month,SH4,countryCode,metricFOB,metricKG,SH4_text,country_text
+export,2026,01,1006,Estados Unidos,197085.0,246380.0,Arroz,Estados Unidos
+export,2026,01,1005,Uruguai,34155.0,169080.0,Milho,Uruguai
+export,2026,02,1005,Filipinas,860443.0,3885671.0,Milho,Filipinas
+export,2026,02,1005,Vietnã,590109.0,2664871.0,Milho,Vietnã
+export,2026,02,1006,Estados Unidos,125399.0,165037.0,Arroz,Estados Unidos
+export,2026,02,1005,Uruguai,73825.0,365480.0,Milho,Uruguai
+export,2026,02,1006,Cuba,13983.0,51600.0,Arroz,Cuba
+export,2026,03,1005,Egito,2288394.0,10082338.0,Milho,Egito
+export,2026,03,1005,Malásia,883400.0,4000000.0,Milho,Malásia
+export,2026,03,1006,Estados Unidos,125152.0,164692.0,Arroz,Estados Unidos
+export,2026,03,1005,Uruguai,56573.0,280060.0,Milho,Uruguai
+export,2026,03,1006,Nicarágua,38775.0,77400.0,Arroz,Nicarágua
+export,2026,04,1201,China,2810361.0,6474592.0,"Soja, mesmo triturada",China
+export,2026,04,1001,Vietnã,35528.0,146810.0,Trigo e mistura de trigo com centeio,Vietnã
+export,2026,05,1201,China,1021708.0,2301248.0,"Soja, mesmo triturada",China
+export,2026,05,1006,Estados Unidos,292453.0,384698.0,Arroz,Estados Unidos
+export,2026,08,1201,China,240865.0,500000.0,"Soja, mesmo triturada",China
+export,2026,08,1006,Estados Unidos,159888.0,191670.0,Arroz,Estados Unidos
+import,2026,01,1006,Argentina,69000.0,292500.0,Arroz,Argentina
+import,2026,02,1006,Paraguai,60000.0,400000.0,Arroz,Paraguai
+import,2026,02,1006,Argentina,53856.0,79200.0,Arroz,Argentina
+import,2026,02,1008,Estados Unidos,35380.0,4000.0,"Trigo mourisco, painço e alpista; outros cereais",Estados Unidos
+import,2026,03,0703,Argentina,25170.0,167800.0,"Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",Argentina
+import,2026,03,8419,Argentina,12150.0,1775.0,"Aparelhos e dispositivos, mesmo aquecidos electricamente (exceto fornos e outros aparelhos da posição 8514), para tratamento de matérias por meio de operações que impliquem mudança de temperatura, tais como o aquecimento, cozimento, torrefacção, destilaç",Argentina
+import,2026,04,1006,Argentina,35904.0,52800.0,Arroz,Argentina
+import,2026,04,0703,Argentina,13350.0,89000.0,"Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",Argentina
+import,2026,05,1006,Argentina,35904.0,52800.0,Arroz,Argentina
+import,2026,06,1006,Uruguai,1108800.0,3024000.0,Arroz,Uruguai
+import,2026,06,1006,Paraguai,43120.0,308000.0,Arroz,Paraguai
+import,2026,07,1006,Uruguai,2575384.0,6884000.0,Arroz,Uruguai
+import,2026,07,1006,Argentina,85756.0,106700.0,Arroz,Argentina
+import,2026,08,1006,Uruguai,2349772.0,6034000.0,Arroz,Uruguai
+import,2026,08,9018,China,11082.0,425.0,"Instrumentos e aparelhos para medicina, cirurgia, odontologia e veterinária, incluídos os aparelhos de cintilografia e outros aparelhos electromédicos, bem como os aparelhos para testes visuais",China

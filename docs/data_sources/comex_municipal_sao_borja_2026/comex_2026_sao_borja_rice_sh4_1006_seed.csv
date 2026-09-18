@@ -1,0 +1,7 @@
+﻿flow,year,SH4,countryCode,metricFOB,metricKG,SH4_text,country_text
+export,2026,1006,Estados Unidos,899977.0,1152477.0,Arroz,Estados Unidos
+export,2026,1006,Nicarágua,38775.0,77400.0,Arroz,Nicarágua
+export,2026,1006,Cuba,13983.0,51600.0,Arroz,Cuba
+import,2026,1006,Uruguai,6033956.0,15942000.0,Arroz,Uruguai
+import,2026,1006,Argentina,280420.0,584000.0,Arroz,Argentina
+import,2026,1006,Paraguai,103120.0,708000.0,Arroz,Paraguai

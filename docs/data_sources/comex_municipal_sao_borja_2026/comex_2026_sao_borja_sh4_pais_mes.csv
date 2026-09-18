@@ -1,0 +1,34 @@
+﻿flow,country,heading,headingCode,metricFOB,metricKG,monthNumber,year
+export,China,"Soja, mesmo triturada",1201,2810361,6474592,04,2026
+export,Egito,Milho,1005,2288394,10082338,03,2026
+export,China,"Soja, mesmo triturada",1201,1021708,2301248,05,2026
+export,Malásia,Milho,1005,883400,4000000,03,2026
+export,Filipinas,Milho,1005,860443,3885671,02,2026
+export,Vietnã,Milho,1005,590109,2664871,02,2026
+export,Estados Unidos,Arroz,1006,292453,384698,05,2026
+export,China,"Soja, mesmo triturada",1201,240865,500000,08,2026
+export,Estados Unidos,Arroz,1006,197085,246380,01,2026
+export,Estados Unidos,Arroz,1006,159888,191670,08,2026
+export,Estados Unidos,Arroz,1006,125399,165037,02,2026
+export,Estados Unidos,Arroz,1006,125152,164692,03,2026
+export,Uruguai,Milho,1005,73825,365480,02,2026
+export,Uruguai,Milho,1005,56573,280060,03,2026
+export,Nicarágua,Arroz,1006,38775,77400,03,2026
+export,Vietnã,Trigo e mistura de trigo com centeio,1001,35528,146810,04,2026
+export,Uruguai,Milho,1005,34155,169080,01,2026
+export,Cuba,Arroz,1006,13983,51600,02,2026
+import,Uruguai,Arroz,1006,2575384,6884000,07,2026
+import,Uruguai,Arroz,1006,2349772,6034000,08,2026
+import,Uruguai,Arroz,1006,1108800,3024000,06,2026
+import,Argentina,Arroz,1006,85756,106700,07,2026
+import,Argentina,Arroz,1006,69000,292500,01,2026
+import,Paraguai,Arroz,1006,60000,400000,02,2026
+import,Argentina,Arroz,1006,53856,79200,02,2026
+import,Paraguai,Arroz,1006,43120,308000,06,2026
+import,Argentina,Arroz,1006,35904,52800,04,2026
+import,Argentina,Arroz,1006,35904,52800,05,2026
+import,Estados Unidos,"Trigo mourisco, painço e alpista; outros cereais",1008,35380,4000,02,2026
+import,Argentina,"Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",0703,25170,167800,03,2026
+import,Argentina,"Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",0703,13350,89000,04,2026
+import,Argentina,"Aparelhos e dispositivos, mesmo aquecidos electricamente (exceto fornos e outros aparelhos da posição 8514), para tratamento de matérias por meio de operações que impliquem mudança de temperatura, tais como o aquecimento, cozimento, torrefacção, destilaç",8419,12150,1775,03,2026
+import,China,"Instrumentos e aparelhos para medicina, cirurgia, odontologia e veterinária, incluídos os aparelhos de cintilografia e outros aparelhos electromédicos, bem como os aparelhos para testes visuais",9018,11082,425,08,2026

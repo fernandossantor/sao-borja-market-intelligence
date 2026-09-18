@@ -1,0 +1,146 @@
+{
+  "updated": {
+    "http": {
+      "url": "https://api-comexstat.mdic.gov.br/general/dates/updated",
+      "status": 200,
+      "verify_ssl": true,
+      "bytes": 133,
+      "sha256": "8aaa5341c63621e71b6f2527c2ce2c7cace7cef5a5c1777b005139e174846077"
+    },
+    "response": {
+      "data": {
+        "updated": "2026-09-04",
+        "year": "2026",
+        "monthNumber": "08"
+      },
+      "success": true,
+      "message": null,
+      "processo_info": null,
+      "language": "pt"
+    }
+  },
+  "city_filters": {
+    "http": {
+      "url": "https://api-comexstat.mdic.gov.br/cities/filters?language=pt",
+      "status": 200,
+      "verify_ssl": true,
+      "bytes": 421,
+      "sha256": "e8fd8ae2d3951e5c09e8bdb8936121ebef794460a1af29a236135d9d6ee9208a"
+    },
+    "response": {
+      "data": {
+        "list": [
+          {
+            "filter": "country",
+            "text": "Países"
+          },
+          {
+            "filter": "economicBlock",
+            "text": "Blocos"
+          },
+          {
+            "filter": "state",
+            "text": "UF do município"
+          },
+          {
+            "filter": "city",
+            "text": "Munícipio"
+          },
+          {
+            "filter": "heading",
+            "text": "Posição (SH4)"
+          },
+          {
+            "filter": "chapter",
+            "text": "Capítulo (SH2)"
+          },
+          {
+            "filter": "section",
+            "text": "Seção"
+          }
+        ],
+        "0": "pt"
+      },
+      "success": true,
+      "message": null,
+      "processo_info": null,
+      "language": "pt"
+    }
+  },
+  "city_details": {
+    "http": {
+      "url": "https://api-comexstat.mdic.gov.br/cities/details?language=pt",
+      "status": 200,
+      "verify_ssl": true,
+      "bytes": 421,
+      "sha256": "e8fd8ae2d3951e5c09e8bdb8936121ebef794460a1af29a236135d9d6ee9208a"
+    },
+    "response": {
+      "data": {
+        "list": [
+          {
+            "filter": "country",
+            "text": "Países"
+          },
+          {
+            "filter": "economicBlock",
+            "text": "Blocos"
+          },
+          {
+            "filter": "state",
+            "text": "UF do município"
+          },
+          {
+            "filter": "city",
+            "text": "Munícipio"
+          },
+          {
+            "filter": "heading",
+            "text": "Posição (SH4)"
+          },
+          {
+            "filter": "chapter",
+            "text": "Capítulo (SH2)"
+          },
+          {
+            "filter": "section",
+            "text": "Seção"
+          }
+        ],
+        "0": "pt"
+      },
+      "success": true,
+      "message": null,
+      "processo_info": null,
+      "language": "pt"
+    }
+  },
+  "city_metrics": {
+    "http": {
+      "url": "https://api-comexstat.mdic.gov.br/cities/metrics?language=pt",
+      "status": 200,
+      "verify_ssl": true,
+      "bytes": 183,
+      "sha256": "c878f6445fc5596f8f2dc999f69f655c6ca2da2919d135e68d36887610b13984"
+    },
+    "response": {
+      "data": {
+        "list": [
+          {
+            "id": "metricFOB",
+            "text": "Valor US$ FOB"
+          },
+          {
+            "id": "metricKG",
+            "text": "Quilograma Liquido"
+          }
+        ],
+        "0": "pt"
+      },
+      "success": true,
+      "message": null,
+      "processo_info": null,
+      "language": "pt"
+    }
+  }
+}

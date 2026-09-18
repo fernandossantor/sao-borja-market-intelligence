@@ -1,0 +1,21 @@
+{
+  "http": {
+    "url": "https://api-comexstat.mdic.gov.br/tables/cities/4318002",
+    "status": 200,
+    "verify_ssl": true,
+    "bytes": 158,
+    "sha256": "23772b2e813838a4a2678f8a1a383bd8b85e8a04ba310478fe9873d586141bbc"
+  },
+  "response": {
+    "data": {
+      "coMunGeo": "4318002",
+      "noMun": "SAO BORJA",
+      "noMunMin": "São Borja",
+      "sgUf": "RS"
+    },
+    "success": true,
+    "message": null,
+    "processo_info": null,
+    "language": "pt"
+  }
+}

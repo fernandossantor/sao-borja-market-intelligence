@@ -1,0 +1,18 @@
+﻿flow,year,SH4,countryCode,metricFOB,metricKG,SH4_text,country_text
+export,2026,1201,China,4072934.0,9275840.0,"Soja, mesmo triturada",China
+export,2026,1005,Egito,2288394.0,10082338.0,Milho,Egito
+export,2026,1006,Estados Unidos,899977.0,1152477.0,Arroz,Estados Unidos
+export,2026,1005,Malásia,883400.0,4000000.0,Milho,Malásia
+export,2026,1005,Filipinas,860443.0,3885671.0,Milho,Filipinas
+export,2026,1005,Vietnã,590109.0,2664871.0,Milho,Vietnã
+export,2026,1005,Uruguai,164553.0,814620.0,Milho,Uruguai
+export,2026,1006,Nicarágua,38775.0,77400.0,Arroz,Nicarágua
+export,2026,1001,Vietnã,35528.0,146810.0,Trigo e mistura de trigo com centeio,Vietnã
+export,2026,1006,Cuba,13983.0,51600.0,Arroz,Cuba
+import,2026,1006,Uruguai,6033956.0,15942000.0,Arroz,Uruguai
+import,2026,1006,Argentina,280420.0,584000.0,Arroz,Argentina
+import,2026,1006,Paraguai,103120.0,708000.0,Arroz,Paraguai
+import,2026,0703,Argentina,38520.0,256800.0,"Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",Argentina
+import,2026,1008,Estados Unidos,35380.0,4000.0,"Trigo mourisco, painço e alpista; outros cereais",Estados Unidos
+import,2026,8419,Argentina,12150.0,1775.0,"Aparelhos e dispositivos, mesmo aquecidos electricamente (exceto fornos e outros aparelhos da posição 8514), para tratamento de matérias por meio de operações que impliquem mudança de temperatura, tais como o aquecimento, cozimento, torrefacção, destilaç",Argentina
+import,2026,9018,China,11082.0,425.0,"Instrumentos e aparelhos para medicina, cirurgia, odontologia e veterinária, incluídos os aparelhos de cintilografia e outros aparelhos electromédicos, bem como os aparelhos para testes visuais",China

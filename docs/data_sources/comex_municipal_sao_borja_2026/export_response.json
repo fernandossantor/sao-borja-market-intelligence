@@ -1,0 +1,205 @@
+{
+  "http": {
+    "url": "https://api-comexstat.mdic.gov.br/cities?language=pt",
+    "status": 200,
+    "verify_ssl": true,
+    "bytes": 2643,
+    "sha256": "aee0624407f9041c3d188f8d5229fa26c360716858acfa880ef227a6437dbdb6"
+  },
+  "body": {
+    "flow": "export",
+    "monthDetail": true,
+    "period": {
+      "from": "2026-01",
+      "to": "2026-08"
+    },
+    "filters": [
+      {
+        "filter": "city",
+        "values": [
+          "4318002"
+        ]
+      }
+    ],
+    "details": [
+      "country",
+      "heading"
+    ],
+    "metrics": [
+      "metricFOB",
+      "metricKG"
+    ]
+  },
+  "response": {
+    "data": {
+      "list": [
+        {
+          "year": "2026",
+          "monthNumber": "04",
+          "country": "China",
+          "headingCode": "1201",
+          "heading": "Soja, mesmo triturada",
+          "metricFOB": "2810361",
+          "metricKG": "6474592"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Egito",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "2288394",
+          "metricKG": "10082338"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "05",
+          "country": "China",
+          "headingCode": "1201",
+          "heading": "Soja, mesmo triturada",
+          "metricFOB": "1021708",
+          "metricKG": "2301248"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Malásia",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "883400",
+          "metricKG": "4000000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Filipinas",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "860443",
+          "metricKG": "3885671"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Vietnã",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "590109",
+          "metricKG": "2664871"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "05",
+          "country": "Estados Unidos",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "292453",
+          "metricKG": "384698"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "08",
+          "country": "China",
+          "headingCode": "1201",
+          "heading": "Soja, mesmo triturada",
+          "metricFOB": "240865",
+          "metricKG": "500000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "01",
+          "country": "Estados Unidos",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "197085",
+          "metricKG": "246380"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "08",
+          "country": "Estados Unidos",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "159888",
+          "metricKG": "191670"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Estados Unidos",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "125399",
+          "metricKG": "165037"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Estados Unidos",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "125152",
+          "metricKG": "164692"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Uruguai",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "73825",
+          "metricKG": "365480"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Uruguai",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "56573",
+          "metricKG": "280060"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Nicarágua",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "38775",
+          "metricKG": "77400"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "04",
+          "country": "Vietnã",
+          "headingCode": "1001",
+          "heading": "Trigo e mistura de trigo com centeio",
+          "metricFOB": "35528",
+          "metricKG": "146810"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "01",
+          "country": "Uruguai",
+          "headingCode": "1005",
+          "heading": "Milho",
+          "metricFOB": "34155",
+          "metricKG": "169080"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Cuba",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "13983",
+          "metricKG": "51600"
+        }
+      ]
+    },
+    "success": true,
+    "message": null,
+    "processo_info": null,
+    "language": "pt"
+  }
+}

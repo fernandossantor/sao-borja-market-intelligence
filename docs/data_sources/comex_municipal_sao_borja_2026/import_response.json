@@ -1,0 +1,178 @@
+{
+  "http": {
+    "url": "https://api-comexstat.mdic.gov.br/cities?language=pt",
+    "status": 200,
+    "verify_ssl": true,
+    "bytes": 2885,
+    "sha256": "5a823c12502f43bedde5c67e9b35012cfb338ad1d3d5fea1f089dbb61ea91dd4"
+  },
+  "body": {
+    "flow": "import",
+    "monthDetail": true,
+    "period": {
+      "from": "2026-01",
+      "to": "2026-08"
+    },
+    "filters": [
+      {
+        "filter": "city",
+        "values": [
+          "4318002"
+        ]
+      }
+    ],
+    "details": [
+      "country",
+      "heading"
+    ],
+    "metrics": [
+      "metricFOB",
+      "metricKG"
+    ]
+  },
+  "response": {
+    "data": {
+      "list": [
+        {
+          "year": "2026",
+          "monthNumber": "07",
+          "country": "Uruguai",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "2575384",
+          "metricKG": "6884000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "08",
+          "country": "Uruguai",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "2349772",
+          "metricKG": "6034000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "06",
+          "country": "Uruguai",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "1108800",
+          "metricKG": "3024000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "07",
+          "country": "Argentina",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "85756",
+          "metricKG": "106700"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "01",
+          "country": "Argentina",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "69000",
+          "metricKG": "292500"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Paraguai",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "60000",
+          "metricKG": "400000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Argentina",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "53856",
+          "metricKG": "79200"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "06",
+          "country": "Paraguai",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "43120",
+          "metricKG": "308000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "04",
+          "country": "Argentina",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "35904",
+          "metricKG": "52800"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "05",
+          "country": "Argentina",
+          "headingCode": "1006",
+          "heading": "Arroz",
+          "metricFOB": "35904",
+          "metricKG": "52800"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "02",
+          "country": "Estados Unidos",
+          "headingCode": "1008",
+          "heading": "Trigo mourisco, painço e alpista; outros cereais",
+          "metricFOB": "35380",
+          "metricKG": "4000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Argentina",
+          "headingCode": "0703",
+          "heading": "Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",
+          "metricFOB": "25170",
+          "metricKG": "167800"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "04",
+          "country": "Argentina",
+          "headingCode": "0703",
+          "heading": "Cebolas, chalotas, alho comum, alho-porro e outros produtos hortícolas aliáceos, frescos ou refrigerados",
+          "metricFOB": "13350",
+          "metricKG": "89000"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "03",
+          "country": "Argentina",
+          "headingCode": "8419",
+          "heading": "Aparelhos e dispositivos, mesmo aquecidos electricamente (exceto fornos e outros aparelhos da posição 8514), para tratamento de matérias por meio de operações que impliquem mudança de temperatura, tais como o aquecimento, cozimento, torrefacção, destilaç",
+          "metricFOB": "12150",
+          "metricKG": "1775"
+        },
+        {
+          "year": "2026",
+          "monthNumber": "08",
+          "country": "China",
+          "headingCode": "9018",
+          "heading": "Instrumentos e aparelhos para medicina, cirurgia, odontologia e veterinária, incluídos os aparelhos de cintilografia e outros aparelhos electromédicos, bem como os aparelhos para testes visuais",
+          "metricFOB": "11082",
+          "metricKG": "425"
+        }
+      ]
+    },
+    "success": true,
+    "message": null,
+    "processo_info": null,
+    "language": "pt"
+  }
+}

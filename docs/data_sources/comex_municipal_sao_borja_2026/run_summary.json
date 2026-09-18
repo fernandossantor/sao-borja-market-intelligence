@@ -1,0 +1,138 @@
+{
+  "source": "MDIC/SECEX — API oficial Comex Stat — endpoint /cities",
+  "api_base": "https://api-comexstat.mdic.gov.br",
+  "period": "2026-01 a 2026-08",
+  "municipality": "São Borja/RS",
+  "municipality_filter": {
+    "filter": "city",
+    "value": "4318002"
+  },
+  "details": [
+    "country",
+    "heading"
+  ],
+  "metrics": [
+    "metricFOB",
+    "metricKG"
+  ],
+  "monthDetail": true,
+  "fiscal_domicile_limitation": "O módulo municipal identifica o domicílio fiscal da empresa declarante; não a origem física da mercadoria.",
+  "city_identity": {
+    "data": {
+      "coMunGeo": "4318002",
+      "noMun": "SAO BORJA",
+      "noMunMin": "São Borja",
+      "sgUf": "RS"
+    },
+    "success": true,
+    "message": null,
+    "processo_info": null,
+    "language": "pt"
+  },
+  "query_log": [
+    {
+      "flow": "export",
+      "body": {
+        "flow": "export",
+        "monthDetail": true,
+        "period": {
+          "from": "2026-01",
+          "to": "2026-08"
+        },
+        "filters": [
+          {
+            "filter": "city",
+            "values": [
+              "4318002"
+            ]
+          }
+        ],
+        "details": [
+          "country",
+          "heading"
+        ],
+        "metrics": [
+          "metricFOB",
+          "metricKG"
+        ]
+      },
+      "http": {
+        "url": "https://api-comexstat.mdic.gov.br/cities?language=pt",
+        "status": 200,
+        "verify_ssl": true,
+        "bytes": 2643,
+        "sha256": "aee0624407f9041c3d188f8d5229fa26c360716858acfa880ef227a6437dbdb6"
+      },
+      "rows": 18
+    },
+    {
+      "flow": "import",
+      "body": {
+        "flow": "import",
+        "monthDetail": true,
+        "period": {
+          "from": "2026-01",
+          "to": "2026-08"
+        },
+        "filters": [
+          {
+            "filter": "city",
+            "values": [
+              "4318002"
+            ]
+          }
+        ],
+        "details": [
+          "country",
+          "heading"
+        ],
+        "metrics": [
+          "metricFOB",
+          "metricKG"
+        ]
+      },
+      "http": {
+        "url": "https://api-comexstat.mdic.gov.br/cities?language=pt",
+        "status": 200,
+        "verify_ssl": true,
+        "bytes": 2885,
+        "sha256": "5a823c12502f43bedde5c67e9b35012cfb338ad1d3d5fea1f089dbb61ea91dd4"
+      },
+      "rows": 15
+    }
+  ],
+  "response_fields": [
+    "flow",
+    "country",
+    "heading",
+    "headingCode",
+    "metricFOB",
+    "metricKG",
+    "monthNumber",
+    "year"
+  ],
+  "logical_field_mapping": {
+    "year": "year",
+    "month": "monthNumber",
+    "hs4": "headingCode",
+    "country": "country",
+    "fob": "metricFOB",
+    "kg": "metricKG"
+  },
+  "raw_rows": 33,
+  "totals": [
+    {
+      "flow": "export",
+      "metricFOB": 9848096.0,
+      "metricKG": 32151627.0
+    },
+    {
+      "flow": "import",
+      "metricFOB": 6514628.0,
+      "metricKG": 17497000.0
+    }
+  ],
+  "rice_seed_rows": 6,
+  "nature": "DADO OBSERVADO na resposta oficial; agregações mensais/YTD são DADOS CALCULADOS.",
+  "canonical_promotion": false
+}

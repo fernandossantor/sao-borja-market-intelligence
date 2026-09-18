@@ -311,3 +311,89 @@ Planilha exploratória do Drive:
 - nova aba `Radar_piloto_arroz`.
 
 Nenhum valor foi preenchido por inferência. Os campos quantitativos permanecem pendentes até leitura verificável do Radar.
+
+
+## Etapa 4C.1 — capacidade territorial local confirmada
+
+Em 18/09/2026, a auditoria passou a usar como **fonte de leitura** o Caderno-Base técnico v028 — análise integrada (17Sk5Hu_CQ-hKJYTNEfYSN4F97MiuZrfrU9o_VxEg0Rc), que é posterior à v016 registrada no corpo do PR #41.
+
+**Regra de preservação:** a v028 foi apenas consultada; não foi editada, duplicada nem promovida pela branch exploratória.
+
+### Achado principal
+
+A cadeia do arroz em São Borja já possui capacidade territorial materialmente documentada. O elo de beneficiamento não é uma hipótese de instalação futura.
+
+Na camada canônica RAIS 2025 × RFB do projeto, o CNAE 10.61-9/01 apresenta:
+- 20 estabelecimentos ativos;
+- 19 matrizes;
+- 1 filial de raiz cuja matriz também está em São Borja;
+- 953 vínculos formais;
+- R$ 3.491.039,35 de massa de remuneração de dezembro/2025;
+- 97,34% dos vínculos da divisão 10 no recorte;
+- 98,69% da massa de remuneração de dezembro da divisão 10 no recorte.
+
+A própria v028 qualifica esse elo como um encadeamento agroindustrial local material e alerta para não generalizá-lo a toda a indústria ou a todo o agro.
+
+### Validação histórica independente
+
+IBGE/CEMPRE — Tabela 9418, São Borja, 2022:
+
+Grupo 10.6:
+- 23 empresas/organizações;
+- 994 pessoas ocupadas;
+- 960 assalariadas;
+- R$ 42,945 milhões em salários e outras remunerações.
+
+Classe 10.61-9:
+- 21 empresas/organizações;
+- demais variáveis de pessoal/remuneração suprimidas como X.
+
+Cálculo: 21 / 23 × 100 = 91,30% dos estabelecimentos do grupo 10.6 pertenciam à classe 10.61-9.
+
+Não inferir a mesma proporção para emprego ou remuneração.
+
+### Produção primária recente
+
+IRGA — safra 2023/2024, São Borja:
+- 31.166 ha semeados;
+- 2.014 ha perdidos;
+- 29.152 ha colhidos;
+- 8.129 kg/ha;
+- 236.977 t.
+
+IRGA/SEAPI — safra 2024/2025:
+- 306.703,95 t;
+- 8º maior produtor do RS;
+- 4º da Fronteira Oeste.
+
+Cálculo SBMI: ((306.703,95 / 236.977) - 1) × 100 = 29,42%.
+
+### Mudança na pergunta analítica
+
+Para arroz, o Radar não será mais usado prioritariamente para perguntar “há uma atividade que poderia existir em São Borja?”.
+
+A pergunta passa a ser:
+
+> **como a capacidade produtiva e agroindustrial já instalada em São Borja se posiciona diante da demanda estadual, da produção gaúcha, das entradas de outras UFs, das importações, dos concorrentes e dos mercados consumidores?**
+
+Essa mudança evita confundir oportunidade de entrada com oportunidade de expansão/posicionamento de uma cadeia já presente.
+
+### Arquivo estruturado
+
+docs/data_sources/radar_piloto_arroz_capacidade_local_v001.csv
+
+Planilha exploratória: aba Radar_arroz_cap_local.
+
+### Pendências do Radar
+
+Continuam sem valor preenchido:
+- demanda RS por NCM;
+- produção interna RS por NCM;
+- entradas de outras UFs;
+- importações;
+- dependência externa;
+- market share;
+- mercados consumidores;
+- concorrentes.
+
+Nenhum desses campos será inferido a partir da força local da cadeia.

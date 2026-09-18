@@ -196,3 +196,85 @@ Regra: não combinar automaticamente faixa de renda da POF com distribuição mu
 A página oficial do Receita.doc expõe links diretos para boletins mensais de agosto/2024 a agosto/2026. Os PDFs mais recentes de 2026 foram identificados, porém o mecanismo automatizado de leitura não conseguiu recuperar seu conteúdo nesta sessão (cache miss/timeout).
 
 Foi criado um **seed de validação**, apenas com observações que puderam ser verificadas em fontes oficiais acessíveis, para testar o esquema da futura série. Esse seed não constitui uma série completa nem dado canônico.
+
+## Subetapa 2C — boletim agosto/2026 extraído
+
+Foi recebido e auditado o boletim **Preços Dinâmicos — edição 25, agosto/2026**.
+
+### Atualização metodológica do próprio boletim
+
+O documento reafirma:
+- referência à POF/IBGE 2017/2018, Tabela 2393;
+- adoção da taxonomia grupo > subgrupo > produto;
+- 80 produtos;
+- 12 grupos;
+- ponderação por consumo per capita da POF.
+
+**Inconsistência documental a preservar:** o boletim de agosto/2026 informa **30 subgrupos**, enquanto a NT CIET 01/2026 anteriormente auditada registrava **29 subgrupos**. Não foi encontrada, nesta etapa, explicação documental para a mudança. Não harmonizar silenciosamente.
+
+### Fronteira Oeste — PCA-RE agosto/2026
+
+- valor: **R$ 284,19**;
+- variação mensal: **+0,51%**;
+- variação no ano: **+2,01%**;
+- variação em 12 meses: **+3,22%**.
+
+Rio Grande do Sul:
+- R$ 298,61;
+- +0,60% no mês;
+- +2,54% no ano;
+- +3,49% em 12 meses.
+
+Cálculo SBMI:
+`(284,19 / 298,61 - 1) × 100 = -4,83%`.
+
+Assim, o nível do PCA-RE da Fronteira Oeste estava 4,83% abaixo da média estadual naquele mês.
+
+### ICA-RE em 12 meses — Fronteira Oeste
+
+- <2 SM: 2,23%;
+- 2 a 3 SM: 1,94%;
+- 3 a 6 SM: 2,26%;
+- 6 a 10 SM: 2,73%;
+- 10 a 15 SM: 2,64%;
+- 15 a 25 SM: 3,84%;
+- >25 SM: 4,29%;
+- média: **3,23%**.
+
+Média RS: **3,49%**.
+
+Interpretação permitida: no agregado, a inflação alimentar regional em 12 meses estava 0,26 p.p. abaixo da média estadual, mas o resultado não é uniforme por faixa de renda.
+
+### Hortaliças
+
+Fronteira Oeste:
+- R$ 5,58;
+- -6,88% no mês;
+- +6,31% no ano;
+- +18,69% em 12 meses.
+
+RS:
+- R$ 6,50;
+- -7,27% no mês;
+- +16,28% no ano;
+- +22,45% em 12 meses.
+
+### Cebola
+
+Fronteira Oeste:
+- R$ 5,43;
+- -13,10% no mês;
+- +117,60% no ano;
+- +101,93% em 12 meses.
+
+RS:
+- R$ 5,99;
+- -11,80% no mês;
+- +101,39% no ano;
+- +102,89% em 12 meses.
+
+### Arquivo estruturado
+
+`docs/data_sources/precos_dinamicos_fronteira_oeste_agosto2026_v001.csv`
+
+Regra territorial mantida: Fronteira Oeste é região de referência de São Borja, não preço municipal.

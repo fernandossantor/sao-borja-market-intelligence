@@ -1,0 +1,85 @@
+[
+  {
+    "name": "gasolina_c.csv",
+    "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/gasolina-c/vendas-anuais-de-gasolina-c-por-municipio.csv",
+    "obtained_at": "2026-09-18T21:41:04.836866+00:00",
+    "status": 200,
+    "content_type": "text/csv",
+    "bytes": 12123475,
+    "sha256": "1469a81527e813dd4e446251a0095fdfdef8b03c1d7300b84e91814c2c6e4b72",
+    "raw_file": "artifacts/secondary_official_sources_sao_borja/raw/gasolina_c.csv"
+  },
+  {
+    "name": "etanol_hidratado.csv",
+    "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/etanol-hidratado/vendas-anuais-de-etanol-hidratado-por-municipio.csv",
+    "obtained_at": "2026-09-18T21:41:19.033192+00:00",
+    "status": 200,
+    "content_type": "text/csv",
+    "bytes": 10062933,
+    "sha256": "bc45221d1dfd9d35cf0309ee41fe32083c12dddddce382caabcbb7851600c8d5",
+    "raw_file": "artifacts/secondary_official_sources_sao_borja/raw/etanol_hidratado.csv"
+  },
+  {
+    "name": "oleo_diesel.csv",
+    "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/oleo-diesel/vendas-anuais-de-oleo-diesel-por-municipio.csv",
+    "obtained_at": "2026-09-18T21:41:29.858333+00:00",
+    "status": 200,
+    "content_type": "text/csv",
+    "bytes": 12666750,
+    "sha256": "082f2483a551c86b73f117d11e560d04e7a48f05d34062bf1a48821882065a3e",
+    "raw_file": "artifacts/secondary_official_sources_sao_borja/raw/oleo_diesel.csv"
+  },
+  {
+    "name": "glp.csv",
+    "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/glp/vendas-anuais-de-glp-por-municipio.csv",
+    "obtained_at": "2026-09-18T21:41:43.375170+00:00",
+    "status": 200,
+    "content_type": "text/csv",
+    "bytes": 9158373,
+    "sha256": "8c75e86854cc4f673a292bfe68c0b78d52705bd450616cd9fb436010fc328772",
+    "raw_file": "artifacts/secondary_official_sources_sao_borja/raw/glp.csv"
+  },
+  {
+    "name": "anp_retailers_api",
+    "url": "https://revendedoresapi.anp.gov.br/v1/combustivel?municipio=SAO%20BORJA&uf=RS",
+    "status": 200,
+    "content_type": "application/json; charset=utf-8",
+    "bytes": 11680,
+    "obtained_at": "2026-09-18T21:41:53.575595+00:00",
+    "sha256": "b991515d287cf5a0941cd1709415117391729d8bf364812e9be8850292f3ddf6",
+    "top_level_type": "dict",
+    "rows_detected": 10
+  },
+  {
+    "name": "cadastur_hospedagem_2t2026.xlsx",
+    "url": "https://dados.turismo.gov.br/dataset/d2333d1b-db1e-438b-955a-028db80a031e/resource/7e385ec2-57d8-446c-9cc0-f5f7dadd1fdf/download/meios-de-hospedagem-2-trimestre-2026.xlsx",
+    "obtained_at": "2026-09-18T21:41:53.578520+00:00",
+    "status": 200,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "bytes": 6755085,
+    "sha256": "ff42be5d0c0f41c4ecbd3013927d6a6fabc55072322fda8cd46f8073b553c804",
+    "raw_file": "artifacts/secondary_official_sources_sao_borja/raw/cadastur_hospedagem_2t2026.xlsx"
+  },
+  {
+    "name": "cadastur_agencias_2t2026.xlsx",
+    "url": "https://dados.turismo.gov.br/dataset/5a324238-184a-4103-bfaa-bb998aa10328/resource/b4a036ed-8caa-46b5-86af-edbce86392d1/download/agencias-de-turismo-2-trimestre-2026.xlsx",
+    "obtained_at": "2026-09-18T21:42:12.109840+00:00",
+    "status": 200,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "bytes": 19017621,
+    "sha256": "2d63a16058377fe25e9512c45920c375ec6d7f59d1e0cb28eccdbf6cb17d163c",
+    "raw_file": "artifacts/secondary_official_sources_sao_borja/raw/cadastur_agencias_2t2026.xlsx"
+  },
+  {
+    "name": "EXP_2026_MUN.csv",
+    "url": "https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv",
+    "obtained_at": "2026-09-18T21:42:43.312220+00:00",
+    "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='balanca.mdic.gov.br', port=443): Max retries exceeded with url: /balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)')))\"))"
+  },
+  {
+    "name": "IMP_2026_MUN.csv",
+    "url": "https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv",
+    "obtained_at": "2026-09-18T21:42:43.727776+00:00",
+    "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='balanca.mdic.gov.br', port=443): Max retries exceeded with url: /balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)')))\"))"
+  }
+]

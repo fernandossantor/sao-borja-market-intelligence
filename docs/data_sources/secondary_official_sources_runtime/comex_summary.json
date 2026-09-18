@@ -1,0 +1,14 @@
+[
+  {
+    "file": "EXP_2026_MUN.csv",
+    "status": null,
+    "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='balanca.mdic.gov.br', port=443): Max retries exceeded with url: /balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)')))\"))",
+    "text_head": null
+  },
+  {
+    "file": "IMP_2026_MUN.csv",
+    "status": null,
+    "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='balanca.mdic.gov.br', port=443): Max retries exceeded with url: /balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)')))\"))",
+    "text_head": null
+  }
+]

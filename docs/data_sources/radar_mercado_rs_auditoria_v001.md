@@ -259,3 +259,55 @@ Isso mantém separadas **demanda estadual** e **capacidade territorial local**.
 3. construir o primeiro cruzamento exploratório:
    `NCM / oportunidade estadual → CNAE/capacidade local → evidência municipal existente → hipótese mercadológica`;
 4. manter toda hipótese como exploratória até validação.
+
+
+## Etapa 4C — piloto iniciado: cadeia do arroz
+
+Foi selecionada a cadeia do arroz como primeiro teste controlado do método `oportunidade estadual por NCM → capacidade territorial local`.
+
+### Base territorial usada para seleção
+
+O Caderno Setorial de Bens Essenciais registra, a partir de documentação municipal/Emater já incorporada ao projeto, forte presença histórica de arroz na base agropecuária de São Borja.
+
+Isso justifica a **seleção do piloto**, mas não será tratado como prova de capacidade industrial corrente.
+
+### CNAE oficial associado
+
+Fonte CONCLA/IBGE:
+
+- `0111-3/01` — Cultivo de arroz;
+- `1061-9/01` — Beneficiamento de arroz;
+- `1061-9/02` — Fabricação de produtos do arroz.
+
+### NCM piloto
+
+Fonte: Ministério da Agricultura e Pecuária — Sumário Executivo Arroz 2026; nomenclatura vigente consultável no CLASSIF/RFB.
+
+Cesta inicial:
+- `10062010`;
+- `10062020`;
+- `10063011`;
+- `10063019`;
+- `10063021`;
+- `10063029`;
+- `10064000`.
+
+O objetivo é recuperar, para cada código:
+- demanda no RS;
+- produção interna;
+- entradas de outras UFs;
+- importações;
+- dependência externa;
+- localização municipal da produção, se disponível;
+- mercados consumidores;
+- concorrentes.
+
+Arquivos criados:
+
+- `docs/data_sources/radar_piloto_arroz_v001.md`
+- `docs/data_sources/radar_piloto_arroz_ncm_v001.csv`
+
+Planilha exploratória do Drive:
+- nova aba `Radar_piloto_arroz`.
+
+Nenhum valor foi preenchido por inferência. Os campos quantitativos permanecem pendentes até leitura verificável do Radar.

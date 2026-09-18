@@ -109,3 +109,35 @@ Produto público do Desenvolve-RS em Power BI.
 
 > Extrair e auditar os indicadores do Boletim Econômico-Tributário que sejam diretamente selecionáveis para o município de São Borja.
 
+
+
+### Observatório do Comércio — Fecomércio-RS / IFEP-RS
+
+Fonte principal:  
+https://observatorio.fecomercio-rs.org.br/page/home
+
+**Natureza da fonte:** plataforma secundária/integradora produzida pelo Instituto Fecomércio-RS de Pesquisas (IFEP-RS), com indicadores próprios e integração de bases oficiais.
+
+A documentação pública sobre o lançamento informa que o Observatório reúne dados sobre empresas/estabelecimentos, trabalho, receitas e despesas e permite análises segmentadas por região e atividade econômica. Também divulga indicadores próprios do IFEP-RS, entre eles rotatividade, concentração territorial e tempo de vida/atividade das empresas.
+
+**Origem dos dados:** a própria plataforma possui área “Fonte dos dados”. Nesta auditoria, o mapa detalhado de origem deve ser transcrito e validado diretamente nessa área antes de qualquer promoção. Fontes confirmadas externamente para a plataforma incluem Receita Federal e Ministério do Trabalho. Não presumir que todos os indicadores derivam dessas duas fontes.
+
+**Regra de uso no SBMI:**
+- quando o indicador apenas reorganizar uma base primária já utilizada pelo SBMI, manter a fonte primária como referência canônica e usar o Observatório como interface de conferência/benchmark;
+- quando o indicador for calculado pelo IFEP-RS, registrar explicitamente IFEP-RS como produtor do indicador e documentar fórmula/metodologia, se publicada;
+- preservar granularidade territorial original;
+- não substituir séries já auditadas sem comparação metodológica.
+
+**Granularidade potencial:** regional e por atividade econômica confirmada; recorte municipal deve ser auditado dentro da própria plataforma antes de uso.
+
+**Aplicações potenciais:** demografia empresarial, emprego, receitas/despesas, rotatividade, concentração territorial, sobrevivência/tempo médio de atividade e benchmarking setorial.
+
+## Atualização da ordem de trabalho
+
+O Observatório Fecomércio-RS/IFEP-RS entra como fonte transversal de validação e complementação, sem interromper a sequência já definida:
+
+1. **BET** — concluir auditoria de indicadores municipais de São Borja;
+2. **Preços Dinâmicos** — produtos, periodicidade, histórico e Fronteira Oeste;
+3. **Cesta Nutricional** — perfis, periodicidade e Fronteira Oeste;
+4. **Radar** — auditoria por indicador e granularidade;
+5. **Observatório Fecomércio-RS/IFEP-RS** — auditar “Fonte dos dados”, granularidade municipal/regional e indicadores próprios; comparar com fontes primárias já canônicas.

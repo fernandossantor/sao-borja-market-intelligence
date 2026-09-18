@@ -103,7 +103,7 @@ jobs:
                   for o in opts:
                       t=norm(o.get("text","")).upper()
                       if t == "RS - RIO GRANDE DO SUL" or t.startswith("RS - RIO GRANDE DO SUL"):
-                          await s.select_option(value=o.get("value"))
+                          await s.select_option(value=o.get("value"), force=True)
                           log.append({"action":"select_rs","select_index":i,"id":await s.get_attribute("id"),"value":o.get("value"),"text":o.get("text")})
                           await wait_settle(page)
                           return True
@@ -130,7 +130,7 @@ jobs:
               if not target:
                   return False
               i,s=target
-              await s.select_option(value=opt.get("value"))
+              await s.select_option(value=opt.get("value"), force=True)
               log.append({"action":"select_sao_borja","select_index":i,"id":await s.get_attribute("id"),"value":opt.get("value"),"text":opt.get("text")})
               await page.wait_for_timeout(800)
 
@@ -154,7 +154,7 @@ jobs:
                       candidates.append((j,b,blob))
               for j,b,blob in candidates[:3]:
                   try:
-                      await b.click(timeout=4000)
+                      await b.click(timeout=4000, force=True)
                       log.append({"action":"transfer_municipality","button_index":j,"control":blob})
                       await wait_settle(page)
                       break
@@ -179,7 +179,7 @@ jobs:
                       continue
                   if "consult" in blob.lower() or "pesquis" in blob.lower():
                       try:
-                          await c.click(timeout=5000)
+                          await c.click(timeout=5000, force=True)
                           log.append({"action":"click_consultar","control":blob})
                           await wait_settle(page)
                           return True

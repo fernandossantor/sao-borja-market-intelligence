@@ -1,0 +1,268 @@
+name: comex-municipal-sao-borja-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/comex-municipal-sao-borja-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pandas requests
+
+      - name: Download official Comex Stat municipal files and filter São Borja
+        run: |
+          cat > /tmp/comex_sb.py <<'PY'
+          import csv, hashlib, json, re
+          from pathlib import Path
+          import pandas as pd
+          import requests
+
+          OUT=Path("artifacts/comex_municipal_sao_borja_2026")
+          RAW=OUT/"raw"
+          OUT.mkdir(parents=True,exist_ok=True)
+          RAW.mkdir(parents=True,exist_ok=True)
+
+          URLS={
+            "EXP":"https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv",
+            "IMP":"https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv",
+            "PAIS":"https://balanca.mdic.gov.br/balanca/bd/tabelas/PAIS.csv",
+            "NCM_SH":"https://balanca.mdic.gov.br/balanca/bd/tabelas/NCM_SH.csv",
+            "UF_MUN":"https://balanca.mdic.gov.br/balanca/bd/tabelas/UF_MUN.csv",
+          }
+          EXPECTED=["CO_ANO","CO_MES","SH4","CO_PAIS","SG_UF_MUN","CO_MUN","KG_LIQUIDO","VL_FOB"]
+
+          session=requests.Session()
+          session.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/2026-09-18"})
+
+          def download(name,url):
+              p=RAW/(url.rsplit("/",1)[-1])
+              h=hashlib.sha256()
+              total=0
+              with session.get(url,stream=True,timeout=(30,1200)) as r:
+                  r.raise_for_status()
+                  ctype=r.headers.get("content-type")
+                  with p.open("wb") as f:
+                      for chunk in r.iter_content(1024*1024):
+                          if not chunk: continue
+                          f.write(chunk); h.update(chunk); total+=len(chunk)
+              return p,{"name":name,"url":url,"bytes":total,"sha256":h.hexdigest(),"content_type":ctype}
+
+          metadata=[]
+          paths={}
+          for k,u in URLS.items():
+              try:
+                  p,m=download(k,u)
+                  paths[k]=p; metadata.append({**m,"status":"ok"})
+              except Exception as e:
+                  metadata.append({"name":k,"url":u,"status":"error","error":repr(e)})
+
+          # EXP/IMP are essential. Dictionaries are desirable but not allowed to block the raw municipal evidence.
+          for k in ("EXP","IMP"):
+              if k not in paths:
+                  raise SystemExit(f"Essential Comex file unavailable: {k}")
+
+          # Official municipal dictionary: verify that the code used for São Borja is actually present.
+          mun_info={}
+          if "UF_MUN" in paths:
+              try:
+                  md=pd.read_csv(paths["UF_MUN"],sep=";",dtype=str,encoding="utf-8-sig")
+                  md.columns=[str(c).strip() for c in md.columns]
+                  candidates=md.copy()
+                  textcols=[c for c in md.columns if "MUN" in c.upper() or "NOME" in c.upper()]
+                  mask=pd.Series(False,index=md.index)
+                  for c in textcols:
+                      vals=md[c].fillna("").astype(str).str.normalize("NFKD").str.encode("ascii",errors="ignore").str.decode("ascii").str.upper()
+                      mask |= vals.str.contains(r"\bSAO BORJA\b",regex=True)
+                  if "SG_UF" in md.columns:
+                      mask &= md["SG_UF"].fillna("").str.upper().eq("RS")
+                  sb=md.loc[mask].copy()
+                  mun_info={"columns":list(md.columns),"rows":sb.to_dict(orient="records")}
+              except Exception as e:
+                  mun_info={"error":repr(e)}
+          (OUT/"municipality_dictionary_check.json").write_text(json.dumps(mun_info,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Prefer confirmed code from dictionary when possible; otherwise use IBGE 4318002, already audited in project.
+          codes={"4318002"}
+          for row in mun_info.get("rows",[]):
+              for c,v in row.items():
+                  if v is not None and re.fullmatch(r"\d{7}",str(v).strip()):
+                      codes.add(str(v).strip())
+          confirmed="4318002" in codes
+
+          all_filtered=[]
+          source_stats=[]
+          for direction in ("EXP","IMP"):
+              src=paths[direction]
+              filtered=[]
+              total_rows=0
+              cols_seen=None
+              for chunk in pd.read_csv(src,sep=";",dtype=str,encoding="utf-8-sig",chunksize=250_000):
+                  chunk.columns=[str(c).strip() for c in chunk.columns]
+                  if cols_seen is None: cols_seen=list(chunk.columns)
+                  missing=[c for c in EXPECTED if c not in chunk.columns]
+                  if missing:
+                      raise SystemExit(f"{direction}: missing columns {missing}; got {chunk.columns.tolist()}")
+                  total_rows += len(chunk)
+                  co=chunk["CO_MUN"].fillna("").str.strip()
+                  uf=chunk["SG_UF_MUN"].fillna("").str.upper().str.strip()
+                  sub=chunk.loc[co.isin(codes) & uf.eq("RS"),EXPECTED].copy()
+                  if not sub.empty:
+                      sub.insert(0,"DIRECAO",direction)
+                      filtered.append(sub)
+              if filtered:
+                  f=pd.concat(filtered,ignore_index=True)
+              else:
+                  f=pd.DataFrame(columns=["DIRECAO"]+EXPECTED)
+              f.to_csv(OUT/f"{direction.lower()}_2026_sao_borja_raw_filtered.csv",index=False)
+              all_filtered.append(f)
+              source_stats.append({
+                  "direction":direction,
+                  "source_rows":total_rows,
+                  "filtered_rows":len(f),
+                  "columns":cols_seen,
+                  "municipality_codes_attempted":sorted(codes),
+              })
+
+          joined=pd.concat(all_filtered,ignore_index=True)
+          for col in ["CO_ANO","CO_MES","SH4","CO_PAIS","CO_MUN"]:
+              if col in joined: joined[col]=joined[col].fillna("").astype(str)
+          for col in ["KG_LIQUIDO","VL_FOB"]:
+              joined[col]=pd.to_numeric(joined[col],errors="raise")
+
+          # Country dictionary join, preserving code if dictionary is unavailable.
+          country_map=None
+          if "PAIS" in paths:
+              try:
+                  pa=pd.read_csv(paths["PAIS"],sep=";",dtype=str,encoding="utf-8-sig")
+                  pa.columns=[str(c).strip() for c in pa.columns]
+                  code_col=next((c for c in pa.columns if c.upper() in {"CO_PAIS","CO_PAIS_ISON3"}),None)
+                  name_col=next((c for c in pa.columns if "NO_PAIS" in c.upper() or c.upper()=="PAIS"),None)
+                  if code_col and name_col:
+                      country_map=pa[[code_col,name_col]].drop_duplicates().rename(columns={code_col:"CO_PAIS",name_col:"NO_PAIS"})
+                      joined=joined.merge(country_map,on="CO_PAIS",how="left")
+              except Exception:
+                  pass
+          if "NO_PAIS" not in joined.columns:
+              joined["NO_PAIS"]=""
+
+          # SH4 dictionary join. NCM_SH normally contains NO_SH4_POR.
+          sh4_map=None
+          if "NCM_SH" in paths:
+              try:
+                  sh=pd.read_csv(paths["NCM_SH"],sep=";",dtype=str,encoding="utf-8-sig")
+                  sh.columns=[str(c).strip() for c in sh.columns]
+                  code_col=next((c for c in sh.columns if c.upper()=="CO_SH4" or c.upper()=="SH4"),None)
+                  name_col=next((c for c in sh.columns if "NO_SH4_POR" in c.upper()),None)
+                  if code_col and name_col:
+                      sh4_map=sh[[code_col,name_col]].drop_duplicates().rename(columns={code_col:"SH4",name_col:"NO_SH4_POR"})
+                      joined=joined.merge(sh4_map,on="SH4",how="left")
+              except Exception:
+                  pass
+          if "NO_SH4_POR" not in joined.columns:
+              joined["NO_SH4_POR"]=""
+
+          joined.to_csv(OUT/"comex_2026_sao_borja_enriched.csv",index=False)
+
+          # User requirement: SH4 / country / period. Preserve monthly period and direction.
+          agg=(
+              joined.groupby(["DIRECAO","CO_ANO","CO_MES","SH4","NO_SH4_POR","CO_PAIS","NO_PAIS"],dropna=False,as_index=False)
+                    [["KG_LIQUIDO","VL_FOB"]].sum()
+                    .sort_values(["DIRECAO","CO_ANO","CO_MES","VL_FOB"],ascending=[True,True,True,False])
+          )
+          agg.to_csv(OUT/"comex_2026_sao_borja_sh4_pais_mes.csv",index=False)
+
+          annual=(
+              joined.groupby(["DIRECAO","CO_ANO","SH4","NO_SH4_POR","CO_PAIS","NO_PAIS"],dropna=False,as_index=False)
+                    [["KG_LIQUIDO","VL_FOB"]].sum()
+                    .sort_values(["DIRECAO","VL_FOB"],ascending=[True,False])
+          )
+          annual.to_csv(OUT/"comex_2026_sao_borja_sh4_pais_ytd.csv",index=False)
+
+          totals=(
+              joined.groupby(["DIRECAO","CO_ANO"],dropna=False,as_index=False)[["KG_LIQUIDO","VL_FOB"]].sum()
+          )
+          totals.to_csv(OUT/"comex_2026_sao_borja_totals_ytd.csv",index=False)
+
+          # Rice SH4=1006 is only a technical seed, not the analytical center.
+          rice=annual.loc[annual["SH4"].astype(str).str.zfill(4).eq("1006")].copy()
+          rice.to_csv(OUT/"comex_2026_sao_borja_rice_sh4_1006_seed.csv",index=False)
+
+          summary={
+              "source":"MDIC/SECEX — Comex Stat — base municipal por empresa declarante e SH4",
+              "page_reference_period":"janeiro-agosto/2026",
+              "municipality":"São Borja/RS",
+              "municipality_filter":"SG_UF_MUN=RS + CO_MUN=4318002 (checked against official UF_MUN when available)",
+              "fiscal_domicile_limitation":"CO_MUN/SG_UF_MUN identify fiscal domicile of declaring company, not physical origin/destination of goods.",
+              "layout":EXPECTED,
+              "download_metadata":metadata,
+              "source_stats":source_stats,
+              "filtered_total_rows":int(len(joined)),
+              "export_rows":int((joined["DIRECAO"]=="EXP").sum()),
+              "import_rows":int((joined["DIRECAO"]=="IMP").sum()),
+              "directions_totals":totals.to_dict(orient="records"),
+              "rice_seed_rows":int(len(rice)),
+              "nature":"exploratory observed data; aggregates are calculated from official observed rows",
+              "canonical_promotion":False,
+          }
+          (OUT/"run_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+          python /tmp/comex_sb.py
+
+      - name: Persist filtered exploratory evidence only
+        run: |
+          mkdir -p docs/data_sources/comex_municipal_sao_borja_2026
+          cp artifacts/comex_municipal_sao_borja_2026/*.csv docs/data_sources/comex_municipal_sao_borja_2026/
+          cp artifacts/comex_municipal_sao_borja_2026/*.json docs/data_sources/comex_municipal_sao_borja_2026/
+          cat > docs/data_sources/comex_municipal_sao_borja_2026/README.md <<'EOF'
+          # Comex Stat municipal — São Borja — 2026
+
+          Camada exploratória, não canônica.
+
+          Fonte primária: MDIC/SECEX, Base de Dados Bruta do Comex Stat, base municipal
+          por empresa exportadora/importadora e SH4.
+
+          Recorte: São Borja/RS; 2026; arquivos disponibilizados pelo MDIC com dados
+          correntes até agosto/2026 na página oficial em 04/09/2026.
+
+          Controle conceitual obrigatório: CO_MUN e SG_UF_MUN representam o domicílio
+          fiscal da empresa declarante. Não representam a origem física da mercadoria.
+
+          Saídas preservam direção (EXP/IMP), ano, mês, SH4, país, quilograma líquido
+          e US$ FOB. O SH4 1006 (arroz) é mantido apenas como primeiro teste técnico;
+          a arquitetura é multissetorial.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/comex_municipal_sao_borja_2026
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: extract Comex municipal 2026 for São Borja"
+            git fetch origin explore/receita-estadual-rs-market-intel-v1
+            git rebase origin/explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: comex-municipal-sao-borja-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/comex_municipal_sao_borja_2026/

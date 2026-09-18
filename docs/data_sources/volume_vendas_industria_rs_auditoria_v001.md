@@ -77,3 +77,42 @@ Essas participações são estaduais e não devem ser usadas como estrutura prod
 ## Limitação central
 
 A fonte é útil para **contexto estadual**, mas não acrescenta diretamente granularidade territorial de São Borja. Sua incorporação futura deve ser contextual, não como evidência municipal.
+
+## Atualização — edição 03 / 1º trimestre de 2026
+
+Foi recebida e auditada a edição 03, referente ao **1º trimestre de 2026**.
+
+### Indústria de transformação do RS
+
+Variação frente ao 1º trimestre de 2025:
+- total: **+1,9%**;
+- mercado interno do RS: **+1,9%**;
+- outras UFs: **+5,0%**;
+- exterior: **-6,1%**.
+
+### Produtos alimentícios
+
+- total: **+6,5%**;
+- mercado interno: **+5,0%**;
+- outras UFs: **+1,4%**;
+- exterior: **+20,5%**.
+
+Cálculo SBMI:
+`6,5 - 1,9 = +4,6 p.p.`
+
+No trimestre, a taxa de crescimento de produtos alimentícios superou a indústria de transformação agregada em 4,6 p.p.
+
+A contribuição dos mercados para a taxa de 6,5% de produtos alimentícios foi:
+- interno: +2,0 p.p.;
+- OUF: +0,6 p.p.;
+- exterior: +3,9 p.p.
+
+### Interpretação para o SBMI
+
+O setor de alimentos teve desempenho estadual relativamente mais forte que a indústria agregada no 1º trimestre de 2026, com contribuição importante do mercado externo.
+
+Isso é **contexto estadual** para cadeias agroindustriais de São Borja e não evidência de desempenho das empresas locais.
+
+### Arquivo estruturado
+
+`docs/data_sources/volume_vendas_industria_rs_1t2026_selecionados_v001.csv`

@@ -363,3 +363,64 @@ Cálculo:
 **Resultado:** concordância exata no estoque total de estabelecimentos ativos.
 
 Esta conciliação aumenta a confiança de que o agregador está operando sobre a mesma competência geral da base RFB usada pelo SBMI. Contudo, **não valida automaticamente** os valores de MEI, Simples, aberturas ou baixas, porque essas métricas dependem de arquivos/regras adicionais e ainda não foram reproduzidas diretamente.
+
+## Fechamento adicional de lacunas com RAIS 2024
+
+A retomada da matriz de gaps mostrou que dois indicadores anteriormente marcados como lacunas já podem ser respondidos diretamente pela camada primária RAIS 2024, sem depender do Observatório.
+
+### Participação feminina no emprego formal
+
+Universo:
+13.125 vínculos ativos válidos em São Borja em 31/12/2024.
+
+Resultados:
+- homens: 7.665 vínculos — 58,40%;
+- mulheres: 5.460 vínculos — **41,60%**.
+
+Natureza:
+DADO CALCULADO sobre MTE/RAIS 2024.
+
+Limitação:
+vínculos não equivalem a pessoas únicas.
+
+### Tempo de emprego do vínculo
+
+- média: **61,92 meses**;
+- mediana: **28 meses**.
+
+Distribuição analítica SBMI:
+- até 12 meses: 30,27%;
+- 13–36 meses: 26,86%;
+- 37–60 meses: 13,17%;
+- 61–120 meses: 13,21%;
+- mais de 120 meses: 16,49%.
+
+Natureza:
+DADO CALCULADO sobre MTE/RAIS 2024.
+
+Limitação:
+o campo representa tempo de emprego do vínculo. A identidade conceitual com eventual indicador “tempo médio de contrato” do IFEP permanece a verificar.
+
+### Remuneração por sexo
+
+Para vínculos com remuneração média nominal positiva:
+- homens: média R$ 3.334,00; mediana R$ 2.689,55;
+- mulheres: média R$ 2.961,37; mediana R$ 2.241,81.
+
+Diferenças brutas calculadas:
+- média: -11,18%;
+- mediana: -16,65%.
+
+Essas diferenças são descritivas e **não demonstram discriminação salarial**, pois não controlam ocupação, setor, jornada, escolaridade ou tempo de vínculo.
+
+Fonte estruturada já existente:
+`docs/data_sources/rais_2024_perfil_complementar_fecomercio_v001.csv`.
+
+### Decisão
+
+A matriz de gaps foi reclassificada:
+- participação feminina: de lacuna para **coberto exploratoriamente por fonte primária**;
+- tempo médio de vínculo: de lacuna para **coberto exploratoriamente por fonte primária**;
+- remuneração por sexo/idade/ocupação/tempo: permanece parcial, mas remuneração por sexo passa a estar coberta.
+
+Não houve alteração de bases canônicas.

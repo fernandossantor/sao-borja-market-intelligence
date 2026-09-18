@@ -310,3 +310,43 @@ Recuperar diretamente da interface:
 `indicador | fonte_original | produtor | periodicidade | menor_geografia | unidade | transformação_IFEP`.
 
 Até lá, o Observatório permanece fonte integradora/secundária, e as bases primárias já canônicas no SBMI mantêm precedência.
+
+## Retomada 18/09/2026 — rota primária para MEI/Simples
+
+A auditoria avançou na estratégia de fechar duas lacunas de alto valor — **MEI** e **Simples Nacional** — sem depender da plataforma secundária.
+
+### Evidência oficial
+
+A página de Cadastros da Receita Federal, atualizada em 03/09/2026, confirma:
+- existência de **Painel de MEIs**;
+- disponibilização do **Cadastro Nacional da Pessoa Jurídica (CNPJ)** em Dados Abertos.
+
+Isso estabelece uma rota primária adequada para reproduzir os indicadores de estrutura empresarial.
+
+### Cross-check secundário localizado
+
+Foi localizado um agregador que declara processar os Dados Abertos CNPJ da Receita Federal, competência **agosto/2026**, e publica para São Borja:
+- 7.306 estabelecimentos ativos;
+- 3.829 estabelecimentos ativos de empresas optantes do MEI;
+- 52,41% dos estabelecimentos ativos vinculados a MEI;
+- 102 aberturas no mês;
+- 54 baixas no mês.
+
+**Status metodológico:** `SECONDARY_CROSSCHECK_NOT_ACCEPTED`.
+
+Esses valores **não são incorporados como dados oficiais do SBMI**. Servem apenas para:
+1. estabelecer uma expectativa de ordem de grandeza;
+2. validar posteriormente a reprodução direta;
+3. detectar divergências de conceito/competência na extração primária.
+
+Arquivo:
+`docs/data_sources/fecomercio_mei_simples_crosscheck_v001.csv`
+
+### Pendência primária
+
+Ainda é necessário obter e processar diretamente a competência correspondente dos Dados Abertos CNPJ/RFB, incluindo o arquivo de opção pelo Simples/MEI.
+
+Até isso ocorrer:
+- MEI continua **lacuna em reprodução primária**;
+- Simples Nacional continua **lacuna em reprodução primária**;
+- nenhum valor secundário será promovido.

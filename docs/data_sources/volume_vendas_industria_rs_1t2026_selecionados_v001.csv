@@ -1,0 +1,10 @@
+periodo,atividade,mercado,variacao_pct,natureza,fonte,limitacao
+"1T2026","Indústria de Transformação","Total",1.9,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul; não municipal"
+"1T2026","Indústria de Transformação","Interno RS",1.9,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul"
+"1T2026","Indústria de Transformação","Outras UFs",5.0,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul"
+"1T2026","Indústria de Transformação","Exterior",-6.1,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul"
+"1T2026","Produtos alimentícios","Total",6.5,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul; setor amplo"
+"1T2026","Produtos alimentícios","Interno RS",5.0,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul"
+"1T2026","Produtos alimentícios","Outras UFs",1.4,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul"
+"1T2026","Produtos alimentícios","Exterior",20.5,"DADO OBSERVADO","Volume de Vendas da Indústria do RS ed.03","Rio Grande do Sul"
+"1T2026","Produtos alimentícios","Diferença vs total da indústria",4.6,"p.p. — DADO CALCULADO","SBMI: 6,5 - 1,9","Comparação de taxas agregadas; não implica causalidade"

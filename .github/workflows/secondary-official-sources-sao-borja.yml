@@ -1,0 +1,314 @@
+name: secondary-official-sources-sao-borja
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/secondary-official-sources-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install tabular dependencies
+        run: |
+          python -m pip install --quiet pandas openpyxl requests
+
+      - name: Extract official municipal sources for São Borja
+        run: |
+          cat > /tmp/extract_secondary.py <<'PY'
+          import hashlib
+          import io
+          import json
+          import re
+          import unicodedata
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          import pandas as pd
+          import requests
+
+          OUT = Path("artifacts/secondary_official_sources_sao_borja")
+          OUT.mkdir(parents=True, exist_ok=True)
+          RAW = OUT / "raw"
+          FILT = OUT / "filtered"
+          RAW.mkdir(exist_ok=True)
+          FILT.mkdir(exist_ok=True)
+
+          IBGE = "4318002"
+          UF = "RS"
+          MUNICIPIO = "SAO BORJA"
+          session = requests.Session()
+          session.headers.update({
+              "User-Agent": "SBMI official-source audit/1.0",
+              "Accept": "*/*",
+          })
+          log = []
+
+          def norm(x):
+              x = unicodedata.normalize("NFKD", str(x or ""))
+              x = "".join(c for c in x if not unicodedata.combining(c))
+              return re.sub(r"\s+", " ", x).strip().upper()
+
+          def fetch(name, url, timeout=120):
+              rec = {"name": name, "url": url, "obtained_at": datetime.now(timezone.utc).isoformat()}
+              try:
+                  r = session.get(url, timeout=timeout)
+                  rec["status"] = r.status_code
+                  rec["content_type"] = r.headers.get("content-type", "")
+                  rec["bytes"] = len(r.content)
+                  if r.ok and r.content:
+                      p = RAW / name
+                      p.write_bytes(r.content)
+                      rec["sha256"] = hashlib.sha256(r.content).hexdigest()
+                      rec["raw_file"] = str(p)
+                      log.append(rec)
+                      return r.content, rec
+                  rec["text_head"] = r.text[:1000]
+              except Exception as exc:
+                  rec["error"] = repr(exc)
+              log.append(rec)
+              return None, rec
+
+          def read_csv_bytes(data):
+              trials = [
+                  ("utf-8-sig", ";"),
+                  ("utf-8", ";"),
+                  ("latin-1", ";"),
+                  ("utf-8-sig", ","),
+                  ("latin-1", ","),
+              ]
+              errors = []
+              for enc, sep in trials:
+                  try:
+                      df = pd.read_csv(io.BytesIO(data), encoding=enc, sep=sep, dtype=str)
+                      if len(df.columns) > 1:
+                          return df, {"encoding": enc, "separator": sep}
+                  except Exception as exc:
+                      errors.append({"encoding": enc, "separator": sep, "error": repr(exc)})
+              raise RuntimeError(f"CSV unreadable: {errors}")
+
+          # 1. ANP annual municipal sales
+          anp_sales = {
+              "gasolina_c.csv": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/gasolina-c/vendas-anuais-de-gasolina-c-por-municipio.csv",
+              "etanol_hidratado.csv": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/etanol-hidratado/vendas-anuais-de-etanol-hidratado-por-municipio.csv",
+              "oleo_diesel.csv": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/oleo-diesel/vendas-anuais-de-oleo-diesel-por-municipio.csv",
+              "glp.csv": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/glp/vendas-anuais-de-glp-por-municipio.csv",
+          }
+          anp_summary = []
+          for fn, url in anp_sales.items():
+              data, rec = fetch(fn, url)
+              if not data:
+                  continue
+              try:
+                  df, parser = read_csv_bytes(data)
+                  cols = {norm(c): c for c in df.columns}
+                  code_col = cols.get("CODIGO IBGE")
+                  uf_col = cols.get("UF")
+                  year_col = cols.get("ANO")
+                  sales_col = cols.get("VENDAS")
+                  if not all((code_col, uf_col, year_col, sales_col)):
+                      raise RuntimeError(f"Expected ANP schema not found: {list(df.columns)}")
+                  code = df[code_col].astype(str).str.replace(r"\D", "", regex=True)
+                  mask = code.eq(IBGE) & df[uf_col].map(norm).eq(UF)
+                  hit = df.loc[mask].copy()
+                  out = FILT / f"saoborja_{fn}"
+                  hit.to_csv(out, index=False)
+                  anp_summary.append({
+                      "file": fn,
+                      "rows": len(hit),
+                      "years": sorted(hit[year_col].dropna().astype(str).unique().tolist()),
+                      "latest_year": max(hit[year_col].dropna().astype(str).tolist(), default=None),
+                      "parser": parser,
+                      "columns": list(df.columns),
+                      "filtered_file": str(out),
+                  })
+              except Exception as exc:
+                  anp_summary.append({"file": fn, "error": repr(exc)})
+
+          (OUT / "anp_sales_summary.json").write_text(
+              json.dumps(anp_summary, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          # 2. ANP current retailers API
+          api_url = "https://revendedoresapi.anp.gov.br/v1/combustivel?municipio=SAO%20BORJA&uf=RS"
+          try:
+              r = session.get(api_url, timeout=120)
+              api_rec = {
+                  "name": "anp_retailers_api",
+                  "url": api_url,
+                  "status": r.status_code,
+                  "content_type": r.headers.get("content-type", ""),
+                  "bytes": len(r.content),
+                  "obtained_at": datetime.now(timezone.utc).isoformat(),
+              }
+              if r.ok and r.content:
+                  (RAW / "anp_retailers_api.json").write_bytes(r.content)
+                  api_rec["sha256"] = hashlib.sha256(r.content).hexdigest()
+                  try:
+                      js = r.json()
+                      rows = js if isinstance(js, list) else js.get("data", js.get("value", [])) if isinstance(js, dict) else []
+                      api_rec["top_level_type"] = type(js).__name__
+                      api_rec["rows_detected"] = len(rows) if isinstance(rows, list) else None
+                      if isinstance(rows, list):
+                          pd.json_normalize(rows).to_csv(FILT / "anp_retailers_saoborja.csv", index=False)
+                  except Exception as exc:
+                      api_rec["json_error"] = repr(exc)
+              else:
+                  api_rec["text_head"] = r.text[:1000]
+              log.append(api_rec)
+          except Exception as exc:
+              log.append({"name": "anp_retailers_api", "url": api_url, "error": repr(exc)})
+
+          # 3. Cadastur 2Q2026 — Meios de Hospedagem and Agências de Turismo
+          cadastur = {
+              "cadastur_hospedagem_2t2026.xlsx": "https://dados.turismo.gov.br/dataset/d2333d1b-db1e-438b-955a-028db80a031e/resource/7e385ec2-57d8-446c-9cc0-f5f7dadd1fdf/download/meios-de-hospedagem-2-trimestre-2026.xlsx",
+              "cadastur_agencias_2t2026.xlsx": "https://dados.turismo.gov.br/dataset/5a324238-184a-4103-bfaa-bb998aa10328/resource/b4a036ed-8caa-46b5-86af-edbce86392d1/download/agencias-de-turismo-2-trimestre-2026.xlsx",
+          }
+          cad_summary = []
+          for fn, url in cadastur.items():
+              data, rec = fetch(fn, url)
+              if not data:
+                  continue
+              try:
+                  book = pd.ExcelFile(io.BytesIO(data))
+                  file_rows = 0
+                  matches = []
+                  for sheet in book.sheet_names:
+                      df = pd.read_excel(io.BytesIO(data), sheet_name=sheet, dtype=str)
+                      for col in df.columns:
+                          nc = norm(col)
+                          if "MUNIC" in nc or "CIDADE" in nc:
+                              mask = df[col].map(norm).eq(MUNICIPIO)
+                              if mask.any():
+                                  hit = df.loc[mask].copy()
+                                  hit.insert(0, "_sheet", sheet)
+                                  hit.insert(1, "_municipio_col", str(col))
+                                  matches.append(hit)
+                                  file_rows += len(hit)
+                                  break
+                  if matches:
+                      outdf = pd.concat(matches, ignore_index=True)
+                      out = FILT / fn.replace(".xlsx", "_saoborja.csv")
+                      outdf.to_csv(out, index=False)
+                      cad_summary.append({
+                          "file": fn,
+                          "sheets": book.sheet_names,
+                          "rows_sao_borja": file_rows,
+                          "filtered_file": str(out),
+                          "columns": list(outdf.columns),
+                      })
+                  else:
+                      cad_summary.append({
+                          "file": fn,
+                          "sheets": book.sheet_names,
+                          "rows_sao_borja": 0,
+                          "note": "No São Borja municipality value matched in detected municipality/city columns.",
+                      })
+              except Exception as exc:
+                  cad_summary.append({"file": fn, "error": repr(exc)})
+          (OUT / "cadastur_summary.json").write_text(
+              json.dumps(cad_summary, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          # 4. Comex Stat municipal — attempt current 2026 official files
+          comex = {
+              "EXP_2026_MUN.csv": "https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv",
+              "IMP_2026_MUN.csv": "https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv",
+          }
+          comex_summary = []
+          for fn, url in comex.items():
+              data, rec = fetch(fn, url, timeout=180)
+              if not data:
+                  comex_summary.append({"file": fn, "status": rec.get("status"), "error": rec.get("error"), "text_head": rec.get("text_head")})
+                  continue
+              try:
+                  df, parser = read_csv_bytes(data)
+                  required = {"CO_ANO","CO_MES","SH4","CO_PAIS","SG_UF_MUN","CO_MUN","KG_LIQUIDO","VL_FOB"}
+                  if not required.issubset(df.columns):
+                      raise RuntimeError(f"Expected Comex municipal schema not found: {list(df.columns)}")
+                  code = df["CO_MUN"].astype(str).str.replace(r"\D", "", regex=True)
+                  hit = df.loc[code.eq(IBGE) & df["SG_UF_MUN"].map(norm).eq(UF)].copy()
+                  out = FILT / fn.replace(".csv", "_saoborja.csv")
+                  hit.to_csv(out, index=False)
+                  comex_summary.append({
+                      "file": fn, "rows": len(hit), "parser": parser,
+                      "periods": sorted((hit["CO_ANO"].astype(str)+"-"+hit["CO_MES"].astype(str).str.zfill(2)).unique().tolist()),
+                      "sh4": sorted(hit["SH4"].dropna().astype(str).unique().tolist()),
+                      "filtered_file": str(out),
+                  })
+              except Exception as exc:
+                  comex_summary.append({"file": fn, "error": repr(exc)})
+          (OUT / "comex_summary.json").write_text(
+              json.dumps(comex_summary, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          (OUT / "request_log.json").write_text(
+              json.dumps(log, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          readme = [
+              "# Extração exploratória — fontes oficiais secundárias — São Borja",
+              "",
+              "Status: exploratório; nenhum arquivo é canônico.",
+              "",
+              "Filtros:",
+              "- IBGE: 4318002",
+              "- UF: RS",
+              "- Município normalizado: SAO BORJA",
+              "",
+              "Controles:",
+              "- ANP vendas mede volume vendido, não gasto ou perfil do comprador.",
+              "- ANP revendedores mede cadastro em operação, não volume.",
+              "- Comex municipal usa domicílio fiscal da empresa declarante e SH4.",
+              "- Cadastur mede prestadores cadastrados e possui obrigatoriedade distinta por categoria.",
+              "",
+              "Os arquivos raw são preservados apenas no artefato da execução; os arquivos filtered e resumos são persistidos no branch exploratório.",
+          ]
+          (OUT / "README.md").write_text("\n".join(readme), encoding="utf-8")
+
+          print(json.dumps({
+              "anp_sales": anp_summary,
+              "cadastur": cad_summary,
+              "comex": comex_summary,
+              "request_log": log,
+          }, ensure_ascii=False, indent=2))
+          PY
+          python /tmp/extract_secondary.py
+
+      - name: Persist filtered evidence on exploratory branch
+        run: |
+          mkdir -p docs/data_sources/secondary_official_sources_runtime
+          cp artifacts/secondary_official_sources_sao_borja/README.md docs/data_sources/secondary_official_sources_runtime/README.md
+          cp artifacts/secondary_official_sources_sao_borja/*_summary.json docs/data_sources/secondary_official_sources_runtime/ || true
+          cp artifacts/secondary_official_sources_sao_borja/request_log.json docs/data_sources/secondary_official_sources_runtime/
+          if compgen -G "artifacts/secondary_official_sources_sao_borja/filtered/*" > /dev/null; then
+            cp artifacts/secondary_official_sources_sao_borja/filtered/* docs/data_sources/secondary_official_sources_runtime/
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/secondary_official_sources_runtime
+          if git diff --cached --quiet; then
+            echo "No extraction changes to commit."
+          else
+            git commit -m "data: extract São Borja official secondary source evidence"
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload raw and filtered audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: secondary-official-sources-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/secondary_official_sources_sao_borja/

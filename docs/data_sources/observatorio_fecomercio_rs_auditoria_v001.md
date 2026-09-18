@@ -350,3 +350,16 @@ Até isso ocorrer:
 - MEI continua **lacuna em reprodução primária**;
 - Simples Nacional continua **lacuna em reprodução primária**;
 - nenhum valor secundário será promovido.
+
+### Conciliação com a base RFB já processada no SBMI
+
+O Caderno-Base v028, lido sem alteração, registra **7.306 estabelecimentos ativos** na camada RFB 2026-08.
+
+O cross-check secundário publica exatamente **7.306** para a mesma competência.
+
+Cálculo:
+`7.306 - 7.306 = 0`.
+
+**Resultado:** concordância exata no estoque total de estabelecimentos ativos.
+
+Esta conciliação aumenta a confiança de que o agregador está operando sobre a mesma competência geral da base RFB usada pelo SBMI. Contudo, **não valida automaticamente** os valores de MEI, Simples, aberturas ou baixas, porque essas métricas dependem de arquivos/regras adicionais e ainda não foram reproduzidas diretamente.

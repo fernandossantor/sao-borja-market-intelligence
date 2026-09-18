@@ -7,9 +7,11 @@
 
 ## Objetivo
 
-Preparar uma ingestão reproduzível dos CSVs que a NT CIET 05/2026 documenta na página **Dados Abertos** do Radar de Mercado.
+Preparar uma ingestão reproduzível dos CSVs documentados pela NT CIET 05/2026 na página **Dados Abertos** do Radar de Mercado.
 
-Este protocolo não cria nem altera base canônica.
+O desenho é **multissetorial**. O arroz permanece apenas como cesta-piloto inicial; a rotina aceita qualquer cesta auditável de NCMs fornecida explicitamente.
+
+Nenhuma execução promove dados para camadas canônicas.
 
 ## Bases documentadas pela NT
 
@@ -20,23 +22,34 @@ Este protocolo não cria nem altera base canônica.
 5. Portfólio de NCMs por Setor;
 6. Categorias de Produtos.
 
-## Cesta piloto
+## Cesta-piloto padrão
 
-O módulo filtra apenas:
+Sem parâmetro adicional, o módulo usa os sete NCMs do arroz já auditados.
 
-- 10062010;
-- 10062020;
-- 10063011;
-- 10063019;
-- 10063021;
-- 10063029;
-- 10064000.
+Essa cesta serve para validar:
+- schema;
+- granularidade;
+- fórmula de Part.RS;
+- classificação de dependência;
+- fluxos OUF/EXT.
 
-## Procedimento
+Ela **não define o escopo analítico do SBMI**.
 
-Depois de obter os arquivos públicos, armazená-los fora das camadas canônicas, preferencialmente em uma pasta de entrada exploratória.
+## Cestas multissetoriais
 
-Executar:
+Para qualquer outro setor/cadeia, criar um CSV com:
+
+```csv
+ncm,descricao
+XXXXXXXX,Descrição auditada do produto
+YYYYYYYY,Descrição auditada do produto
+```
+
+A classificação deve vir de fonte oficial compatível, como NCM/CLASSIF ou tabela oficial utilizada pelo projeto. Não inventar agrupamentos sem documentação.
+
+## Execução
+
+### Piloto padrão do arroz
 
 ```bash
 python -m sbmi.radar_open_data_cli \
@@ -44,64 +57,99 @@ python -m sbmi.radar_open_data_cli \
   --execution-id radar-open-data-YYYYMMDD-HHMMSS
 ```
 
-Saída padrão:
+### Cesta própria
+
+```bash
+python -m sbmi.radar_open_data_cli \
+  --source-dir <pasta-dos-csvs> \
+  --basket-file <cesta_ncm.csv> \
+  --basket-name <nome_da_cesta> \
+  --execution-id radar-open-data-YYYYMMDD-HHMMSS
+```
+
+## Saída padrão
 
 `.data/audit/receita_rs/radar_open_data/<execution-id>/`
 
-Arquivos produzidos:
+Arquivos:
+- `schema_inventory.csv`;
+- `ncm_basket.csv`;
+- `ncm_matches.csv`;
+- `composition_summary.csv`;
+- `validation.csv`;
+- `limitations.csv`.
 
-- `schema_inventory.csv` — nome, hash SHA-256, encoding, tamanho lógico, colunas e mapeamentos reconhecidos;
-- `rice_ncm_matches.csv` — todas as linhas brutas que correspondam aos sete NCMs;
-- `rice_composition_summary.csv` — resumo INT/OUF/EXT, demanda e Part.RS **somente quando o schema permitir mapear esses campos com segurança**;
-- `validation.csv` — verificações da execução;
-- `limitations.csv` — schemas ou campos que não puderam ser interpretados sem inferência.
+Quando a cesta padrão do arroz é usada, são mantidos também aliases de compatibilidade:
+- `rice_ncm_matches.csv`;
+- `rice_composition_summary.csv`.
 
 ## Regras de não-inferência
 
-O módulo não tenta adivinhar a estrutura real de um CSV desconhecido.
+O módulo não tenta adivinhar a estrutura de um CSV desconhecido.
 
-Quando não identifica:
-- coluna NCM; ou
-- INT/OUF/EXT em formato largo; ou
-- tipo de origem + valor em formato longo,
+Só calcula composição quando identifica inequivocamente:
+- coluna NCM; e
+- INT/OUF/EXT em formato largo;
 
-o cálculo é bloqueado e a limitação é registrada.
+ou:
+- coluna NCM;
+- tipo de origem;
+- valor;
+- categorias INT, OUF e EXT.
 
-Nenhum market share é criado a partir de campos desconhecidos.
+Quando o schema não satisfaz essas condições, nenhum market share é produzido.
 
 ## Fórmula permitida
 
-Quando os dados necessários forem inequivocamente identificados:
-
 `Part.RS = INT / (INT + OUF + EXT)`
 
-Classificação oficial da NT CIET 05/2026:
+Classificação da NT CIET 05/2026:
 - crítica: Part.RS < 5%;
 - alta: 5% ≤ Part.RS < 15%;
-- média: 15% ≤ Part.RS < 30%;
-- acima desse limite o módulo registra `FORA_DAS_FAIXAS_NT`, sem inventar uma quarta categoria.
+- média: 15% ≤ Part.RS < 30%.
 
-## Testes
+Acima de 30%, o código registra `FORA_DAS_FAIXAS_NT`. Isso **não é uma quarta categoria oficial**; é apenas um marcador de que a observação não pertence às três faixas expressamente nomeadas na NT.
 
-Foram preparados testes sintéticos para:
-- composição em formato largo;
-- composição em formato longo;
-- filtragem de exportações por NCM sem fabricar market share;
-- bloqueio quando o schema de composição não é interpretável.
+## Testes preparados
 
-Em execução local controlada na preparação desta versão: **4 testes aprovados**.
+A suíte cobre:
+1. composição em formato largo;
+2. composição em formato longo;
+3. arquivo de exportações filtrado sem fabricar market share;
+4. bloqueio para schema de composição não interpretável;
+5. cesta customizada de NCM fora do arroz.
+
+A execução da suíte deve ser refeita no ambiente local/CI após cada alteração.
+
+## Próximas cestas analíticas
+
+A seleção deve partir das perguntas territoriais, e não de uma tentativa de varrer indiscriminadamente toda a NCM.
+
+Candidatas:
+- agroindústrias e alimentos;
+- saúde/higiene e cuidados;
+- categorias de bens essenciais;
+- cadeias de bens não essenciais com relevância local;
+- produtos associados a atividades industriais locais relevantes.
+
+Cada cesta exige:
+1. regra de seleção documentada;
+2. relação CNAE/NCM quando pertinente;
+3. fonte oficial de classificação;
+4. justificativa mercadológica;
+5. registro de itens incluídos/excluídos.
 
 ## Pendência operacional
 
-O pipeline está pronto, mas os CSVs públicos reais ainda não foram obtidos por uma rota reproduzível no ambiente de auditoria.
+Os CSVs públicos reais ainda precisam ser obtidos por rota reproduzível.
 
-Foi também preparado `.github/workflows/radar-open-data-discovery.yml` para tentar capturar os downloads públicos pelo navegador automatizado. O push efetuado pelo conector não disparou GitHub Actions, portanto esse caminho permanece preparado, mas não executado.
+O workflow `.github/workflows/radar-open-data-discovery.yml` permanece preparado para descoberta automatizada, mas ainda não foi executado pelo GitHub Actions.
 
 ## Critério de promoção futura
 
 Mesmo após extração bem-sucedida, os resultados permanecem exploratórios até:
 1. schema auditado;
 2. período/unidade confirmados;
-3. conciliação das somas com o painel ou documentação;
-4. validação dos sete NCMs;
+3. conciliação das somas com painel/documentação;
+4. validação da cesta;
 5. decisão explícita de promoção.

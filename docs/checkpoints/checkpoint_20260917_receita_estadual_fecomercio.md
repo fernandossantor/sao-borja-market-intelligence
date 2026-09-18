@@ -167,3 +167,16 @@ Volume de Vendas da Indústria do RS:
 - manter dados novos como exploratórios;
 - registrar fonte, período, unidade, geografia e limitação;
 - promover somente após validação e autorização explícita.
+
+
+## ERRATA — 18/09/2026
+
+A referência à “NT CIET 05/2026” como não localizada no checkpoint de 17/09/2026 está superada.
+
+A página oficial do Receita.doc lista explicitamente:
+**NOTA TÉCNICA CIET 05/2026 - RADAR DE MERCADO DA RECEITA ESTADUAL**, publicada em **30/06/2026**.
+
+URL oficial identificado:
+https://receitadoc.sefaz.rs.gov.br/media/rhwdpvaz/nota_tecnica_radar_mercado_v1.pdf
+
+O PDF ainda não foi recuperado integralmente nesta sessão por limitação técnica de acesso, portanto somente existência, título, data e URL foram confirmados. O restante da metodologia permanece pendente de leitura documental.

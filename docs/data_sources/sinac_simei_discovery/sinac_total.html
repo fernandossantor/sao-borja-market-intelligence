@@ -1,0 +1,290 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head id="ctl00_ctl00_Head1"><title>
+	Estatísticas Sinac
+</title>
+  <!-- OOCSS -->
+  <link id="ctl00_ctl00_Link1" rel="stylesheet" type="text/css" media="all" href="css/framework/libraries.css"><link id="ctl00_ctl00_Link2" rel="stylesheet" type="text/css" media="all" href="css/framework/template.css"><link id="ctl00_ctl00_Link3" rel="stylesheet" type="text/css" media="all" href="css/framework/grids.css">
+  
+  <!-- CSS -->
+  <link id="ctl00_ctl00_Link4" rel="stylesheet" type="text/css" media="all" href="css/framework/mod.css"><link id="ctl00_ctl00_Link5" rel="stylesheet" type="text/css" media="all" href="css/base.css"><link id="ctl00_ctl00_Link6" rel="stylesheet" type="text/css" media="all" href="css/forms.css"><link id="ctl00_ctl00_Link7" rel="stylesheet" type="text/css" media="all" href="css/dataTable.css"><link id="ctl00_ctl00_Link8" rel="stylesheet" type="text/css" media="all" href="css/actions.css"><link id="ctl00_ctl00_Link9" rel="stylesheet" type="text/css" media="all" href="css/navigation.css"><link id="ctl00_ctl00_Link10" rel="stylesheet" type="text/css" media="all" href="css/skinDefault.css"><link id="ctl00_ctl00_Link11" rel="Stylesheet" type="text/css" media="all" href="css/Estatistica.css">
+  <!-- CSS-Print -->
+  <link id="ctl00_ctl00_Link12" rel="stylesheet" type="text/css" media="print" href="css/framePrint.css">
+    
+    <link rel="stylesheet" type="text/css" media="screen" href="css/ui-lightness/jquery-ui-1.8.9.custom.css">
+
+
+
+</head>
+<body class="interno">
+  <div id="container">
+    <form name="aspnetForm" method="post" action="./EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1" id="aspnetForm">
+<div>
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="" style="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="" style="">
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="" style="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="sY8qEgppoj+1UTd2tv6LicsbmBSlaSLm1ukDwX/Hw4RUw/Rv8OYAonfmHrNZPMyOPVrBjeTQZA1QvMutsOyw1WWOfkDziv6vffFpMJB+LkLxUQiHbTSeSn/xbPV1/PeEgiWZ57UtNAj4/D9dIhdDexBr8A6MmoNTtZKM7If1W7bnSIXisBYUtl/TbbOlRiPk9zruxOq+s8iIxwURKY5DAwS4vOgs/Ervyz6vKCq/+ZpiEdYz4JQ0YsZj6XS5XcxrVGFBKxHvPlyCXJsb794WVoD6iL6U2Ue2GEh+ya+T/SGEFeXsYpQskSGbX6KZUtOwuHg2pCPepBI/APW3yn69hMQaguH/N0fVKeYbnsHf0i+yP83wInIBMrojeb8mCYW1jqWNfmIvkhEjZl3/vTMMbMeoCKv5W9J8XOyEsalFr5rxTtT4uF+bdECMtOLdU6V4blBEGomBtlxNJExrG3oZFA2kl27aDTC9GwEwIQHTnpFkiTKUU2GF1tc69dVAtzfIhnLwSQwPX3pWsjHw3VKxsgN/jY0pQq+rU7OghcPwbNB/YufR+tap4gES/khyu45z9SlMiuFDDCzakjlV1grS2A5DxDFv7Dp9XO7RjLX0sVc0F8pzWmEKVvDO5Q1tsK2CN1H2KE8/uLutQ7q4VetcsSYvwIr0SudWR3LNXmiSdms/cDNExYzAnhE3RqHyFQZoVxGL/ktSNcbZYBhJC5FdMEfb9P3KgXEn1WLJPKlP/4CbtQqKYg7jr3JefLQhym/GEKgFxgWtPjy9/tYbFL+nTJH3GAB0QhVZGo0mIV2IdySTiwKsGHKO9L4c7lIfRdjr65Fw8YpTzC+Ro5oCPwTNuRp94EfRw1ncOG/ZxU48xEZWMaVUYDNhhfQBWqJ7wooPWAn/2HtuZiWYcBbTkpN0V+iDg9opzfbON8661TvXrWSPpj0l1yeKNqoDo+iAMZ8hKRiJtrJbSUTI9xNOXNRaqd5x3Cj3ODY0ErHvLpEAX9ZLRRhVL/XajOSBmDI8DWGaKwHAv33+5qRe2Byg21eR5K5TdlP2dej5pJ1jYJGVQBvSHIWNwBLFmx5ViMFMtSzHuTBmuqb9NgggMKarNvQfKgHa3OZMFyXphZE7n+GQAQbIqzu0i4d9rHn4/pjciY19NVGXTphxeKbIn6nnjucOmPi20lpskrewF40inqT/MDujX19IM/Jsish6nCMRB047QJ6/AxEwf1PATbA0YxEKg/lqgWNUzwH8fPtTm6UkNZiPmbpvTMyTv6aB44yjq1UayjvpowIsZuXM+ntY4ErVrLTvkz7lQhyoE2UG2Bn+K7EdKMgip8nfRGYqdzv/HWuBhb9GB4eTpYV21mx8qUICWMmbs1oFNAw8j7ASblESOThDFg6oxH8ZKh2aaPlNGaku2YgZeh4kcoaYvS1KrvnejhDTIdWbFJkPMFjedle/1Vlfmxxv8ip2hO4kQJrzW53NgKBInPchGz2GJgvG4BiWxo+Kq0t/blU25/zjtF0IG9exfyhYZAy/GSLeoeGwUGc9XdeX5CoI/Z6lW/wV442bQ1SyylSrZkmd0CLplmrpXbMalehIzled6wcFQsVqNViTlgSbqTFVzigprdLDSC1WcD7nu0HutKGHXMsGndRwBMNuMnRwl5fHXj6I3bVqIlP4hBm9+g==" style="">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['aspnetForm'];
+if (!theForm) {
+    theForm = document.aspnetForm;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="/SimplesNacional/Aplicacoes/ATBHE/estatisticasSinac.app/WebResource.axd?d=pynGkmcFUV13He1Qd6_TZGQ5xk-A9jB6VPAZKED3K0N4iJobMafgnc18AKA7XYHmRb9Ehw2&amp;t=639190736600000000" type="text/javascript"></script>
+
+
+<script src="/SimplesNacional/Aplicacoes/ATBHE/estatisticasSinac.app/ScriptResource.axd?d=D9drwtSJ4hBA6O8UhT6CQhNVXqwOPLjzBv8R36s9ZfRzNe9ll4sJLBdyl7o9s7_0Y3PWUBXxGDmdwiyQt1FjtP-rzXmsRkcPBnVk7GAuwaCE_WEp6wFv0lZ2go6tbCcpUXh-rbJykITOHd84xsaP6KtJJXo1&amp;t=ffffffffbec1863d" type="text/javascript"></script>
+<script type="text/javascript">
+//<![CDATA[
+if (typeof(Sys) === 'undefined') throw new Error('ASP.NET Ajax client-side framework failed to load.');
+//]]>
+</script>
+
+<script src="/SimplesNacional/Aplicacoes/ATBHE/estatisticasSinac.app/ScriptResource.axd?d=JnUc-DEDOM5KzzVKtsL1tWbDB6h4G62Iq7MsQV3wCiAYIfBZiAXfuOXnRvGNHrXO2VxZIEp3paW6RQ9h2K6BuNivw9DIj25NDxrJDV5s5Xs2TMgZBgadpPMdqdGOX1Y316i6XX2LSlgVcmshaubZQx_-pnv0Q2S4yfG9_gw8JXsY9L5V0&amp;t=ffffffffbec1863d" type="text/javascript"></script>
+<script src="js/jquery-1.4.2-min.js" type="text/javascript"></script>
+<script src="js/Leiaute.js" type="text/javascript"></script>
+<script src="js/FormatacaoTabelas.js" type="text/javascript"></script>
+<script src="js/FormatacaoDL.js" type="text/javascript"></script>
+<div>
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="FEAC32F1" style="">
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="y5D/W0fFdv1EVePuQ6np6Cp4BUE70mJO0ent/R2P/aSLL/zRV7zzdoCj77h+5SyLV4qQ+D82m7GA4/a5sAnVcV3GocWybJhD/ymovm9eMcYcc6DBAr2MU2/Hp9uTrLZUNfeeLFYmS6s8HM5RoGLbfFX7oYWfSrd328YQsoSVun6Gd1wCWQjwVm1hrF0k7QcCfxJy7feNUW6hikBKpAPspLLMM5ufzliR4DzOdToNVjG0GNEtM4GbWjW5FdCkUoptyVH3IiflDZwog0vS0dc8tVTacfVHLx32jMvUJlIoDvsEJuYuQ3XOKfiEzKhhUsDi8HxZtgA+LbUJgTPrHMGneEmyX77xCe+TGaBxBNqSyZZhCOLkL22vCcOMpLSLu4W+ix7igywTWBew/8KjsyyBQTDdmEj7qGPYRAPWdE0N6r2cKr/U57itFJH0W6JnNSd76kIB4hoFJgTnDmUPwPwV/a1v818WSXc627OgcHqDelwnI9gEUumsO2dZSiZBhpzfQDoYni+6HVh5vk8s+WyGk/yS3bJEgKf39K4L3Iddk6hsaLV00Y3ija3N7wrG0fBGdF21SrN6YcEJFzxDnf3qNTQgwTrpV1X/Q8ghRkcmoZaT4lpnpY1BuSkICqd+tmL9g+if/aeNJ6sTXFfHLvOVnIqMYr0/GEvdZnoc5UZSQmuzp+MxTegD+jyEI9I67FF9ydekeJPwu4d1DHkReZtG5BCoEUjNfaZRwjTWtAPFTgpJfpxChuEaBEYmGuDrKzpUyspXsIfTHtpnyPEoq6ekxnESMDuunz37DuT36I9rui2bV4JDJscfrNzQkxk3YgAHcRQhGtyKRHfC+rcgXN7+wLjJrxxwIcGf7ljYWMzw5+Ii3gPJcYsCkV9Jl2yGtmNmbvHLXuzf0DuhQDqAgbLVG+uER25mjLHgn6a/NbJlOK5Yj/o2tXUDe59ShGEVyKTcoN/LoXUoO4BFPI2VTkWLGN0EQofBrGBg6l4bmXKTuLsyiUUY5D1iu2ivNwou8mVSwMo3A4Aelgd0pwDycxnhPyOkVahlvsnoBJN0SmLuxnTb5phAGV69YbVFgWiu2wxvIC/aCQ==" style="">
+</div>
+    <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ctl00$ctl00$ScriptManager1', 'aspnetForm', [], [], [], 90, 'ctl00$ctl00');
+//]]>
+</script>
+
+    <div class="page liquid">
+      <div id="breadcrumbs">
+        <span id="ctl00_ctl00_SiteMapPath"><a href="#ctl00_ctl00_SiteMapPath_SkipLink"><img alt="Skip Navigation Links" src="/SimplesNacional/Aplicacoes/ATBHE/estatisticasSinac.app/WebResource.axd?d=rKN1opQVoh180LaGjXZZkIWX6Rxy_F6aKU70Xx5hw8WvyepiKfrAaUbojzSjIj-khHqLxA2&amp;t=639190736600000000" width="0" height="0" style="border-width:0px;"></a><span>
+            <a id="ctl00_ctl00_SiteMapPath_ctl00_LinkRaiz" class="first" href="/SimplesNacional/Aplicacoes/ATBHE/estatisticasSinac.app/Default.aspx">Estatísticas do Simples Nacional</a>
+          </span><span>:: </span><span>
+            <span class="atual">
+              Optantes por UF e Município</span>
+          </span><a id="ctl00_ctl00_SiteMapPath_SkipLink"></a></span>
+      </div>
+      <div class="userCase">
+        <h1>
+          
+    
+    <span id="ctl00_ctl00_Titulo_Titulo_lblTitulo">Optantes por UF e Município - Sinac</span>
+
+
+        </h1>
+        <span class="controlPanel">
+          
+    
+
+
+        </span>
+      </div>
+      <div id="mainBodyContainer" class="body" style="position: relative; overflow: auto; height: 1138.55px; width: 1764px;">
+        
+    
+    
+<span id="ctl00_ctl00_Conteudo_AntesTabela_lblAno" style="border-color:#000099;">ANO 2026</span>
+  <br>
+        
+     <br>
+       <div class="nota">
+           <span id="ctl00_ctl00_Conteudo_AntesTabela_lblDataEstatistica">Posição Consolidada até 12/09/2026</span>
+    </div>
+  <table id="tabelaSemFormatacao1" width="100%" class="">
+    <tbody><tr class="cabecalho">   
+  
+      <td style="width: 100%">
+        <fieldset id="fieldSetP">
+          <legend>Parâmetros de Exibição</legend>
+          
+              <table id="tabelaSemFormatacao3" class="">              
+               <tbody><tr class="cabecalho">                   
+                <td>
+                    <span id="ctl00_ctl00_Conteudo_AntesTabela_lblOpcao">Selecione o tipo de consulta:</span>                   
+                </td>
+                <td>
+                    <select name="ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao" onchange="javascript:setTimeout('__doPostBack(\'ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao\',\'\')', 0)" id="ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao">
+	<option selected="selected" value="Por Dia">Por Dia</option>
+	<option value="Por UF">Por UF</option>
+	<option value="Por Município">Por Município</option>
+
+</select>
+                </td>                   
+                <td>
+                    &nbsp;                    
+                    <span id="ctl00_ctl00_Conteudo_AntesTabela_lblMes"> Mês: </span>
+                    <select name="ctl00$ctl00$Conteudo$AntesTabela$droplistMes" id="ctl00_ctl00_Conteudo_AntesTabela_droplistMes">
+	<option value="">-- Selecione uma opção --</option>
+	<option value="1">Janeiro/2026</option>
+	<option value="2">Fevereiro/2026</option>
+	<option value="3">Março/2026</option>
+	<option value="4">Abril/2026</option>
+	<option value="5">Maio/2026</option>
+	<option value="6">Junho/2026</option>
+	<option value="7">Julho/2026</option>
+	<option value="8">Agosto/2026</option>
+	<option value="9">Setembro/2026</option>
+
+</select>
+                </td>                   
+               </tr>              
+                <tr class="">
+                 <td class="formatacaoTd">
+                    
+                  </td>
+                  <td>
+                    <span class="containerCaixaCalendario">
+                      
+                    </span>
+                    
+                  </td>                 
+                  <td class="formatacaoTd">
+                    
+                    
+                  </td>
+                  
+                </tr>                
+              </tbody></table>          
+        </fieldset>
+      </td>
+    </tr>
+  </tbody></table>
+  <div style="margin-bottom: 20px">
+    <center>
+      <input type="submit" name="ctl00$ctl00$Conteudo$AntesTabela$btnExibir" value="Exibir Dados" id="ctl00_ctl00_Conteudo_AntesTabela_btnExibir" class="button" style="">
+      <input type="submit" name="ctl00$ctl00$Conteudo$AntesTabela$btnLimpar" value="Limpar Dados" id="ctl00_ctl00_Conteudo_AntesTabela_btnLimpar" class="button" style="">
+      <input id="btVoltar" onclick="javascript:window.history.back()" type="button" value="Voltar" class="button" style="">
+    </center>
+  </div>
+
+
+  
+    
+  <center>
+    <br>
+     
+    <br>
+    <br>
+    
+    
+  </center>
+
+  
+
+    <script src="js/SinacSuite.js" type="text/javascript"></script>
+
+  <script src="js/EstatisticaSinac.js" type="text/javascript"></script>
+
+  <script src="js/jquery-ui-1.8.9.custom.min.js" type="text/javascript"></script>
+
+  <script src="js/i18n/jquery.ui.datepicker-pt-BR.js" type="text/javascript"></script>
+
+  
+  
+  <input type="hidden" name="ctl00$ctl00$Conteudo$AposTabela$hfMunicipios" id="ctl00_ctl00_Conteudo_AposTabela_hfMunicipios" style="">
+  <input type="hidden" name="ctl00$ctl00$Conteudo$AposTabela$hfUF" id="ctl00_ctl00_Conteudo_AposTabela_hfUF" style="">
+  <input type="hidden" name="ctl00$ctl00$Conteudo$AposTabela$hfCheck" id="ctl00_ctl00_Conteudo_AposTabela_hfCheck" value="false" style="">
+   
+   
+
+   
+
+      </div>
+    </div>
+    </form>
+  </div>
+
+
+<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div><div class="ui-dialog ui-widget ui-widget-content ui-corner-all  ui-draggable ui-resizable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-divModal" style="display: none; z-index: 1000; outline: 0px; position: absolute;"><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="ui-dialog-title" id="ui-dialog-title-divModal">Gráficos</span><a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a></div><div id="divModal" class="ui-dialog-content ui-widget-content">
+    <iframe id="ctl00_ctl00_Conteudo_AposTabela_FrameCiae_FrameVisualizacaoEstatistica" width="100%" height="425px" frameborder="0" style="z-index: 0 !important"></iframe>
+
+  </div><div class="ui-resizable-handle ui-resizable-n"></div><div class="ui-resizable-handle ui-resizable-e"></div><div class="ui-resizable-handle ui-resizable-s"></div><div class="ui-resizable-handle ui-resizable-w"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se ui-icon-grip-diagonal-se" style="z-index: 1001;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 1002;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 1003;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 1004;"></div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Fechar</span></button></div></div></div><div class="ui-dialog ui-widget ui-widget-content ui-corner-all  ui-draggable ui-resizable" tabindex="-1" role="dialog" aria-labelledby="ui-dialog-title-divModalFiltroIrpf" style="display: none; z-index: 1000; outline: 0px; position: absolute;"><div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix"><span class="ui-dialog-title" id="ui-dialog-title-divModalFiltroIrpf">Selecione a UF / Município</span><a href="#" class="ui-dialog-titlebar-close ui-corner-all" role="button"><span class="ui-icon ui-icon-closethick">close</span></a></div><div id="divModalFiltroIrpf" class="ui-dialog-content ui-widget-content">
+    <table id="tabelaSemFormatacao4" class="">
+      <tbody><tr class="cabecalho">
+        <td align="right" style="padding: 5px">
+          UF:
+        </td>
+        <td>
+          <select name="ctl00$ctl00$Conteudo$AposTabela$ddlUf" id="ctl00_ctl00_Conteudo_AposTabela_ddlUf">
+	<option value="UFNS">UF não selecionado</option>
+	<option value="AC">AC - Acre</option>
+	<option value="AL">AL - Alagoas</option>
+	<option value="AM">AM - Amazonas</option>
+	<option value="AP">AP - Amapá</option>
+	<option value="BA">BA - Bahia</option>
+	<option value="CE">CE - Ceará</option>
+	<option value="DF">DF - Distrito Federal</option>
+	<option value="ES">ES - Espírito Santo</option>
+	<option value="GO">GO - Goiás</option>
+	<option value="MA">MA - Maranhão</option>
+	<option value="MG">MG - Minas Gerais</option>
+	<option value="MS">MS - Mato Grosso do Sul</option>
+	<option value="MT">MT - Mato Grosso</option>
+	<option value="PA">PA - Pará</option>
+	<option value="PB">PB - Paraíba</option>
+	<option value="PE">PE - Pernambuco</option>
+	<option value="PI">PI - Piauí</option>
+	<option value="PR">PR - Paraná</option>
+	<option value="RJ">RJ - Rio de Janeiro</option>
+	<option value="RN">RN - Rio Grande do Norte</option>
+	<option value="RO">RO - Rondônia</option>
+	<option value="RR">RR - Roraima</option>
+	<option value="RS">RS - Rio Grande do Sul</option>
+	<option value="SC">SC - Santa Catarina</option>
+	<option value="SE">SE - Sergipe</option>
+	<option value="SP">SP - São Paulo</option>
+	<option value="TO">TO - Tocantins</option>
+
+</select>          
+        </td>
+      </tr>
+    </tbody></table>
+    <fieldset>
+      <legend>Selecione os municípios desejados</legend>
+      <table id="tabelaSemFormatacao5" class="">
+        <tbody><tr class="cabecalho">
+          <td style="padding-right: 8px">
+            <select multiple="multiple" size="8" id="lbOrigem" style="width: 250px"><option value="1118">ACEGUA</option><option value="8499">AGUA SANTA</option><option value="8501">AGUDO</option><option value="8503">AJURICABA</option><option value="8505">ALECRIM</option><option value="8507">ALEGRETE</option><option value="8497">ALEGRIA</option><option value="1120">ALMIRANTE TAMANDARE DO SUL</option><option value="8509">ALPESTRE</option><option value="8495">ALTO ALEGRE</option><option value="6045">ALTO FELIZ</option><option value="8511">ALVORADA</option><option value="8493">AMARAL FERRADOR</option><option value="5969">AMETISTA DO SUL</option><option value="8491">ANDRE DA ROCHA</option><option value="8513">ANTA GORDA</option><option value="8515">ANTONIO PRADO</option><option value="5779">ARAMBARE</option><option value="0952">ARARICA</option><option value="8517">ARATIBA</option><option value="8519">ARROIO DO MEIO</option><option value="1122">ARROIO DO PADRE</option><option value="8489">ARROIO DO SAL</option><option value="8523">ARROIO DO TIGRE</option><option value="8521">ARROIO DOS RATOS</option><option value="8525">ARROIO GRANDE</option><option value="8527">ARVOREZINHA</option><option value="8529">AUGUSTO PESTANA</option><option value="8487">AUREA</option><option value="8531">BAGE</option><option value="0954">BALNEARIO PINHAL</option><option value="8485">BARAO</option><option value="8533">BARAO DE COTEGIPE</option><option value="5771">BARAO DO TRIUNFO</option><option value="6069">BARRA DO GUARITA</option><option value="0956">BARRA DO QUARAI</option><option value="8537">BARRA DO RIBEIRO</option><option value="5959">BARRA DO RIO AZUL</option><option value="5943">BARRA FUNDA</option><option value="8535">BARRACAO</option><option value="8539">BARROS CASSAL</option><option value="0958">BENJAMIN CONSTANT DO SUL</option><option value="8541">BENTO GONCALVES</option><option value="5981">BOA VISTA DAS MISSOES</option><option value="8543">BOA VISTA DO BURICA</option><option value="1124">BOA VISTA DO CADEADO</option><option value="1126">BOA VISTA DO INCRA</option><option value="0960">BOA VISTA DO SUL</option><option value="8545">BOM JESUS</option><option value="9823">BOM PRINCIPIO</option><option value="6071">BOM PROGRESSO</option><option value="8547">BOM RETIRO DO SUL</option><option value="8483">BOQUEIRAO DO LEAO</option><option value="8549">BOSSOROCA</option><option value="1128">BOZANO</option><option value="8551">BRAGA</option><option value="8449">BROCHIER</option><option value="8553">BUTIA</option><option value="8555">CACAPAVA DO SUL</option><option value="8557">CACEQUI</option><option value="8559">CACHOEIRA DO SUL</option><option value="8561">CACHOEIRINHA</option><option value="8563">CACIQUE DOBLE</option><option value="8565">CAIBATE</option><option value="8567">CAICARA</option><option value="8569">CAMAQUA</option><option value="8447">CAMARGO</option><option value="8571">CAMBARA DO SUL</option><option value="6013">CAMPESTRE DA SERRA</option><option value="8573">CAMPINA DAS MISSOES</option><option value="8575">CAMPINAS DO SUL</option><option value="8577">CAMPO BOM</option><option value="8579">CAMPO NOVO</option><option value="8445">CAMPOS BORGES</option><option value="8581">CANDELARIA</option><option value="8583">CANDIDO GODOI</option><option value="6083">CANDIOTA</option><option value="8585">CANELA</option><option value="8587">CANGUCU</option><option value="8589">CANOAS</option><option value="1130">CANUDOS DO VALE</option><option value="1132">CAPAO BONITO DO SUL</option><option value="8915">CAPAO DA CANOA</option><option value="1134">CAPAO DO CIPO</option><option value="8973">CAPAO DO LEAO</option><option value="8443">CAPELA DE SANTANA</option><option value="6025">CAPITAO</option><option value="0962">CAPIVARI DO SUL</option><option value="0964">CARAA</option><option value="8591">CARAZINHO</option><option value="8593">CARLOS BARBOSA</option><option value="5961">CARLOS GOMES</option><option value="8595">CASCA</option><option value="8441">CASEIROS</option><option value="8597">CATUIPE</option><option value="8599">CAXIAS DO SUL</option><option value="5963">CENTENARIO</option><option value="0966">CERRITO</option><option value="8439">CERRO BRANCO</option><option value="8437">CERRO GRANDE</option><option value="8435">CERRO GRANDE DO SUL</option><option value="8601">CERRO LARGO</option><option value="8603">CHAPADA</option><option value="8693">CHARQUEADAS</option><option value="5965">CHARRUA</option><option value="8605">CHIAPETTA</option><option value="0968">CHUI</option><option value="0970">CHUVISCA</option><option value="8433">CIDREIRA</option><option value="8607">CIRIACO</option><option value="6029">COLINAS</option><option value="8609">COLORADO</option><option value="8611">CONDOR</option><option value="8613">CONSTANTINA</option><option value="1136">COQUEIRO BAIXO</option><option value="5945">COQUEIROS DO SUL</option><option value="6055">CORONEL BARROS</option><option value="8615">CORONEL BICACO</option><option value="1138">CORONEL PILAR</option><option value="8977">COTIPORA</option><option value="5797">COXILHA</option><option value="8617">CRISSIUMAL</option><option value="8431">CRISTAL</option><option value="0972">CRISTAL DO SUL</option><option value="8619">CRUZ ALTA</option><option value="1140">CRUZALTENSE</option><option value="8621">CRUZEIRO DO SUL</option><option value="8623">DAVID CANABARRO</option><option value="6073">DERRUBADAS</option><option value="8429">DEZESSEIS DE NOVEMBRO</option><option value="0974">DILERMANDO DE AGUIAR</option><option value="8625">DOIS IRMAOS</option><option value="5971">DOIS IRMAOS DAS MISSOES</option><option value="8427">DOIS LAJEADOS</option><option value="8627">DOM FELICIANO</option><option value="8629">DOM PEDRITO</option><option value="0976">DOM PEDRO DE ALCANTARA</option><option value="8631">DONA FRANCISCA</option><option value="8425">DOUTOR MAURICIO CARDOSO</option><option value="0978">DOUTOR RICARDO</option><option value="8423">ELDORADO DO SUL</option><option value="8633">ENCANTADO</option><option value="8635">ENCRUZILHADA DO SUL</option><option value="5947">ENGENHO VELHO</option><option value="8419">ENTRE IJUIS</option><option value="8421">ENTRE RIOS DO SUL</option><option value="8417">EREBANGO</option><option value="8637">ERECHIM</option><option value="8415">ERNESTINA</option><option value="8641">ERVAL GRANDE</option><option value="8643">ERVAL SECO</option><option value="8645">ESMERALDA</option><option value="0980">ESPERANCA DO SUL</option><option value="8647">ESPUMOSO</option><option value="7301">ESTACAO</option><option value="8649">ESTANCIA VELHA</option><option value="8651">ESTEIO</option><option value="8653">ESTRELA</option><option value="0982">ESTRELA VELHA</option><option value="8413">EUGENIO DE CASTRO</option><option value="8411">FAGUNDES VARELA</option><option value="8655">FARROUPILHA</option><option value="8657">FAXINAL DO SOTURNO</option><option value="8409">FAXINALZINHO</option><option value="0984">FAZENDA VILANOVA</option><option value="8659">FELIZ</option><option value="8661">FLORES DA CUNHA</option><option value="0986">FLORIANO PEIXOTO</option><option value="8663">FONTOURA XAVIER</option><option value="8665">FORMIGUEIRO</option><option value="1142">FORQUETINHA</option><option value="9827">FORTALEZA DOS VALOS</option><option value="8667">FREDERICO WESTPHALEN</option><option value="8669">GARIBALDI</option><option value="6081">GARRUCHOS</option><option value="8671">GAURAMA</option><option value="8673">GENERAL CAMARA</option><option value="5799">GENTIL</option><option value="8677">GETULIO VARGAS</option><option value="8679">GIRUA</option><option value="8407">GLORINHA</option><option value="8681">GRAMADO</option><option value="5949">GRAMADO DOS LOUREIROS</option><option value="5763">GRAMADO XAVIER</option><option value="8683">GRAVATAI</option><option value="8405">GUABIJU</option><option value="8685">GUAIBA</option><option value="8687">GUAPORE</option><option value="8689">GUARANI DAS MISSOES</option><option value="8403">HARMONIA</option><option value="8639">HERVAL</option><option value="0988">HERVEIRAS</option><option value="8691">HORIZONTINA</option><option value="6085">HULHA NEGRA</option><option value="8695">HUMAITA</option><option value="8401">IBARAMA</option><option value="8697">IBIACA</option><option value="8699">IBIRAIARAS</option><option value="7299">IBIRAPUITA</option><option value="8701">IBIRUBA</option><option value="8703">IGREJINHA</option><option value="8705">IJUI</option><option value="8707">ILOPOLIS</option><option value="7297">IMBE</option><option value="7295">IMIGRANTE</option><option value="8709">INDEPENDENCIA</option><option value="6051">INHACORA</option><option value="8399">IPE</option><option value="7399">IPIRANGA DO SUL</option><option value="8711">IRAI</option><option value="0990">ITAARA</option><option value="7397">ITACURUBI</option><option value="6027">ITAPUCA</option><option value="8713">ITAQUI</option><option value="1144">ITATI</option><option value="8715">ITATIBA DO SUL</option><option value="7395">IVORA</option><option value="8717">IVOTI</option><option value="7393">JABOTICABA</option><option value="1146">JACUIZINHO</option><option value="8719">JACUTINGA</option><option value="8721">JAGUARAO</option><option value="8723">JAGUARI</option><option value="7391">JAQUIRANA</option><option value="0992">JARI</option><option value="9829">JOIA</option><option value="8725">JULIO DE CASTILHOS</option><option value="1148">LAGOA BONITA DO SUL</option><option value="5951">LAGOA DOS TRES CANTOS</option><option value="8727">LAGOA VERMELHA</option><option value="7389">LAGOAO</option><option value="8729">LAJEADO</option><option value="5983">LAJEADO DO BUGRE</option><option value="8731">LAVRAS DO SUL</option><option value="8733">LIBERATO SALZANO</option><option value="6017">LINDOLFO COLLOR</option><option value="6047">LINHA NOVA</option><option value="0994">MACAMBARA</option><option value="8735">MACHADINHO</option><option value="0996">MAMPITUBA</option><option value="6079">MANOEL VIANA</option><option value="5783">MAQUINE</option><option value="6039">MARATA</option><option value="8737">MARAU</option><option value="8739">MARCELINO RAMOS</option><option value="5759">MARIANA PIMENTEL</option><option value="8741">MARIANO MORO</option><option value="0998">MARQUES DE SOUZA</option><option value="8743">MATA</option><option value="5931">MATO CASTELHANO</option><option value="6031">MATO LEITAO</option><option value="1150">MATO QUEIMADO</option><option value="8745">MAXIMILIANO DE ALMEIDA</option><option value="5773">MINAS DO LEAO</option><option value="8747">MIRAGUAI</option><option value="7387">MONTAURI</option><option value="1000">MONTE ALEGRE DOS CAMPOS</option><option value="5993">MONTE BELO DO SUL</option><option value="8749">MONTENEGRO</option><option value="5933">MORMACO</option><option value="5775">MORRINHOS DO SUL</option><option value="7385">MORRO REDONDO</option><option value="6019">MORRO REUTER</option><option value="8751">MOSTARDAS</option><option value="8753">MUCUM</option><option value="1002">MUITOS CAPOES</option><option value="5935">MULITERNO</option><option value="8755">NAO-ME-TOQUE</option><option value="5937">NICOLAU VERGUEIRO</option><option value="8757">NONOAI</option><option value="7383">NOVA ALVORADA</option><option value="8759">NOVA ARACA</option><option value="8761">NOVA BASSANO</option><option value="5953">NOVA BOA VISTA</option><option value="8763">NOVA BRESCIA</option><option value="1004">NOVA CANDELARIA</option><option value="7381">NOVA ESPERANCA DO SUL</option><option value="7379">NOVA HARTZ</option><option value="5991">NOVA PADUA</option><option value="8765">NOVA PALMA</option><option value="8767">NOVA PETROPOLIS</option><option value="8769">NOVA PRATA</option><option value="1006">NOVA RAMADA</option><option value="7377">NOVA ROMA DO SUL</option><option value="5757">NOVA SANTA RITA</option><option value="5985">NOVO BARREIRO</option><option value="1008">NOVO CABRAIS</option><option value="8771">NOVO HAMBURGO</option><option value="6057">NOVO MACHADO</option><option value="5973">NOVO TIRADENTES</option><option value="1152">NOVO XINGU</option><option value="8773">OSORIO</option><option value="8775">PAIM FILHO</option><option value="8967">PALMARES DO SUL</option><option value="8777">PALMEIRA DAS MISSOES</option><option value="8779">PALMITINHO</option><option value="8781">PANAMBI</option><option value="7375">PANTANO GRANDE</option><option value="8783">PARAI</option><option value="7373">PARAISO DO SUL</option><option value="6041">PARECI NOVO</option><option value="9825">PAROBE</option><option value="1010">PASSA SETE</option><option value="5765">PASSO DO SOBRADO</option><option value="8785">PASSO FUNDO</option><option value="1154">PAULO BENTO</option><option value="7371">PAVERAMA</option><option value="1156">PEDRAS ALTAS</option><option value="8787">PEDRO OSORIO</option><option value="8789">PEJUCARA</option><option value="8791">PELOTAS</option><option value="6021">PICADA CAFE</option><option value="7369">PINHAL</option><option value="1158">PINHAL DA SERRA</option><option value="5787">PINHAL GRANDE</option><option value="5975">PINHEIRINHO DO VALE</option><option value="8793">PINHEIRO MACHADO</option><option value="1160">PINTO BANDEIRA</option><option value="7367">PIRAPO</option><option value="8795">PIRATINI</option><option value="8797">PLANALTO</option><option value="7365">POCO DAS ANTAS</option><option value="5939">PONTAO</option><option value="5967">PONTE PRETA</option><option value="8799">PORTAO</option><option value="8801">PORTO ALEGRE</option><option value="8803">PORTO LUCENA</option><option value="6065">PORTO MAUA</option><option value="6067">PORTO VERA CRUZ</option><option value="8805">PORTO XAVIER</option><option value="7363">POUSO NOVO</option><option value="6023">PRESIDENTE LUCENA</option><option value="7361">PROGRESSO</option><option value="7359">PROTASIO ALVES</option><option value="8807">PUTINGA</option><option value="8809">QUARAI</option><option value="1162">QUATRO IRMAOS</option><option value="5789">QUEVEDOS</option><option value="7357">QUINZE DE NOVEMBRO</option><option value="8811">REDENTORA</option><option value="7355">RELVADO</option><option value="8813">RESTINGA SECA</option><option value="5955">RIO DOS INDIOS</option><option value="8815">RIO GRANDE</option><option value="8817">RIO PARDO</option><option value="7353">RIOZINHO</option><option value="8819">ROCA SALES</option><option value="8821">RODEIO BONITO</option><option value="1164">ROLADOR</option><option value="8823">ROLANTE</option><option value="8825">RONDA ALTA</option><option value="8827">RONDINHA</option><option value="8829">ROQUE GONZALES</option><option value="8831">ROSARIO DO SUL</option><option value="5987">SAGRADA FAMILIA</option><option value="7339">SALDANHA MARINHO</option><option value="8975">SALTO DO JACUI</option><option value="6061">SALVADOR DAS MISSOES</option><option value="8833">SALVADOR DO SUL</option><option value="8835">SANANDUVA</option><option value="8837">SANTA BARBARA DO SUL</option><option value="1166">SANTA CECILIA DO SUL</option><option value="6033">SANTA CLARA DO SUL</option><option value="8839">SANTA CRUZ DO SUL</option><option value="1168">SANTA MARGARIDA DO SUL</option><option value="8841">SANTA MARIA</option><option value="7337">SANTA MARIA DO HERVAL</option><option value="8847">SANTA ROSA</option><option value="5995">SANTA TEREZA</option><option value="8849">SANTA VITORIA DO PALMAR</option><option value="8843">SANTANA DA BOA VISTA</option><option value="8845">SANTANA DO LIVRAMENTO</option><option value="8851">SANTIAGO</option><option value="8853">SANTO ANGELO</option><option value="8855">SANTO ANTONIO DA PATRULHA</option><option value="8857">SANTO ANTONIO DAS MISSOES</option><option value="5941">SANTO ANTONIO DO PALMA</option><option value="5957">SANTO ANTONIO DO PLANALTO</option><option value="8859">SANTO AUGUSTO</option><option value="8861">SANTO CRISTO</option><option value="5977">SANTO EXPEDITO DO SUL</option><option value="8863">SAO BORJA</option><option value="7351">SAO DOMINGOS DO SUL</option><option value="8865">SAO FRANCISCO DE ASSIS</option><option value="8867">SAO FRANCISCO DE PAULA</option><option value="8869">SAO GABRIEL</option><option value="8871">SAO JERONIMO</option><option value="7349">SAO JOAO DA URTIGA</option><option value="5791">SAO JOAO DO POLESINE</option><option value="7347">SAO JORGE</option><option value="5989">SAO JOSE DAS MISSOES</option><option value="7345">SAO JOSE DO HERVAL</option><option value="7343">SAO JOSE DO HORTENCIO</option><option value="6059">SAO JOSE DO INHACORA</option><option value="8873">SAO JOSE DO NORTE</option><option value="8875">SAO JOSE DO OURO</option><option value="1170">SAO JOSE DO SUL</option><option value="6015">SAO JOSE DOS AUSENTES</option><option value="8877">SAO LEOPOLDO</option><option value="8879">SAO LOURENCO DO SUL</option><option value="8881">SAO LUIZ GONZAGA</option><option value="8883">SAO MARCOS</option><option value="8885">SAO MARTINHO</option><option value="5793">SAO MARTINHO DA SERRA</option><option value="7341">SAO MIGUEL DAS MISSOES</option><option value="8887">SAO NICOLAU</option><option value="8889">SAO PAULO DAS MISSOES</option><option value="6043">SAO PEDRO DA SERRA</option><option value="1172">SAO PEDRO DAS MISSOES</option><option value="6063">SAO PEDRO DO BUTIA</option><option value="8891">SAO PEDRO DO SUL</option><option value="8893">SAO SEBASTIAO DO CAI</option><option value="8895">SAO SEPE</option><option value="8897">SAO VALENTIM</option><option value="5997">SAO VALENTIM DO SUL</option><option value="6075">SAO VALERIO DO SUL</option><option value="7293">SAO VENDELINO</option><option value="8675">SAO VICENTE DO SUL</option><option value="8899">SAPIRANGA</option><option value="8901">SAPUCAIA DO SUL</option><option value="8903">SARANDI</option><option value="8905">SEBERI</option><option value="7335">SEDE NOVA</option><option value="7317">SEGREDO</option><option value="8907">SELBACH</option><option value="1012">SENADOR SALGADO FILHO</option><option value="5781">SENTINELA DO SUL</option><option value="8909">SERAFINA CORREA</option><option value="6035">SERIO</option><option value="8911">SERTAO</option><option value="5761">SERTAO SANTANA</option><option value="1014">SETE DE SETEMBRO</option><option value="8913">SEVERIANO DE ALMEIDA</option><option value="7315">SILVEIRA MARTINS</option><option value="5767">SINIMBU</option><option value="8917">SOBRADINHO</option><option value="8919">SOLEDADE</option><option value="1016">TABAI</option><option value="8921">TAPEJARA</option><option value="8923">TAPERA</option><option value="8925">TAPES</option><option value="8927">TAQUARA</option><option value="8929">TAQUARI</option><option value="7313">TAQUARUCU DO SUL</option><option value="8971">TAVARES</option><option value="8931">TENENTE PORTELA</option><option value="7333">TERRA DE AREIA</option><option value="9821">TEUTONIA</option><option value="1174">TIO HUGO</option><option value="6077">TIRADENTES DO SUL</option><option value="1018">TOROPI</option><option value="8933">TORRES</option><option value="8935">TRAMANDAI</option><option value="6037">TRAVESSEIRO</option><option value="7331">TRES ARROIOS</option><option value="7329">TRES CACHOEIRAS</option><option value="8937">TRES COROAS</option><option value="8939">TRES DE MAIO</option><option value="5777">TRES FORQUILHAS</option><option value="7327">TRES PALMEIRAS</option><option value="8941">TRES PASSOS</option><option value="7325">TRINDADE DO SUL</option><option value="8943">TRIUNFO</option><option value="8945">TUCUNDUVA</option><option value="7323">TUNAS</option><option value="5979">TUPANCI DO SUL</option><option value="8947">TUPANCIRETA</option><option value="7321">TUPANDI</option><option value="8949">TUPARENDI</option><option value="1020">TURUCU</option><option value="1022">UBIRETAMA</option><option value="5999">UNIAO DA SERRA</option><option value="1024">UNISTALDA</option><option value="8951">URUGUAIANA</option><option value="8953">VACARIA</option><option value="5769">VALE DO SOL</option><option value="6049">VALE REAL</option><option value="1026">VALE VERDE</option><option value="7319">VANINI</option><option value="8955">VENANCIO AIRES</option><option value="8957">VERA CRUZ</option><option value="8959">VERANOPOLIS</option><option value="1028">VESPASIANO CORREA</option><option value="8961">VIADUTOS</option><option value="8963">VIAMAO</option><option value="8965">VICENTE DUTRA</option><option value="8969">VICTOR GRAEFF</option><option value="7311">VILA FLORES</option><option value="1030">VILA LANGARO</option><option value="7309">VILA MARIA</option><option value="5795">VILA NOVA DO SUL</option><option value="7307">VISTA ALEGRE</option><option value="7305">VISTA ALEGRE DO PRATA</option><option value="7303">VISTA GAUCHA</option><option value="6053">VITORIA DAS MISSOES</option><option value="1176">WESTFALIA</option><option value="5785">XANGRI-LA</option></select>
+          </td>
+          <td align="center" valign="middle">
+            <table id="tabelaSemFormatacao6" class="">
+              <tbody><tr class="cabecalho">
+                <td style="padding: 7px">
+                    <input id="chkTodosMunicipios" type="checkbox" style="">Selecionar todos Municípios</td>
+              </tr>
+              <tr class="">
+                <td style="padding: 7px">
+                  <input type="button" class="button" id="btnInserir" style="width: 120px;" value="Inserir &gt;">
+                </td>
+              </tr>
+              <tr class="">
+                <td style="padding: 7px">
+                  <input type="button" class="button" id="btnRemover" style="width: 120px;" value="&lt; Remover">
+                </td>
+              </tr>
+              <tr class="">
+                <td style="padding: 7px">
+                  <input type="button" class="button" id="btnRemoverTudo" style="width: 120px;" value="&lt;&lt; Remover Tudo">
+                </td>
+              </tr>
+            </tbody></table>
+          </td>
+          <td style="padding-left: 8px">
+            <select multiple="multiple" size="8" id="lbDestino" style="width: 250px">
+          </select></td>
+        </tr>
+      </tbody></table>
+    </fieldset>
+  </div><div class="ui-resizable-handle ui-resizable-n"></div><div class="ui-resizable-handle ui-resizable-e"></div><div class="ui-resizable-handle ui-resizable-s"></div><div class="ui-resizable-handle ui-resizable-w"></div><div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se ui-icon-grip-diagonal-se" style="z-index: 1001;"></div><div class="ui-resizable-handle ui-resizable-sw" style="z-index: 1002;"></div><div class="ui-resizable-handle ui-resizable-ne" style="z-index: 1003;"></div><div class="ui-resizable-handle ui-resizable-nw" style="z-index: 1004;"></div><div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix"><div class="ui-dialog-buttonset"><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Ok</span></button><button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false"><span class="ui-button-text">Cancelar</span></button></div></div></div></body></html>

@@ -1,0 +1,1063 @@
+{
+  "name": "sinac_total",
+  "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+  "http_status": 200,
+  "title_before": "Estatísticas Sinac",
+  "body_before": "Estatísticas do Simples Nacional :: Optantes por UF e Município Optantes por UF e Município - Sinac ANO 2026 Posição Consolidada até 12/09/2026 Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
+  "selects_before": [
+    {
+      "index": 0,
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
+      "multiple": null,
+      "options": [
+        {
+          "text": "Por Dia",
+          "value": "Por Dia",
+          "selected": true
+        },
+        {
+          "text": "Por UF",
+          "value": "Por UF",
+          "selected": false
+        },
+        {
+          "text": "Por Município",
+          "value": "Por Município",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
+      "multiple": null,
+      "options": [
+        {
+          "text": "-- Selecione uma opção --",
+          "value": "",
+          "selected": true
+        },
+        {
+          "text": "Janeiro/2026",
+          "value": "1",
+          "selected": false
+        },
+        {
+          "text": "Fevereiro/2026",
+          "value": "2",
+          "selected": false
+        },
+        {
+          "text": "Março/2026",
+          "value": "3",
+          "selected": false
+        },
+        {
+          "text": "Abril/2026",
+          "value": "4",
+          "selected": false
+        },
+        {
+          "text": "Maio/2026",
+          "value": "5",
+          "selected": false
+        },
+        {
+          "text": "Junho/2026",
+          "value": "6",
+          "selected": false
+        },
+        {
+          "text": "Julho/2026",
+          "value": "7",
+          "selected": false
+        },
+        {
+          "text": "Agosto/2026",
+          "value": "8",
+          "selected": false
+        },
+        {
+          "text": "Setembro/2026",
+          "value": "9",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+      "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+      "multiple": null,
+      "options": [
+        {
+          "text": "UF não selecionado",
+          "value": "UFNS",
+          "selected": true
+        },
+        {
+          "text": "AC - Acre",
+          "value": "AC",
+          "selected": false
+        },
+        {
+          "text": "AL - Alagoas",
+          "value": "AL",
+          "selected": false
+        },
+        {
+          "text": "AM - Amazonas",
+          "value": "AM",
+          "selected": false
+        },
+        {
+          "text": "AP - Amapá",
+          "value": "AP",
+          "selected": false
+        },
+        {
+          "text": "BA - Bahia",
+          "value": "BA",
+          "selected": false
+        },
+        {
+          "text": "CE - Ceará",
+          "value": "CE",
+          "selected": false
+        },
+        {
+          "text": "DF - Distrito Federal",
+          "value": "DF",
+          "selected": false
+        },
+        {
+          "text": "ES - Espírito Santo",
+          "value": "ES",
+          "selected": false
+        },
+        {
+          "text": "GO - Goiás",
+          "value": "GO",
+          "selected": false
+        },
+        {
+          "text": "MA - Maranhão",
+          "value": "MA",
+          "selected": false
+        },
+        {
+          "text": "MG - Minas Gerais",
+          "value": "MG",
+          "selected": false
+        },
+        {
+          "text": "MS - Mato Grosso do Sul",
+          "value": "MS",
+          "selected": false
+        },
+        {
+          "text": "MT - Mato Grosso",
+          "value": "MT",
+          "selected": false
+        },
+        {
+          "text": "PA - Pará",
+          "value": "PA",
+          "selected": false
+        },
+        {
+          "text": "PB - Paraíba",
+          "value": "PB",
+          "selected": false
+        },
+        {
+          "text": "PE - Pernambuco",
+          "value": "PE",
+          "selected": false
+        },
+        {
+          "text": "PI - Piauí",
+          "value": "PI",
+          "selected": false
+        },
+        {
+          "text": "PR - Paraná",
+          "value": "PR",
+          "selected": false
+        },
+        {
+          "text": "RJ - Rio de Janeiro",
+          "value": "RJ",
+          "selected": false
+        },
+        {
+          "text": "RN - Rio Grande do Norte",
+          "value": "RN",
+          "selected": false
+        },
+        {
+          "text": "RO - Rondônia",
+          "value": "RO",
+          "selected": false
+        },
+        {
+          "text": "RR - Roraima",
+          "value": "RR",
+          "selected": false
+        },
+        {
+          "text": "RS - Rio Grande do Sul",
+          "value": "RS",
+          "selected": false
+        },
+        {
+          "text": "SC - Santa Catarina",
+          "value": "SC",
+          "selected": false
+        },
+        {
+          "text": "SE - Sergipe",
+          "value": "SE",
+          "selected": false
+        },
+        {
+          "text": "SP - São Paulo",
+          "value": "SP",
+          "selected": false
+        },
+        {
+          "text": "TO - Tocantins",
+          "value": "TO",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "id": "lbOrigem",
+      "name": null,
+      "multiple": "multiple",
+      "options": []
+    },
+    {
+      "index": 4,
+      "id": "lbDestino",
+      "name": null,
+      "multiple": "multiple",
+      "options": []
+    }
+  ],
+  "controls_before": [
+    {
+      "tag": "INPUT",
+      "id": "__EVENTTARGET",
+      "name": "__EVENTTARGET",
+      "type": "hidden",
+      "value": "",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "__EVENTARGUMENT",
+      "name": "__EVENTARGUMENT",
+      "type": "hidden",
+      "value": "",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "__LASTFOCUS",
+      "name": "__LASTFOCUS",
+      "type": "hidden",
+      "value": "",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "__VIEWSTATE",
+      "name": "__VIEWSTATE",
+      "type": "hidden",
+      "value": "sY8qEgppoj+1UTd2tv6LicsbmBSlaSLm1ukDwX/Hw4RUw/Rv8OYAonfmHrNZPMyOPVrBjeTQZA1QvMutsOyw1WWOfkDziv6vffFpMJB+LkLxUQiHbTSeSn/xbPV1/PeEgiWZ57UtNAj4/D9dIhdDexBr8A6MmoNTtZKM7If1W7bnSIXisBYUtl/TbbOlRiPk9zruxOq+s8iIxwURKY5DAwS4vOgs/Ervyz6vKCq/+ZpiEdYz4JQ0YsZj6XS5XcxrVGFBKxHvPlyCXJsb794WVoD6iL6U2Ue2GEh+ya+T/SGEFeXsYpQskSGbX6KZUtOwuHg2pCPepBI/APW3yn69hMQaguH/N0fVKeYbnsHf0i+yP83wInIBMrojeb8mCYW1jqWNfmIvkhEjZl3/vTMMbMeoCKv5W9J8XOyEsalFr5rxTtT4uF+bdECMtOLdU6V4blBEGomBtlxNJExrG3oZFA2kl27aDTC9GwEwIQHTnpFkiTKUU2GF1tc69dVAtzfIhnLwSQwPX3pWsjHw3VKxsgN/jY0pQq+rU7OghcPwbNB/YufR+tap4gES/khyu45z9SlMiuFDDCzakjlV1grS2A5DxDFv7Dp9XO7RjLX0sVc0F8pzWmEKVvDO5Q1tsK2CN1H2KE8/uLutQ7q4VetcsSYvwIr0SudWR3LNXmiSdms/cDNExYzAnhE3RqHyFQZoVxGL/ktSNcbZYBhJC5FdMEfb9P3KgXEn1WLJPKlP/4CbtQqKYg7jr3JefLQhym/GEKgFxgWtPjy9/tYbFL+nTJH3GAB0QhVZGo0mIV2IdySTiwKsGHKO9L4c7lIfRdjr65Fw8YpTzC+Ro5oCPwTNuRp94EfRw1ncOG/ZxU48xEZWMaVUYDNhhfQBWqJ7wooPWAn/2HtuZiWYcBbTkpN0V+iDg9opzfbON8661TvXrWSPpj0l1yeKNqoDo+iAMZ8hKRiJtrJbSUTI9xNOXNRaqd5x3Cj3ODY0ErHvLpEAX9ZLRRhVL/XajOSBmDI8DWGaKwHAv33+5qRe2Byg21eR5K5TdlP2dej5pJ1jYJGVQBvSHIWNwBLFmx5ViMFMtSzHuTBmuqb9NgggMKarNvQfKgHa3OZMFyXphZE7n+GQAQbIqzu0i4d9rHn4/pjciY19NVGXTphxeKbIn6nnjucOmPi20lpskrewF40inqT/MDujX19IM/Jsish6nCMRB047QJ6/AxEwf1PATbA0YxEKg/lqgWNUzwH8fPtTm6UkNZiPmbpvTMyTv6aB44yjq1UayjvpowIsZuXM+ntY4ErVrLTvkz7lQhyoE2UG2Bn+K7EdKMgip8nfRGYqdzv/HWuBhb9GB4eTpYV21mx8qUICWMmbs1oFNAw8j7ASblESOThDFg6oxH8ZKh2aaPlNGaku2YgZeh4kcoaYvS1KrvnejhDTIdWbFJkPMFjedle/1Vlfmxxv8ip2hO4kQJrzW53NgKBInPchGz2GJgvG4BiWxo+Kq0t/blU25/zjtF0IG9exfyhYZAy/GSLeoeGwUGc9XdeX5CoI/Z6lW/wV442bQ1SyylSrZkmd0CLplmrpXbMalehIzled6wcFQsVqNViTlgSbqTFVzigprdLDSC1WcD7nu0HutKGHXMsGndRwBMNuMnRwl5fHXj6I3bVqIlP4hBm9+g==",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "__VIEWSTATEGENERATOR",
+      "name": "__VIEWSTATEGENERATOR",
+      "type": "hidden",
+      "value": "FEAC32F1",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "__EVENTVALIDATION",
+      "name": "__EVENTVALIDATION",
+      "type": "hidden",
+      "value": "y5D/W0fFdv1EVePuQ6np6Cp4BUE70mJO0ent/R2P/aSLL/zRV7zzdoCj77h+5SyLV4qQ+D82m7GA4/a5sAnVcV3GocWybJhD/ymovm9eMcYcc6DBAr2MU2/Hp9uTrLZUNfeeLFYmS6s8HM5RoGLbfFX7oYWfSrd328YQsoSVun6Gd1wCWQjwVm1hrF0k7QcCfxJy7feNUW6hikBKpAPspLLMM5ufzliR4DzOdToNVjG0GNEtM4GbWjW5FdCkUoptyVH3IiflDZwog0vS0dc8tVTacfVHLx32jMvUJlIoDvsEJuYuQ3XOKfiEzKhhUsDi8HxZtgA+LbUJgTPrHMGneEmyX77xCe+TGaBxBNqSyZZhCOLkL22vCcOMpLSLu4W+ix7igywTWBew/8KjsyyBQTDdmEj7qGPYRAPWdE0N6r2cKr/U57itFJH0W6JnNSd76kIB4hoFJgTnDmUPwPwV/a1v818WSXc627OgcHqDelwnI9gEUumsO2dZSiZBhpzfQDoYni+6HVh5vk8s+WyGk/yS3bJEgKf39K4L3Iddk6hsaLV00Y3ija3N7wrG0fBGdF21SrN6YcEJFzxDnf3qNTQgwTrpV1X/Q8ghRkcmoZaT4lpnpY1BuSkICqd+tmL9g+if/aeNJ6sTXFfHLvOVnIqMYr0/GEvdZnoc5UZSQmuzp+MxTegD+jyEI9I67FF9ydekeJPwu4d1DHkReZtG5BCoEUjNfaZRwjTWtAPFTgpJfpxChuEaBEYmGuDrKzpUyspXsIfTHtpnyPEoq6ekxnESMDuunz37DuT36I9rui2bV4JDJscfrNzQkxk3YgAHcRQhGtyKRHfC+rcgXN7+wLjJrxxwIcGf7ljYWMzw5+Ii3gPJcYsCkV9Jl2yGtmNmbvHLXuzf0DuhQDqAgbLVG+uER25mjLHgn6a/NbJlOK5Yj/o2tXUDe59ShGEVyKTcoN/LoXUoO4BFPI2VTkWLGN0EQofBrGBg6l4bmXKTuLsyiUUY5D1iu2ivNwou8mVSwMo3A4Aelgd0pwDycxnhPyOkVahlvsnoBJN0SmLuxnTb5phAGV69YbVFgWiu2wxvIC/aCQ==",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "A",
+      "id": null,
+      "name": null,
+      "type": null,
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "A",
+      "id": "ctl00_ctl00_SiteMapPath_ctl00_LinkRaiz",
+      "name": null,
+      "type": null,
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": "Estatísticas do Simples Nacional"
+    },
+    {
+      "tag": "A",
+      "id": "ctl00_ctl00_SiteMapPath_SkipLink",
+      "name": null,
+      "type": null,
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_btnExibir",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$btnExibir",
+      "type": "submit",
+      "value": "Exibir Dados",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_btnLimpar",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$btnLimpar",
+      "type": "submit",
+      "value": "Limpar Dados",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "btVoltar",
+      "name": null,
+      "type": "button",
+      "value": "Voltar",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "ctl00_ctl00_Conteudo_AposTabela_hfMunicipios",
+      "name": "ctl00$ctl00$Conteudo$AposTabela$hfMunicipios",
+      "type": "hidden",
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "ctl00_ctl00_Conteudo_AposTabela_hfUF",
+      "name": "ctl00$ctl00$Conteudo$AposTabela$hfUF",
+      "type": "hidden",
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "ctl00_ctl00_Conteudo_AposTabela_hfCheck",
+      "name": "ctl00$ctl00$Conteudo$AposTabela$hfCheck",
+      "type": "hidden",
+      "value": "false",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "A",
+      "id": null,
+      "name": null,
+      "type": null,
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": "close"
+    },
+    {
+      "tag": "BUTTON",
+      "id": null,
+      "name": null,
+      "type": "button",
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": "Fechar"
+    },
+    {
+      "tag": "A",
+      "id": null,
+      "name": null,
+      "type": null,
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": "close"
+    },
+    {
+      "tag": "INPUT",
+      "id": "chkTodosMunicipios",
+      "name": null,
+      "type": "checkbox",
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "btnInserir",
+      "name": null,
+      "type": "button",
+      "value": "Inserir >",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "btnRemover",
+      "name": null,
+      "type": "button",
+      "value": "< Remover",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "btnRemoverTudo",
+      "name": null,
+      "type": "button",
+      "value": "<< Remover Tudo",
+      "title": null,
+      "aria": null,
+      "text": ""
+    },
+    {
+      "tag": "BUTTON",
+      "id": null,
+      "name": null,
+      "type": "button",
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": "Ok"
+    },
+    {
+      "tag": "BUTTON",
+      "id": null,
+      "name": null,
+      "type": "button",
+      "value": null,
+      "title": null,
+      "aria": null,
+      "text": "Cancelar"
+    }
+  ],
+  "rs_selected": true,
+  "selects_after_rs": [
+    {
+      "index": 0,
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
+      "multiple": null,
+      "options": [
+        {
+          "text": "Por Dia",
+          "value": "Por Dia",
+          "selected": true
+        },
+        {
+          "text": "Por UF",
+          "value": "Por UF",
+          "selected": false
+        },
+        {
+          "text": "Por Município",
+          "value": "Por Município",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
+      "multiple": null,
+      "options": [
+        {
+          "text": "-- Selecione uma opção --",
+          "value": "",
+          "selected": true
+        },
+        {
+          "text": "Janeiro/2026",
+          "value": "1",
+          "selected": false
+        },
+        {
+          "text": "Fevereiro/2026",
+          "value": "2",
+          "selected": false
+        },
+        {
+          "text": "Março/2026",
+          "value": "3",
+          "selected": false
+        },
+        {
+          "text": "Abril/2026",
+          "value": "4",
+          "selected": false
+        },
+        {
+          "text": "Maio/2026",
+          "value": "5",
+          "selected": false
+        },
+        {
+          "text": "Junho/2026",
+          "value": "6",
+          "selected": false
+        },
+        {
+          "text": "Julho/2026",
+          "value": "7",
+          "selected": false
+        },
+        {
+          "text": "Agosto/2026",
+          "value": "8",
+          "selected": false
+        },
+        {
+          "text": "Setembro/2026",
+          "value": "9",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+      "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+      "multiple": null,
+      "options": [
+        {
+          "text": "UF não selecionado",
+          "value": "UFNS",
+          "selected": false
+        },
+        {
+          "text": "AC - Acre",
+          "value": "AC",
+          "selected": false
+        },
+        {
+          "text": "AL - Alagoas",
+          "value": "AL",
+          "selected": false
+        },
+        {
+          "text": "AM - Amazonas",
+          "value": "AM",
+          "selected": false
+        },
+        {
+          "text": "AP - Amapá",
+          "value": "AP",
+          "selected": false
+        },
+        {
+          "text": "BA - Bahia",
+          "value": "BA",
+          "selected": false
+        },
+        {
+          "text": "CE - Ceará",
+          "value": "CE",
+          "selected": false
+        },
+        {
+          "text": "DF - Distrito Federal",
+          "value": "DF",
+          "selected": false
+        },
+        {
+          "text": "ES - Espírito Santo",
+          "value": "ES",
+          "selected": false
+        },
+        {
+          "text": "GO - Goiás",
+          "value": "GO",
+          "selected": false
+        },
+        {
+          "text": "MA - Maranhão",
+          "value": "MA",
+          "selected": false
+        },
+        {
+          "text": "MG - Minas Gerais",
+          "value": "MG",
+          "selected": false
+        },
+        {
+          "text": "MS - Mato Grosso do Sul",
+          "value": "MS",
+          "selected": false
+        },
+        {
+          "text": "MT - Mato Grosso",
+          "value": "MT",
+          "selected": false
+        },
+        {
+          "text": "PA - Pará",
+          "value": "PA",
+          "selected": false
+        },
+        {
+          "text": "PB - Paraíba",
+          "value": "PB",
+          "selected": false
+        },
+        {
+          "text": "PE - Pernambuco",
+          "value": "PE",
+          "selected": false
+        },
+        {
+          "text": "PI - Piauí",
+          "value": "PI",
+          "selected": false
+        },
+        {
+          "text": "PR - Paraná",
+          "value": "PR",
+          "selected": false
+        },
+        {
+          "text": "RJ - Rio de Janeiro",
+          "value": "RJ",
+          "selected": false
+        },
+        {
+          "text": "RN - Rio Grande do Norte",
+          "value": "RN",
+          "selected": false
+        },
+        {
+          "text": "RO - Rondônia",
+          "value": "RO",
+          "selected": false
+        },
+        {
+          "text": "RR - Roraima",
+          "value": "RR",
+          "selected": false
+        },
+        {
+          "text": "RS - Rio Grande do Sul",
+          "value": "RS",
+          "selected": true
+        },
+        {
+          "text": "SC - Santa Catarina",
+          "value": "SC",
+          "selected": false
+        },
+        {
+          "text": "SE - Sergipe",
+          "value": "SE",
+          "selected": false
+        },
+        {
+          "text": "SP - São Paulo",
+          "value": "SP",
+          "selected": false
+        },
+        {
+          "text": "TO - Tocantins",
+          "value": "TO",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "id": "lbOrigem",
+      "name": null,
+      "multiple": "multiple",
+      "options": []
+    },
+    {
+      "index": 4,
+      "id": "lbDestino",
+      "name": null,
+      "multiple": "multiple",
+      "options": []
+    }
+  ],
+  "sb_selected": false,
+  "selects_after_sb": [
+    {
+      "index": 0,
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
+      "multiple": null,
+      "options": [
+        {
+          "text": "Por Dia",
+          "value": "Por Dia",
+          "selected": true
+        },
+        {
+          "text": "Por UF",
+          "value": "Por UF",
+          "selected": false
+        },
+        {
+          "text": "Por Município",
+          "value": "Por Município",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
+      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
+      "multiple": null,
+      "options": [
+        {
+          "text": "-- Selecione uma opção --",
+          "value": "",
+          "selected": true
+        },
+        {
+          "text": "Janeiro/2026",
+          "value": "1",
+          "selected": false
+        },
+        {
+          "text": "Fevereiro/2026",
+          "value": "2",
+          "selected": false
+        },
+        {
+          "text": "Março/2026",
+          "value": "3",
+          "selected": false
+        },
+        {
+          "text": "Abril/2026",
+          "value": "4",
+          "selected": false
+        },
+        {
+          "text": "Maio/2026",
+          "value": "5",
+          "selected": false
+        },
+        {
+          "text": "Junho/2026",
+          "value": "6",
+          "selected": false
+        },
+        {
+          "text": "Julho/2026",
+          "value": "7",
+          "selected": false
+        },
+        {
+          "text": "Agosto/2026",
+          "value": "8",
+          "selected": false
+        },
+        {
+          "text": "Setembro/2026",
+          "value": "9",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+      "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+      "multiple": null,
+      "options": [
+        {
+          "text": "UF não selecionado",
+          "value": "UFNS",
+          "selected": false
+        },
+        {
+          "text": "AC - Acre",
+          "value": "AC",
+          "selected": false
+        },
+        {
+          "text": "AL - Alagoas",
+          "value": "AL",
+          "selected": false
+        },
+        {
+          "text": "AM - Amazonas",
+          "value": "AM",
+          "selected": false
+        },
+        {
+          "text": "AP - Amapá",
+          "value": "AP",
+          "selected": false
+        },
+        {
+          "text": "BA - Bahia",
+          "value": "BA",
+          "selected": false
+        },
+        {
+          "text": "CE - Ceará",
+          "value": "CE",
+          "selected": false
+        },
+        {
+          "text": "DF - Distrito Federal",
+          "value": "DF",
+          "selected": false
+        },
+        {
+          "text": "ES - Espírito Santo",
+          "value": "ES",
+          "selected": false
+        },
+        {
+          "text": "GO - Goiás",
+          "value": "GO",
+          "selected": false
+        },
+        {
+          "text": "MA - Maranhão",
+          "value": "MA",
+          "selected": false
+        },
+        {
+          "text": "MG - Minas Gerais",
+          "value": "MG",
+          "selected": false
+        },
+        {
+          "text": "MS - Mato Grosso do Sul",
+          "value": "MS",
+          "selected": false
+        },
+        {
+          "text": "MT - Mato Grosso",
+          "value": "MT",
+          "selected": false
+        },
+        {
+          "text": "PA - Pará",
+          "value": "PA",
+          "selected": false
+        },
+        {
+          "text": "PB - Paraíba",
+          "value": "PB",
+          "selected": false
+        },
+        {
+          "text": "PE - Pernambuco",
+          "value": "PE",
+          "selected": false
+        },
+        {
+          "text": "PI - Piauí",
+          "value": "PI",
+          "selected": false
+        },
+        {
+          "text": "PR - Paraná",
+          "value": "PR",
+          "selected": false
+        },
+        {
+          "text": "RJ - Rio de Janeiro",
+          "value": "RJ",
+          "selected": false
+        },
+        {
+          "text": "RN - Rio Grande do Norte",
+          "value": "RN",
+          "selected": false
+        },
+        {
+          "text": "RO - Rondônia",
+          "value": "RO",
+          "selected": false
+        },
+        {
+          "text": "RR - Roraima",
+          "value": "RR",
+          "selected": false
+        },
+        {
+          "text": "RS - Rio Grande do Sul",
+          "value": "RS",
+          "selected": true
+        },
+        {
+          "text": "SC - Santa Catarina",
+          "value": "SC",
+          "selected": false
+        },
+        {
+          "text": "SE - Sergipe",
+          "value": "SE",
+          "selected": false
+        },
+        {
+          "text": "SP - São Paulo",
+          "value": "SP",
+          "selected": false
+        },
+        {
+          "text": "TO - Tocantins",
+          "value": "TO",
+          "selected": false
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "id": "lbOrigem",
+      "name": null,
+      "multiple": "multiple",
+      "options": []
+    },
+    {
+      "index": 4,
+      "id": "lbDestino",
+      "name": null,
+      "multiple": "multiple",
+      "options": []
+    }
+  ],
+  "consult_clicked": false,
+  "final_url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+  "body_after": "Estatísticas do Simples Nacional :: Optantes por UF e Município Optantes por UF e Município - Sinac ANO 2026 Posição Consolidada até 12/09/2026 Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
+  "tables": [
+    [
+      [
+        "Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
+        "Selecione o tipo de consulta:",
+        "Por Dia Por UF Por Município",
+        "Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Selecione o tipo de consulta:",
+        "Por Dia Por UF Por Município",
+        "Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026"
+      ]
+    ],
+    [
+      [
+        "Selecione o tipo de consulta:",
+        "Por Dia Por UF Por Município",
+        "Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026"
+      ]
+    ],
+    [
+      [
+        "UF:",
+        "UF não selecionado AC - Acre AL - Alagoas AM - Amazonas AP - Amapá BA - Bahia CE - Ceará DF - Distrito Federal ES - Espírito Santo GO - Goiás MA - Maranhão MG - Minas Gerais MS - Mato Grosso do Sul MT - Mato Grosso PA - Pará PB - Paraíba PE - Pernambuco PI - Piauí PR - Paraná RJ - Rio de Janeiro RN - Rio Grande do Norte RO - Rondônia RR - Roraima RS - Rio Grande do Sul SC - Santa Catarina SE - Sergipe SP - São Paulo TO - Tocantins"
+      ]
+    ],
+    [
+      [
+        "ACEGUAAGUA SANTAAGUDOAJURICABAALECRIMALEGRETEALEGRIAALMIRANTE TAMANDARE DO SULALPESTREALTO ALEGREALTO FELIZALVORADAAMARAL FERRADORAMETISTA DO SULANDRE DA ROCHAANTA GORDAANTONIO PRADOARAMBAREARARICAARATIBAARROIO DO MEIOARROIO DO PADREARROIO DO SALARROIO DO TIGREARROIO DOS RATOSARROIO GRANDEARVOREZINHAAUGUSTO PESTANAAUREABAGEBALNEARIO PINHALBARAOBARAO DE COTEGIPEBARAO DO TRIUNFOBARRA DO GUARITABARRA DO QUARAIBARRA DO RIBEIROBARRA DO RIO AZULBARRA FUNDABARRACAOBARROS CASSALBENJAMIN CONSTANT DO SULBENTO GONCALVESBOA VISTA DAS MISSOESBOA VISTA DO BURICABOA VISTA DO CADEADOBOA VISTA DO INCRABOA VISTA DO SULBOM JESUSBOM PRINCIPIOBOM PROGRESSOBOM RETIRO DO SULBOQUEIRAO DO LEAOBOSSOROCABOZANOBRAGABROCHIERBUTIACACAPAVA DO SULCACEQUICACHOEIRA DO SULCACHOEIRINHACACIQUE DOBLECAIBATECAICARACAMAQUACAMARGOCAMBARA DO SULCAMPESTRE DA SERRACAMPINA DAS MISSOESCAMPINAS DO SULCAMPO BOMCAMPO NOVOCAMPOS BORGESCANDELARIACANDIDO GODOICANDIOTACANELACANGUCUCANOASCANUDOS DO VALECAPAO BONITO DO SULCAPAO DA CANOACAPAO DO CIPOCAPAO DO LEAOCAPELA DE SANTANACAPITAOCAPIVARI DO SULCARAACARAZINHOCARLOS BARBOSACARLOS GOMESCASCACASEIROSCATUIPECAXIAS DO SULCENTENARIOCERRITOCERRO BRANCOCERRO GRANDECERRO GRANDE DO SULCERRO LARGOCHAPADACHARQUEADASCHARRUACHIAPETTACHUICHUVISCACIDREIRACIRIACOCOLINASCOLORADOCONDORCONSTANTINACOQUEIRO BAIXOCOQUEIROS DO SULCORONEL BARROSCORONEL BICACOCORONEL PILARCOTIPORACOXILHACRISSIUMALCRISTALCRISTAL DO SULCRUZ ALTACRUZALTENSECRUZEIRO DO SULDAVID CANABARRODERRUBADASDEZESSEIS DE NOVEMBRODILERMANDO DE AGUIARDOIS IRMAOSDOIS IRMAOS DAS MISSOESDOIS LAJEADOSDOM FELICIANODOM PEDRITODOM PEDRO DE ALCANTARADONA FRANCISCADOUTOR MAURICIO CARDOSODOUTOR RICARDOELDORADO DO SULENCANTADOENCRUZILHADA DO SULENGENHO VELHOENTRE IJUISENTRE RIOS DO SULEREBANGOERECHIMERNESTINAERVAL GRANDEERVAL SECOESMERALDAESPERANCA DO SULESPUMOSOESTACAOESTANCIA VELHAESTEIOESTRELAESTRELA VELHAEUGENIO DE CASTROFAGUNDES VARELAFARROUPILHAFAXINAL DO SOTURNOFAXINALZINHOFAZENDA VILANOVAFELIZFLORES DA CUNHAFLORIANO PEIXOTOFONTOURA XAVIERFORMIGUEIROFORQUETINHAFORTALEZA DOS VALOSFREDERICO WESTPHALENGARIBALDIGARRUCHOSGAURAMAGENERAL CAMARAGENTILGETULIO VARGASGIRUAGLORINHAGRAMADOGRAMADO DOS LOUREIROSGRAMADO XAVIERGRAVATAIGUABIJUGUAIBAGUAPOREGUARANI DAS MISSOESHARMONIAHERVALHERVEIRASHORIZONTINAHULHA NEGRAHUMAITAIBARAMAIBIACAIBIRAIARASIBIRAPUITAIBIRUBAIGREJINHAIJUIILOPOLISIMBEIMIGRANTEINDEPENDENCIAINHACORAIPEIPIRANGA DO SULIRAIITAARAITACURUBIITAPUCAITAQUIITATIITATIBA DO SULIVORAIVOTIJABOTICABAJACUIZINHOJACUTINGAJAGUARAOJAGUARIJAQUIRANAJARIJOIAJULIO DE CASTILHOSLAGOA BONITA DO SULLAGOA DOS TRES CANTOSLAGOA VERMELHALAGOAOLAJEADOLAJEADO DO BUGRELAVRAS DO SULLIBERATO SALZANOLINDOLFO COLLORLINHA NOVAMACAMBARAMACHADINHOMAMPITUBAMANOEL VIANAMAQUINEMARATAMARAUMARCELINO RAMOSMARIANA PIMENTELMARIANO MOROMARQUES DE SOUZAMATAMATO CASTELHANOMATO LEITAOMATO QUEIMADOMAXIMILIANO DE ALMEIDAMINAS DO LEAOMIRAGUAIMONTAURIMONTE ALEGRE DOS CAMPOSMONTE BELO DO SULMONTENEGROMORMACOMORRINHOS DO SULMORRO REDONDOMORRO REUTERMOSTARDASMUCUMMUITOS CAPOESMULITERNONAO-ME-TOQUENICOLAU VERGUEIRONONOAINOVA ALVORADANOVA ARACANOVA BASSANONOVA BOA VISTANOVA BRESCIANOVA CANDELARIANOVA ESPERANCA DO SULNOVA HARTZNOVA PADUANOVA PALMANOVA PETROPOLISNOVA PRATANOVA RAMADANOVA ROMA DO SULNOVA SANTA RITANOVO BARREIRONOVO CABRAISNOVO HAMBURGONOVO MACHADONOVO TIRADENTESNOVO XINGUOSORIOPAIM FILHOPALMARES DO SULPALMEIRA DAS MISSOESPALMITINHOPANAMBIPANTANO GRANDEPARAIPARAISO DO SULPARECI NOVOPAROBEPASSA SETEPASSO DO SOBRADOPASSO FUNDOPAULO BENTOPAVERAMAPEDRAS ALTASPEDRO OSORIOPEJUCARAPELOTASPICADA CAFEPINHALPINHAL DA SERRAPINHAL GRANDEPINHEIRINHO DO VALEPINHEIRO MACHADOPINTO BANDEIRAPIRAPOPIRATINIPLANALTOPOCO DAS ANTASPONTAOPONTE PRETAPORTAOPORTO ALEGREPORTO LUCENAPORTO MAUAPORTO VERA CRUZPORTO XAVIERPOUSO NOVOPRESIDENTE LUCENAPROGRESSOPROTASIO ALVESPUTINGAQUARAIQUATRO IRMAOSQUEVEDOSQUINZE DE NOVEMBROREDENTORARELVADORESTINGA SECARIO DOS INDIOSRIO GRANDERIO PARDORIOZINHOROCA SALESRODEIO BONITOROLADORROLANTERONDA ALTARONDINHAROQUE GONZALESROSARIO DO SULSAGRADA FAMILIASALDANHA MARINHOSALTO DO JACUISALVADOR DAS MISSOESSALVADOR DO SULSANANDUVASANTA BARBARA DO SULSANTA CECILIA DO SULSANTA CLARA DO SULSANTA CRUZ DO SULSANTA MARGARIDA DO SULSANTA MARIASANTA MARIA DO HERVALSANTA ROSASANTA TEREZASANTA VITORIA DO PALMARSANTANA DA BOA VISTASANTANA DO LIVRAMENTOSANTIAGOSANTO ANGELOSANTO ANTONIO DA PATRULHASANTO ANTONIO DAS MISSOESSANTO ANTONIO DO PALMASANTO ANTONIO DO PLANALTOSANTO AUGUSTOSANTO CRISTOSANTO EXPEDITO DO SULSAO BORJASAO DOMINGOS DO SULSAO FRANCISCO DE ASSISSAO FRANCISCO DE PAULASAO GABRIELSAO JERONIMOSAO JOAO DA URTIGASAO JOAO DO POLESINESAO JORGESAO JOSE DAS MISSOESSAO JOSE DO HERVALSAO JOSE DO HORTENCIOSAO JOSE DO INHACORASAO JOSE DO NORTESAO JOSE DO OUROSAO JOSE DO SULSAO JOSE DOS AUSENTESSAO LEOPOLDOSAO LOURENCO DO SULSAO LUIZ GONZAGASAO MARCOSSAO MARTINHOSAO MARTINHO DA SERRASAO MIGUEL DAS MISSOESSAO NICOLAUSAO PAULO DAS MISSOESSAO PEDRO DA SERRASAO PEDRO DAS MISSOESSAO PEDRO DO BUTIASAO PEDRO DO SULSAO SEBASTIAO DO CAISAO SEPESAO VALENTIMSAO VALENTIM DO SULSAO VALERIO DO SULSAO VENDELINOSAO VICENTE DO SULSAPIRANGASAPUCAIA DO SULSARANDISEBERISEDE NOVASEGREDOSELBACHSENADOR SALGADO FILHOSENTINELA DO SULSERAFINA CORREASERIOSERTAOSERTAO SANTANASETE DE SETEMBROSEVERIANO DE ALMEIDASILVEIRA MARTINSSINIMBUSOBRADINHOSOLEDADETABAITAPEJARATAPERATAPESTAQUARATAQUARITAQUARUCU DO SULTAVARESTENENTE PORTELATERRA DE AREIATEUTONIATIO HUGOTIRADENTES DO SULTOROPITORRESTRAMANDAITRAVESSEIROTRES ARROIOSTRES CACHOEIRASTRES COROASTRES DE MAIOTRES FORQUILHASTRES PALMEIRASTRES PASSOSTRINDADE DO SULTRIUNFOTUCUNDUVATUNASTUPANCI DO SULTUPANCIRETATUPANDITUPARENDITURUCUUBIRETAMAUNIAO DA SERRAUNISTALDAURUGUAIANAVACARIAVALE DO SOLVALE REALVALE VERDEVANINIVENANCIO AIRESVERA CRUZVERANOPOLISVESPASIANO CORREAVIADUTOSVIAMAOVICENTE DUTRAVICTOR GRAEFFVILA FLORESVILA LANGAROVILA MARIAVILA NOVA DO SULVISTA ALEGREVISTA ALEGRE DO PRATAVISTA GAUCHAVITORIA DAS MISSOESWESTFALIAXANGRI-LA",
+        "Selecionar todos Municípios",
+        "Selecionar todos Municípios",
+        "",
+        "",
+        "",
+        ""
+      ],
+      [
+        "Selecionar todos Municípios"
+      ]
+    ],
+    [
+      [
+        "Selecionar todos Municípios"
+      ]
+    ]
+  ],
+  "sao_borja_rows": [
+    {
+      "table": 3,
+      "row": 0,
+      "cells": [
+        "ACEGUAAGUA SANTAAGUDOAJURICABAALECRIMALEGRETEALEGRIAALMIRANTE TAMANDARE DO SULALPESTREALTO ALEGREALTO FELIZALVORADAAMARAL FERRADORAMETISTA DO SULANDRE DA ROCHAANTA GORDAANTONIO PRADOARAMBAREARARICAARATIBAARROIO DO MEIOARROIO DO PADREARROIO DO SALARROIO DO TIGREARROIO DOS RATOSARROIO GRANDEARVOREZINHAAUGUSTO PESTANAAUREABAGEBALNEARIO PINHALBARAOBARAO DE COTEGIPEBARAO DO TRIUNFOBARRA DO GUARITABARRA DO QUARAIBARRA DO RIBEIROBARRA DO RIO AZULBARRA FUNDABARRACAOBARROS CASSALBENJAMIN CONSTANT DO SULBENTO GONCALVESBOA VISTA DAS MISSOESBOA VISTA DO BURICABOA VISTA DO CADEADOBOA VISTA DO INCRABOA VISTA DO SULBOM JESUSBOM PRINCIPIOBOM PROGRESSOBOM RETIRO DO SULBOQUEIRAO DO LEAOBOSSOROCABOZANOBRAGABROCHIERBUTIACACAPAVA DO SULCACEQUICACHOEIRA DO SULCACHOEIRINHACACIQUE DOBLECAIBATECAICARACAMAQUACAMARGOCAMBARA DO SULCAMPESTRE DA SERRACAMPINA DAS MISSOESCAMPINAS DO SULCAMPO BOMCAMPO NOVOCAMPOS BORGESCANDELARIACANDIDO GODOICANDIOTACANELACANGUCUCANOASCANUDOS DO VALECAPAO BONITO DO SULCAPAO DA CANOACAPAO DO CIPOCAPAO DO LEAOCAPELA DE SANTANACAPITAOCAPIVARI DO SULCARAACARAZINHOCARLOS BARBOSACARLOS GOMESCASCACASEIROSCATUIPECAXIAS DO SULCENTENARIOCERRITOCERRO BRANCOCERRO GRANDECERRO GRANDE DO SULCERRO LARGOCHAPADACHARQUEADASCHARRUACHIAPETTACHUICHUVISCACIDREIRACIRIACOCOLINASCOLORADOCONDORCONSTANTINACOQUEIRO BAIXOCOQUEIROS DO SULCORONEL BARROSCORONEL BICACOCORONEL PILARCOTIPORACOXILHACRISSIUMALCRISTALCRISTAL DO SULCRUZ ALTACRUZALTENSECRUZEIRO DO SULDAVID CANABARRODERRUBADASDEZESSEIS DE NOVEMBRODILERMANDO DE AGUIARDOIS IRMAOSDOIS IRMAOS DAS MISSOESDOIS LAJEADOSDOM FELICIANODOM PEDRITODOM PEDRO DE ALCANTARADONA FRANCISCADOUTOR MAURICIO CARDOSODOUTOR RICARDOELDORADO DO SULENCANTADOENCRUZILHADA DO SULENGENHO VELHOENTRE IJUISENTRE RIOS DO SULEREBANGOERECHIMERNESTINAERVAL GRANDEERVAL SECOESMERALDAESPERANCA DO SULESPUMOSOESTACAOESTANCIA VELHAESTEIOESTRELAESTRELA VELHAEUGENIO DE CASTROFAGUNDES VARELAFARROUPILHAFAXINAL DO SOTURNOFAXINALZINHOFAZENDA VILANOVAFELIZFLORES DA CUNHAFLORIANO PEIXOTOFONTOURA XAVIERFORMIGUEIROFORQUETINHAFORTALEZA DOS VALOSFREDERICO WESTPHALENGARIBALDIGARRUCHOSGAURAMAGENERAL CAMARAGENTILGETULIO VARGASGIRUAGLORINHAGRAMADOGRAMADO DOS LOUREIROSGRAMADO XAVIERGRAVATAIGUABIJUGUAIBAGUAPOREGUARANI DAS MISSOESHARMONIAHERVALHERVEIRASHORIZONTINAHULHA NEGRAHUMAITAIBARAMAIBIACAIBIRAIARASIBIRAPUITAIBIRUBAIGREJINHAIJUIILOPOLISIMBEIMIGRANTEINDEPENDENCIAINHACORAIPEIPIRANGA DO SULIRAIITAARAITACURUBIITAPUCAITAQUIITATIITATIBA DO SULIVORAIVOTIJABOTICABAJACUIZINHOJACUTINGAJAGUARAOJAGUARIJAQUIRANAJARIJOIAJULIO DE CASTILHOSLAGOA BONITA DO SULLAGOA DOS TRES CANTOSLAGOA VERMELHALAGOAOLAJEADOLAJEADO DO BUGRELAVRAS DO SULLIBERATO SALZANOLINDOLFO COLLORLINHA NOVAMACAMBARAMACHADINHOMAMPITUBAMANOEL VIANAMAQUINEMARATAMARAUMARCELINO RAMOSMARIANA PIMENTELMARIANO MOROMARQUES DE SOUZAMATAMATO CASTELHANOMATO LEITAOMATO QUEIMADOMAXIMILIANO DE ALMEIDAMINAS DO LEAOMIRAGUAIMONTAURIMONTE ALEGRE DOS CAMPOSMONTE BELO DO SULMONTENEGROMORMACOMORRINHOS DO SULMORRO REDONDOMORRO REUTERMOSTARDASMUCUMMUITOS CAPOESMULITERNONAO-ME-TOQUENICOLAU VERGUEIRONONOAINOVA ALVORADANOVA ARACANOVA BASSANONOVA BOA VISTANOVA BRESCIANOVA CANDELARIANOVA ESPERANCA DO SULNOVA HARTZNOVA PADUANOVA PALMANOVA PETROPOLISNOVA PRATANOVA RAMADANOVA ROMA DO SULNOVA SANTA RITANOVO BARREIRONOVO CABRAISNOVO HAMBURGONOVO MACHADONOVO TIRADENTESNOVO XINGUOSORIOPAIM FILHOPALMARES DO SULPALMEIRA DAS MISSOESPALMITINHOPANAMBIPANTANO GRANDEPARAIPARAISO DO SULPARECI NOVOPAROBEPASSA SETEPASSO DO SOBRADOPASSO FUNDOPAULO BENTOPAVERAMAPEDRAS ALTASPEDRO OSORIOPEJUCARAPELOTASPICADA CAFEPINHALPINHAL DA SERRAPINHAL GRANDEPINHEIRINHO DO VALEPINHEIRO MACHADOPINTO BANDEIRAPIRAPOPIRATINIPLANALTOPOCO DAS ANTASPONTAOPONTE PRETAPORTAOPORTO ALEGREPORTO LUCENAPORTO MAUAPORTO VERA CRUZPORTO XAVIERPOUSO NOVOPRESIDENTE LUCENAPROGRESSOPROTASIO ALVESPUTINGAQUARAIQUATRO IRMAOSQUEVEDOSQUINZE DE NOVEMBROREDENTORARELVADORESTINGA SECARIO DOS INDIOSRIO GRANDERIO PARDORIOZINHOROCA SALESRODEIO BONITOROLADORROLANTERONDA ALTARONDINHAROQUE GONZALESROSARIO DO SULSAGRADA FAMILIASALDANHA MARINHOSALTO DO JACUISALVADOR DAS MISSOESSALVADOR DO SULSANANDUVASANTA BARBARA DO SULSANTA CECILIA DO SULSANTA CLARA DO SULSANTA CRUZ DO SULSANTA MARGARIDA DO SULSANTA MARIASANTA MARIA DO HERVALSANTA ROSASANTA TEREZASANTA VITORIA DO PALMARSANTANA DA BOA VISTASANTANA DO LIVRAMENTOSANTIAGOSANTO ANGELOSANTO ANTONIO DA PATRULHASANTO ANTONIO DAS MISSOESSANTO ANTONIO DO PALMASANTO ANTONIO DO PLANALTOSANTO AUGUSTOSANTO CRISTOSANTO EXPEDITO DO SULSAO BORJASAO DOMINGOS DO SULSAO FRANCISCO DE ASSISSAO FRANCISCO DE PAULASAO GABRIELSAO JERONIMOSAO JOAO DA URTIGASAO JOAO DO POLESINESAO JORGESAO JOSE DAS MISSOESSAO JOSE DO HERVALSAO JOSE DO HORTENCIOSAO JOSE DO INHACORASAO JOSE DO NORTESAO JOSE DO OUROSAO JOSE DO SULSAO JOSE DOS AUSENTESSAO LEOPOLDOSAO LOURENCO DO SULSAO LUIZ GONZAGASAO MARCOSSAO MARTINHOSAO MARTINHO DA SERRASAO MIGUEL DAS MISSOESSAO NICOLAUSAO PAULO DAS MISSOESSAO PEDRO DA SERRASAO PEDRO DAS MISSOESSAO PEDRO DO BUTIASAO PEDRO DO SULSAO SEBASTIAO DO CAISAO SEPESAO VALENTIMSAO VALENTIM DO SULSAO VALERIO DO SULSAO VENDELINOSAO VICENTE DO SULSAPIRANGASAPUCAIA DO SULSARANDISEBERISEDE NOVASEGREDOSELBACHSENADOR SALGADO FILHOSENTINELA DO SULSERAFINA CORREASERIOSERTAOSERTAO SANTANASETE DE SETEMBROSEVERIANO DE ALMEIDASILVEIRA MARTINSSINIMBUSOBRADINHOSOLEDADETABAITAPEJARATAPERATAPESTAQUARATAQUARITAQUARUCU DO SULTAVARESTENENTE PORTELATERRA DE AREIATEUTONIATIO HUGOTIRADENTES DO SULTOROPITORRESTRAMANDAITRAVESSEIROTRES ARROIOSTRES CACHOEIRASTRES COROASTRES DE MAIOTRES FORQUILHASTRES PALMEIRASTRES PASSOSTRINDADE DO SULTRIUNFOTUCUNDUVATUNASTUPANCI DO SULTUPANCIRETATUPANDITUPARENDITURUCUUBIRETAMAUNIAO DA SERRAUNISTALDAURUGUAIANAVACARIAVALE DO SOLVALE REALVALE VERDEVANINIVENANCIO AIRESVERA CRUZVERANOPOLISVESPASIANO CORREAVIADUTOSVIAMAOVICENTE DUTRAVICTOR GRAEFFVILA FLORESVILA LANGAROVILA MARIAVILA NOVA DO SULVISTA ALEGREVISTA ALEGRE DO PRATAVISTA GAUCHAVITORIA DAS MISSOESWESTFALIAXANGRI-LA",
+        "Selecionar todos Municípios",
+        "Selecionar todos Municípios",
+        "",
+        "",
+        "",
+        ""
+      ]
+    }
+  ],
+  "log": [
+    {
+      "action": "select_rs",
+      "select_index": 2,
+      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+      "value": "RS",
+      "text": "RS - Rio Grande do Sul"
+    }
+  ]
+}

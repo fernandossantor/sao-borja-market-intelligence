@@ -146,3 +146,81 @@ Quando um dos PDFs recentes puder ser lido integralmente, registrar:
 `edicao | periodo_referencia | indicador | setor/categoria | municipio | valor | unidade | fonte | nota_metodologica`
 
 e testar São Borja antes de qualquer promoção.
+
+## Subetapa 1D — edição de agosto/2026 recebida e extraída
+
+Foi recebido o PDF `29-boletim-economico-tributario-receita-rs-ago-2026.pdf`.
+
+### Inconsistência de data
+
+O conteúdo interno do PDF informa **PUBLICADO: 01/09/2026**, enquanto a listagem institucional anteriormente consultada havia sido registrada nesta auditoria como ed. 29 em 08/09/2026.
+
+Tratamento:
+- preservar as duas evidências;
+- para os indicadores extraídos deste arquivo, usar a data interna do PDF: **01/09/2026**;
+- não corrigir silenciosamente a listagem institucional.
+
+### Fronteira Oeste — estabelecimentos
+
+Estabelecimentos ativos:
+- Fronteira Oeste: **25.218**;
+- RS: **607.659**;
+- contagem não inclui MEI.
+
+Cálculo SBMI:
+`25.218 / 607.659 × 100 = 4,15%`.
+
+Esse percentual se refere à contagem de estabelecimentos do universo do boletim e **não deve ser comparado diretamente** com a participação da região nas vendas industriais.
+
+### Fronteira Oeste — indústria em agosto/2026
+
+Vendas industriais:
+- participação no RS: **1,3%**;
+- agosto/2025: aproximadamente R$ 0,7 bi;
+- agosto/2026: aproximadamente R$ 0,7 bi;
+- variação: **-5,3%**.
+
+RS:
+- R$ 53,5 bi → R$ 51,6 bi;
+- variação: **-3,5%**.
+
+Diferença calculada:
+`-5,3 - (-3,5) = -1,8 p.p.`
+
+A retração regional foi 1,8 p.p. mais intensa que a média estadual naquele mês.
+
+### Realizado x previsto
+
+Fronteira Oeste:
+- realizado: ~R$ 0,7 bi;
+- previsto: ~R$ 0,7 bi;
+- variação: **+0,8%**.
+
+RS:
+- realizado: R$ 51,6 bi;
+- previsto: R$ 56,0 bi;
+- variação: **-8,5%**.
+
+Isso mostra que, apesar da queda interanual da região, o resultado ficou ligeiramente acima do modelo de previsão da Receita para agosto.
+
+### Produtos alimentícios — RS
+
+- participação nas vendas industriais do mês: 3,5%;
+- agosto/2025: R$ 1,8 bi;
+- agosto/2026: R$ 1,8 bi;
+- variação: **+1,3%**.
+
+No mesmo mês, a indústria total recuou 3,5%.
+
+### Município
+
+A tabela municipal exibida pelo boletim contém um subconjunto de municípios. **São Borja não aparece nessa tabela.**
+
+Conclusão:
+- o arquivo confirma granularidade municipal no produto BET;
+- esta edição não fornece um valor diretamente extraível para São Borja no quadro municipal exibido;
+- ausência na tabela não significa ausência de atividade.
+
+### Arquivo estruturado
+
+`docs/data_sources/bet_ed29_fronteira_oeste_agosto2026_v001.csv`

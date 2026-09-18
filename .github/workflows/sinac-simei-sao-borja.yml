@@ -1,0 +1,247 @@
+name: sinac-simei-sao-borja
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sinac-simei-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Reproduce official SINAC/SIMEI municipal query
+        run: |
+          cat > /tmp/sinac_simei.py <<'PY'
+          import asyncio
+          import csv
+          import json
+          import re
+          import unicodedata
+          from pathlib import Path
+
+          from playwright.async_api import async_playwright
+
+          OUT = Path("artifacts/sinac_simei_sao_borja")
+          OUT.mkdir(parents=True, exist_ok=True)
+          URL = (
+              "https://www8.receita.fazenda.gov.br/simplesnacional/"
+              "aplicacoes/atbhe/estatisticassinac.app/"
+              "EstatisticasOptantesPorDataMunicipio.aspx?optanteSimei=&tipoConsulta=2"
+          )
+
+          def norm(value):
+              value = unicodedata.normalize("NFKD", str(value or ""))
+              value = "".join(c for c in value if not unicodedata.combining(c))
+              return re.sub(r"\s+", " ", value).strip().upper()
+
+          async def main():
+              audit = {"url": URL, "actions": [], "selects": [], "tables": []}
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  page = await browser.new_page(viewport={"width": 1600, "height": 1200}, locale="pt-BR")
+                  await page.goto(URL, wait_until="domcontentloaded", timeout=120000)
+                  await page.wait_for_timeout(3000)
+
+                  async def inspect_selects(tag):
+                      result = []
+                      selects = page.locator("select")
+                      for i in range(await selects.count()):
+                          sel = selects.nth(i)
+                          try:
+                              opts = await sel.locator("option").all_text_contents()
+                              result.append({
+                                  "tag": tag,
+                                  "index": i,
+                                  "id": await sel.get_attribute("id"),
+                                  "name": await sel.get_attribute("name"),
+                                  "value": await sel.input_value(),
+                                  "options": opts[:1000],
+                              })
+                          except Exception as exc:
+                              result.append({"tag": tag, "index": i, "error": repr(exc)})
+                      audit["selects"].extend(result)
+                      return result
+
+                  before = await inspect_selects("before")
+
+                  # State selector: prefer a select containing RS / Rio Grande do Sul.
+                  state_index = None
+                  state_value = None
+                  for item in before:
+                      opts = item.get("options", [])
+                      for j, label in enumerate(opts):
+                          n = norm(label)
+                          if n == "RS" or "RIO GRANDE DO SUL" in n:
+                              state_index = item["index"]
+                              state_value = j
+                              break
+                      if state_index is not None:
+                          break
+
+                  if state_index is None:
+                      raise RuntimeError("No UF selector with RS option found")
+
+                  state_sel = page.locator("select").nth(state_index)
+                  opts = state_sel.locator("option")
+                  option = opts.nth(state_value)
+                  value = await option.get_attribute("value")
+                  label = await option.inner_text()
+                  audit["actions"].append({"action": "select_uf", "label": label, "value": value})
+                  if value is not None:
+                      await state_sel.select_option(value=value)
+                  else:
+                      await state_sel.select_option(index=state_value)
+                  await page.wait_for_timeout(5000)
+                  try:
+                      await page.wait_for_load_state("networkidle", timeout=15000)
+                  except Exception:
+                      pass
+
+                  after_uf = await inspect_selects("after_uf")
+
+                  # Municipality selector: identify option São Borja.
+                  mun_index = None
+                  mun_opt_index = None
+                  for item in after_uf:
+                      for j, label in enumerate(item.get("options", [])):
+                          if norm(label) == "SAO BORJA":
+                              mun_index = item["index"]
+                              mun_opt_index = j
+                              break
+                      if mun_index is not None:
+                          break
+                  if mun_index is None:
+                      raise RuntimeError("São Borja option not found after selecting RS")
+
+                  mun_sel = page.locator("select").nth(mun_index)
+                  mun_opt = mun_sel.locator("option").nth(mun_opt_index)
+                  mun_value = await mun_opt.get_attribute("value")
+                  mun_label = await mun_opt.inner_text()
+                  audit["actions"].append({"action": "select_municipality", "label": mun_label, "value": mun_value})
+                  if mun_value is not None:
+                      await mun_sel.select_option(value=mun_value)
+                  else:
+                      await mun_sel.select_option(index=mun_opt_index)
+                  await page.wait_for_timeout(1500)
+
+                  # Click Consultar/Pesquisar if present.
+                  clicked = False
+                  for selector in [
+                      'input[type="submit"]',
+                      'input[type="button"]',
+                      'button',
+                      'a',
+                  ]:
+                      loc = page.locator(selector)
+                      for i in range(min(await loc.count(), 100)):
+                          el = loc.nth(i)
+                          try:
+                              text = " ".join(
+                                  x for x in [
+                                      await el.get_attribute("value"),
+                                      await el.inner_text(timeout=300),
+                                      await el.get_attribute("title"),
+                                  ] if x
+                              )
+                              if any(k in norm(text) for k in ("CONSULT", "PESQUIS", "EXIBIR", "VISUALIZ")):
+                                  audit["actions"].append({"action": "click", "text": text[:500]})
+                                  await el.click(timeout=5000)
+                                  clicked = True
+                                  break
+                          except Exception:
+                              pass
+                      if clicked:
+                          break
+
+                  await page.wait_for_timeout(5000)
+                  try:
+                      await page.wait_for_load_state("networkidle", timeout=15000)
+                  except Exception:
+                      pass
+
+                  body = await page.locator("body").inner_text()
+                  (OUT / "body.txt").write_text(body, encoding="utf-8")
+                  (OUT / "final.html").write_text(await page.content(), encoding="utf-8")
+                  await page.screenshot(path=str(OUT / "final.png"), full_page=True)
+
+                  # Capture tables and rows. Do not infer which column is the count.
+                  found_rows = []
+                  tables = page.locator("table")
+                  for ti in range(await tables.count()):
+                      table = tables.nth(ti)
+                      rows = table.locator("tr")
+                      table_rows = []
+                      for ri in range(await rows.count()):
+                          cells = rows.nth(ri).locator("th,td")
+                          vals = [(await cells.nth(ci).inner_text()).strip() for ci in range(await cells.count())]
+                          if vals:
+                              table_rows.append(vals)
+                              if any("SAO BORJA" in norm(v) for v in vals):
+                                  found_rows.append({"table": ti, "row": ri, "cells": vals})
+                      audit["tables"].append({"table": ti, "rows": table_rows[:5000]})
+
+                  audit["found_sao_borja_rows"] = found_rows
+                  audit["body_contains_sao_borja"] = "SAO BORJA" in norm(body)
+                  (OUT / "audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2), encoding="utf-8")
+
+                  if found_rows:
+                      maxcols = max(len(r["cells"]) for r in found_rows)
+                      with (OUT / "sinac_simei_sao_borja_rows.csv").open("w", encoding="utf-8", newline="") as f:
+                          w = csv.writer(f)
+                          w.writerow(["table_index", "row_index"] + [f"col_{i+1}" for i in range(maxcols)])
+                          for r in found_rows:
+                              w.writerow([r["table"], r["row"]] + r["cells"])
+
+                  await browser.close()
+
+              print(json.dumps({
+                  "actions": audit["actions"],
+                  "found_rows": audit["found_sao_borja_rows"],
+                  "body_contains_sao_borja": audit["body_contains_sao_borja"],
+              }, ensure_ascii=False, indent=2))
+
+          asyncio.run(main())
+          PY
+          python /tmp/sinac_simei.py
+
+      - name: Persist audit on exploratory branch
+        run: |
+          mkdir -p docs/data_sources/sinac_simei_runtime
+          cp artifacts/sinac_simei_sao_borja/audit.json docs/data_sources/sinac_simei_runtime/
+          cp artifacts/sinac_simei_sao_borja/body.txt docs/data_sources/sinac_simei_runtime/
+          if [ -f artifacts/sinac_simei_sao_borja/sinac_simei_sao_borja_rows.csv ]; then
+            cp artifacts/sinac_simei_sao_borja/sinac_simei_sao_borja_rows.csv docs/data_sources/sinac_simei_runtime/
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/sinac_simei_runtime
+          if git diff --cached --quiet; then
+            echo "No SINAC changes to commit."
+          else
+            git commit -m "data: reproduce SINAC SIMEI São Borja query"
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload SINAC audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sinac-simei-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/sinac_simei_sao_borja/

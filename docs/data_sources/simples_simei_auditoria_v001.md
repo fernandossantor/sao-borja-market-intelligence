@@ -108,3 +108,46 @@ O indicador só poderá mudar de lacuna para coberto quando houver:
 Até lá, a matriz deve permanecer:
 - MEI: rota primária identificada, valor pendente;
 - Simples: rota primária identificada, valor pendente.
+
+## Retomada operacional — 18/09/2026
+
+A rota oficial foi revalidada diretamente nas páginas de Estatísticas do Simples Nacional.
+
+### Snapshots confirmados
+
+SINAC — Optantes por UF e Município:
+- ano: 2026;
+- posição consolidada até **12/09/2026**.
+
+SINAC — Optantes por CNAE, UF e município:
+- ano: 2026;
+- posição consolidada até **12/09/2026**.
+
+SIMEI — Optantes por UF e Município:
+- ano: 2026;
+- posição consolidada até **12/09/2026**.
+
+SIMEI — Eventos de enquadramento/desenquadramento:
+- ano: 2026;
+- posição consolidada exibida na página consultada: **18/09/2026**.
+
+### Controle temporal
+
+As páginas não possuem necessariamente o mesmo snapshot.
+
+Regra:
+**não combinar estoque de optantes em 12/09/2026 com eventos consolidados em 18/09/2026 como se fossem uma única fotografia temporal sem explicitar as datas.**
+
+### Estado de São Borja
+
+A granularidade municipal e a opção de consulta por CNAE estão confirmadas.
+
+O formulário ainda não foi submetido de forma reproduzível para São Borja no ambiente atual.
+
+Portanto:
+- valor oficial de optantes do Simples em São Borja: PENDENTE;
+- valor oficial de MEI/SIMEI em São Borja: PENDENTE;
+- valor por CNAE: PENDENTE;
+- cross-check secundário de 3.829 MEI permanece **não aceito**.
+
+A lacuna continua operacional, não conceitual.

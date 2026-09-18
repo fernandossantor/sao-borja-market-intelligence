@@ -77,3 +77,112 @@ Essas duas confirmações não autorizam presumir que sejam as únicas fontes. A
 Material de imprensa de maio/2026, ao relatar apresentação da plataforma no Vale do Rio Pardo, utilizou indicadores de emprego formal para municípios individuais da região. Isso confirma que **há pelo menos indicadores do Observatório com granularidade municipal**.
 
 Regra: a granularidade será registrada indicador a indicador; não se assumirá que todos os módulos permitem município.
+
+
+## Auditoria aprofundada — 18/09/2026
+
+### O que foi possível confirmar sem a rota dinâmica de metadados
+
+A página `/page/fonte-dos-dados` continua sendo carregada client-side e não expõe seu conteúdo textual no mecanismo automatizado.
+
+Mesmo assim, três tipos de evidência pública permitiram avançar sem inventar vínculos de fonte:
+
+1. materiais institucionais da própria Fecomércio-RS;
+2. cobertura do lançamento, que registra Receita Federal e Ministério do Trabalho como fontes oficiais integradas;
+3. reportagem de maio/2026 baseada em demonstração do Observatório, que reproduz variáveis e valores municipais concretos.
+
+### Dimensões institucionais confirmadas
+
+A Fecomércio-RS informa que o Observatório reúne:
+- empresas;
+- empregos;
+- receitas;
+- despesas;
+- recortes por região;
+- recortes por atividade econômica.
+
+Também confirma indicadores próprios do IFEP-RS:
+- rotatividade;
+- concentração territorial;
+- tempo de vida/atividade das empresas.
+
+### Evidência concreta de granularidade municipal
+
+Reportagem da Gazeta do Sul de 07/05/2026 reproduz resultados apresentados pelo Observatório para municípios do Vale do Rio Pardo.
+
+Para Santa Cruz do Sul, a publicação registra que a plataforma permite observar, entre outros:
+- participação feminina nos contratos formais;
+- composição do emprego por setor;
+- tempo médio de contrato;
+- opção da empresa empregadora pelo Simples Nacional;
+- distribuição por horas semanais;
+- estoque/número de empresas;
+- participação de optantes do Simples;
+- número de MEIs;
+- empregos formais;
+- criação de vagas no período;
+- estoque de contratos;
+- rotatividade;
+- remuneração média;
+- remuneração cruzada com sexo, jornada, ocupação, idade e tempo de atuação.
+
+A mesma evidência traz municípios individuais, portanto a **granularidade municipal está confirmada para parte relevante dos módulos empresariais e trabalhistas**.
+
+### Regra de proveniência reforçada
+
+Embora Receita Federal e Ministério do Trabalho sejam fontes gerais confirmadas da plataforma, a auditoria **não vinculará automaticamente**:
+
+`indicador → Receita Federal`
+
+ou
+
+`indicador → RAIS/Novo Caged`
+
+sem que a seção “Fonte dos dados” ou metadado equivalente confirme essa relação.
+
+Exemplo:
+- remuneração com última referência em 2024 é metodologicamente compatível com uma base anual de emprego;
+- criação de vagas no primeiro quadrimestre de 2026 é compatível com base conjuntural;
+- porém essas compatibilidades são apenas **hipóteses de origem**, não fontes documentadas.
+
+### Indicadores próprios IFEP-RS
+
+Para rotatividade, concentração territorial e tempo de atividade:
+- existência: confirmada;
+- produtor: IFEP-RS;
+- fórmula: pendente;
+- periodicidade: pendente;
+- fonte(s) de entrada: pendente;
+- comparabilidade com indicadores homônimos externos: **não autorizada** até recuperar metodologia.
+
+### Consequência para São Borja
+
+A plataforma possui capacidade comprovada de trabalhar no nível municipal.
+
+Ainda falta testar diretamente São Borja na interface. Até esse teste, a regra será:
+
+> “granularidade municipal confirmada no Observatório; disponibilidade específica do recorte São Borja a validar na interface.”
+
+Não se importarão valores de outro município como proxy de São Borja.
+
+### Artefato estruturado
+
+`docs/data_sources/observatorio_fecomercio_rs_matriz_indicadores_v001.csv`
+
+A matriz separa:
+- indicador;
+- geografia;
+- unidade;
+- status da fonte primária;
+- transformação IFEP;
+- uso no SBMI;
+- limitação.
+
+### Fontes públicas utilizadas nesta etapa
+
+- Fecomércio-RS — publicação institucional de lançamento/uso do Observatório;
+- Grupo Amanhã — 04/12/2025, cobertura do lançamento, confirmando integração de bases oficiais como Ministério do Trabalho e Receita Federal;
+- Gazeta do Sul — 07/05/2026, reprodução de resultados municipais apresentados pelo Observatório;
+- Sindilojas Caxias — 27/08/2026, confirmação de uso para empresas, emprego, vendas, setores e regiões.
+
+Nenhuma dessas fontes substitui a página interna “Fonte dos dados” para o vínculo fino indicador→base original.

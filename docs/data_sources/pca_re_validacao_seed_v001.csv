@@ -4,3 +4,5 @@ periodo,indicador,geografia_tipo,geografia_nome,valor,unidade,variacao_mes_pct,v
 2024-08,PCA-RE,Estado,Rio Grande do Sul,254.32,BRL,,,,"Notícia oficial Sefaz/RS de 05/09/2024","Valor estadual informado na comunicação oficial; não substitui boletim",exploratorio
 2024-11,PCA-RE,COREDE,Fronteira Oeste,270.33,BRL,2.74,11.63,14.20,"Boletim Preços Dinâmicos — Ref. novembro/2024","Âncora oficial para validação do processo de extração",exploratorio
 2024-11,PCA-RE,Estado,Rio Grande do Sul,283.92,BRL,1.73,10.80,12.94,"Boletim Preços Dinâmicos — Ref. novembro/2024","Âncora oficial para validação do processo de extração",exploratorio
+2026-08,PCA-RE,COREDE,Fronteira Oeste,284.19,BRL,0.51,2.01,3.22,"Boletim Preços Dinâmicos — Ed. 25 / agosto 2026","Observação corrente; COREDE de referência de São Borja",exploratorio
+2026-08,PCA-RE,Estado,Rio Grande do Sul,298.61,BRL,0.60,2.54,3.49,"Boletim Preços Dinâmicos — Ed. 25 / agosto 2026","Média estadual corrente",exploratorio

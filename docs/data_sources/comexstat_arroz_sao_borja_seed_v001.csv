@@ -1,0 +1,7 @@
+periodo,fluxo,municipio_ibge,municipio,uf,sh4,produto,pais_codigo,pais,kg_liquido,valor_fob_usd,natureza,status,fonte,limitacao
+2024,export,4318002,"São Borja",RS,1006,"Arroz",,,,,DADO OBSERVADO,pending_extract,"Comex Stat / MDIC — base municípios","Município é domicílio fiscal do exportador; produto apenas SH4"
+2024,import,4318002,"São Borja",RS,1006,"Arroz",,,,,DADO OBSERVADO,pending_extract,"Comex Stat / MDIC — base municípios","Município é domicílio fiscal do importador; não implica consumo local"
+2025,export,4318002,"São Borja",RS,1006,"Arroz",,,,,DADO OBSERVADO,pending_extract,"Comex Stat / MDIC — base municípios","Município é domicílio fiscal do exportador; produto apenas SH4"
+2025,import,4318002,"São Borja",RS,1006,"Arroz",,,,,DADO OBSERVADO,pending_extract,"Comex Stat / MDIC — base municípios","Município é domicílio fiscal do importador; não implica consumo local"
+2026,export,4318002,"São Borja",RS,1006,"Arroz",,,,,DADO OBSERVADO,pending_extract,"Comex Stat / MDIC — jan-ago/2026","Ano parcial; município é domicílio fiscal do exportador"
+2026,import,4318002,"São Borja",RS,1006,"Arroz",,,,,DADO OBSERVADO,pending_extract,"Comex Stat / MDIC — jan-ago/2026","Ano parcial; município é domicílio fiscal do importador"

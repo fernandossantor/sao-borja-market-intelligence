@@ -442,4 +442,74 @@ Isso ajuda a explicar por que:
 
 Isso não autoriza classificar indivíduos por setor nem inferir gasto a partir de salário.
 
+## 17. Fronteira — fluxo físico, abastecimento e oferta formal não são proxies intercambiáveis
 
+A retomada das fontes oficiais permitiu decompor melhor o circuito fronteiriço.
+
+### Fluxo físico exportador — ANTT/Comex Stat
+
+São Borja:
+- 2023: 859.348 t;
+- 2024: 800.435 t;
+- 2025: 979.151 t.
+
+Participação calculada no total das seis fronteiras apresentadas no Anuário TRC:
+- 2023: 14,50%;
+- 2024: 14,78%;
+- 2025: 16,22%.
+
+O volume de 2025 ficou 13,94% acima de 2023.
+
+### Abastecimento municipal — ANP
+
+2024:
+- gasolina C: 15.929.410 L;
+- etanol: 592.100 L;
+- diesel: 49.501.472 L.
+
+Variações 2023→2024:
+- gasolina: +53,81%;
+- etanol: +64,93%;
+- diesel: +52,66%.
+
+No mesmo intervalo, o volume exportado pela fronteira caiu 7%.
+
+### Resultado metodológico
+
+A divergência de direção entre exportações e combustíveis mostra que vendas municipais de combustível não podem ser tratadas como proxy direto do fluxo exportador.
+
+As duas camadas respondem a perguntas distintas:
+- ANTT/Comex Stat: fluxo físico exportador;
+- ANP: abastecimento/mobilidade municipal ampla.
+
+### Oferta turística formal — Cadastur
+
+2T2026:
+- 2 meios de hospedagem Regular/Operação;
+- 90 UHs;
+- 180 leitos;
+- 6 agências Regular/Operação e 1 Em Implantação.
+
+A RFB registra 31 estabelecimentos CNAE 55 — Alojamento.
+
+Os universos são diferentes e não devem ser convertidos em “taxa de cobertura”.
+
+### Diagnóstico atualizado
+
+A fronteira deixa de ser uma única variável e passa a ser observada em quatro camadas:
+
+1. fluxo internacional;
+2. abastecimento/mobilidade;
+3. oferta turística formal;
+4. estrutura empresarial local.
+
+A lacuna central continua sendo a conexão entre essas camadas e a **captura econômica local**.
+
+Variáveis ainda faltantes:
+- origem do cliente;
+- motivo da viagem;
+- permanência/pernoite;
+- ticket/gasto;
+- categoria de consumo.
+
+Aumentar a quantidade de proxies sem essas variáveis não produzirá uma estimativa válida de retenção econômica.

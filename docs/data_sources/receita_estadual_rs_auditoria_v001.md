@@ -141,3 +141,35 @@ O Observatório Fecomércio-RS/IFEP-RS entra como fonte transversal de validaç�
 3. **Cesta Nutricional** — perfis, periodicidade e Fronteira Oeste;
 4. **Radar** — auditoria por indicador e granularidade;
 5. **Observatório Fecomércio-RS/IFEP-RS** — auditar “Fonte dos dados”, granularidade municipal/regional e indicadores próprios; comparar com fontes primárias já canônicas.
+
+## Atualização integrada — 18/09/2026 — PDFs recebidos
+
+Foram recebidos e auditados cinco documentos oficiais:
+- NT CIET 05/2026 — Radar de Mercado;
+- BET agosto/2026;
+- BET Comércio Exterior ed.07;
+- Preços Dinâmicos ed.25 / agosto/2026;
+- Volume de Vendas da Indústria ed.03 / 1º trimestre de 2026.
+
+### Principais avanços
+
+1. O método do Radar está fechado, inclusive fórmula de Part.RS, faixas de dependência, janela LTM, portfólio Top 90% e dicionário das seis bases CSV.
+2. A Fronteira Oeste passa a ter observações correntes de agosto/2026 para estabelecimentos, vendas industriais, realizado vs previsto, PCA/ICA e comércio exterior.
+3. O BET Comércio Exterior confirma granularidade por COREDE.
+4. O boletim de Preços permite comparar Fronteira Oeste x RS e faixas de renda.
+5. A edição 03 de vendas industriais confirma desempenho relativamente mais forte de alimentos no 1º trimestre de 2026.
+
+### Artefatos novos
+
+- `radar_nt_ciet_05_2026_dicionario_v001.csv`
+- `precos_dinamicos_fronteira_oeste_agosto2026_v001.csv`
+- `bet_ed29_fronteira_oeste_agosto2026_v001.csv`
+- `bet_comex_ed07_fronteira_oeste_v001.csv`
+- `volume_vendas_industria_rs_1t2026_selecionados_v001.csv`
+- `receita_rs_sintese_exploratoria_20260918_v001.md`
+
+### Próxima prioridade
+
+A principal pendência operacional é baixar as bases CSV da página **Dados Abertos** do Radar e preencher os sete NCMs do piloto do arroz.
+
+Nenhuma base ou caderno canônico foi alterado.

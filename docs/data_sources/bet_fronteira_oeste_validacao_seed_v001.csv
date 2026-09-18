@@ -1,0 +1,6 @@
+edicao,periodo_referencia,indicador,geografia_tipo,geografia_nome,participacao_pct,valor_base_milhoes_brl,valor_corrente_milhoes_brl,variacao_pct,fonte_oficial,observacao,status
+04,"15/05 a 11/06/2024","Volume de vendas da indústria",COREDE,"Fronteira Oeste",2.0,563.0,750.6,33.3,"Boletim Econômico-Tributário ed. 04","Comparação interanual conforme tabela oficial; valores corrigidos pelo D-ICMS",exploratorio
+08,"01 a 15/07/2024","Volume de vendas da indústria",COREDE,"Fronteira Oeste",1.6,286.0,336.2,17.5,"Boletim Econômico-Tributário ed. 08","Período parcial de julho; comparação interanual; valores corrigidos pelo D-ICMS",exploratorio
+09,"01 a 31/07/2024","Volume de vendas da indústria",COREDE,"Fronteira Oeste",1.5,591.2,743.5,25.8,"Boletim Econômico-Tributário ed. 09","Julho completo; comparação interanual; valores corrigidos pelo D-ICMS",exploratorio
+EXPOINTER,"01 a 25/08/2024","Volume de vendas da indústria",COREDE,"Fronteira Oeste",1.6,565.9,594.7,5.1,"Boletim Econômico-Tributário — Edição Expointer","Período parcial; comparação interanual; valores corrigidos pelo D-ICMS",exploratorio
+11,"01 a 30/09/2024","Volume de vendas da indústria",COREDE,"Fronteira Oeste",1.4,630.2,701.3,11.3,"Boletim Econômico-Tributário ed. 11","Setembro completo; comparação interanual; valores corrigidos pelo D-ICMS",exploratorio

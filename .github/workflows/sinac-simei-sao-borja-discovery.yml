@@ -120,7 +120,7 @@ jobs:
                   log.append({"action":"sao_borja_not_found","available_count":await source.locator("option").count() if await source.count() else 0})
                   return False
               if await page.locator("#btnInserir").count():
-                  await page.locator("#btnInserir").click(force=True)
+                  await page.evaluate("document.querySelector('#btnInserir').click()")
                   log.append({"action":"insert_sao_borja"})
                   await page.wait_for_timeout(500)
               dest=page.locator("#lbDestino")
@@ -130,7 +130,7 @@ jobs:
               # otherwise set the same hidden fields explicitly from the selected destination.
               ok=page.locator('.ui-dialog:has(#divModalFiltroIrpf) button:has-text("Ok")')
               if await ok.count() and await ok.first.is_visible():
-                  await ok.first.click(force=True)
+                  await ok.first.evaluate("el=>el.click()")
                   log.append({"action":"filter_ok"})
                   await page.wait_for_timeout(700)
               else:
@@ -151,7 +151,7 @@ jobs:
               if not await b.count():
                   log.append({"action":"exibir_missing"})
                   return False
-              await b.click(force=True)
+              await b.evaluate("el=>el.click()")
               log.append({"action":"click_exibir"})
               await settle(page,2200)
               return True
@@ -305,6 +305,7 @@ jobs:
           fi
 
       - name: Upload artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: sinac-simei-sao-borja

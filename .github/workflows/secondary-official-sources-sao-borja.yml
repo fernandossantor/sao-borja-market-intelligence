@@ -117,8 +117,16 @@ jobs:
                   uf_col = cols.get("UF")
                   year_col = cols.get("ANO")
                   sales_col = cols.get("VENDAS")
-                  if not all((code_col, uf_col, year_col, sales_col)):
-                      raise RuntimeError(f"Expected ANP schema not found: {list(df.columns)}")
+                  p13_col = cols.get("P13")
+                  outros_col = cols.get("OUTROS")
+                  if not all((code_col, uf_col, year_col)):
+                      raise RuntimeError(f"Expected ANP municipal keys not found: {list(df.columns)}")
+                  if sales_col:
+                      value_columns = [sales_col]
+                  elif p13_col and outros_col:
+                      value_columns = [p13_col, outros_col]
+                  else:
+                      raise RuntimeError(f"Expected ANP measure columns not found: {list(df.columns)}")
                   code = df[code_col].astype(str).str.replace(r"\D", "", regex=True)
                   mask = code.eq(IBGE) & df[uf_col].map(norm).eq(UF)
                   hit = df.loc[mask].copy()
@@ -129,6 +137,7 @@ jobs:
                       "rows": len(hit),
                       "years": sorted(hit[year_col].dropna().astype(str).unique().tolist()),
                       "latest_year": max(hit[year_col].dropna().astype(str).tolist(), default=None),
+                      "value_columns": value_columns,
                       "parser": parser,
                       "columns": list(df.columns),
                       "filtered_file": str(out),

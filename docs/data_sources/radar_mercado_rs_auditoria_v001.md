@@ -12,7 +12,7 @@ Auditar o Radar do Mercado da Receita Estadual como fonte de inteligência merca
 ## Fontes
 
 - Painel oficial: https://receitadados.sefaz.rs.gov.br/desenvolve-rs/radar-do-mercado-da-receita-estadual/
-- Nota Técnica CIET 05/2026: link publicado no Receita.doc
+- Nota técnica específica: **não localizada de forma verificável nesta auditoria; não usar como fonte até localização oficial**.
 - Material institucional sobre a versão ampliada lançada em 30/06/2026.
 
 ## Achados observados — etapa 4A
@@ -86,3 +86,176 @@ A auditoria deverá registrar página por página:
 ## Próxima subetapa — 4B
 
 Auditar o painel interativo página por página e construir uma matriz de granularidade e filtros antes de qualquer extração setorial.
+
+
+## Etapa 4B — matriz de dimensões verificáveis
+
+### Limitação técnica da auditoria do Power BI
+
+O portal oficial incorpora o Radar por um relatório público do Power BI:
+
+`https://app.powerbi.com/view?r=eyJrIjoiYzMxNWUyMDQtYWVjOC00MTcxLWJhN2ItY2NjYTk2MWEwNmNjIiwidCI6IjgzYmQwOTBiLTc1NmUtNGEwMi1hNTEyLWU1ZWEwMmMwMzA0MSJ9`
+
+O HTML público do Receita Dados confirma o iframe, mas o conteúdo interno do relatório é carregado client-side. Nesta auditoria não foi possível recuperar de forma confiável os **nomes atuais das páginas** nem a lista completa de filtros diretamente do Power BI.
+
+Por isso, a matriz abaixo registra **dimensões analíticas confirmadas**, e não inventa títulos de páginas.
+
+### Dimensões atuais confirmadas por fonte institucional — versão ampliada 2026
+
+#### 1. Demanda estadual por produto
+
+Conceito documentado:
+- produtos com maior demanda interna no Rio Grande do Sul;
+- detalhamento por produto;
+- eixo classificatório por NCM confirmado por documentação e usos publicados do Radar.
+
+Geografia:
+- demanda: Rio Grande do Sul.
+
+Uso SBMI:
+- identificar produtos com mercado estadual relevante;
+- cruzar depois com setores e capacidades presentes em São Borja.
+
+Limitação:
+- demanda estadual não é demanda municipal.
+
+#### 2. Composição/origem do abastecimento
+
+Conceito documentado:
+- para cada produto, distinguir:
+  - produção local (RS);
+  - compras de outras unidades da federação;
+  - importações.
+
+Geografia:
+- mercado consumidor: RS;
+- origem: RS / outras UFs / exterior.
+
+Uso SBMI:
+- medir dependência externa estadual;
+- identificar lacunas produtivas e oportunidades de substituição de oferta externa.
+
+#### 3. Market share por produto no mercado gaúcho
+
+Conceito documentado:
+- composição de mercado dos produtos associados aos setores industriais;
+- participação da produção gaúcha, entradas de outras UFs e importações.
+
+Unidade:
+- participação percentual / composição de mercado;
+- volume financeiro associado ao produto quando disponibilizado.
+
+Limitação:
+- market share do RS não é market share de São Borja.
+
+#### 4. Destino da produção industrial gaúcha
+
+Conceito documentado:
+- destino da produção discriminado por unidade da federação e país.
+
+Geografia:
+- origem: RS;
+- destino: UF e país.
+
+Uso SBMI:
+- contextualizar mercados externos de cadeias em que São Borja possua operadores/produtores;
+- identificar mercados consumidores potenciais.
+
+#### 5. Mercados consumidores e concorrentes
+
+A divulgação oficial da versão 2026 informa identificação de:
+- mercados consumidores;
+- principais concorrentes de cada setor produtivo.
+
+A granularidade exata desses visuais ainda não foi recuperada do Power BI.
+
+Status:
+- dimensão confirmada;
+- filtros e geografia pendentes.
+
+#### 6. Dependência externa / carência de produção local
+
+Conceito documentado:
+- produtos com demanda interna relevante e baixa produção local;
+- classificação por níveis de dependência externa.
+
+Uso SBMI:
+- triagem de oportunidades, nunca prova de viabilidade econômica local.
+
+### Evidência histórica de granularidade municipal
+
+Publicação acadêmica de 2025 que utilizou diretamente o Radar mostra visualizações intituladas, entre outras:
+
+- “Mapa do setor de Máquinas e Equipamentos por Município/RS em 2023”;
+- “Mapa de calor do setor de Metalurgia por Município/RS em 2023”.
+
+Isso confirma que a estrutura do Radar já continha **município** para localização/volume de produção industrial.
+
+Classificação dessa evidência:
+- fonte secundária acadêmica que declara uso direto do Radar;
+- referência temporal: dados de 2023, acesso ao Radar em 2025;
+- **não suficiente para afirmar que o filtro municipal está disponível em todas as páginas da versão ampliada de 2026**.
+
+### Estrutura setorial — evidência histórica de uso
+
+A mesma publicação descreve a taxonomia do Desenvolve RS em três níveis:
+- Atividades;
+- Áreas;
+- Setores.
+
+As Atividades citadas são:
+- Produção Primária;
+- Indústrias;
+- Atacado;
+- Varejo;
+- Serviços.
+
+Essa taxonomia será tratada como **evidência histórica/auxiliar** até confirmação direta no painel atual.
+
+### Conclusão territorial da 4B
+
+No estado atual da auditoria:
+
+| Dimensão | Menor geografia confirmada | São Borja diretamente utilizável? |
+|---|---|---|
+| Demanda por NCM | RS | Não |
+| Origem do abastecimento | RS / OUF / exterior | Não |
+| Market share por produto | RS | Não |
+| Destino da produção | UF / país | Não como mercado de origem municipal |
+| Mercados consumidores | a auditar | Ainda não |
+| Concorrentes | a auditar | Ainda não |
+| Localização/volume de produção | Município — evidência histórica | **Potencialmente sim** |
+| Dependência externa | RS | Não |
+
+### Implicação para o SBMI
+
+O Radar deve ser integrado em duas camadas distintas:
+
+1. **Camada estadual de oportunidade**
+   - NCM;
+   - demanda;
+   - produção interna;
+   - entradas OUF;
+   - importações;
+   - dependência externa;
+   - market share.
+
+2. **Camada territorial de capacidade/oferta**
+   - município de localização das indústrias, quando o visual atual permitir;
+   - cruzamento posterior com CNAE/CNPJ/VAF/emprego já auditados no SBMI.
+
+A análise correta não será:
+> “São Borja demanda R$ X deste produto”.
+
+Mas sim:
+> “O mercado gaúcho apresenta demanda e dependência externa para determinado produto; São Borja possui ou não capacidades produtivas relacionadas que justificam investigação de oportunidade”.
+
+Isso mantém separadas **demanda estadual** e **capacidade territorial local**.
+
+## Próxima subetapa — 4C
+
+1. testar, por evidência pública acessível, quais setores/produtos do Radar possuem mapa municipal na versão atual;
+2. selecionar uma pequena cesta piloto de NCMs associados a cadeias já relevantes em São Borja;
+3. construir o primeiro cruzamento exploratório:
+   `NCM / oportunidade estadual → CNAE/capacidade local → evidência municipal existente → hipótese mercadológica`;
+4. manter toda hipótese como exploratória até validação.

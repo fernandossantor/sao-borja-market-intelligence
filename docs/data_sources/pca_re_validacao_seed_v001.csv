@@ -1,0 +1,6 @@
+periodo,indicador,geografia_tipo,geografia_nome,valor,unidade,variacao_mes_pct,variacao_ano_pct,variacao_12m_pct,fonte_oficial,observacao,status
+2024-07,PCA-RE,COREDE,Fronteira Oeste,248.70,BRL,,,10.56,"Boletim Preços Dinâmicos — Edição Expointer 2024","Âncora oficial para validação do processo de extração",exploratorio
+2024-07,PCA-RE,Estado,Rio Grande do Sul,258.80,BRL,,,8.72,"Boletim Preços Dinâmicos — Edição Expointer 2024","Âncora oficial para validação do processo de extração",exploratorio
+2024-08,PCA-RE,Estado,Rio Grande do Sul,254.32,BRL,,,,"Notícia oficial Sefaz/RS de 05/09/2024","Valor estadual informado na comunicação oficial; não substitui boletim",exploratorio
+2024-11,PCA-RE,COREDE,Fronteira Oeste,270.33,BRL,2.74,11.63,14.20,"Boletim Preços Dinâmicos — Ref. novembro/2024","Âncora oficial para validação do processo de extração",exploratorio
+2024-11,PCA-RE,Estado,Rio Grande do Sul,283.92,BRL,1.73,10.80,12.94,"Boletim Preços Dinâmicos — Ref. novembro/2024","Âncora oficial para validação do processo de extração",exploratorio

@@ -1,0 +1,8 @@
+{
+  "discovered_packages": 15,
+  "resources_2t2026": 13,
+  "categories_with_sao_borja": 5,
+  "total_sao_borja_rows": 21,
+  "failures": 0,
+  "rule": "Exploratory only; no canonical promotion. Category coverage is reported without forcing comparability across mandatory/optional Cadastur categories."
+}

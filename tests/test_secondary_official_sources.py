@@ -4,6 +4,7 @@ import pytest
 from sbmi.secondary_official_sources import (
     aggregate_comex_by_month_sh4,
     filter_anp_annual_sales,
+    filter_anp_glp_sales,
     filter_anp_retailers,
     filter_comex_municipal,
 )
@@ -121,3 +122,30 @@ def test_rejects_unexpected_schema_instead_of_guessing_columns():
     frame = pd.DataFrame([{"municipio": "São Borja"}])
     with pytest.raises(ValueError, match="colunas obrigatórias ausentes"):
         filter_anp_annual_sales(frame)
+
+
+def test_filters_anp_glp_preserving_p13_and_outros():
+    frame = pd.DataFrame(
+        [
+            {
+                "ANO": 2024,
+                "UF": "RS",
+                "MUNICÍPIO": "SAO BORJA",
+                "CÓDIGO IBGE": 4318002,
+                "P13": 100,
+                "OUTROS": 20,
+            },
+            {
+                "ANO": 2024,
+                "UF": "RS",
+                "MUNICÍPIO": "ITAQUI",
+                "CÓDIGO IBGE": 4310603,
+                "P13": 999,
+                "OUTROS": 999,
+            },
+        ]
+    )
+    result = filter_anp_glp_sales(frame)
+    assert len(result) == 1
+    assert result.iloc[0]["P13"] == 100
+    assert result.iloc[0]["OUTROS"] == 20

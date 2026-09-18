@@ -151,3 +151,41 @@ Portanto:
 - cross-check secundário de 3.829 MEI permanece **não aceito**.
 
 A lacuna continua operacional, não conceitual.
+
+## Rota de arquivo mensal — tentativa de materialização
+
+A auditoria confirmou adicionalmente a existência mensal do arquivo `Simples.zip` no ecossistema dos Dados Abertos CNPJ.
+
+### Evidência operacional
+
+Um espelho público declara copiar os Dados Abertos CNPJ da Receita Federal e expõe:
+- snapshot de agosto/2026: diretório `2026-08-09`, `Simples.zip` com 288 MB;
+- snapshot de setembro/2026: diretório `2026-09-14`, `Simples.zip` com 294 MB.
+
+O próprio espelho identifica como fonte original o repositório da Receita Federal.
+
+### Classificação metodológica
+
+`SECONDARY_MIRROR_FOR_RETRIEVAL_ONLY`
+
+O espelho **não é aceito como fonte analítica**.
+
+Seu único uso admissível seria transportar bytes que depois fossem:
+1. confrontados com layout oficial da RFB;
+2. associados à competência correta;
+3. reconciliados com o estoque RFB já processado;
+4. comparados com a estatística SINAC/SIMEI oficial.
+
+### Tentativa técnica
+
+A tentativa de download do `Simples.zip` de agosto/2026 pelo ambiente atual falhou.
+
+Nenhum byte foi processado e nenhum valor foi derivado.
+
+### Estado
+
+- SINAC/SIMEI oficial: rota confirmada, valor São Borja pendente;
+- `Simples.zip` mensal: existência operacional confirmada, bytes pendentes;
+- cross-check secundário MEI: continua não aceito.
+
+A lacuna permanece técnica, não conceitual.

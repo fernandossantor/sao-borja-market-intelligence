@@ -200,3 +200,104 @@ Antes de propor pesquisa de campo, buscar:
 
 Arquivo de base:
 `estrutura_empresarial_ancoras_202608_v001.csv`.
+
+## 11. Retomada das rotas oficiais — 18/09/2026
+
+### Cadastur — meios de hospedagem
+
+Foi confirmado o recurso oficial **Segundo Trimestre de 2026**:
+- formato: XLSX;
+- data de criação/modificação: 02/07/2026;
+- recurso CKAN: `7e385ec2-57d8-446c-9cc0-f5f7dadd1fdf`;
+- tamanho informado pelo catálogo: 6.755.085 bytes.
+
+Status:
+- recurso e metadados: CONFIRMADOS;
+- bytes: ainda não ingeridos;
+- contagem atual de São Borja: PENDENTE.
+
+Regra:
+não usar contagens históricas do Cadastur como valor corrente de 2026.
+
+### ANP — revendedores em operação
+
+A página oficial de dados cadastrais dos revendedores varejistas de combustíveis automotivos foi atualizada em **18/09/2026 07:50**.
+
+A ANP descreve o conjunto como revendedores atualmente **em operação**.
+
+O CSV publica, entre outros:
+- código ISIMP;
+- autorização;
+- data de publicação;
+- razão social;
+- CNPJ;
+- endereço;
+- UF;
+- município;
+- bandeira.
+
+Status:
+- rota e CSV atual: CONFIRMADOS;
+- contagem de revendedores em São Borja: PENDENTE.
+
+### ANP — vendas municipais
+
+A ANP mantém séries anuais por município.
+
+Para Gasolina C:
+- série: 1990–2024;
+- arquivo atualizado em 05/01/2026;
+- unidade: litros;
+- campos incluem ano, UF, município, código IBGE e vendas.
+
+Status:
+- estrutura da série: CONFIRMADA;
+- valor mais recente de São Borja: PENDENTE.
+
+Uso:
+proxy complementar de abastecimento/mobilidade.
+
+Proibição:
+não interpretar vendas de combustível como turismo, gasto de visitantes ou tráfego da ponte.
+
+### ANTT — volume exportado pela fronteira de São Borja
+
+O *Anuário TRC 2025* fornece uma nova evidência específica do ponto de fronteira.
+
+Volume de exportação:
+- 2023: **859.348 t**;
+- 2024: **800.435 t**;
+- 2025: **979.151 t**.
+
+Variações publicadas:
+- 2023→2024: -7%;
+- 2024→2025: +22%.
+
+Total das seis fronteiras da tabela:
+- 2023: 5.925.470 t;
+- 2024: 5.415.037 t;
+- 2025: 6.036.930 t.
+
+Cálculos SBMI — participação de São Borja:
+- 2023: 14,50%;
+- 2024: 14,78%;
+- 2025: 16,22%.
+
+Variação acumulada São Borja 2023→2025:
+- **+13,94%**.
+
+Diferença de crescimento 2024→2025:
+- São Borja: +22%;
+- total das seis fronteiras: +12%;
+- diferença: **+10 p.p.**
+
+Interpretação:
+o corredor recuperou volume exportador em 2025 e superou o nível de 2023.
+
+Limitação:
+toneladas exportadas pela fronteira não medem faturamento local, importações, número de veículos, permanência ou gasto no município.
+
+Artefatos:
+- `rotas_oficiais_operacionais_20260918_v001.csv`;
+- `antt_trc_sao_borja_fronteira_2023_2025_v001.csv`;
+- `antt_trc_sao_borja_fronteira_2023_2025_v001.md`.

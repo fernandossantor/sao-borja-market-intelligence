@@ -453,3 +453,99 @@ A divulgação oficial da NT DEE 135 informa adicionalmente que, no 2º trimestr
 Os campos quantitativos de `radar_piloto_arroz_ncm_v001.csv` associados à demanda/origem da oferta/dependência permanecem vazios.
 
 Não houve alteração de bases ou cadernos canônicos.
+
+## Etapa 4D — leitura integral da NT CIET 05/2026
+
+O PDF integral da Nota Técnica foi recebido e lido em 18/09/2026. Isso resolve a principal pendência metodológica da auditoria.
+
+### Fontes, universo e periodicidade
+
+A NT confirma:
+- NFe como base principal;
+- MDIC/Siscomex como complemento no comércio exterior;
+- Regime Geral + Simples Nacional;
+- granularidade por Setor industrial e NCM de 8 dígitos;
+- atualização mensal com consolidação do mês imediatamente anterior.
+
+### Oportunidades — regras exatas
+
+A página trabalha com:
+- operações efetivas;
+- acumulado dos últimos 12 meses comparado aos 12 meses anteriores;
+- correção financeira pelo D-ICMS.
+
+Fórmula oficial:
+
+`Part. RS = INT / (INT + OUF + EXT)`
+
+Faixas:
+- crítica: <5%;
+- alta: 5% a 15%;
+- média: 15% a 30%.
+
+O indicador de volume financeiro saindo do RS corresponde à soma das entradas OUF + EXT.
+
+### Mercado Nacional
+
+Foram confirmadas três perspectivas distintas:
+- Consumidores: estados que compram da indústria do RS;
+- Fornecedores: estados que abastecem o RS em NCM/Categoria;
+- Concorrentes: estados cujas vendas concorrem com a produção industrial gaúcha no mercado interno.
+
+Nesta página, operações exteriores são excluídas.
+
+### Competitividade RS
+
+A NT confirma:
+- análise setorial;
+- portfólio Top 90% dos NCMs de maior volume de saída do setor;
+- série mensal de INT/OUF/EXT em 24 meses;
+- market share acumulado em 12 meses.
+
+Fórmula do market share INT no mês m:
+
+`ΣINT_12m / Σ(INT + OUF + EXT)_12m`
+
+### Perfil de Vendas e Composição de Mercado
+
+Perfil de Vendas:
+- para onde a produção gaúcha é vendida;
+- produto/categoria ou setor;
+- INT, OUF e EXT;
+- UFs destinatárias;
+- países via Siscomex.
+
+Composição de Mercado:
+- de onde vem o que o RS consome;
+- INT, OUF e EXT;
+- visão por setor ou NCM;
+- UFs de origem;
+- países via Siscomex.
+
+### Dados Abertos — nova prioridade operacional
+
+A página Dados Abertos disponibiliza seis CSVs:
+1. Saídas por Setor;
+2. Exportações por NCM;
+3. Composição de Mercado;
+4. Importações por NCM;
+5. Portfólio de NCMs por Setor;
+6. Categorias de Produtos.
+
+A NT informa atualização mensal incremental para as quatro bases de fluxo; Portfólio é substitutivo e Categorias é ocasional.
+
+**Decisão:** a via preferencial para o SBMI passa a ser a ingestão reproduzível desses CSVs, não a extração visual do Power BI.
+
+### Geografia municipal — revisão
+
+A NT 05/2026 não documenta município como filtro/geografia das páginas correntes.
+
+Consequência:
+- evidência municipal de versões anteriores permanece apenas como histórico;
+- o piloto de São Borja deve manter a capacidade local em IRGA/RAIS/RFB/CEMPRE e usar o Radar para a camada estadual/nacional/internacional;
+- nenhum indicador atual do Radar será rotulado como municipal sem evidência direta adicional.
+
+### Arquivos derivados
+
+- `radar_nt_ciet_05_2026_dicionario_v001.csv`;
+- `radar_mercado_dimensoes_v001.csv` revisado para a metodologia oficial.

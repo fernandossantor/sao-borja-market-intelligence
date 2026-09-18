@@ -23,199 +23,197 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --quiet pandas requests
 
-      - name: Download official Comex Stat municipal files and filter São Borja
+      - name: Query official Comex Stat API for São Borja
         run: |
           cat > /tmp/comex_sb.py <<'PY'
-          import csv, hashlib, json, re
+          import csv, hashlib, json, time
           from pathlib import Path
-          import pandas as pd
           import requests
 
           OUT=Path("artifacts/comex_municipal_sao_borja_2026")
-          RAW=OUT/"raw"
           OUT.mkdir(parents=True,exist_ok=True)
-          RAW.mkdir(parents=True,exist_ok=True)
-
-          URLS={
-            "EXP":"https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv",
-            "IMP":"https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv",
-            "PAIS":"https://balanca.mdic.gov.br/balanca/bd/tabelas/PAIS.csv",
-            "NCM_SH":"https://balanca.mdic.gov.br/balanca/bd/tabelas/NCM_SH.csv",
-            "UF_MUN":"https://balanca.mdic.gov.br/balanca/bd/tabelas/UF_MUN.csv",
-          }
-          EXPECTED=["CO_ANO","CO_MES","SH4","CO_PAIS","SG_UF_MUN","CO_MUN","KG_LIQUIDO","VL_FOB"]
+          API="https://api-comexstat.mdic.gov.br"
+          CITY="4318002"
+          PERIOD={"from":"2026-01","to":"2026-08"}
+          DETAILS=["country","heading"]
+          METRICS=["metricFOB","metricKG"]
 
           session=requests.Session()
-          session.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/2026-09-18"})
+          session.headers.update({
+              "User-Agent":"SBMI exploratory audit/2026-09-18",
+              "Accept":"application/json",
+              "Content-Type":"application/json",
+          })
 
-          def download(name,url):
-              p=RAW/(url.rsplit("/",1)[-1])
-              h=hashlib.sha256()
-              total=0
-              with session.get(url,stream=True,timeout=(30,1200)) as r:
-                  r.raise_for_status()
-                  ctype=r.headers.get("content-type")
-                  with p.open("wb") as f:
-                      for chunk in r.iter_content(1024*1024):
-                          if not chunk: continue
-                          f.write(chunk); h.update(chunk); total+=len(chunk)
-              return p,{"name":name,"url":url,"bytes":total,"sha256":h.hexdigest(),"content_type":ctype}
+          def request_json(method,url,**kwargs):
+              errors=[]
+              for verify in (True,False):
+                  for attempt in range(1,6):
+                      try:
+                          r=session.request(method,url,timeout=(30,240),verify=verify,**kwargs)
+                          if r.status_code==429:
+                              wait=10*attempt
+                              errors.append({"status":429,"attempt":attempt,"wait":wait,"text":r.text[:500]})
+                              time.sleep(wait)
+                              continue
+                          r.raise_for_status()
+                          return r.json(),{
+                              "url":url,
+                              "status":r.status_code,
+                              "verify_ssl":verify,
+                              "bytes":len(r.content),
+                              "sha256":hashlib.sha256(r.content).hexdigest(),
+                          }
+                      except Exception as exc:
+                          errors.append({"verify_ssl":verify,"attempt":attempt,"error":repr(exc)})
+                          time.sleep(min(5*attempt,20))
+              raise RuntimeError(json.dumps({"url":url,"errors":errors},ensure_ascii=False))
 
-          metadata=[]
-          paths={}
-          for k,u in URLS.items():
+          # Authoritative city identity check.
+          city_resp,city_http=request_json("GET",f"{API}/tables/cities/{CITY}")
+          (OUT/"city_identity.json").write_text(json.dumps({"http":city_http,"response":city_resp},ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Metadata exposed by the same official API.
+          meta={}
+          for key,endpoint in {
+              "updated":"/general/dates/updated",
+              "city_filters":"/cities/filters?language=pt",
+              "city_details":"/cities/details?language=pt",
+              "city_metrics":"/cities/metrics?language=pt",
+          }.items():
               try:
-                  p,m=download(k,u)
-                  paths[k]=p; metadata.append({**m,"status":"ok"})
-              except Exception as e:
-                  metadata.append({"name":k,"url":u,"status":"error","error":repr(e)})
+                  resp,http=request_json("GET",API+endpoint)
+                  meta[key]={"http":http,"response":resp}
+              except Exception as exc:
+                  meta[key]={"error":repr(exc)}
+          (OUT/"api_metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
 
-          # EXP/IMP are essential. Dictionaries are desirable but not allowed to block the raw municipal evidence.
-          for k in ("EXP","IMP"):
-              if k not in paths:
-                  raise SystemExit(f"Essential Comex file unavailable: {k}")
+          def unwrap_rows(payload):
+              data=payload.get("data") if isinstance(payload,dict) else None
+              if isinstance(data,dict) and isinstance(data.get("list"),list):
+                  return data["list"]
+              if isinstance(data,list):
+                  if len(data)==1 and isinstance(data[0],list):
+                      return data[0]
+                  return data
+              return []
 
-          # Official municipal dictionary: verify that the code used for São Borja is actually present.
-          mun_info={}
-          if "UF_MUN" in paths:
-              try:
-                  md=pd.read_csv(paths["UF_MUN"],sep=";",dtype=str,encoding="utf-8-sig")
-                  md.columns=[str(c).strip() for c in md.columns]
-                  candidates=md.copy()
-                  textcols=[c for c in md.columns if "MUN" in c.upper() or "NOME" in c.upper()]
-                  mask=pd.Series(False,index=md.index)
-                  for c in textcols:
-                      vals=md[c].fillna("").astype(str).str.normalize("NFKD").str.encode("ascii",errors="ignore").str.decode("ascii").str.upper()
-                      mask |= vals.str.contains(r"\bSAO BORJA\b",regex=True)
-                  if "SG_UF" in md.columns:
-                      mask &= md["SG_UF"].fillna("").str.upper().eq("RS")
-                  sb=md.loc[mask].copy()
-                  mun_info={"columns":list(md.columns),"rows":sb.to_dict(orient="records")}
-              except Exception as e:
-                  mun_info={"error":repr(e)}
-          (OUT/"municipality_dictionary_check.json").write_text(json.dumps(mun_info,ensure_ascii=False,indent=2),encoding="utf-8")
+          all_rows=[]
+          query_log=[]
+          for flow in ("export","import"):
+              body={
+                  "flow":flow,
+                  "monthDetail":True,
+                  "period":PERIOD,
+                  "filters":[{"filter":"city","values":[CITY]}],
+                  "details":DETAILS,
+                  "metrics":METRICS,
+              }
+              resp,http=request_json("POST",f"{API}/cities?language=pt",json=body)
+              (OUT/f"{flow}_response.json").write_text(json.dumps({"http":http,"body":body,"response":resp},ensure_ascii=False,indent=2),encoding="utf-8")
+              if not resp.get("success",False):
+                  raise RuntimeError(f"ComexStat API returned success=false for {flow}: {resp}")
+              rows=unwrap_rows(resp)
+              query_log.append({"flow":flow,"body":body,"http":http,"rows":len(rows)})
+              for row in rows:
+                  if not isinstance(row,dict): continue
+                  all_rows.append({"flow":flow,**row})
 
-          # Prefer confirmed code from dictionary when possible; otherwise use IBGE 4318002, already audited in project.
-          codes={"4318002"}
-          for row in mun_info.get("rows",[]):
-              for c,v in row.items():
-                  if v is not None and re.fullmatch(r"\d{7}",str(v).strip()):
-                      codes.add(str(v).strip())
-          confirmed="4318002" in codes
+          if not all_rows:
+              raise SystemExit("ComexStat city API returned zero rows for both flows; cannot close route.")
 
-          all_filtered=[]
-          source_stats=[]
-          for direction in ("EXP","IMP"):
-              src=paths[direction]
-              filtered=[]
-              total_rows=0
-              cols_seen=None
-              for chunk in pd.read_csv(src,sep=";",dtype=str,encoding="utf-8-sig",chunksize=250_000):
-                  chunk.columns=[str(c).strip() for c in chunk.columns]
-                  if cols_seen is None: cols_seen=list(chunk.columns)
-                  missing=[c for c in EXPECTED if c not in chunk.columns]
-                  if missing:
-                      raise SystemExit(f"{direction}: missing columns {missing}; got {chunk.columns.tolist()}")
-                  total_rows += len(chunk)
-                  co=chunk["CO_MUN"].fillna("").str.strip()
-                  uf=chunk["SG_UF_MUN"].fillna("").str.upper().str.strip()
-                  sub=chunk.loc[co.isin(codes) & uf.eq("RS"),EXPECTED].copy()
-                  if not sub.empty:
-                      sub.insert(0,"DIRECAO",direction)
-                      filtered.append(sub)
-              if filtered:
-                  f=pd.concat(filtered,ignore_index=True)
-              else:
-                  f=pd.DataFrame(columns=["DIRECAO"]+EXPECTED)
-              f.to_csv(OUT/f"{direction.lower()}_2026_sao_borja_raw_filtered.csv",index=False)
-              all_filtered.append(f)
-              source_stats.append({
-                  "direction":direction,
-                  "source_rows":total_rows,
-                  "filtered_rows":len(f),
-                  "columns":cols_seen,
-                  "municipality_codes_attempted":sorted(codes),
-              })
+          # Preserve the official response schema instead of silently renaming unknown fields.
+          fieldnames=["flow"]+sorted({k for r in all_rows for k in r.keys() if k!="flow"})
+          with (OUT/"comex_2026_sao_borja_sh4_pais_mes.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.DictWriter(f,fieldnames=fieldnames)
+              w.writeheader()
+              for r in all_rows:
+                  w.writerow({k:r.get(k) for k in fieldnames})
 
-          joined=pd.concat(all_filtered,ignore_index=True)
-          for col in ["CO_ANO","CO_MES","SH4","CO_PAIS","CO_MUN"]:
-              if col in joined: joined[col]=joined[col].fillna("").astype(str)
-          for col in ["KG_LIQUIDO","VL_FOB"]:
-              joined[col]=pd.to_numeric(joined[col],errors="raise")
+          # Identify canonical response columns by documented/API-observed names.
+          def first_key(candidates):
+              for k in candidates:
+                  if k in fieldnames: return k
+              return None
 
-          # Country dictionary join, preserving code if dictionary is unavailable.
-          country_map=None
-          if "PAIS" in paths:
-              try:
-                  pa=pd.read_csv(paths["PAIS"],sep=";",dtype=str,encoding="utf-8-sig")
-                  pa.columns=[str(c).strip() for c in pa.columns]
-                  code_col=next((c for c in pa.columns if c.upper() in {"CO_PAIS","CO_PAIS_ISON3"}),None)
-                  name_col=next((c for c in pa.columns if "NO_PAIS" in c.upper() or c.upper()=="PAIS"),None)
-                  if code_col and name_col:
-                      country_map=pa[[code_col,name_col]].drop_duplicates().rename(columns={code_col:"CO_PAIS",name_col:"NO_PAIS"})
-                      joined=joined.merge(country_map,on="CO_PAIS",how="left")
-              except Exception:
-                  pass
-          if "NO_PAIS" not in joined.columns:
-              joined["NO_PAIS"]=""
+          year_key=first_key(["year","yearNumber","CO_ANO"])
+          month_key=first_key(["monthNumber","month","CO_MES"])
+          hs4_code=first_key(["headingCode","heading","SH4","codeHeading"])
+          hs4_text=first_key(["heading","headingText","headingName","NO_SH4_POR"])
+          country_code=first_key(["countryCode","country","CO_PAIS"])
+          country_text=first_key(["country","countryText","countryName","NO_PAIS"])
+          fob_key=first_key(["metricFOB","VL_FOB"])
+          kg_key=first_key(["metricKG","KG_LIQUIDO"])
 
-          # SH4 dictionary join. NCM_SH normally contains NO_SH4_POR.
-          sh4_map=None
-          if "NCM_SH" in paths:
-              try:
-                  sh=pd.read_csv(paths["NCM_SH"],sep=";",dtype=str,encoding="utf-8-sig")
-                  sh.columns=[str(c).strip() for c in sh.columns]
-                  code_col=next((c for c in sh.columns if c.upper()=="CO_SH4" or c.upper()=="SH4"),None)
-                  name_col=next((c for c in sh.columns if "NO_SH4_POR" in c.upper()),None)
-                  if code_col and name_col:
-                      sh4_map=sh[[code_col,name_col]].drop_duplicates().rename(columns={code_col:"SH4",name_col:"NO_SH4_POR"})
-                      joined=joined.merge(sh4_map,on="SH4",how="left")
-              except Exception:
-                  pass
-          if "NO_SH4_POR" not in joined.columns:
-              joined["NO_SH4_POR"]=""
+          required={"year":year_key,"month":month_key,"hs4":hs4_code,"country":country_code,"fob":fob_key,"kg":kg_key}
+          missing=[k for k,v in required.items() if v is None]
+          if missing:
+              raise SystemExit(f"Unexpected ComexStat /cities response schema; missing logical fields {missing}; fields={fieldnames}")
 
-          joined.to_csv(OUT/"comex_2026_sao_borja_enriched.csv",index=False)
+          def num(v):
+              if v in (None,""): return 0.0
+              return float(str(v).replace(".","").replace(",", ".")) if isinstance(v,str) and "," in v else float(v)
 
-          # User requirement: SH4 / country / period. Preserve monthly period and direction.
-          agg=(
-              joined.groupby(["DIRECAO","CO_ANO","CO_MES","SH4","NO_SH4_POR","CO_PAIS","NO_PAIS"],dropna=False,as_index=False)
-                    [["KG_LIQUIDO","VL_FOB"]].sum()
-                    .sort_values(["DIRECAO","CO_ANO","CO_MES","VL_FOB"],ascending=[True,True,True,False])
-          )
-          agg.to_csv(OUT/"comex_2026_sao_borja_sh4_pais_mes.csv",index=False)
+          # Aggregation is deliberately done only after preserving the original rows.
+          agg={}
+          annual={}
+          totals={}
+          for r in all_rows:
+              key=(r["flow"],str(r.get(year_key)),str(r.get(month_key)),str(r.get(hs4_code)),str(r.get(country_code)))
+              a=agg.setdefault(key,{"flow":r["flow"],"year":r.get(year_key),"month":r.get(month_key),"SH4":r.get(hs4_code),"countryCode":r.get(country_code),"metricFOB":0.0,"metricKG":0.0})
+              if hs4_text: a["SH4_text"]=r.get(hs4_text)
+              if country_text: a["country_text"]=r.get(country_text)
+              a["metricFOB"]+=num(r.get(fob_key))
+              a["metricKG"]+=num(r.get(kg_key))
 
-          annual=(
-              joined.groupby(["DIRECAO","CO_ANO","SH4","NO_SH4_POR","CO_PAIS","NO_PAIS"],dropna=False,as_index=False)
-                    [["KG_LIQUIDO","VL_FOB"]].sum()
-                    .sort_values(["DIRECAO","VL_FOB"],ascending=[True,False])
-          )
-          annual.to_csv(OUT/"comex_2026_sao_borja_sh4_pais_ytd.csv",index=False)
+              ykey=(r["flow"],str(r.get(year_key)),str(r.get(hs4_code)),str(r.get(country_code)))
+              y=annual.setdefault(ykey,{"flow":r["flow"],"year":r.get(year_key),"SH4":r.get(hs4_code),"countryCode":r.get(country_code),"metricFOB":0.0,"metricKG":0.0})
+              if hs4_text: y["SH4_text"]=r.get(hs4_text)
+              if country_text: y["country_text"]=r.get(country_text)
+              y["metricFOB"]+=num(r.get(fob_key))
+              y["metricKG"]+=num(r.get(kg_key))
 
-          totals=(
-              joined.groupby(["DIRECAO","CO_ANO"],dropna=False,as_index=False)[["KG_LIQUIDO","VL_FOB"]].sum()
-          )
-          totals.to_csv(OUT/"comex_2026_sao_borja_totals_ytd.csv",index=False)
+              t=totals.setdefault(r["flow"],{"flow":r["flow"],"metricFOB":0.0,"metricKG":0.0})
+              t["metricFOB"]+=num(r.get(fob_key))
+              t["metricKG"]+=num(r.get(kg_key))
 
-          # Rice SH4=1006 is only a technical seed, not the analytical center.
-          rice=annual.loc[annual["SH4"].astype(str).str.zfill(4).eq("1006")].copy()
-          rice.to_csv(OUT/"comex_2026_sao_borja_rice_sh4_1006_seed.csv",index=False)
+          def write_dicts(path,rows):
+              rows=list(rows)
+              fields=[]
+              for row in rows:
+                  for k in row:
+                      if k not in fields: fields.append(k)
+              with path.open("w",newline="",encoding="utf-8-sig") as f:
+                  w=csv.DictWriter(f,fieldnames=fields)
+                  w.writeheader(); w.writerows(rows)
+
+          monthly_rows=sorted(agg.values(),key=lambda r:(r["flow"],str(r["year"]),int(r["month"]),-r["metricFOB"]))
+          annual_rows=sorted(annual.values(),key=lambda r:(r["flow"],-r["metricFOB"]))
+          write_dicts(OUT/"comex_2026_sao_borja_sh4_pais_mes_aggregated.csv",monthly_rows)
+          write_dicts(OUT/"comex_2026_sao_borja_sh4_pais_ytd.csv",annual_rows)
+          write_dicts(OUT/"comex_2026_sao_borja_totals_ytd.csv",totals.values())
+
+          rice=[r for r in annual_rows if str(r.get("SH4","")).zfill(4)=="1006"]
+          write_dicts(OUT/"comex_2026_sao_borja_rice_sh4_1006_seed.csv",rice)
 
           summary={
-              "source":"MDIC/SECEX — Comex Stat — base municipal por empresa declarante e SH4",
-              "page_reference_period":"janeiro-agosto/2026",
+              "source":"MDIC/SECEX — API oficial Comex Stat — endpoint /cities",
+              "api_base":API,
+              "period":"2026-01 a 2026-08",
               "municipality":"São Borja/RS",
-              "municipality_filter":"SG_UF_MUN=RS + CO_MUN=4318002 (checked against official UF_MUN when available)",
-              "fiscal_domicile_limitation":"CO_MUN/SG_UF_MUN identify fiscal domicile of declaring company, not physical origin/destination of goods.",
-              "layout":EXPECTED,
-              "download_metadata":metadata,
-              "source_stats":source_stats,
-              "filtered_total_rows":int(len(joined)),
-              "export_rows":int((joined["DIRECAO"]=="EXP").sum()),
-              "import_rows":int((joined["DIRECAO"]=="IMP").sum()),
-              "directions_totals":totals.to_dict(orient="records"),
-              "rice_seed_rows":int(len(rice)),
-              "nature":"exploratory observed data; aggregates are calculated from official observed rows",
+              "municipality_filter":{"filter":"city","value":CITY},
+              "details":DETAILS,
+              "metrics":METRICS,
+              "monthDetail":True,
+              "fiscal_domicile_limitation":"O módulo municipal identifica o domicílio fiscal da empresa declarante; não a origem física da mercadoria.",
+              "city_identity":city_resp,
+              "query_log":query_log,
+              "response_fields":fieldnames,
+              "logical_field_mapping":required,
+              "raw_rows":len(all_rows),
+              "totals":list(totals.values()),
+              "rice_seed_rows":len(rice),
+              "nature":"DADO OBSERVADO na resposta oficial; agregações mensais/YTD são DADOS CALCULADOS.",
               "canonical_promotion":False,
           }
           (OUT/"run_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
@@ -227,17 +225,18 @@ jobs:
         run: |
           mkdir -p docs/data_sources/comex_municipal_sao_borja_2026
           cp artifacts/comex_municipal_sao_borja_2026/*.csv docs/data_sources/comex_municipal_sao_borja_2026/
+          cp artifacts/comex_municipal_sao_borja_2026/*_response.json docs/data_sources/comex_municipal_sao_borja_2026/
+          cp artifacts/comex_municipal_sao_borja_2026/city_identity.json docs/data_sources/comex_municipal_sao_borja_2026/
+          cp artifacts/comex_municipal_sao_borja_2026/api_metadata.json docs/data_sources/comex_municipal_sao_borja_2026/
           cp artifacts/comex_municipal_sao_borja_2026/*.json docs/data_sources/comex_municipal_sao_borja_2026/
           cat > docs/data_sources/comex_municipal_sao_borja_2026/README.md <<'EOF'
           # Comex Stat municipal — São Borja — 2026
 
           Camada exploratória, não canônica.
 
-          Fonte primária: MDIC/SECEX, Base de Dados Bruta do Comex Stat, base municipal
-          por empresa exportadora/importadora e SH4.
+          Fonte primária: MDIC/SECEX, API oficial do Comex Stat, endpoint /cities.
 
-          Recorte: São Borja/RS; 2026; arquivos disponibilizados pelo MDIC com dados
-          correntes até agosto/2026 na página oficial em 04/09/2026.
+          Recorte: São Borja/RS; janeiro-agosto/2026; filtro municipal pelo código IBGE 4318002; detalhamento por país e SH4.
 
           Controle conceitual obrigatório: CO_MUN e SG_UF_MUN representam o domicílio
           fiscal da empresa declarante. Não representam a origem física da mercadoria.

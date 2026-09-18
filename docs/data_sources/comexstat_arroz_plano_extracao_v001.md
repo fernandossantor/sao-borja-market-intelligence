@@ -158,3 +158,29 @@ Comex Stat **não** substitui o Radar para:
 - fornecedores/concorrentes domésticos.
 
 Portanto, as duas fontes são complementares.
+
+## Retomada operacional dos arquivos municipais — 18/09/2026
+
+A página oficial de Dados Abertos do MDIC foi revalidada.
+
+Estado publicado:
+- página atualizada em **04/09/2026**;
+- últimos dados: **janeiro–agosto de 2026**.
+
+Layout municipal oficial:
+`CO_ANO; CO_MES; SH4; CO_PAIS; SG_UF_MUN; CO_MUN; KG_LIQUIDO; VL_FOB`.
+
+Links diretos de 2026 confirmados pela própria página oficial:
+- exportação municipal: `https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv`;
+- importação municipal: `https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv`.
+
+Nova tentativa de abertura dos dois CSVs no ambiente disponível:
+- exportação: timeout;
+- importação: timeout.
+
+Consequência:
+os arquivos estão documentalmente localizados, mas os bytes continuam indisponíveis para filtragem nesta sessão.
+
+Nenhum valor de São Borja foi inferido.
+
+O bloqueio permanece estritamente operacional.

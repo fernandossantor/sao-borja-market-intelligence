@@ -33,6 +33,15 @@ ANP_RETAILERS_REQUIRED = {
     "BANDEIRA",
 }
 
+ANP_GLP_REQUIRED = {
+    "ANO",
+    "UF",
+    "MUNICÍPIO",
+    "CÓDIGO IBGE",
+    "P13",
+    "OUTROS",
+}
+
 COMEX_MUNICIPAL_REQUIRED = {
     "CO_ANO",
     "CO_MES",
@@ -65,6 +74,19 @@ def filter_anp_annual_sales(frame: pd.DataFrame) -> pd.DataFrame:
     por perfil de usuário.
     """
     _require_columns(frame, ANP_ANNUAL_SALES_REQUIRED, "ANP vendas anuais")
+    code = pd.to_numeric(frame["CÓDIGO IBGE"], errors="coerce")
+    uf = frame["UF"].map(_ascii_upper)
+    result = frame.loc[code.eq(IBGE_CODE) & uf.eq(UF)].copy()
+    return result.reset_index(drop=True)
+
+
+def filter_anp_glp_sales(frame: pd.DataFrame) -> pd.DataFrame:
+    """Filtra vendas anuais municipais de GLP para São Borja/RS.
+
+    A base de GLP possui duas medidas oficiais separadas, P13 e OUTROS.
+    A função preserva ambas e não cria uma coluna total sem regra explícita.
+    """
+    _require_columns(frame, ANP_GLP_REQUIRED, "ANP vendas anuais de GLP")
     code = pd.to_numeric(frame["CÓDIGO IBGE"], errors="coerce")
     uf = frame["UF"].map(_ascii_upper)
     result = frame.loc[code.eq(IBGE_CODE) & uf.eq(UF)].copy()

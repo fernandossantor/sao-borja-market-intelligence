@@ -125,3 +125,110 @@ Interpretação não permitida sem dado adicional:
 Preencher a matriz piloto com os valores do Radar quando a leitura confiável do Power BI for possível ou quando os mesmos indicadores aparecerem em documentação pública verificável.
 
 Até lá, a tabela permanece como **esqueleto auditável**, sem preenchimento numérico especulativo.
+
+
+## Etapa 4C.1 — capacidade local auditada
+
+A retomada em 18/09/2026 identificou que o Caderno-Base técnico mais recente no Drive é a **v028 — análise integrada**, posterior à v016 registrada no corpo do PR #41. A v028 foi usada **somente em leitura** nesta auditoria; não foi modificada.
+
+### Produção primária — fonte oficial IRGA
+
+Safra 2023/2024 — São Borja:
+- área semeada: **31.166 ha**;
+- área perdida: **2.014 ha**;
+- área colhida: **29.152 ha**;
+- produtividade: **8.129 kg/ha**;
+- produção: **236.977 t**.
+
+Fonte oficial:
+IRGA — Produtividades Municipais Safra 2023/24.
+
+Safra 2024/2025:
+- produção de São Borja: **306.703,95 t**;
+- posição no RS: **8º maior produtor**;
+- posição na Fronteira Oeste: **4º**, atrás de Uruguaiana, Itaqui e Alegrete.
+
+Fonte:
+IRGA/SEAPI, notícia de encerramento da colheita publicada em 13/06/2025.
+
+### Cálculo SBMI
+
+Variação da produção entre as duas safras:
+
+`((306.703,95 / 236.977) - 1) × 100 = 29,42%`
+
+**Natureza:** dado calculado.
+
+A variação mede mudança de volume produzido entre duas safras; não demonstra causa nem tendência estrutural.
+
+### Agroindústria local — base canônica v028
+
+O Caderno-Base Territorial v028 registra para **CNAE 10.61-9/01 — Beneficiamento de arroz**, com base na camada RAIS 2025 × RFB:
+
+- **20 estabelecimentos ativos**;
+- **19 matrizes**;
+- **1 filial pertencente a raiz com matriz em São Borja**;
+- portanto, no recorte cadastral, todos os 20 estabelecimentos pertencem a raízes com matriz local;
+- **953 vínculos formais**;
+- **R$ 3.491.039,35** de massa de remuneração em dezembro/2025;
+- **97,34%** dos vínculos da divisão 10 no recorte utilizado;
+- **98,69%** da massa salarial de dezembro da divisão 10 no recorte utilizado.
+
+O mesmo caderno compara com a divisão 01 — agricultura, pecuária e serviços relacionados:
+- **192 vínculos**;
+- **R$ 593.208,92** de massa de remuneração de dezembro.
+
+A v028 interpreta o beneficiamento de arroz como um encadeamento agroindustrial local material, mas mantém como **não verificado** o destino de lucros, poupança, aplicações, imóveis e reinvestimentos.
+
+### Evidência histórica independente — IBGE/CEMPRE 2022
+
+Tabela 9418 — São Borja:
+
+Grupo **10.6 — Moagem, fabricação de produtos amiláceos e de alimentos para animais**:
+- 23 empresas/organizações;
+- 994 pessoas ocupadas;
+- 960 assalariadas;
+- R$ 42,945 milhões em salários e outras remunerações no ano.
+
+Classe **10.61-9 — Beneficiamento de arroz e fabricação de produtos do arroz**:
+- 21 empresas/organizações;
+- pessoal ocupado, assalariados e remunerações: **suprimidos (X)** pelo IBGE.
+
+Cálculo estrutural permitido:
+`21 / 23 × 100 = 91,30%`
+
+Assim, 91,30% dos estabelecimentos do grupo 10.6 pertenciam à classe 10.61-9 em 2022.
+
+**Não é permitido inferir que 91,30% do emprego ou da remuneração do grupo também eram do arroz**, porque esses valores da classe estão explicitamente suprimidos.
+
+## Diagnóstico parcial do piloto
+
+### Fato observado
+
+São Borja apresenta simultaneamente:
+1. produção primária relevante e recente de arroz;
+2. presença agroindustrial local expressiva no beneficiamento;
+3. forte ancoragem cadastral local das unidades de beneficiamento;
+4. massa de emprego e remuneração formal material nesse elo.
+
+### Interpretação
+
+A condição local já é suficientemente forte para que o Radar não seja usado apenas para procurar uma “atividade potencialmente instalável”. Para arroz, a pergunta de inteligência mercadológica passa a ser:
+
+> **qual é a posição competitiva da cadeia já instalada em São Borja diante da demanda gaúcha, da produção estadual, das entradas de outras UFs, das importações, dos destinos e dos concorrentes?**
+
+Essa é uma mudança de foco importante: de **oportunidade de entrada** para **expansão, posicionamento, mercado e encadeamento de uma capacidade local já comprovada**.
+
+### O que permanece não respondido
+
+Sem os valores do Radar, ainda não é possível concluir:
+- tamanho da demanda estadual dos NCMs selecionados;
+- parcela atendida por produção gaúcha;
+- dependência de outras UFs/importações;
+- participação de São Borja na oferta estadual;
+- market share das empresas locais;
+- mercados compradores específicos das unidades de São Borja;
+- margens, lucros ou retenção financeira local.
+
+Arquivo estruturado desta camada:
+`docs/data_sources/radar_piloto_arroz_capacidade_local_v001.csv`

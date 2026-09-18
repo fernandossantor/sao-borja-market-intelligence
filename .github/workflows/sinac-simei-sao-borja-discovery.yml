@@ -1,0 +1,330 @@
+name: sinac-simei-sao-borja-discovery
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sinac-simei-sao-borja-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Reproduce official SINAC/SIMEI municipal queries
+        run: |
+          cat > /tmp/sinac_simei_sb.py <<'PY'
+          import asyncio, csv, json, re
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+
+          OUT = Path("artifacts/sinac_simei_sao_borja")
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          PAGES = {
+              "sinac_total": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+              "simei_total": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?optanteSimei=&tipoConsulta=2",
+              "sinac_cnae": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?tipoConsulta=1",
+              "simei_cnae": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?optanteSimei=&tipoConsulta=2",
+          }
+
+          def norm(s):
+              return re.sub(r"\s+", " ", (s or "")).strip()
+
+          async def select_snapshot(page):
+              out=[]
+              sels=page.locator("select")
+              for i in range(await sels.count()):
+                  s=sels.nth(i)
+                  try:
+                      opts=await s.locator("option").evaluate_all(
+                          "(els)=>els.map(o=>({text:o.textContent,value:o.value,selected:o.selected}))"
+                      )
+                      out.append({
+                          "index":i,
+                          "id":await s.get_attribute("id"),
+                          "name":await s.get_attribute("name"),
+                          "multiple":await s.get_attribute("multiple"),
+                          "options":opts[:3000],
+                      })
+                  except Exception as exc:
+                      out.append({"index":i,"error":repr(exc)})
+              return out
+
+          async def controls_snapshot(page):
+              out=[]
+              loc=page.locator("input,button,a")
+              n=min(await loc.count(),2000)
+              for i in range(n):
+                  el=loc.nth(i)
+                  try:
+                      out.append({
+                          "tag":await el.evaluate("(e)=>e.tagName"),
+                          "id":await el.get_attribute("id"),
+                          "name":await el.get_attribute("name"),
+                          "type":await el.get_attribute("type"),
+                          "value":await el.get_attribute("value"),
+                          "title":await el.get_attribute("title"),
+                          "aria":await el.get_attribute("aria-label"),
+                          "text":norm(await el.inner_text(timeout=300)),
+                      })
+                  except Exception:
+                      pass
+              return out
+
+          async def wait_settle(page):
+              try:
+                  await page.wait_for_load_state("networkidle", timeout=15000)
+              except Exception:
+                  await page.wait_for_timeout(2500)
+
+          async def choose_rs(page, log):
+              sels=page.locator("select")
+              for i in range(await sels.count()):
+                  s=sels.nth(i)
+                  try:
+                      opts=await s.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value}))")
+                  except Exception:
+                      continue
+                  for o in opts:
+                      t=norm(o.get("text","")).upper()
+                      if t == "RS - RIO GRANDE DO SUL" or t.startswith("RS - RIO GRANDE DO SUL"):
+                          await s.select_option(value=o.get("value"))
+                          log.append({"action":"select_rs","select_index":i,"id":await s.get_attribute("id"),"value":o.get("value"),"text":o.get("text")})
+                          await wait_settle(page)
+                          return True
+              return False
+
+          async def choose_sao_borja(page, log):
+              sels=page.locator("select")
+              target=None
+              opt=None
+              for i in range(await sels.count()):
+                  s=sels.nth(i)
+                  try:
+                      opts=await s.locator("option").evaluate_all("(els)=>els.map(o=>({text:o.textContent,value:o.value}))")
+                  except Exception:
+                      continue
+                  for o in opts:
+                      t=norm(o.get("text","")).upper()
+                      if "SÃO BORJA" in t or "SAO BORJA" in t:
+                          target=(i,s)
+                          opt=o
+                          break
+                  if target:
+                      break
+              if not target:
+                  return False
+              i,s=target
+              await s.select_option(value=opt.get("value"))
+              log.append({"action":"select_sao_borja","select_index":i,"id":await s.get_attribute("id"),"value":opt.get("value"),"text":opt.get("text")})
+              await page.wait_for_timeout(800)
+
+              # Dual-list interfaces commonly require a transfer button.
+              buttons=page.locator("input[type=button],input[type=submit],button")
+              candidates=[]
+              for j in range(await buttons.count()):
+                  b=buttons.nth(j)
+                  try:
+                      blob=" | ".join(filter(None,[
+                          await b.get_attribute("value"),
+                          await b.get_attribute("title"),
+                          await b.get_attribute("aria-label"),
+                          norm(await b.inner_text(timeout=200)),
+                          await b.get_attribute("id"),
+                          await b.get_attribute("name"),
+                      ]))
+                  except Exception:
+                      continue
+                  if re.search(r"(^|\s)(>|adicionar|incluir|selecionar)(\s|$)", blob, re.I) and "todos" not in blob.lower():
+                      candidates.append((j,b,blob))
+              for j,b,blob in candidates[:3]:
+                  try:
+                      await b.click(timeout=4000)
+                      log.append({"action":"transfer_municipality","button_index":j,"control":blob})
+                      await wait_settle(page)
+                      break
+                  except Exception as exc:
+                      log.append({"action":"transfer_failed","button_index":j,"control":blob,"error":repr(exc)})
+              return True
+
+          async def click_consultar(page, log):
+              controls=page.locator("input[type=submit],input[type=button],button,a")
+              for i in range(await controls.count()):
+                  c=controls.nth(i)
+                  try:
+                      blob=" | ".join(filter(None,[
+                          await c.get_attribute("value"),
+                          await c.get_attribute("title"),
+                          await c.get_attribute("aria-label"),
+                          norm(await c.inner_text(timeout=200)),
+                          await c.get_attribute("id"),
+                          await c.get_attribute("name"),
+                      ]))
+                  except Exception:
+                      continue
+                  if "consult" in blob.lower() or "pesquis" in blob.lower():
+                      try:
+                          await c.click(timeout=5000)
+                          log.append({"action":"click_consultar","control":blob})
+                          await wait_settle(page)
+                          return True
+                      except Exception as exc:
+                          log.append({"action":"consultar_failed","control":blob,"error":repr(exc)})
+              return False
+
+          async def extract_tables(page):
+              tables=[]
+              loc=page.locator("table")
+              for i in range(await loc.count()):
+                  t=loc.nth(i)
+                  rows=[]
+                  tr=t.locator("tr")
+                  for r in range(await tr.count()):
+                      cells=tr.nth(r).locator("th,td")
+                      vals=[]
+                      for c in range(await cells.count()):
+                          try:
+                              vals.append(norm(await cells.nth(c).inner_text(timeout=500)))
+                          except Exception:
+                              vals.append("")
+                      if vals and any(vals):
+                          rows.append(vals)
+                  if rows:
+                      tables.append(rows)
+              return tables
+
+          def rows_with_sb(tables):
+              found=[]
+              for ti,table in enumerate(tables):
+                  for ri,row in enumerate(table):
+                      joined=" | ".join(row).upper()
+                      if "SÃO BORJA" in joined or "SAO BORJA" in joined:
+                          found.append({"table":ti,"row":ri,"cells":row})
+              return found
+
+          async def run_one(context, name, url):
+              page=await context.new_page()
+              log=[]
+              rec={"name":name,"url":url}
+              try:
+                  resp=await page.goto(url,wait_until="domcontentloaded",timeout=120000)
+                  rec["http_status"]=resp.status if resp else None
+                  await wait_settle(page)
+                  rec["title_before"]=await page.title()
+                  rec["body_before"]=norm(await page.locator("body").inner_text())[:120000]
+                  rec["selects_before"]=await select_snapshot(page)
+                  rec["controls_before"]=await controls_snapshot(page)
+
+                  rec["rs_selected"]=await choose_rs(page,log)
+                  rec["selects_after_rs"]=await select_snapshot(page)
+                  rec["sb_selected"]=await choose_sao_borja(page,log)
+                  rec["selects_after_sb"]=await select_snapshot(page)
+                  rec["consult_clicked"]=await click_consultar(page,log)
+                  await page.wait_for_timeout(2500)
+
+                  rec["final_url"]=page.url
+                  rec["body_after"]=norm(await page.locator("body").inner_text())[:250000]
+                  rec["tables"]=await extract_tables(page)
+                  rec["sao_borja_rows"]=rows_with_sb(rec["tables"])
+                  rec["log"]=log
+                  await page.screenshot(path=str(OUT/f"{name}.png"),full_page=True)
+                  (OUT/f"{name}.html").write_text(await page.content(),encoding="utf-8")
+              except Exception as exc:
+                  rec["error"]=repr(exc)
+                  rec["log"]=log
+              finally:
+                  (OUT/f"{name}.json").write_text(json.dumps(rec,ensure_ascii=False,indent=2),encoding="utf-8")
+                  await page.close()
+              return rec
+
+          async def main():
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  context=await browser.new_context(locale="pt-BR",viewport={"width":1800,"height":1200})
+                  results=[]
+                  for name,url in PAGES.items():
+                      results.append(await run_one(context,name,url))
+                  await browser.close()
+
+              summary=[]
+              for r in results:
+                  summary.append({
+                      "name":r["name"],
+                      "http_status":r.get("http_status"),
+                      "rs_selected":r.get("rs_selected"),
+                      "sb_selected":r.get("sb_selected"),
+                      "consult_clicked":r.get("consult_clicked"),
+                      "sao_borja_rows":r.get("sao_borja_rows",[]),
+                      "error":r.get("error"),
+                  })
+              (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+
+              # Flatten any São Borja result rows for easy review.
+              with (OUT/"sao_borja_rows.csv").open("w",newline="",encoding="utf-8") as f:
+                  w=csv.writer(f)
+                  w.writerow(["query","table_index","row_index","cells_json"])
+                  for r in results:
+                      for row in r.get("sao_borja_rows",[]):
+                          w.writerow([r["name"],row["table"],row["row"],json.dumps(row["cells"],ensure_ascii=False)])
+
+              print(json.dumps(summary,ensure_ascii=False,indent=2))
+
+          asyncio.run(main())
+          PY
+          python /tmp/sinac_simei_sb.py
+
+      - name: Persist exploratory evidence
+        run: |
+          mkdir -p docs/data_sources/sinac_simei_discovery
+          cp artifacts/sinac_simei_sao_borja/summary.json docs/data_sources/sinac_simei_discovery/summary.json
+          cp artifacts/sinac_simei_sao_borja/sao_borja_rows.csv docs/data_sources/sinac_simei_discovery/sao_borja_rows.csv
+          for f in artifacts/sinac_simei_sao_borja/*.json artifacts/sinac_simei_sao_borja/*.html; do
+            [ -f "$f" ] && cp "$f" docs/data_sources/sinac_simei_discovery/
+          done
+          cat > docs/data_sources/sinac_simei_discovery/README.md <<'EOF'
+          # SINAC/SIMEI — reprodução municipal São Borja
+
+          Evidência exploratória gerada automaticamente na branch
+          `explore/receita-estadual-rs-market-intel-v1`.
+
+          Fonte primária: Portal Estatísticas do Simples Nacional / Receita Federal.
+
+          Regras:
+          - nenhum valor é canônico;
+          - preservar a posição de consolidação exibida pela própria página;
+          - não usar cross-check secundário como substituto;
+          - somente aceitar resultado quando São Borja estiver explicitamente presente
+            na tabela de saída ou quando o controle da consulta comprovar o município selecionado.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/sinac_simei_discovery
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: reproduce SINAC SIMEI São Borja queries"
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sinac-simei-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/sinac_simei_sao_borja/

@@ -288,3 +288,77 @@ Arquivo estruturado:
 `diagnostico_pom_multissetorial_20260918_v001.csv`.
 
 Nenhuma base ou caderno canônico foi alterado.
+
+## 11. Presença digital nominal versus maturidade digital
+
+A auditoria da planilha de empresas acrescenta uma distinção importante aos POM.
+
+### Bens essenciais
+
+Das 54 linhas nomeadas:
+- 39 possuem algum endpoint digital registrado — 72,22%;
+- 35 registram Instagram;
+- 33 Facebook;
+- 7 site/URL;
+- 15 não possuem endpoint digital registrado no inventário.
+
+Leitura: neste mercado ainda existe uma parcela relevante sem presença digital documentada, embora isso não prove que esteja efetivamente offline.
+
+### Saúde/higiene
+
+41/41 linhas possuem algum endpoint digital registrado.
+
+- Instagram: 39/41 — 95,12%;
+- Facebook: 38/41 — 92,68%;
+- site/URL: 26/41 — 63,41%.
+
+Leitura: a pesquisa online relatada no POM ocorre diante de uma oferta que, no inventário, já possui presença digital nominal quase universal.
+
+A questão passa a ser **qualidade de execução**.
+
+### Bens não essenciais
+
+- 117/120 linhas com algum endpoint registrado — 97,50%;
+- Instagram: 111/120 — 92,50%;
+- Facebook: 102/120 — 85,00%;
+- site/URL: 33/120 — 27,50%.
+
+Isso ajuda a qualificar uma aparente tensão com o POM: consumidores criticam presença digital local, embora a maioria dos operadores catalogados possua perfis.
+
+INTERPRETAÇÃO:
+“presença digital fraca” pode significar:
+- catálogo ruim;
+- informação incompleta;
+- baixa atualização;
+- demora na resposta;
+- ausência de preço/estoque;
+- fraca integração com a loja;
+- pouca encontrabilidade;
+- experiência inconsistente.
+
+Não significa necessariamente ausência de perfil.
+
+### Controle metodológico
+
+A planilha foi construída por busca documental. Logo:
+- pode super-representar operadores encontráveis online;
+- presença registrada não mede atividade;
+- conta linhas do inventário, não empresas ativas auditadas;
+- páginas podem pertencer à rede/marca, não à unidade.
+
+### KPIs adequados
+
+- última atualização do perfil;
+- tempo de primeira resposta;
+- WhatsApp funcional;
+- catálogo/preço disponível;
+- estoque informado;
+- Google Business/Profile;
+- avaliações;
+- link de compra/agendamento;
+- conversão digital→loja/contrato.
+
+Artefatos:
+- `presenca_digital_inventario_pom_20260918_v001.csv`;
+- `presenca_digital_inventario_pom_20260918_v001.md`.
+

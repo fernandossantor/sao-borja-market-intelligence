@@ -128,3 +128,71 @@ Extrair uma série mensal reproduzível para **COREDE Fronteira Oeste** e **Rio 
 11. frutas e hortaliças de maior peso.
 
 A extração só será promovida se for possível documentar período, unidade, transformação e fonte oficial de cada observação.
+
+
+## Extensão metodológica identificada — NT CIET 04/2026
+
+A auditoria da página de boletins identificou a Nota Técnica CIET 04/2026, que amplia o projeto para **Preço da Cesta de Alimentos por Faixa de Renda (PCA-RE-r)** e **Inflação da Cesta de Alimentos por Faixa de Renda (ICA-RE-r)**.
+
+### Faixas de renda
+
+As classes são definidas em salários mínimos:
+
+- r1: < 2 SM;
+- r2: 2 a 3 SM;
+- r3: 3 a 6 SM;
+- r4: 6 a 10 SM;
+- r5: 10 a 15 SM;
+- r6: 15 a 25 SM;
+- r7: > 25 SM.
+
+### Fonte e ponderação
+
+Mantém-se a mesma base NFC-e e o mesmo pré-processamento dos Preços Dinâmicos.
+
+Os pesos por faixa de renda derivam da POF/IBGE 2017/2018, especialmente da Tabela 6972, com estrutura de despesas de alimentação no domicílio por classes de rendimento.
+
+A NT publica matriz de pesos por produto e faixa de renda. Exemplos que mostram diferenças relevantes no padrão de consumo:
+
+- arroz branco: peso de 16,268 em <2 SM e 26,355 em >25 SM;
+- feijão-preto: 4,060 em <2 SM e 5,184 em >25 SM;
+- pão francês: 9,256 em <2 SM e 9,954 em >25 SM;
+- leite integral: 30,314 em <2 SM e 68,223 em >25 SM.
+
+Esses valores são **ponderadores da metodologia**, não quantidades de compra observadas pelo SBMI.
+
+### Fórmula
+
+O PCA-RE-r é definido como soma ponderada dos preços mensais medianos:
+
+`PCA(r,t) = Σ w(i,r) * P(i,t)`
+
+O ICA-RE-r é divulgado como variações:
+- mensal;
+- acumulada em 12 meses;
+- acumulada no ano.
+
+### Periodicidade e geografia
+
+A divulgação é mensal para itens, subgrupos, grupos e cesta.
+
+A NT informa tempo médio de aproximadamente 16 dias entre o evento e a publicação dos resultados mensais.
+
+A cobertura contempla todo o RS e os 28 COREDES, permitindo comparar inflação alimentar por faixa de renda e território.
+
+### Valor para o SBMI
+
+Este subproduto é potencialmente mais útil do que um único PCA-RE agregado para análises de:
+
+- pressão do custo alimentar sobre famílias de baixa renda;
+- diferenças de exposição à inflação alimentar;
+- leitura de poder de compra por segmentos;
+- comparação Fronteira Oeste × RS por faixa de renda.
+
+Regra: não combinar automaticamente faixa de renda da POF com distribuição municipal de renda sem explicitar conceitos e períodos distintos.
+
+## Subetapa 2B — estado parcial
+
+A página oficial do Receita.doc expõe links diretos para boletins mensais de agosto/2024 a agosto/2026. Os PDFs mais recentes de 2026 foram identificados, porém o mecanismo automatizado de leitura não conseguiu recuperar seu conteúdo nesta sessão (cache miss/timeout).
+
+Foi criado um **seed de validação**, apenas com observações que puderam ser verificadas em fontes oficiais acessíveis, para testar o esquema da futura série. Esse seed não constitui uma série completa nem dado canônico.

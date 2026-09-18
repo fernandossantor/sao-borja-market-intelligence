@@ -409,3 +409,47 @@ Nesta sessão, o arquivo PDF oficial foi identificado pelo link institucional, p
 - a existência, o título, a data e o URL são **confirmados oficialmente**;
 - detalhes metodológicos adicionais do PDF só serão incorporados após leitura verificável do conteúdo;
 - nenhuma informação metodológica será atribuída à NT 05/2026 apenas por inferência.
+
+## Atualização 18/09/2026 - recuperação da NT CIET 05 e fallback estadual por NCM
+
+Foi executada nova tentativa de recuperação integral da **NT CIET 05/2026 - Radar de Mercado da Receita Estadual** a partir da página oficial de Boletins/Notas Técnicas da Receita Estadual.
+
+### Identificação oficial reconfirmada
+
+- página Receita.doc: a NT 05/2026 está listada entre as Notas Técnicas;
+- data de publicação: 30/06/2026;
+- URL oficial: `https://receitadoc.sefaz.rs.gov.br/media/rhwdpvaz/nota_tecnica_radar_mercado_v1.pdf`.
+
+### Resultado técnico
+
+O link oficial do PDF continua retornando timeout/cache no mecanismo de recuperação. Assim, **o texto integral da NT permanece não lido** e nenhum detalhe metodológico novo foi atribuído à nota.
+
+A auditoria específica das tentativas e das regras de não inferência foi registrada em:
+
+`docs/data_sources/nt_ciet_05_2026_recuperacao_v001.md`
+
+### Fallback oficial - não Radar
+
+Como previsto no checkpoint, foram buscadas fontes oficiais compatíveis para a camada estadual dos NCMs do arroz, sem substituir semanticamente os indicadores do Radar.
+
+A **Nota Técnica DEE 102**, com dados brutos do Comex Stat/MDIC, contém valores estaduais de exportação no 3º trimestre de 2024 para três NCMs da cesta piloto:
+
+- `10064000` - US$ 65.459.780 FOB;
+- `10063021` - US$ 35.360.813 FOB;
+- `10063011` - US$ 16.412.640 FOB.
+
+Esses valores foram preservados em:
+
+`docs/data_sources/arroz_ncm_estado_fallback_oficial_v001.csv`
+
+Classificação: **DADO OBSERVADO - fallback oficial não Radar**.
+
+Limitação obrigatória: exportação estadual por NCM não equivale a demanda interna gaúcha, produção interna destinada ao RS, entradas de outras UFs, importações totais do mercado interno, dependência externa ou market share do Radar.
+
+A divulgação oficial da NT DEE 135 informa adicionalmente que, no 2º trimestre de 2026, o valor exportado de arroz pelo RS cresceu 14,8% frente ao mesmo trimestre de 2025, com acréscimo de US$ 13,6 milhões. O texto público consultado não desagrega esse resultado por NCM; por isso ele foi mantido apenas como contexto agregado.
+
+### Decisão de preservação
+
+Os campos quantitativos de `radar_piloto_arroz_ncm_v001.csv` associados à demanda/origem da oferta/dependência permanecem vazios.
+
+Não houve alteração de bases ou cadernos canônicos.

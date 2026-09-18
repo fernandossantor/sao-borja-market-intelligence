@@ -56,3 +56,24 @@ Depois, testar explicitamente:
 - São Borja;
 - Fronteira Oeste/região comparável, quando houver;
 - Rio Grande do Sul.
+
+
+## Verificação adicional — rota “Fonte dos dados”
+
+Foi identificada como rota válida da aplicação:
+
+https://observatorio.fecomercio-rs.org.br/page/fonte-dos-dados
+
+A aplicação é client-side e o conteúdo da rota não é exposto no HTML estático recuperável pela ferramenta de auditoria utilizada nesta sessão. Portanto, a existência da página foi confirmada, mas **a lista interna de fontes ainda não foi transcrita automaticamente**.
+
+Fontes confirmadas por material público sobre o lançamento:
+- Receita Federal;
+- Ministério do Trabalho.
+
+Essas duas confirmações não autorizam presumir que sejam as únicas fontes. A matriz de proveniência continuará pendente até leitura direta do conteúdo dinâmico da rota.
+
+## Evidência de granularidade municipal
+
+Material de imprensa de maio/2026, ao relatar apresentação da plataforma no Vale do Rio Pardo, utilizou indicadores de emprego formal para municípios individuais da região. Isso confirma que **há pelo menos indicadores do Observatório com granularidade municipal**.
+
+Regra: a granularidade será registrada indicador a indicador; não se assumirá que todos os módulos permitem município.

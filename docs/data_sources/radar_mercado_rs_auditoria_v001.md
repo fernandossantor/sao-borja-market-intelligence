@@ -12,7 +12,7 @@ Auditar o Radar do Mercado da Receita Estadual como fonte de inteligência merca
 ## Fontes
 
 - Painel oficial: https://receitadados.sefaz.rs.gov.br/desenvolve-rs/radar-do-mercado-da-receita-estadual/
-- Nota técnica específica: **não localizada de forma verificável nesta auditoria; não usar como fonte até localização oficial**.
+- Nota Técnica CIET 05/2026 — **Radar de Mercado da Receita Estadual**, publicada em 30/06/2026. Link oficial: https://receitadoc.sefaz.rs.gov.br/media/rhwdpvaz/nota_tecnica_radar_mercado_v1.pdf
 - Material institucional sobre a versão ampliada lançada em 30/06/2026.
 
 ## Achados observados — etapa 4A
@@ -397,3 +397,15 @@ Continuam sem valor preenchido:
 - concorrentes.
 
 Nenhum desses campos será inferido a partir da força local da cadeia.
+
+
+## Errata de fonte — 18/09/2026
+
+A Nota Técnica CIET 05/2026 foi localizada na página oficial de Boletins/Notas Técnicas do Receita.doc, com publicação em 30/06/2026.
+
+A anotação anterior de “nota técnica não localizada” estava incorreta e foi substituída.
+
+Nesta sessão, o arquivo PDF oficial foi identificado pelo link institucional, porém seu conteúdo integral não pôde ser recuperado automaticamente por timeout/cache. Portanto:
+- a existência, o título, a data e o URL são **confirmados oficialmente**;
+- detalhes metodológicos adicionais do PDF só serão incorporados após leitura verificável do conteúdo;
+- nenhuma informação metodológica será atribuída à NT 05/2026 apenas por inferência.

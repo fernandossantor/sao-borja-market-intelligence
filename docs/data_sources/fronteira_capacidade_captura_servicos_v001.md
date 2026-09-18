@@ -301,3 +301,65 @@ Artefatos:
 - `rotas_oficiais_operacionais_20260918_v001.csv`;
 - `antt_trc_sao_borja_fronteira_2023_2025_v001.csv`;
 - `antt_trc_sao_borja_fronteira_2023_2025_v001.md`.
+
+## 12. Fechamento parcial ANP/Cadastur — valores São Borja
+
+Após a confirmação das rotas, parte dos arquivos/respostas foi materializada e filtrada para São Borja.
+
+### ANP — volumes 2024
+
+- Gasolina C: **15.929.410 litros**;
+- Etanol hidratado: **592.100 litros**;
+- Óleo diesel: **49.501.472 litros**;
+- GLP P13: **1.124.934 kg**;
+- GLP OUTROS: **210.685 kg**.
+
+Variações 2023→2024:
+- gasolina C: +53,81%;
+- etanol: +64,93%;
+- diesel: +52,66%;
+- GLP total calculado P13+OUTROS: -20,34%.
+
+A variação é descritiva; nenhuma causa foi atribuída.
+
+### ANP — revendedores
+
+Extração corrente em 18/09/2026:
+- 10 registros em operação;
+- VIBRA 3;
+- Bandeira Branca 3;
+- IPIRANGA 2;
+- SANTA LUCIA 1;
+- RAIZEN 1.
+
+As contagens por bandeira não são participação de mercado.
+
+### Cadastur — 2T2026
+
+Meios de hospedagem em situação Regular/Operação:
+- 2 registros;
+- 90 UHs;
+- 180 leitos.
+
+Agências:
+- 7 registros;
+- 6 Regular/Operação;
+- 1 Em Implantação.
+
+### Controle de comparabilidade
+
+A RFB registra 31 estabelecimentos na divisão 55 — Alojamento.
+
+Cadastur = 2 meios de hospedagem Regular/Operação.
+
+Esses números pertencem a universos diferentes e **não formam uma taxa de cobertura 2/31**.
+
+### Consequência analítica
+
+A lacuna “há oferta formal?” foi parcialmente reduzida.
+
+Permanece aberta a lacuna decisória:
+**quanto do fluxo de fronteira gera hospedagem, alimentação, combustível e outros gastos em São Borja?**
+
+Arquivo estruturado:
+`anp_cadastur_sao_borja_20260918_v001.csv`.

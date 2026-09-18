@@ -1,0 +1,272 @@
+name: radar-open-data-discovery
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/radar-open-data-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Discover Radar Dados Abertos links and downloads
+        run: |
+          cat > /tmp/radar_discovery.py <<'PY'
+          import asyncio, json, re, hashlib
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+
+          OUT = Path("artifacts/radar_open_data_discovery")
+          DL = OUT / "downloads"
+          OUT.mkdir(parents=True, exist_ok=True)
+          DL.mkdir(parents=True, exist_ok=True)
+
+          TARGET = "https://app.powerbi.com/view?r=eyJrIjoiYzMxNWUyMDQtYWVjOC00MTcxLWJhN2ItY2NjYTk2MWEwNmNjIiwidCI6IjgzYmQwOTBiLTc1NmUtNGEwMi1hNTEyLWU1ZWEwMmMwMzA0MSJ9"
+          KEYWORDS = (
+              "dados abertos","csv","download","baixar","saídas por setor","saidas por setor",
+              "exportações por ncm","exportacoes por ncm","importações por ncm","importacoes por ncm",
+              "composição de mercado","composicao de mercado","portfólio","portfolio","categorias de produtos"
+          )
+
+          def clean(s):
+              s = re.sub(r'Bearer\s+[A-Za-z0-9._~+/=-]+', 'Bearer <REDACTED>', s, flags=re.I)
+              s = re.sub(r'("?(?:accessToken|token|embedToken)"?\s*[:=]\s*")[^"]+(")', r'\1<REDACTED>\2', s, flags=re.I)
+              return s
+
+          async def main():
+              records=[]
+              frame_snapshots=[]
+              candidates=[]
+              downloads=[]
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  context = await browser.new_context(
+                      accept_downloads=True,
+                      viewport={"width": 1920, "height": 1200},
+                      locale="pt-BR"
+                  )
+                  page = await context.new_page()
+
+                  async def handle_response(resp):
+                      u=resp.url
+                      lu=u.lower()
+                      if not any(k in lu for k in ("querydata","modelsandexploration","metadata","download","export","csv","blob","storage")):
+                          return
+                      rec={"url":u.split("?")[0],"status":resp.status,"content_type":resp.headers.get("content-type","")}
+                      try:
+                          body=clean(await resp.text())
+                          low=body.lower()
+                          rec["body_len"]=len(body)
+                          rec["keyword_hits"]=[k for k in KEYWORDS if k in low]
+                          # Preserve only a bounded public excerpt.
+                          if rec["keyword_hits"]:
+                              pos=min(low.find(k) for k in rec["keyword_hits"] if low.find(k)>=0)
+                              rec["body_excerpt"]=body[max(0,pos-3000):pos+20000]
+                          else:
+                              rec["body_head"]=body[:5000]
+                      except Exception as exc:
+                          rec["body_error"]=repr(exc)
+                      records.append(rec)
+
+                  page.on("response", handle_response)
+
+                  async def on_download(download):
+                      try:
+                          name=download.suggested_filename or ("download_"+hashlib.sha1(download.url.encode()).hexdigest()[:10])
+                          dest=DL/name
+                          await download.save_as(dest)
+                          downloads.append({"name":name,"url":download.url.split("?")[0],"size":dest.stat().st_size})
+                      except Exception as exc:
+                          downloads.append({"error":repr(exc)})
+
+                  page.on("download", on_download)
+                  await page.goto(TARGET, wait_until="domcontentloaded", timeout=120000)
+                  await page.wait_for_timeout(45000)
+
+                  async def snapshot(tag):
+                      for i,fr in enumerate(page.frames):
+                          try:
+                              txt=clean(await fr.locator("body").inner_text(timeout=5000))
+                          except Exception:
+                              txt=""
+                          if txt:
+                              frame_snapshots.append({"tag":tag,"frame":i,"url":fr.url.split("?")[0],"text":txt[:200000]})
+                          try:
+                              els=fr.locator("[aria-label],button,a")
+                              n=min(await els.count(),2500)
+                              for j in range(n):
+                                  el=els.nth(j)
+                                  try:
+                                      aria=await el.get_attribute("aria-label")
+                                      href=await el.get_attribute("href")
+                                      title=await el.get_attribute("title")
+                                      role=await el.get_attribute("role")
+                                      text=(await el.inner_text(timeout=500)).strip()
+                                      blob=" | ".join(x for x in (aria,title,text,href) if x)
+                                      if any(k in blob.lower() for k in KEYWORDS):
+                                          candidates.append({"tag":tag,"frame":i,"aria":aria,"title":title,"text":text[:1000],"href":href,"role":role})
+                                  except Exception:
+                                      pass
+                          except Exception:
+                              pass
+
+                  await snapshot("before")
+
+                  clicked=False
+                  click_log=[]
+                  for i,fr in enumerate(page.frames):
+                      for selector in [
+                          'text="Dados Abertos"',
+                          '[aria-label*="Dados Abertos" i]',
+                          '[title*="Dados Abertos" i]',
+                      ]:
+                          try:
+                              loc=fr.locator(selector)
+                              n=await loc.count()
+                              if n:
+                                  for j in range(n):
+                                      try:
+                                          await loc.nth(j).click(timeout=5000, force=True)
+                                          click_log.append({"frame":i,"selector":selector,"index":j,"result":"clicked"})
+                                          clicked=True
+                                          break
+                                      except Exception as exc:
+                                          click_log.append({"frame":i,"selector":selector,"index":j,"error":repr(exc)})
+                              if clicked: break
+                          except Exception as exc:
+                              click_log.append({"frame":i,"selector":selector,"error":repr(exc)})
+                      if clicked: break
+
+                  await page.wait_for_timeout(20000)
+                  await snapshot("after_dados_abertos")
+
+                  # Attempt public download controls only when the label clearly identifies one of the six documented files.
+                  labels=[
+                      "Saídas por Setor","Saidas por Setor","Exportações por NCM","Exportacoes por NCM",
+                      "Composição de Mercado","Composicao de Mercado","Importações por NCM","Importacoes por NCM",
+                      "Portfólio de NCMs por Setor","Portfolio de NCMs por Setor","Categorias de Produtos"
+                  ]
+                  interaction_log=[]
+                  for label in labels:
+                      done=False
+                      for i,fr in enumerate(page.frames):
+                          try:
+                              loc=fr.get_by_text(label, exact=False)
+                              n=min(await loc.count(),20)
+                              for j in range(n):
+                                  try:
+                                      el=loc.nth(j)
+                                      interaction_log.append({"label":label,"frame":i,"index":j,"text":(await el.inner_text(timeout=500))[:500]})
+                                      # click likely file/card once; downloads are captured
+                                      await el.click(timeout=3000, force=True)
+                                      await page.wait_for_timeout(2500)
+                                      done=True
+                                      break
+                                  except Exception as exc:
+                                      interaction_log.append({"label":label,"frame":i,"index":j,"error":repr(exc)})
+                              if done: break
+                          except Exception:
+                              pass
+
+                  await page.wait_for_timeout(10000)
+                  await snapshot("after_file_attempts")
+
+                  # Gather all absolute URL-like strings from frame text and candidate hrefs.
+                  urls=set()
+                  url_re=re.compile(r'https?://[^\s\"\'<>]+',re.I)
+                  for fs in frame_snapshots:
+                      urls.update(url_re.findall(fs["text"]))
+                  for c in candidates:
+                      if c.get("href") and c["href"].startswith("http"):
+                          urls.add(c["href"])
+
+                  await page.screenshot(path=str(OUT/"radar_final.png"), full_page=True)
+                  await browser.close()
+
+              out={
+                  "target":TARGET,
+                  "clicked_dados_abertos":clicked,
+                  "click_log":click_log,
+                  "interaction_log":interaction_log,
+                  "downloads":downloads,
+                  "candidate_elements":candidates,
+                  "urls":sorted(urls),
+                  "frame_snapshots":frame_snapshots,
+                  "responses":records,
+                  "privacy":"Public report only. Authorization headers, cookies and tokens are not persisted; text bodies are redacted and bounded."
+              }
+              (OUT/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+
+              md=[
+                  "# Radar do Mercado — descoberta automática da página Dados Abertos",
+                  "",
+                  f"- Dados Abertos clicado: **{clicked}**",
+                  f"- downloads capturados: **{len(downloads)}**",
+                  f"- elementos candidatos: **{len(candidates)}**",
+                  f"- respostas de rede selecionadas: **{len(records)}**",
+                  "",
+                  "## Downloads",
+              ]
+              for d in downloads:
+                  md.append(f"- {d}")
+              md += ["","## Elementos candidatos"]
+              for c in candidates[:100]:
+                  md.append(f"- {c}")
+              md += ["","## URLs públicas candidatas"]
+              for u in sorted(urls):
+                  md.append(f"- {u}")
+              (OUT/"README.md").write_text("\n".join(md),encoding="utf-8")
+
+              print(json.dumps({
+                  "clicked":clicked,
+                  "downloads":downloads,
+                  "candidates":candidates[:30],
+                  "urls":sorted(urls)[:50],
+                  "response_count":len(records)
+              },ensure_ascii=False,indent=2))
+
+          asyncio.run(main())
+          PY
+          python /tmp/radar_discovery.py
+
+      - name: Persist discovery on exploratory branch
+        run: |
+          mkdir -p docs/data_sources/radar_open_data_discovery
+          cp artifacts/radar_open_data_discovery/discovery.json docs/data_sources/radar_open_data_discovery/discovery.json
+          cp artifacts/radar_open_data_discovery/README.md docs/data_sources/radar_open_data_discovery/README.md
+          if compgen -G "artifacts/radar_open_data_discovery/downloads/*" > /dev/null; then
+            cp artifacts/radar_open_data_discovery/downloads/* docs/data_sources/radar_open_data_discovery/
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/radar_open_data_discovery
+          if git diff --cached --quiet; then
+            echo "No discovery changes to commit."
+          else
+            git commit -m "data: discover Radar Dados Abertos public downloads"
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload discovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-open-data-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/radar_open_data_discovery/

@@ -1,0 +1,13 @@
+empresa,localizacao_institucional,ano,posicao_irga,unidades_ativas_irga,beneficiamento_t,participacao_rs_pct,fonte_ranking,fonte_localizacao,natureza,limitacao
+"PIRAHY ALIMENTOS LTDA.","São Borja",2023,3,2,216780,3.79,"IRGA Ranking Beneficiamento 2023","Sindarroz-RS; site oficial Prato Fino/Pirahy","DADO OBSERVADO + CROSSWALK","Ranking é por empresa; crosswalk territorial é institucional"
+"PIRAHY ALIMENTOS LTDA.","São Borja",2024,3,2,237880,4.55,"IRGA Ranking Beneficiamento 2024 corrigido","Sindarroz-RS; site oficial Prato Fino/Pirahy","DADO OBSERVADO + CROSSWALK","Ranking é por empresa; crosswalk territorial é institucional"
+"CEREALISTA ALBARUSKA LTDA.","São Borja",2023,30,1,45837,0.80,"IRGA Ranking Beneficiamento 2023","Sindarroz-RS","DADO OBSERVADO + CROSSWALK","Lista de associados não é censo completo do município"
+"CEREALISTA ALBARUSKA LTDA.","São Borja",2024,35,1,42580,0.81,"IRGA Ranking Beneficiamento 2024 corrigido","Sindarroz-RS","DADO OBSERVADO + CROSSWALK","Lista de associados não é censo completo do município"
+"CIAGRO ALIMENTOS LTDA.","São Borja",2023,64,1,20814,0.36,"IRGA Ranking Beneficiamento 2023","Sindarroz-RS","DADO OBSERVADO + CROSSWALK","Lista de associados não é censo completo do município"
+"CIAGRO ALIMENTOS LTDA.","São Borja",2024,47,1,27017,0.52,"IRGA Ranking Beneficiamento 2024 corrigido","Sindarroz-RS","DADO OBSERVADO + CROSSWALK","Lista de associados não é censo completo do município"
+"CEREALISTA STRECK LTDA.","São Borja",2023,67,1,20188,0.35,"IRGA Ranking Beneficiamento 2023","Sindarroz-RS","DADO OBSERVADO + CROSSWALK","Lista de associados não é censo completo do município"
+"CEREALISTA STRECK LTDA.","São Borja",2024,66,1,17556,0.34,"IRGA Ranking Beneficiamento 2024 corrigido","Sindarroz-RS","DADO OBSERVADO + CROSSWALK","Lista de associados não é censo completo do município"
+"SUBCONJUNTO IDENTIFICADO SÃO BORJA","São Borja",2023,,5,303619,5.30,"Cálculo SBMI a partir do IRGA","Crosswalk Sindarroz-RS","DADO CALCULADO","Mínimo identificável; não representa todo o beneficiamento municipal"
+"SUBCONJUNTO IDENTIFICADO SÃO BORJA","São Borja",2024,,5,325033,6.22,"Cálculo SBMI a partir do IRGA","Crosswalk Sindarroz-RS","DADO CALCULADO","Mínimo identificável; não representa todo o beneficiamento municipal"
+"TOTAL INDÚSTRIAS RS","Rio Grande do Sul",2023,,157,5722235,100.00,"IRGA Ranking Beneficiamento 2023","IRGA","DADO OBSERVADO","Total estadual"
+"TOTAL INDÚSTRIAS RS","Rio Grande do Sul",2024,,157,5233168,100.00,"IRGA Ranking Beneficiamento 2024 corrigido","IRGA","DADO OBSERVADO","Total estadual"

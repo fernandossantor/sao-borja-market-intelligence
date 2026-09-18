@@ -2,7 +2,7 @@
   {
     "name": "gasolina_c.csv",
     "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/gasolina-c/vendas-anuais-de-gasolina-c-por-municipio.csv",
-    "obtained_at": "2026-09-18T21:41:04.836866+00:00",
+    "obtained_at": "2026-09-18T21:45:03.278331+00:00",
     "status": 200,
     "content_type": "text/csv",
     "bytes": 12123475,
@@ -12,7 +12,7 @@
   {
     "name": "etanol_hidratado.csv",
     "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/etanol-hidratado/vendas-anuais-de-etanol-hidratado-por-municipio.csv",
-    "obtained_at": "2026-09-18T21:41:19.033192+00:00",
+    "obtained_at": "2026-09-18T21:45:21.641700+00:00",
     "status": 200,
     "content_type": "text/csv",
     "bytes": 10062933,
@@ -22,7 +22,7 @@
   {
     "name": "oleo_diesel.csv",
     "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/oleo-diesel/vendas-anuais-de-oleo-diesel-por-municipio.csv",
-    "obtained_at": "2026-09-18T21:41:29.858333+00:00",
+    "obtained_at": "2026-09-18T21:45:35.467344+00:00",
     "status": 200,
     "content_type": "text/csv",
     "bytes": 12666750,
@@ -32,7 +32,7 @@
   {
     "name": "glp.csv",
     "url": "https://www.gov.br/anp/pt-br/centrais-de-conteudo/dados-abertos/arquivos/vdpb/vaehdpm/glp/vendas-anuais-de-glp-por-municipio.csv",
-    "obtained_at": "2026-09-18T21:41:43.375170+00:00",
+    "obtained_at": "2026-09-18T21:45:52.840886+00:00",
     "status": 200,
     "content_type": "text/csv",
     "bytes": 9158373,
@@ -45,7 +45,7 @@
     "status": 200,
     "content_type": "application/json; charset=utf-8",
     "bytes": 11680,
-    "obtained_at": "2026-09-18T21:41:53.575595+00:00",
+    "obtained_at": "2026-09-18T21:46:06.517904+00:00",
     "sha256": "b991515d287cf5a0941cd1709415117391729d8bf364812e9be8850292f3ddf6",
     "top_level_type": "dict",
     "rows_detected": 10
@@ -53,7 +53,7 @@
   {
     "name": "cadastur_hospedagem_2t2026.xlsx",
     "url": "https://dados.turismo.gov.br/dataset/d2333d1b-db1e-438b-955a-028db80a031e/resource/7e385ec2-57d8-446c-9cc0-f5f7dadd1fdf/download/meios-de-hospedagem-2-trimestre-2026.xlsx",
-    "obtained_at": "2026-09-18T21:41:53.578520+00:00",
+    "obtained_at": "2026-09-18T21:46:06.520926+00:00",
     "status": 200,
     "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "bytes": 6755085,
@@ -63,7 +63,7 @@
   {
     "name": "cadastur_agencias_2t2026.xlsx",
     "url": "https://dados.turismo.gov.br/dataset/5a324238-184a-4103-bfaa-bb998aa10328/resource/b4a036ed-8caa-46b5-86af-edbce86392d1/download/agencias-de-turismo-2-trimestre-2026.xlsx",
-    "obtained_at": "2026-09-18T21:42:12.109840+00:00",
+    "obtained_at": "2026-09-18T21:46:21.674083+00:00",
     "status": 200,
     "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "bytes": 19017621,
@@ -73,13 +73,13 @@
   {
     "name": "EXP_2026_MUN.csv",
     "url": "https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv",
-    "obtained_at": "2026-09-18T21:42:43.312220+00:00",
+    "obtained_at": "2026-09-18T21:46:53.565188+00:00",
     "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='balanca.mdic.gov.br', port=443): Max retries exceeded with url: /balanca/bd/comexstat-bd/mun/EXP_2026_MUN.csv (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)')))\"))"
   },
   {
     "name": "IMP_2026_MUN.csv",
     "url": "https://balanca.mdic.gov.br/balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv",
-    "obtained_at": "2026-09-18T21:42:43.727776+00:00",
+    "obtained_at": "2026-09-18T21:46:54.078721+00:00",
     "error": "SSLError(MaxRetryError(\"HTTPSConnectionPool(host='balanca.mdic.gov.br', port=443): Max retries exceeded with url: /balanca/bd/comexstat-bd/mun/IMP_2026_MUN.csv (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1000)')))\"))"
   }
 ]

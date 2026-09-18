@@ -32,6 +32,9 @@
       "2024"
     ],
     "latest_year": "2024",
+    "value_columns": [
+      "VENDAS"
+    ],
     "parser": {
       "encoding": "utf-8-sig",
       "separator": ";"
@@ -80,6 +83,9 @@
       "2024"
     ],
     "latest_year": "2024",
+    "value_columns": [
+      "VENDAS"
+    ],
     "parser": {
       "encoding": "utf-8-sig",
       "separator": ";"
@@ -128,6 +134,9 @@
       "2024"
     ],
     "latest_year": "2024",
+    "value_columns": [
+      "VENDAS"
+    ],
     "parser": {
       "encoding": "utf-8-sig",
       "separator": ";"
@@ -145,6 +154,53 @@
   },
   {
     "file": "glp.csv",
-    "error": "RuntimeError(\"Expected ANP schema not found: ['ANO', 'GRANDE REGIÃO', 'UF', 'PRODUTO', 'CÓDIGO IBGE', 'MUNICÍPIO', 'P13', 'OUTROS']\")"
+    "rows": 25,
+    "years": [
+      "2000",
+      "2001",
+      "2002",
+      "2003",
+      "2004",
+      "2005",
+      "2006",
+      "2007",
+      "2008",
+      "2009",
+      "2010",
+      "2011",
+      "2012",
+      "2013",
+      "2014",
+      "2015",
+      "2016",
+      "2017",
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024"
+    ],
+    "latest_year": "2024",
+    "value_columns": [
+      "P13",
+      "OUTROS"
+    ],
+    "parser": {
+      "encoding": "utf-8-sig",
+      "separator": ";"
+    },
+    "columns": [
+      "ANO",
+      "GRANDE REGIÃO",
+      "UF",
+      "PRODUTO",
+      "CÓDIGO IBGE",
+      "MUNICÍPIO",
+      "P13",
+      "OUTROS"
+    ],
+    "filtered_file": "artifacts/secondary_official_sources_sao_borja/filtered/saoborja_glp.csv"
   }
 ]

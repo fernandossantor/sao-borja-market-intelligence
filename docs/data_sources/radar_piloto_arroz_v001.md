@@ -359,3 +359,72 @@ A cadeia do arroz é um caso prioritário de inteligência de mercado territoria
 - origem/destino doméstico específico das empresas locais;
 - faturamento ou lucro das empresas;
 - causalidade entre produção primária e desempenho industrial.
+
+## Etapa 4C.3 — método do Radar finalmente fechado pela NT CIET 05/2026
+
+A leitura integral da NT CIET 05/2026 fecha a arquitetura metodológica do piloto.
+
+### O que deve ser extraído para cada NCM de arroz
+
+Na página **Oportunidades**:
+- Part. RS;
+- volume OUF + EXT;
+- classificação de dependência;
+- variação do market share em p.p.
+
+Na página **Composição de Mercado**:
+- INT;
+- OUF;
+- EXT;
+- participação de cada origem;
+- variação frente aos 12 meses anteriores;
+- UFs fornecedoras;
+- países de origem.
+
+Na página **Perfil de Vendas**:
+- vendas totais do NCM;
+- destino INT/OUF/EXT;
+- UFs destinatárias;
+- países/blocos de destino.
+
+No **Mercado Nacional**:
+- fornecedores interestaduais do NCM/Categoria;
+- concorrentes por setor;
+- consumidores da indústria gaúcha por setor.
+
+### Fórmula central
+
+`Part. RS = INT / (INT + OUF + EXT)`
+
+Classificação:
+- crítica: <5%;
+- alta: 5%-15%;
+- média: 15%-30%.
+
+### Janela temporal
+
+Os painéis de Oportunidades, Perfil de Vendas e Composição de Mercado trabalham com **últimos 12 meses**, comparados aos 12 meses imediatamente anteriores.
+
+### Caminho de extração
+
+A NT confirma uma página de **Dados Abertos**, com CSVs mensais.
+
+Prioridade para o piloto:
+1. Categorias de Produtos;
+2. Exportações por NCM;
+3. Importações por NCM;
+4. Composição de Mercado;
+5. Portfólio de NCMs por Setor;
+6. Saídas por Setor.
+
+A extração por CSV é preferível ao scraping do Power BI.
+
+### Limite territorial confirmado
+
+A NT corrente não documenta abertura municipal do Radar. Portanto, a camada local de São Borja permanece separada:
+- produção primária: IRGA;
+- beneficiamento/estabelecimentos: RAIS/RFB/CEMPRE;
+- beneficiamento empresarial: IRGA/Sindarroz;
+- comércio exterior municipal: Comex Stat em SH4 1006, quando extraído.
+
+O Radar entra como **mercado estadual e relações com OUF/exterior**, não como estimativa da demanda de São Borja.

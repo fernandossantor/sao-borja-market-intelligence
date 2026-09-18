@@ -2,8 +2,8 @@ indicador_fecomercio,status_v028,fonte_canônica_atual_sbmi,valor_incremental_po
 "Número de empresas/CNPJs","COBERTO","MEMP/DREI Mapa de Empresas + RFB","Validação cruzada/segmentação em interface única","BAIXA","Manter fonte primária canônica; Observatório apenas como validação/interface"
 "Aberturas/fechamentos/variação de estoque","COBERTO","MEMP/DREI Mapa de Empresas","Validação cruzada e eventualmente série mais simples de consultar","BAIXA","Não substituir série canônica"
 "Rotatividade empresarial","COBERTO COMO PROXY SBMI","MEMP/DREI + cálculo SBMI","Possível indicador IFEP metodologicamente distinto","MÉDIA","Não comparar até conhecer fórmula; distinguir turnover de empresas de turnover de trabalhadores"
-"MEI","LACUNA NA CAMADA v028 AUDITADA","Nenhuma identificada nesta auditoria","Estrutura de microempreendedorismo por município/setor","ALTA","Incorporar somente após fonte e conceito confirmados"
-"Optantes do Simples Nacional","LACUNA NA CAMADA v028 AUDITADA","Nenhuma identificada nesta auditoria","Perfil tributário/porte formal das empresas","ALTA","Não usar como sinônimo de microempresa sem conceito da fonte"
+"MEI","LACUNA — ROTA PRIMÁRIA IDENTIFICADA","RFB — Dados Abertos CNPJ; reprodução direta ainda pendente","Estrutura de microempreendedorismo por município/setor","ALTA","Cross-check secundário localizado; não promover até reproduzir diretamente a competência da RFB"
+"Optantes do Simples Nacional","LACUNA — ROTA PRIMÁRIA IDENTIFICADA","RFB — Dados Abertos CNPJ/arquivo de opção; reprodução direta ainda pendente","Perfil tributário/porte formal das empresas","ALTA","Não aceitar valor secundário nem usar como sinônimo de microempresa; reproduzir diretamente da RFB"
 "Tempo médio de atividade das empresas","LACUNA","Nenhuma","Sobrevivência/maturidade empresarial","ALTA","Indicador próprio IFEP; fórmula e coorte precisam ser auditadas"
 "Concentração territorial","LACUNA","Nenhuma equivalente direta","Geografia econômica intra/intermunicipal","ALTA","Indicador próprio IFEP; fórmula/unidade pendentes"
 "Emprego formal — estoque","COBERTO","MTE/RAIS 2024 e RAIS 2025 em camadas específicas","Atualização/validação e interface setorial","BAIXA-MÉDIA","Preservar RAIS como primária quando conceito coincidir"
@@ -18,7 +18,3 @@ indicador_fecomercio,status_v028,fonte_canônica_atual_sbmi,valor_incremental_po
 "Vendas","LACUNA LOCAL/CONCEITO PENDENTE","Fontes setoriais estaduais e modelos específicos; sem série local geral equivalente","Escala/atividade econômica empresarial","MUITO ALTA","Só integrar após confirmar fonte, unidade, deflator e geografia"
 "Receitas","LACUNA/CONCEITO PENDENTE","Sem equivalente municipal geral canônico","Escala econômica e mercado","MUITO ALTA","Não confundir com VAF, faturamento fiscal, PMC ou valor adicionado"
 "Despesas","LACUNA/CONCEITO PENDENTE","Sem equivalente municipal geral canônico","Estrutura de custos/atividade econômica","MUITO ALTA","Exige definição de universo e fonte"
-
-# atualização_2026-09-18
-# MEI: rota primária RFB/Dados Abertos CNPJ confirmada; cross-check secundário localizado; reprodução primária pendente
-# Simples Nacional: rota primária RFB/Dados Abertos CNPJ identificada; valor não aceito até reprodução direta

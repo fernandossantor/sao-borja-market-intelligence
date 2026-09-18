@@ -186,3 +186,96 @@ A matriz separa:
 - Sindilojas Caxias — 27/08/2026, confirmação de uso para empresas, emprego, vendas, setores e regiões.
 
 Nenhuma dessas fontes substitui a página interna “Fonte dos dados” para o vínculo fino indicador→base original.
+
+
+## Matriz de sobreposição com a base canônica v028 — 18/09/2026
+
+A auditoria comparou os indicadores identificados no Observatório com a planilha técnica v028, **somente em leitura**.
+
+### Já coberto no SBMI
+
+A v028 já possui de forma auditada:
+- empresas abertas;
+- empresas fechadas;
+- empresas ativas;
+- saldo mensal;
+- proxies de abertura/fechamento/rotatividade empresarial;
+- série curta de comparação de turnover-proxy São Borja × RS;
+- emprego formal RAIS;
+- remuneração média e mediana;
+- massa remuneratória;
+- jornada contratada;
+- perfil por escolaridade;
+- perfil por grandes grupos CBO;
+- perfil por setor.
+
+Nesses casos, o Observatório não deve substituir a fonte primária já canonizada. Seu uso será:
+- validação cruzada;
+- interface de consulta;
+- eventualmente atualização, desde que conceito/período sejam equivalentes.
+
+### Lacunas com alto valor incremental
+
+Foram identificados como potencialmente novos para a camada atual:
+- MEI;
+- participação de optantes do Simples Nacional;
+- tempo médio de atividade das empresas;
+- concentração territorial;
+- tempo médio de contrato/vínculo;
+- emprego segundo regime Simples do empregador;
+- rotatividade do trabalho, se esse for o conceito do indicador IFEP;
+- vendas locais/setoriais;
+- receitas;
+- despesas.
+
+### Lacunas que podem ser recalculáveis com fonte primária
+
+Alguns indicadores exibidos pelo Observatório podem ser produzidos diretamente a partir de microdados já disponíveis no projeto, caso os campos estejam presentes:
+- sexo;
+- idade;
+- tempo de vínculo;
+- remuneração por características;
+- possivelmente jornada por faixa.
+
+Nesse caso, o procedimento preferido será:
+1. usar o Observatório para identificar a pergunta/indicador;
+2. verificar a definição;
+3. reproduzir pela fonte primária RAIS quando tecnicamente possível;
+4. manter o Observatório como referência metodológica/validação, não como substituto.
+
+### Distinção crítica de “rotatividade”
+
+A v028 já possui **rotatividade empresarial proxy** calculada como movimentação de empresas sobre o estoque.
+
+O Observatório apresenta “rotatividade” no contexto de contratos/emprego em material público.
+
+Sem a fórmula do IFEP, é proibido:
+- tratar as duas medidas como equivalentes;
+- compará-las numericamente;
+- somá-las;
+- chamar qualquer uma simplesmente de “taxa de rotatividade” sem qualificador.
+
+### Prioridade real de integração
+
+**MUITO ALTA**
+- vendas;
+- receitas;
+- despesas.
+
+**ALTA**
+- MEI;
+- Simples Nacional;
+- tempo de vida empresarial;
+- concentração territorial;
+- tempo médio de vínculo;
+- vínculo trabalhador × regime da empresa;
+- rotatividade do trabalho.
+
+**MÉDIA**
+- segmentações de sexo/idade/ocupação quando não estiverem consolidadas.
+
+**BAIXA**
+- indicadores já diretamente reproduzidos por MEMP/DREI, RFB e RAIS.
+
+Arquivo:
+`docs/data_sources/observatorio_fecomercio_rs_gap_v028_v001.csv`

@@ -1,1013 +1,3234 @@
 {
   "name": "sinac_total",
   "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+  "kind": "total",
+  "log": [
+    {
+      "action": "select",
+      "selector": "#ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+      "value": "Por Município"
+    },
+    {
+      "action": "filter_uf",
+      "value": "RS"
+    },
+    {
+      "action": "select_sao_borja",
+      "value": "8863",
+      "text": "SAO BORJA"
+    },
+    {
+      "action": "insert_sao_borja"
+    },
+    {
+      "action": "destination_snapshot",
+      "options": [
+        {
+          "text": "SAO BORJA",
+          "value": "8863"
+        }
+      ]
+    },
+    {
+      "action": "hidden_filter_set",
+      "municipios": [
+        "8863"
+      ],
+      "uf": "RS"
+    },
+    {
+      "action": "click_exibir"
+    }
+  ],
+  "snapshots": [
+    {
+      "tag": "initial",
+      "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+      "title": "Estatísticas Sinac",
+      "selects": [
+        {
+          "index": 0,
+          "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+          "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
+          "visible": true,
+          "value": "Por Dia",
+          "options": [
+            {
+              "text": "Por Dia",
+              "value": "Por Dia",
+              "selected": true
+            },
+            {
+              "text": "Por UF",
+              "value": "Por UF",
+              "selected": false
+            },
+            {
+              "text": "Por Município",
+              "value": "Por Município",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
+          "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
+          "visible": true,
+          "value": "",
+          "options": [
+            {
+              "text": "-- Selecione uma opção --",
+              "value": "",
+              "selected": true
+            },
+            {
+              "text": "Janeiro/2026",
+              "value": "1",
+              "selected": false
+            },
+            {
+              "text": "Fevereiro/2026",
+              "value": "2",
+              "selected": false
+            },
+            {
+              "text": "Março/2026",
+              "value": "3",
+              "selected": false
+            },
+            {
+              "text": "Abril/2026",
+              "value": "4",
+              "selected": false
+            },
+            {
+              "text": "Maio/2026",
+              "value": "5",
+              "selected": false
+            },
+            {
+              "text": "Junho/2026",
+              "value": "6",
+              "selected": false
+            },
+            {
+              "text": "Julho/2026",
+              "value": "7",
+              "selected": false
+            },
+            {
+              "text": "Agosto/2026",
+              "value": "8",
+              "selected": false
+            },
+            {
+              "text": "Setembro/2026",
+              "value": "9",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+          "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+          "visible": false,
+          "value": "UFNS",
+          "options": [
+            {
+              "text": "UF não selecionado",
+              "value": "UFNS",
+              "selected": true
+            },
+            {
+              "text": "AC - Acre",
+              "value": "AC",
+              "selected": false
+            },
+            {
+              "text": "AL - Alagoas",
+              "value": "AL",
+              "selected": false
+            },
+            {
+              "text": "AM - Amazonas",
+              "value": "AM",
+              "selected": false
+            },
+            {
+              "text": "AP - Amapá",
+              "value": "AP",
+              "selected": false
+            },
+            {
+              "text": "BA - Bahia",
+              "value": "BA",
+              "selected": false
+            },
+            {
+              "text": "CE - Ceará",
+              "value": "CE",
+              "selected": false
+            },
+            {
+              "text": "DF - Distrito Federal",
+              "value": "DF",
+              "selected": false
+            },
+            {
+              "text": "ES - Espírito Santo",
+              "value": "ES",
+              "selected": false
+            },
+            {
+              "text": "GO - Goiás",
+              "value": "GO",
+              "selected": false
+            },
+            {
+              "text": "MA - Maranhão",
+              "value": "MA",
+              "selected": false
+            },
+            {
+              "text": "MG - Minas Gerais",
+              "value": "MG",
+              "selected": false
+            },
+            {
+              "text": "MS - Mato Grosso do Sul",
+              "value": "MS",
+              "selected": false
+            },
+            {
+              "text": "MT - Mato Grosso",
+              "value": "MT",
+              "selected": false
+            },
+            {
+              "text": "PA - Pará",
+              "value": "PA",
+              "selected": false
+            },
+            {
+              "text": "PB - Paraíba",
+              "value": "PB",
+              "selected": false
+            },
+            {
+              "text": "PE - Pernambuco",
+              "value": "PE",
+              "selected": false
+            },
+            {
+              "text": "PI - Piauí",
+              "value": "PI",
+              "selected": false
+            },
+            {
+              "text": "PR - Paraná",
+              "value": "PR",
+              "selected": false
+            },
+            {
+              "text": "RJ - Rio de Janeiro",
+              "value": "RJ",
+              "selected": false
+            },
+            {
+              "text": "RN - Rio Grande do Norte",
+              "value": "RN",
+              "selected": false
+            },
+            {
+              "text": "RO - Rondônia",
+              "value": "RO",
+              "selected": false
+            },
+            {
+              "text": "RR - Roraima",
+              "value": "RR",
+              "selected": false
+            },
+            {
+              "text": "RS - Rio Grande do Sul",
+              "value": "RS",
+              "selected": false
+            },
+            {
+              "text": "SC - Santa Catarina",
+              "value": "SC",
+              "selected": false
+            },
+            {
+              "text": "SE - Sergipe",
+              "value": "SE",
+              "selected": false
+            },
+            {
+              "text": "SP - São Paulo",
+              "value": "SP",
+              "selected": false
+            },
+            {
+              "text": "TO - Tocantins",
+              "value": "TO",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "id": "lbOrigem",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": []
+        },
+        {
+          "index": 4,
+          "id": "lbDestino",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": []
+        }
+      ],
+      "hidden": {
+        "municipios": "",
+        "uf": "",
+        "check": "false"
+      },
+      "body": " Estatísticas do Simples Nacional :: Optantes por UF e Município\nOptantes por UF e Município - Sinac\nANO 2026\n\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nSelecione o tipo de consulta:\t\nPor Dia\nPor UF\nPor Município\n\t  Mês: \n-- Selecione uma opção --\nJaneiro/2026\nFevereiro/2026\nMarço/2026\nAbril/2026\nMaio/2026\nJunho/2026\nJulho/2026\nAgosto/2026\nSetembro/2026\n\n\t\t\n  \n\n\n\n"
+    },
+    {
+      "tag": "after_filter",
+      "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+      "title": "Estatísticas Sinac",
+      "selects": [
+        {
+          "index": 0,
+          "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+          "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
+          "visible": true,
+          "value": "Por Município",
+          "options": [
+            {
+              "text": "Por Dia",
+              "value": "Por Dia",
+              "selected": false
+            },
+            {
+              "text": "Por UF",
+              "value": "Por UF",
+              "selected": false
+            },
+            {
+              "text": "Por Município",
+              "value": "Por Município",
+              "selected": true
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+          "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+          "visible": false,
+          "value": "RS",
+          "options": [
+            {
+              "text": "UF não selecionado",
+              "value": "UFNS",
+              "selected": false
+            },
+            {
+              "text": "AC - Acre",
+              "value": "AC",
+              "selected": false
+            },
+            {
+              "text": "AL - Alagoas",
+              "value": "AL",
+              "selected": false
+            },
+            {
+              "text": "AM - Amazonas",
+              "value": "AM",
+              "selected": false
+            },
+            {
+              "text": "AP - Amapá",
+              "value": "AP",
+              "selected": false
+            },
+            {
+              "text": "BA - Bahia",
+              "value": "BA",
+              "selected": false
+            },
+            {
+              "text": "CE - Ceará",
+              "value": "CE",
+              "selected": false
+            },
+            {
+              "text": "DF - Distrito Federal",
+              "value": "DF",
+              "selected": false
+            },
+            {
+              "text": "ES - Espírito Santo",
+              "value": "ES",
+              "selected": false
+            },
+            {
+              "text": "GO - Goiás",
+              "value": "GO",
+              "selected": false
+            },
+            {
+              "text": "MA - Maranhão",
+              "value": "MA",
+              "selected": false
+            },
+            {
+              "text": "MG - Minas Gerais",
+              "value": "MG",
+              "selected": false
+            },
+            {
+              "text": "MS - Mato Grosso do Sul",
+              "value": "MS",
+              "selected": false
+            },
+            {
+              "text": "MT - Mato Grosso",
+              "value": "MT",
+              "selected": false
+            },
+            {
+              "text": "PA - Pará",
+              "value": "PA",
+              "selected": false
+            },
+            {
+              "text": "PB - Paraíba",
+              "value": "PB",
+              "selected": false
+            },
+            {
+              "text": "PE - Pernambuco",
+              "value": "PE",
+              "selected": false
+            },
+            {
+              "text": "PI - Piauí",
+              "value": "PI",
+              "selected": false
+            },
+            {
+              "text": "PR - Paraná",
+              "value": "PR",
+              "selected": false
+            },
+            {
+              "text": "RJ - Rio de Janeiro",
+              "value": "RJ",
+              "selected": false
+            },
+            {
+              "text": "RN - Rio Grande do Norte",
+              "value": "RN",
+              "selected": false
+            },
+            {
+              "text": "RO - Rondônia",
+              "value": "RO",
+              "selected": false
+            },
+            {
+              "text": "RR - Roraima",
+              "value": "RR",
+              "selected": false
+            },
+            {
+              "text": "RS - Rio Grande do Sul",
+              "value": "RS",
+              "selected": true
+            },
+            {
+              "text": "SC - Santa Catarina",
+              "value": "SC",
+              "selected": false
+            },
+            {
+              "text": "SE - Sergipe",
+              "value": "SE",
+              "selected": false
+            },
+            {
+              "text": "SP - São Paulo",
+              "value": "SP",
+              "selected": false
+            },
+            {
+              "text": "TO - Tocantins",
+              "value": "TO",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "id": "lbOrigem",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": [
+            {
+              "text": "ACEGUA",
+              "value": "1118",
+              "selected": false
+            },
+            {
+              "text": "AGUA SANTA",
+              "value": "8499",
+              "selected": false
+            },
+            {
+              "text": "AGUDO",
+              "value": "8501",
+              "selected": false
+            },
+            {
+              "text": "AJURICABA",
+              "value": "8503",
+              "selected": false
+            },
+            {
+              "text": "ALECRIM",
+              "value": "8505",
+              "selected": false
+            },
+            {
+              "text": "ALEGRETE",
+              "value": "8507",
+              "selected": false
+            },
+            {
+              "text": "ALEGRIA",
+              "value": "8497",
+              "selected": false
+            },
+            {
+              "text": "ALMIRANTE TAMANDARE DO SUL",
+              "value": "1120",
+              "selected": false
+            },
+            {
+              "text": "ALPESTRE",
+              "value": "8509",
+              "selected": false
+            },
+            {
+              "text": "ALTO ALEGRE",
+              "value": "8495",
+              "selected": false
+            },
+            {
+              "text": "ALTO FELIZ",
+              "value": "6045",
+              "selected": false
+            },
+            {
+              "text": "ALVORADA",
+              "value": "8511",
+              "selected": false
+            },
+            {
+              "text": "AMARAL FERRADOR",
+              "value": "8493",
+              "selected": false
+            },
+            {
+              "text": "AMETISTA DO SUL",
+              "value": "5969",
+              "selected": false
+            },
+            {
+              "text": "ANDRE DA ROCHA",
+              "value": "8491",
+              "selected": false
+            },
+            {
+              "text": "ANTA GORDA",
+              "value": "8513",
+              "selected": false
+            },
+            {
+              "text": "ANTONIO PRADO",
+              "value": "8515",
+              "selected": false
+            },
+            {
+              "text": "ARAMBARE",
+              "value": "5779",
+              "selected": false
+            },
+            {
+              "text": "ARARICA",
+              "value": "0952",
+              "selected": false
+            },
+            {
+              "text": "ARATIBA",
+              "value": "8517",
+              "selected": false
+            },
+            {
+              "text": "ARROIO DO MEIO",
+              "value": "8519",
+              "selected": false
+            },
+            {
+              "text": "ARROIO DO PADRE",
+              "value": "1122",
+              "selected": false
+            },
+            {
+              "text": "ARROIO DO SAL",
+              "value": "8489",
+              "selected": false
+            },
+            {
+              "text": "ARROIO DO TIGRE",
+              "value": "8523",
+              "selected": false
+            },
+            {
+              "text": "ARROIO DOS RATOS",
+              "value": "8521",
+              "selected": false
+            },
+            {
+              "text": "ARROIO GRANDE",
+              "value": "8525",
+              "selected": false
+            },
+            {
+              "text": "ARVOREZINHA",
+              "value": "8527",
+              "selected": false
+            },
+            {
+              "text": "AUGUSTO PESTANA",
+              "value": "8529",
+              "selected": false
+            },
+            {
+              "text": "AUREA",
+              "value": "8487",
+              "selected": false
+            },
+            {
+              "text": "BAGE",
+              "value": "8531",
+              "selected": false
+            },
+            {
+              "text": "BALNEARIO PINHAL",
+              "value": "0954",
+              "selected": false
+            },
+            {
+              "text": "BARAO",
+              "value": "8485",
+              "selected": false
+            },
+            {
+              "text": "BARAO DE COTEGIPE",
+              "value": "8533",
+              "selected": false
+            },
+            {
+              "text": "BARAO DO TRIUNFO",
+              "value": "5771",
+              "selected": false
+            },
+            {
+              "text": "BARRA DO GUARITA",
+              "value": "6069",
+              "selected": false
+            },
+            {
+              "text": "BARRA DO QUARAI",
+              "value": "0956",
+              "selected": false
+            },
+            {
+              "text": "BARRA DO RIBEIRO",
+              "value": "8537",
+              "selected": false
+            },
+            {
+              "text": "BARRA DO RIO AZUL",
+              "value": "5959",
+              "selected": false
+            },
+            {
+              "text": "BARRA FUNDA",
+              "value": "5943",
+              "selected": false
+            },
+            {
+              "text": "BARRACAO",
+              "value": "8535",
+              "selected": false
+            },
+            {
+              "text": "BARROS CASSAL",
+              "value": "8539",
+              "selected": false
+            },
+            {
+              "text": "BENJAMIN CONSTANT DO SUL",
+              "value": "0958",
+              "selected": false
+            },
+            {
+              "text": "BENTO GONCALVES",
+              "value": "8541",
+              "selected": false
+            },
+            {
+              "text": "BOA VISTA DAS MISSOES",
+              "value": "5981",
+              "selected": false
+            },
+            {
+              "text": "BOA VISTA DO BURICA",
+              "value": "8543",
+              "selected": false
+            },
+            {
+              "text": "BOA VISTA DO CADEADO",
+              "value": "1124",
+              "selected": false
+            },
+            {
+              "text": "BOA VISTA DO INCRA",
+              "value": "1126",
+              "selected": false
+            },
+            {
+              "text": "BOA VISTA DO SUL",
+              "value": "0960",
+              "selected": false
+            },
+            {
+              "text": "BOM JESUS",
+              "value": "8545",
+              "selected": false
+            },
+            {
+              "text": "BOM PRINCIPIO",
+              "value": "9823",
+              "selected": false
+            },
+            {
+              "text": "BOM PROGRESSO",
+              "value": "6071",
+              "selected": false
+            },
+            {
+              "text": "BOM RETIRO DO SUL",
+              "value": "8547",
+              "selected": false
+            },
+            {
+              "text": "BOQUEIRAO DO LEAO",
+              "value": "8483",
+              "selected": false
+            },
+            {
+              "text": "BOSSOROCA",
+              "value": "8549",
+              "selected": false
+            },
+            {
+              "text": "BOZANO",
+              "value": "1128",
+              "selected": false
+            },
+            {
+              "text": "BRAGA",
+              "value": "8551",
+              "selected": false
+            },
+            {
+              "text": "BROCHIER",
+              "value": "8449",
+              "selected": false
+            },
+            {
+              "text": "BUTIA",
+              "value": "8553",
+              "selected": false
+            },
+            {
+              "text": "CACAPAVA DO SUL",
+              "value": "8555",
+              "selected": false
+            },
+            {
+              "text": "CACEQUI",
+              "value": "8557",
+              "selected": false
+            },
+            {
+              "text": "CACHOEIRA DO SUL",
+              "value": "8559",
+              "selected": false
+            },
+            {
+              "text": "CACHOEIRINHA",
+              "value": "8561",
+              "selected": false
+            },
+            {
+              "text": "CACIQUE DOBLE",
+              "value": "8563",
+              "selected": false
+            },
+            {
+              "text": "CAIBATE",
+              "value": "8565",
+              "selected": false
+            },
+            {
+              "text": "CAICARA",
+              "value": "8567",
+              "selected": false
+            },
+            {
+              "text": "CAMAQUA",
+              "value": "8569",
+              "selected": false
+            },
+            {
+              "text": "CAMARGO",
+              "value": "8447",
+              "selected": false
+            },
+            {
+              "text": "CAMBARA DO SUL",
+              "value": "8571",
+              "selected": false
+            },
+            {
+              "text": "CAMPESTRE DA SERRA",
+              "value": "6013",
+              "selected": false
+            },
+            {
+              "text": "CAMPINA DAS MISSOES",
+              "value": "8573",
+              "selected": false
+            },
+            {
+              "text": "CAMPINAS DO SUL",
+              "value": "8575",
+              "selected": false
+            },
+            {
+              "text": "CAMPO BOM",
+              "value": "8577",
+              "selected": false
+            },
+            {
+              "text": "CAMPO NOVO",
+              "value": "8579",
+              "selected": false
+            },
+            {
+              "text": "CAMPOS BORGES",
+              "value": "8445",
+              "selected": false
+            },
+            {
+              "text": "CANDELARIA",
+              "value": "8581",
+              "selected": false
+            },
+            {
+              "text": "CANDIDO GODOI",
+              "value": "8583",
+              "selected": false
+            },
+            {
+              "text": "CANDIOTA",
+              "value": "6083",
+              "selected": false
+            },
+            {
+              "text": "CANELA",
+              "value": "8585",
+              "selected": false
+            },
+            {
+              "text": "CANGUCU",
+              "value": "8587",
+              "selected": false
+            },
+            {
+              "text": "CANOAS",
+              "value": "8589",
+              "selected": false
+            },
+            {
+              "text": "CANUDOS DO VALE",
+              "value": "1130",
+              "selected": false
+            },
+            {
+              "text": "CAPAO BONITO DO SUL",
+              "value": "1132",
+              "selected": false
+            },
+            {
+              "text": "CAPAO DA CANOA",
+              "value": "8915",
+              "selected": false
+            },
+            {
+              "text": "CAPAO DO CIPO",
+              "value": "1134",
+              "selected": false
+            },
+            {
+              "text": "CAPAO DO LEAO",
+              "value": "8973",
+              "selected": false
+            },
+            {
+              "text": "CAPELA DE SANTANA",
+              "value": "8443",
+              "selected": false
+            },
+            {
+              "text": "CAPITAO",
+              "value": "6025",
+              "selected": false
+            },
+            {
+              "text": "CAPIVARI DO SUL",
+              "value": "0962",
+              "selected": false
+            },
+            {
+              "text": "CARAA",
+              "value": "0964",
+              "selected": false
+            },
+            {
+              "text": "CARAZINHO",
+              "value": "8591",
+              "selected": false
+            },
+            {
+              "text": "CARLOS BARBOSA",
+              "value": "8593",
+              "selected": false
+            },
+            {
+              "text": "CARLOS GOMES",
+              "value": "5961",
+              "selected": false
+            },
+            {
+              "text": "CASCA",
+              "value": "8595",
+              "selected": false
+            },
+            {
+              "text": "CASEIROS",
+              "value": "8441",
+              "selected": false
+            },
+            {
+              "text": "CATUIPE",
+              "value": "8597",
+              "selected": false
+            },
+            {
+              "text": "CAXIAS DO SUL",
+              "value": "8599",
+              "selected": false
+            },
+            {
+              "text": "CENTENARIO",
+              "value": "5963",
+              "selected": false
+            },
+            {
+              "text": "CERRITO",
+              "value": "0966",
+              "selected": false
+            },
+            {
+              "text": "CERRO BRANCO",
+              "value": "8439",
+              "selected": false
+            },
+            {
+              "text": "CERRO GRANDE",
+              "value": "8437",
+              "selected": false
+            },
+            {
+              "text": "CERRO GRANDE DO SUL",
+              "value": "8435",
+              "selected": false
+            },
+            {
+              "text": "CERRO LARGO",
+              "value": "8601",
+              "selected": false
+            },
+            {
+              "text": "CHAPADA",
+              "value": "8603",
+              "selected": false
+            },
+            {
+              "text": "CHARQUEADAS",
+              "value": "8693",
+              "selected": false
+            },
+            {
+              "text": "CHARRUA",
+              "value": "5965",
+              "selected": false
+            },
+            {
+              "text": "CHIAPETTA",
+              "value": "8605",
+              "selected": false
+            },
+            {
+              "text": "CHUI",
+              "value": "0968",
+              "selected": false
+            },
+            {
+              "text": "CHUVISCA",
+              "value": "0970",
+              "selected": false
+            },
+            {
+              "text": "CIDREIRA",
+              "value": "8433",
+              "selected": false
+            },
+            {
+              "text": "CIRIACO",
+              "value": "8607",
+              "selected": false
+            },
+            {
+              "text": "COLINAS",
+              "value": "6029",
+              "selected": false
+            },
+            {
+              "text": "COLORADO",
+              "value": "8609",
+              "selected": false
+            },
+            {
+              "text": "CONDOR",
+              "value": "8611",
+              "selected": false
+            },
+            {
+              "text": "CONSTANTINA",
+              "value": "8613",
+              "selected": false
+            },
+            {
+              "text": "COQUEIRO BAIXO",
+              "value": "1136",
+              "selected": false
+            },
+            {
+              "text": "COQUEIROS DO SUL",
+              "value": "5945",
+              "selected": false
+            },
+            {
+              "text": "CORONEL BARROS",
+              "value": "6055",
+              "selected": false
+            },
+            {
+              "text": "CORONEL BICACO",
+              "value": "8615",
+              "selected": false
+            },
+            {
+              "text": "CORONEL PILAR",
+              "value": "1138",
+              "selected": false
+            },
+            {
+              "text": "COTIPORA",
+              "value": "8977",
+              "selected": false
+            },
+            {
+              "text": "COXILHA",
+              "value": "5797",
+              "selected": false
+            },
+            {
+              "text": "CRISSIUMAL",
+              "value": "8617",
+              "selected": false
+            },
+            {
+              "text": "CRISTAL",
+              "value": "8431",
+              "selected": false
+            },
+            {
+              "text": "CRISTAL DO SUL",
+              "value": "0972",
+              "selected": false
+            },
+            {
+              "text": "CRUZ ALTA",
+              "value": "8619",
+              "selected": false
+            },
+            {
+              "text": "CRUZALTENSE",
+              "value": "1140",
+              "selected": false
+            },
+            {
+              "text": "CRUZEIRO DO SUL",
+              "value": "8621",
+              "selected": false
+            },
+            {
+              "text": "DAVID CANABARRO",
+              "value": "8623",
+              "selected": false
+            },
+            {
+              "text": "DERRUBADAS",
+              "value": "6073",
+              "selected": false
+            },
+            {
+              "text": "DEZESSEIS DE NOVEMBRO",
+              "value": "8429",
+              "selected": false
+            },
+            {
+              "text": "DILERMANDO DE AGUIAR",
+              "value": "0974",
+              "selected": false
+            },
+            {
+              "text": "DOIS IRMAOS",
+              "value": "8625",
+              "selected": false
+            },
+            {
+              "text": "DOIS IRMAOS DAS MISSOES",
+              "value": "5971",
+              "selected": false
+            },
+            {
+              "text": "DOIS LAJEADOS",
+              "value": "8427",
+              "selected": false
+            },
+            {
+              "text": "DOM FELICIANO",
+              "value": "8627",
+              "selected": false
+            },
+            {
+              "text": "DOM PEDRITO",
+              "value": "8629",
+              "selected": false
+            },
+            {
+              "text": "DOM PEDRO DE ALCANTARA",
+              "value": "0976",
+              "selected": false
+            },
+            {
+              "text": "DONA FRANCISCA",
+              "value": "8631",
+              "selected": false
+            },
+            {
+              "text": "DOUTOR MAURICIO CARDOSO",
+              "value": "8425",
+              "selected": false
+            },
+            {
+              "text": "DOUTOR RICARDO",
+              "value": "0978",
+              "selected": false
+            },
+            {
+              "text": "ELDORADO DO SUL",
+              "value": "8423",
+              "selected": false
+            },
+            {
+              "text": "ENCANTADO",
+              "value": "8633",
+              "selected": false
+            },
+            {
+              "text": "ENCRUZILHADA DO SUL",
+              "value": "8635",
+              "selected": false
+            },
+            {
+              "text": "ENGENHO VELHO",
+              "value": "5947",
+              "selected": false
+            },
+            {
+              "text": "ENTRE IJUIS",
+              "value": "8419",
+              "selected": false
+            },
+            {
+              "text": "ENTRE RIOS DO SUL",
+              "value": "8421",
+              "selected": false
+            },
+            {
+              "text": "EREBANGO",
+              "value": "8417",
+              "selected": false
+            },
+            {
+              "text": "ERECHIM",
+              "value": "8637",
+              "selected": false
+            },
+            {
+              "text": "ERNESTINA",
+              "value": "8415",
+              "selected": false
+            },
+            {
+              "text": "ERVAL GRANDE",
+              "value": "8641",
+              "selected": false
+            },
+            {
+              "text": "ERVAL SECO",
+              "value": "8643",
+              "selected": false
+            },
+            {
+              "text": "ESMERALDA",
+              "value": "8645",
+              "selected": false
+            },
+            {
+              "text": "ESPERANCA DO SUL",
+              "value": "0980",
+              "selected": false
+            },
+            {
+              "text": "ESPUMOSO",
+              "value": "8647",
+              "selected": false
+            },
+            {
+              "text": "ESTACAO",
+              "value": "7301",
+              "selected": false
+            },
+            {
+              "text": "ESTANCIA VELHA",
+              "value": "8649",
+              "selected": false
+            },
+            {
+              "text": "ESTEIO",
+              "value": "8651",
+              "selected": false
+            },
+            {
+              "text": "ESTRELA",
+              "value": "8653",
+              "selected": false
+            },
+            {
+              "text": "ESTRELA VELHA",
+              "value": "0982",
+              "selected": false
+            },
+            {
+              "text": "EUGENIO DE CASTRO",
+              "value": "8413",
+              "selected": false
+            },
+            {
+              "text": "FAGUNDES VARELA",
+              "value": "8411",
+              "selected": false
+            },
+            {
+              "text": "FARROUPILHA",
+              "value": "8655",
+              "selected": false
+            },
+            {
+              "text": "FAXINAL DO SOTURNO",
+              "value": "8657",
+              "selected": false
+            },
+            {
+              "text": "FAXINALZINHO",
+              "value": "8409",
+              "selected": false
+            },
+            {
+              "text": "FAZENDA VILANOVA",
+              "value": "0984",
+              "selected": false
+            },
+            {
+              "text": "FELIZ",
+              "value": "8659",
+              "selected": false
+            },
+            {
+              "text": "FLORES DA CUNHA",
+              "value": "8661",
+              "selected": false
+            },
+            {
+              "text": "FLORIANO PEIXOTO",
+              "value": "0986",
+              "selected": false
+            },
+            {
+              "text": "FONTOURA XAVIER",
+              "value": "8663",
+              "selected": false
+            },
+            {
+              "text": "FORMIGUEIRO",
+              "value": "8665",
+              "selected": false
+            },
+            {
+              "text": "FORQUETINHA",
+              "value": "1142",
+              "selected": false
+            },
+            {
+              "text": "FORTALEZA DOS VALOS",
+              "value": "9827",
+              "selected": false
+            },
+            {
+              "text": "FREDERICO WESTPHALEN",
+              "value": "8667",
+              "selected": false
+            },
+            {
+              "text": "GARIBALDI",
+              "value": "8669",
+              "selected": false
+            },
+            {
+              "text": "GARRUCHOS",
+              "value": "6081",
+              "selected": false
+            },
+            {
+              "text": "GAURAMA",
+              "value": "8671",
+              "selected": false
+            },
+            {
+              "text": "GENERAL CAMARA",
+              "value": "8673",
+              "selected": false
+            },
+            {
+              "text": "GENTIL",
+              "value": "5799",
+              "selected": false
+            },
+            {
+              "text": "GETULIO VARGAS",
+              "value": "8677",
+              "selected": false
+            },
+            {
+              "text": "GIRUA",
+              "value": "8679",
+              "selected": false
+            },
+            {
+              "text": "GLORINHA",
+              "value": "8407",
+              "selected": false
+            },
+            {
+              "text": "GRAMADO",
+              "value": "8681",
+              "selected": false
+            },
+            {
+              "text": "GRAMADO DOS LOUREIROS",
+              "value": "5949",
+              "selected": false
+            },
+            {
+              "text": "GRAMADO XAVIER",
+              "value": "5763",
+              "selected": false
+            },
+            {
+              "text": "GRAVATAI",
+              "value": "8683",
+              "selected": false
+            },
+            {
+              "text": "GUABIJU",
+              "value": "8405",
+              "selected": false
+            },
+            {
+              "text": "GUAIBA",
+              "value": "8685",
+              "selected": false
+            },
+            {
+              "text": "GUAPORE",
+              "value": "8687",
+              "selected": false
+            },
+            {
+              "text": "GUARANI DAS MISSOES",
+              "value": "8689",
+              "selected": false
+            },
+            {
+              "text": "HARMONIA",
+              "value": "8403",
+              "selected": false
+            },
+            {
+              "text": "HERVAL",
+              "value": "8639",
+              "selected": false
+            },
+            {
+              "text": "HERVEIRAS",
+              "value": "0988",
+              "selected": false
+            },
+            {
+              "text": "HORIZONTINA",
+              "value": "8691",
+              "selected": false
+            },
+            {
+              "text": "HULHA NEGRA",
+              "value": "6085",
+              "selected": false
+            },
+            {
+              "text": "HUMAITA",
+              "value": "8695",
+              "selected": false
+            },
+            {
+              "text": "IBARAMA",
+              "value": "8401",
+              "selected": false
+            },
+            {
+              "text": "IBIACA",
+              "value": "8697",
+              "selected": false
+            },
+            {
+              "text": "IBIRAIARAS",
+              "value": "8699",
+              "selected": false
+            },
+            {
+              "text": "IBIRAPUITA",
+              "value": "7299",
+              "selected": false
+            },
+            {
+              "text": "IBIRUBA",
+              "value": "8701",
+              "selected": false
+            },
+            {
+              "text": "IGREJINHA",
+              "value": "8703",
+              "selected": false
+            },
+            {
+              "text": "IJUI",
+              "value": "8705",
+              "selected": false
+            },
+            {
+              "text": "ILOPOLIS",
+              "value": "8707",
+              "selected": false
+            },
+            {
+              "text": "IMBE",
+              "value": "7297",
+              "selected": false
+            },
+            {
+              "text": "IMIGRANTE",
+              "value": "7295",
+              "selected": false
+            },
+            {
+              "text": "INDEPENDENCIA",
+              "value": "8709",
+              "selected": false
+            },
+            {
+              "text": "INHACORA",
+              "value": "6051",
+              "selected": false
+            },
+            {
+              "text": "IPE",
+              "value": "8399",
+              "selected": false
+            },
+            {
+              "text": "IPIRANGA DO SUL",
+              "value": "7399",
+              "selected": false
+            },
+            {
+              "text": "IRAI",
+              "value": "8711",
+              "selected": false
+            },
+            {
+              "text": "ITAARA",
+              "value": "0990",
+              "selected": false
+            },
+            {
+              "text": "ITACURUBI",
+              "value": "7397",
+              "selected": false
+            },
+            {
+              "text": "ITAPUCA",
+              "value": "6027",
+              "selected": false
+            },
+            {
+              "text": "ITAQUI",
+              "value": "8713",
+              "selected": false
+            },
+            {
+              "text": "ITATI",
+              "value": "1144",
+              "selected": false
+            },
+            {
+              "text": "ITATIBA DO SUL",
+              "value": "8715",
+              "selected": false
+            },
+            {
+              "text": "IVORA",
+              "value": "7395",
+              "selected": false
+            },
+            {
+              "text": "IVOTI",
+              "value": "8717",
+              "selected": false
+            },
+            {
+              "text": "JABOTICABA",
+              "value": "7393",
+              "selected": false
+            },
+            {
+              "text": "JACUIZINHO",
+              "value": "1146",
+              "selected": false
+            },
+            {
+              "text": "JACUTINGA",
+              "value": "8719",
+              "selected": false
+            },
+            {
+              "text": "JAGUARAO",
+              "value": "8721",
+              "selected": false
+            },
+            {
+              "text": "JAGUARI",
+              "value": "8723",
+              "selected": false
+            },
+            {
+              "text": "JAQUIRANA",
+              "value": "7391",
+              "selected": false
+            },
+            {
+              "text": "JARI",
+              "value": "0992",
+              "selected": false
+            },
+            {
+              "text": "JOIA",
+              "value": "9829",
+              "selected": false
+            },
+            {
+              "text": "JULIO DE CASTILHOS",
+              "value": "8725",
+              "selected": false
+            },
+            {
+              "text": "LAGOA BONITA DO SUL",
+              "value": "1148",
+              "selected": false
+            },
+            {
+              "text": "LAGOA DOS TRES CANTOS",
+              "value": "5951",
+              "selected": false
+            },
+            {
+              "text": "LAGOA VERMELHA",
+              "value": "8727",
+              "selected": false
+            },
+            {
+              "text": "LAGOAO",
+              "value": "7389",
+              "selected": false
+            },
+            {
+              "text": "LAJEADO",
+              "value": "8729",
+              "selected": false
+            },
+            {
+              "text": "LAJEADO DO BUGRE",
+              "value": "5983",
+              "selected": false
+            },
+            {
+              "text": "LAVRAS DO SUL",
+              "value": "8731",
+              "selected": false
+            },
+            {
+              "text": "LIBERATO SALZANO",
+              "value": "8733",
+              "selected": false
+            },
+            {
+              "text": "LINDOLFO COLLOR",
+              "value": "6017",
+              "selected": false
+            },
+            {
+              "text": "LINHA NOVA",
+              "value": "6047",
+              "selected": false
+            },
+            {
+              "text": "MACAMBARA",
+              "value": "0994",
+              "selected": false
+            },
+            {
+              "text": "MACHADINHO",
+              "value": "8735",
+              "selected": false
+            },
+            {
+              "text": "MAMPITUBA",
+              "value": "0996",
+              "selected": false
+            },
+            {
+              "text": "MANOEL VIANA",
+              "value": "6079",
+              "selected": false
+            },
+            {
+              "text": "MAQUINE",
+              "value": "5783",
+              "selected": false
+            },
+            {
+              "text": "MARATA",
+              "value": "6039",
+              "selected": false
+            },
+            {
+              "text": "MARAU",
+              "value": "8737",
+              "selected": false
+            },
+            {
+              "text": "MARCELINO RAMOS",
+              "value": "8739",
+              "selected": false
+            },
+            {
+              "text": "MARIANA PIMENTEL",
+              "value": "5759",
+              "selected": false
+            },
+            {
+              "text": "MARIANO MORO",
+              "value": "8741",
+              "selected": false
+            },
+            {
+              "text": "MARQUES DE SOUZA",
+              "value": "0998",
+              "selected": false
+            },
+            {
+              "text": "MATA",
+              "value": "8743",
+              "selected": false
+            },
+            {
+              "text": "MATO CASTELHANO",
+              "value": "5931",
+              "selected": false
+            },
+            {
+              "text": "MATO LEITAO",
+              "value": "6031",
+              "selected": false
+            },
+            {
+              "text": "MATO QUEIMADO",
+              "value": "1150",
+              "selected": false
+            },
+            {
+              "text": "MAXIMILIANO DE ALMEIDA",
+              "value": "8745",
+              "selected": false
+            },
+            {
+              "text": "MINAS DO LEAO",
+              "value": "5773",
+              "selected": false
+            },
+            {
+              "text": "MIRAGUAI",
+              "value": "8747",
+              "selected": false
+            },
+            {
+              "text": "MONTAURI",
+              "value": "7387",
+              "selected": false
+            },
+            {
+              "text": "MONTE ALEGRE DOS CAMPOS",
+              "value": "1000",
+              "selected": false
+            },
+            {
+              "text": "MONTE BELO DO SUL",
+              "value": "5993",
+              "selected": false
+            },
+            {
+              "text": "MONTENEGRO",
+              "value": "8749",
+              "selected": false
+            },
+            {
+              "text": "MORMACO",
+              "value": "5933",
+              "selected": false
+            },
+            {
+              "text": "MORRINHOS DO SUL",
+              "value": "5775",
+              "selected": false
+            },
+            {
+              "text": "MORRO REDONDO",
+              "value": "7385",
+              "selected": false
+            },
+            {
+              "text": "MORRO REUTER",
+              "value": "6019",
+              "selected": false
+            },
+            {
+              "text": "MOSTARDAS",
+              "value": "8751",
+              "selected": false
+            },
+            {
+              "text": "MUCUM",
+              "value": "8753",
+              "selected": false
+            },
+            {
+              "text": "MUITOS CAPOES",
+              "value": "1002",
+              "selected": false
+            },
+            {
+              "text": "MULITERNO",
+              "value": "5935",
+              "selected": false
+            },
+            {
+              "text": "NAO-ME-TOQUE",
+              "value": "8755",
+              "selected": false
+            },
+            {
+              "text": "NICOLAU VERGUEIRO",
+              "value": "5937",
+              "selected": false
+            },
+            {
+              "text": "NONOAI",
+              "value": "8757",
+              "selected": false
+            },
+            {
+              "text": "NOVA ALVORADA",
+              "value": "7383",
+              "selected": false
+            },
+            {
+              "text": "NOVA ARACA",
+              "value": "8759",
+              "selected": false
+            },
+            {
+              "text": "NOVA BASSANO",
+              "value": "8761",
+              "selected": false
+            },
+            {
+              "text": "NOVA BOA VISTA",
+              "value": "5953",
+              "selected": false
+            },
+            {
+              "text": "NOVA BRESCIA",
+              "value": "8763",
+              "selected": false
+            },
+            {
+              "text": "NOVA CANDELARIA",
+              "value": "1004",
+              "selected": false
+            },
+            {
+              "text": "NOVA ESPERANCA DO SUL",
+              "value": "7381",
+              "selected": false
+            },
+            {
+              "text": "NOVA HARTZ",
+              "value": "7379",
+              "selected": false
+            },
+            {
+              "text": "NOVA PADUA",
+              "value": "5991",
+              "selected": false
+            },
+            {
+              "text": "NOVA PALMA",
+              "value": "8765",
+              "selected": false
+            },
+            {
+              "text": "NOVA PETROPOLIS",
+              "value": "8767",
+              "selected": false
+            },
+            {
+              "text": "NOVA PRATA",
+              "value": "8769",
+              "selected": false
+            },
+            {
+              "text": "NOVA RAMADA",
+              "value": "1006",
+              "selected": false
+            },
+            {
+              "text": "NOVA ROMA DO SUL",
+              "value": "7377",
+              "selected": false
+            },
+            {
+              "text": "NOVA SANTA RITA",
+              "value": "5757",
+              "selected": false
+            },
+            {
+              "text": "NOVO BARREIRO",
+              "value": "5985",
+              "selected": false
+            },
+            {
+              "text": "NOVO CABRAIS",
+              "value": "1008",
+              "selected": false
+            },
+            {
+              "text": "NOVO HAMBURGO",
+              "value": "8771",
+              "selected": false
+            },
+            {
+              "text": "NOVO MACHADO",
+              "value": "6057",
+              "selected": false
+            },
+            {
+              "text": "NOVO TIRADENTES",
+              "value": "5973",
+              "selected": false
+            },
+            {
+              "text": "NOVO XINGU",
+              "value": "1152",
+              "selected": false
+            },
+            {
+              "text": "OSORIO",
+              "value": "8773",
+              "selected": false
+            },
+            {
+              "text": "PAIM FILHO",
+              "value": "8775",
+              "selected": false
+            },
+            {
+              "text": "PALMARES DO SUL",
+              "value": "8967",
+              "selected": false
+            },
+            {
+              "text": "PALMEIRA DAS MISSOES",
+              "value": "8777",
+              "selected": false
+            },
+            {
+              "text": "PALMITINHO",
+              "value": "8779",
+              "selected": false
+            },
+            {
+              "text": "PANAMBI",
+              "value": "8781",
+              "selected": false
+            },
+            {
+              "text": "PANTANO GRANDE",
+              "value": "7375",
+              "selected": false
+            },
+            {
+              "text": "PARAI",
+              "value": "8783",
+              "selected": false
+            },
+            {
+              "text": "PARAISO DO SUL",
+              "value": "7373",
+              "selected": false
+            },
+            {
+              "text": "PARECI NOVO",
+              "value": "6041",
+              "selected": false
+            },
+            {
+              "text": "PAROBE",
+              "value": "9825",
+              "selected": false
+            },
+            {
+              "text": "PASSA SETE",
+              "value": "1010",
+              "selected": false
+            },
+            {
+              "text": "PASSO DO SOBRADO",
+              "value": "5765",
+              "selected": false
+            },
+            {
+              "text": "PASSO FUNDO",
+              "value": "8785",
+              "selected": false
+            },
+            {
+              "text": "PAULO BENTO",
+              "value": "1154",
+              "selected": false
+            },
+            {
+              "text": "PAVERAMA",
+              "value": "7371",
+              "selected": false
+            },
+            {
+              "text": "PEDRAS ALTAS",
+              "value": "1156",
+              "selected": false
+            },
+            {
+              "text": "PEDRO OSORIO",
+              "value": "8787",
+              "selected": false
+            },
+            {
+              "text": "PEJUCARA",
+              "value": "8789",
+              "selected": false
+            },
+            {
+              "text": "PELOTAS",
+              "value": "8791",
+              "selected": false
+            },
+            {
+              "text": "PICADA CAFE",
+              "value": "6021",
+              "selected": false
+            },
+            {
+              "text": "PINHAL",
+              "value": "7369",
+              "selected": false
+            },
+            {
+              "text": "PINHAL DA SERRA",
+              "value": "1158",
+              "selected": false
+            },
+            {
+              "text": "PINHAL GRANDE",
+              "value": "5787",
+              "selected": false
+            },
+            {
+              "text": "PINHEIRINHO DO VALE",
+              "value": "5975",
+              "selected": false
+            },
+            {
+              "text": "PINHEIRO MACHADO",
+              "value": "8793",
+              "selected": false
+            },
+            {
+              "text": "PINTO BANDEIRA",
+              "value": "1160",
+              "selected": false
+            },
+            {
+              "text": "PIRAPO",
+              "value": "7367",
+              "selected": false
+            },
+            {
+              "text": "PIRATINI",
+              "value": "8795",
+              "selected": false
+            },
+            {
+              "text": "PLANALTO",
+              "value": "8797",
+              "selected": false
+            },
+            {
+              "text": "POCO DAS ANTAS",
+              "value": "7365",
+              "selected": false
+            },
+            {
+              "text": "PONTAO",
+              "value": "5939",
+              "selected": false
+            },
+            {
+              "text": "PONTE PRETA",
+              "value": "5967",
+              "selected": false
+            },
+            {
+              "text": "PORTAO",
+              "value": "8799",
+              "selected": false
+            },
+            {
+              "text": "PORTO ALEGRE",
+              "value": "8801",
+              "selected": false
+            },
+            {
+              "text": "PORTO LUCENA",
+              "value": "8803",
+              "selected": false
+            },
+            {
+              "text": "PORTO MAUA",
+              "value": "6065",
+              "selected": false
+            },
+            {
+              "text": "PORTO VERA CRUZ",
+              "value": "6067",
+              "selected": false
+            },
+            {
+              "text": "PORTO XAVIER",
+              "value": "8805",
+              "selected": false
+            },
+            {
+              "text": "POUSO NOVO",
+              "value": "7363",
+              "selected": false
+            },
+            {
+              "text": "PRESIDENTE LUCENA",
+              "value": "6023",
+              "selected": false
+            },
+            {
+              "text": "PROGRESSO",
+              "value": "7361",
+              "selected": false
+            },
+            {
+              "text": "PROTASIO ALVES",
+              "value": "7359",
+              "selected": false
+            },
+            {
+              "text": "PUTINGA",
+              "value": "8807",
+              "selected": false
+            },
+            {
+              "text": "QUARAI",
+              "value": "8809",
+              "selected": false
+            },
+            {
+              "text": "QUATRO IRMAOS",
+              "value": "1162",
+              "selected": false
+            },
+            {
+              "text": "QUEVEDOS",
+              "value": "5789",
+              "selected": false
+            },
+            {
+              "text": "QUINZE DE NOVEMBRO",
+              "value": "7357",
+              "selected": false
+            },
+            {
+              "text": "REDENTORA",
+              "value": "8811",
+              "selected": false
+            },
+            {
+              "text": "RELVADO",
+              "value": "7355",
+              "selected": false
+            },
+            {
+              "text": "RESTINGA SECA",
+              "value": "8813",
+              "selected": false
+            },
+            {
+              "text": "RIO DOS INDIOS",
+              "value": "5955",
+              "selected": false
+            },
+            {
+              "text": "RIO GRANDE",
+              "value": "8815",
+              "selected": false
+            },
+            {
+              "text": "RIO PARDO",
+              "value": "8817",
+              "selected": false
+            },
+            {
+              "text": "RIOZINHO",
+              "value": "7353",
+              "selected": false
+            },
+            {
+              "text": "ROCA SALES",
+              "value": "8819",
+              "selected": false
+            },
+            {
+              "text": "RODEIO BONITO",
+              "value": "8821",
+              "selected": false
+            },
+            {
+              "text": "ROLADOR",
+              "value": "1164",
+              "selected": false
+            },
+            {
+              "text": "ROLANTE",
+              "value": "8823",
+              "selected": false
+            },
+            {
+              "text": "RONDA ALTA",
+              "value": "8825",
+              "selected": false
+            },
+            {
+              "text": "RONDINHA",
+              "value": "8827",
+              "selected": false
+            },
+            {
+              "text": "ROQUE GONZALES",
+              "value": "8829",
+              "selected": false
+            },
+            {
+              "text": "ROSARIO DO SUL",
+              "value": "8831",
+              "selected": false
+            },
+            {
+              "text": "SAGRADA FAMILIA",
+              "value": "5987",
+              "selected": false
+            },
+            {
+              "text": "SALDANHA MARINHO",
+              "value": "7339",
+              "selected": false
+            },
+            {
+              "text": "SALTO DO JACUI",
+              "value": "8975",
+              "selected": false
+            },
+            {
+              "text": "SALVADOR DAS MISSOES",
+              "value": "6061",
+              "selected": false
+            },
+            {
+              "text": "SALVADOR DO SUL",
+              "value": "8833",
+              "selected": false
+            },
+            {
+              "text": "SANANDUVA",
+              "value": "8835",
+              "selected": false
+            },
+            {
+              "text": "SANTA BARBARA DO SUL",
+              "value": "8837",
+              "selected": false
+            },
+            {
+              "text": "SANTA CECILIA DO SUL",
+              "value": "1166",
+              "selected": false
+            },
+            {
+              "text": "SANTA CLARA DO SUL",
+              "value": "6033",
+              "selected": false
+            },
+            {
+              "text": "SANTA CRUZ DO SUL",
+              "value": "8839",
+              "selected": false
+            },
+            {
+              "text": "SANTA MARGARIDA DO SUL",
+              "value": "1168",
+              "selected": false
+            },
+            {
+              "text": "SANTA MARIA",
+              "value": "8841",
+              "selected": false
+            },
+            {
+              "text": "SANTA MARIA DO HERVAL",
+              "value": "7337",
+              "selected": false
+            },
+            {
+              "text": "SANTA ROSA",
+              "value": "8847",
+              "selected": false
+            },
+            {
+              "text": "SANTA TEREZA",
+              "value": "5995",
+              "selected": false
+            },
+            {
+              "text": "SANTA VITORIA DO PALMAR",
+              "value": "8849",
+              "selected": false
+            },
+            {
+              "text": "SANTANA DA BOA VISTA",
+              "value": "8843",
+              "selected": false
+            },
+            {
+              "text": "SANTANA DO LIVRAMENTO",
+              "value": "8845",
+              "selected": false
+            },
+            {
+              "text": "SANTIAGO",
+              "value": "8851",
+              "selected": false
+            },
+            {
+              "text": "SANTO ANGELO",
+              "value": "8853",
+              "selected": false
+            },
+            {
+              "text": "SANTO ANTONIO DA PATRULHA",
+              "value": "8855",
+              "selected": false
+            },
+            {
+              "text": "SANTO ANTONIO DAS MISSOES",
+              "value": "8857",
+              "selected": false
+            },
+            {
+              "text": "SANTO ANTONIO DO PALMA",
+              "value": "5941",
+              "selected": false
+            },
+            {
+              "text": "SANTO ANTONIO DO PLANALTO",
+              "value": "5957",
+              "selected": false
+            },
+            {
+              "text": "SANTO AUGUSTO",
+              "value": "8859",
+              "selected": false
+            },
+            {
+              "text": "SANTO CRISTO",
+              "value": "8861",
+              "selected": false
+            },
+            {
+              "text": "SANTO EXPEDITO DO SUL",
+              "value": "5977",
+              "selected": false
+            },
+            {
+              "text": "SAO DOMINGOS DO SUL",
+              "value": "7351",
+              "selected": false
+            },
+            {
+              "text": "SAO FRANCISCO DE ASSIS",
+              "value": "8865",
+              "selected": false
+            },
+            {
+              "text": "SAO FRANCISCO DE PAULA",
+              "value": "8867",
+              "selected": false
+            },
+            {
+              "text": "SAO GABRIEL",
+              "value": "8869",
+              "selected": false
+            },
+            {
+              "text": "SAO JERONIMO",
+              "value": "8871",
+              "selected": false
+            },
+            {
+              "text": "SAO JOAO DA URTIGA",
+              "value": "7349",
+              "selected": false
+            },
+            {
+              "text": "SAO JOAO DO POLESINE",
+              "value": "5791",
+              "selected": false
+            },
+            {
+              "text": "SAO JORGE",
+              "value": "7347",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DAS MISSOES",
+              "value": "5989",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DO HERVAL",
+              "value": "7345",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DO HORTENCIO",
+              "value": "7343",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DO INHACORA",
+              "value": "6059",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DO NORTE",
+              "value": "8873",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DO OURO",
+              "value": "8875",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DO SUL",
+              "value": "1170",
+              "selected": false
+            },
+            {
+              "text": "SAO JOSE DOS AUSENTES",
+              "value": "6015",
+              "selected": false
+            },
+            {
+              "text": "SAO LEOPOLDO",
+              "value": "8877",
+              "selected": false
+            },
+            {
+              "text": "SAO LOURENCO DO SUL",
+              "value": "8879",
+              "selected": false
+            },
+            {
+              "text": "SAO LUIZ GONZAGA",
+              "value": "8881",
+              "selected": false
+            },
+            {
+              "text": "SAO MARCOS",
+              "value": "8883",
+              "selected": false
+            },
+            {
+              "text": "SAO MARTINHO",
+              "value": "8885",
+              "selected": false
+            },
+            {
+              "text": "SAO MARTINHO DA SERRA",
+              "value": "5793",
+              "selected": false
+            },
+            {
+              "text": "SAO MIGUEL DAS MISSOES",
+              "value": "7341",
+              "selected": false
+            },
+            {
+              "text": "SAO NICOLAU",
+              "value": "8887",
+              "selected": false
+            },
+            {
+              "text": "SAO PAULO DAS MISSOES",
+              "value": "8889",
+              "selected": false
+            },
+            {
+              "text": "SAO PEDRO DA SERRA",
+              "value": "6043",
+              "selected": false
+            },
+            {
+              "text": "SAO PEDRO DAS MISSOES",
+              "value": "1172",
+              "selected": false
+            },
+            {
+              "text": "SAO PEDRO DO BUTIA",
+              "value": "6063",
+              "selected": false
+            },
+            {
+              "text": "SAO PEDRO DO SUL",
+              "value": "8891",
+              "selected": false
+            },
+            {
+              "text": "SAO SEBASTIAO DO CAI",
+              "value": "8893",
+              "selected": false
+            },
+            {
+              "text": "SAO SEPE",
+              "value": "8895",
+              "selected": false
+            },
+            {
+              "text": "SAO VALENTIM",
+              "value": "8897",
+              "selected": false
+            },
+            {
+              "text": "SAO VALENTIM DO SUL",
+              "value": "5997",
+              "selected": false
+            },
+            {
+              "text": "SAO VALERIO DO SUL",
+              "value": "6075",
+              "selected": false
+            },
+            {
+              "text": "SAO VENDELINO",
+              "value": "7293",
+              "selected": false
+            },
+            {
+              "text": "SAO VICENTE DO SUL",
+              "value": "8675",
+              "selected": false
+            },
+            {
+              "text": "SAPIRANGA",
+              "value": "8899",
+              "selected": false
+            },
+            {
+              "text": "SAPUCAIA DO SUL",
+              "value": "8901",
+              "selected": false
+            },
+            {
+              "text": "SARANDI",
+              "value": "8903",
+              "selected": false
+            },
+            {
+              "text": "SEBERI",
+              "value": "8905",
+              "selected": false
+            },
+            {
+              "text": "SEDE NOVA",
+              "value": "7335",
+              "selected": false
+            },
+            {
+              "text": "SEGREDO",
+              "value": "7317",
+              "selected": false
+            },
+            {
+              "text": "SELBACH",
+              "value": "8907",
+              "selected": false
+            },
+            {
+              "text": "SENADOR SALGADO FILHO",
+              "value": "1012",
+              "selected": false
+            },
+            {
+              "text": "SENTINELA DO SUL",
+              "value": "5781",
+              "selected": false
+            },
+            {
+              "text": "SERAFINA CORREA",
+              "value": "8909",
+              "selected": false
+            },
+            {
+              "text": "SERIO",
+              "value": "6035",
+              "selected": false
+            },
+            {
+              "text": "SERTAO",
+              "value": "8911",
+              "selected": false
+            },
+            {
+              "text": "SERTAO SANTANA",
+              "value": "5761",
+              "selected": false
+            },
+            {
+              "text": "SETE DE SETEMBRO",
+              "value": "1014",
+              "selected": false
+            },
+            {
+              "text": "SEVERIANO DE ALMEIDA",
+              "value": "8913",
+              "selected": false
+            },
+            {
+              "text": "SILVEIRA MARTINS",
+              "value": "7315",
+              "selected": false
+            },
+            {
+              "text": "SINIMBU",
+              "value": "5767",
+              "selected": false
+            },
+            {
+              "text": "SOBRADINHO",
+              "value": "8917",
+              "selected": false
+            },
+            {
+              "text": "SOLEDADE",
+              "value": "8919",
+              "selected": false
+            },
+            {
+              "text": "TABAI",
+              "value": "1016",
+              "selected": false
+            },
+            {
+              "text": "TAPEJARA",
+              "value": "8921",
+              "selected": false
+            },
+            {
+              "text": "TAPERA",
+              "value": "8923",
+              "selected": false
+            },
+            {
+              "text": "TAPES",
+              "value": "8925",
+              "selected": false
+            },
+            {
+              "text": "TAQUARA",
+              "value": "8927",
+              "selected": false
+            },
+            {
+              "text": "TAQUARI",
+              "value": "8929",
+              "selected": false
+            },
+            {
+              "text": "TAQUARUCU DO SUL",
+              "value": "7313",
+              "selected": false
+            },
+            {
+              "text": "TAVARES",
+              "value": "8971",
+              "selected": false
+            },
+            {
+              "text": "TENENTE PORTELA",
+              "value": "8931",
+              "selected": false
+            },
+            {
+              "text": "TERRA DE AREIA",
+              "value": "7333",
+              "selected": false
+            },
+            {
+              "text": "TEUTONIA",
+              "value": "9821",
+              "selected": false
+            },
+            {
+              "text": "TIO HUGO",
+              "value": "1174",
+              "selected": false
+            },
+            {
+              "text": "TIRADENTES DO SUL",
+              "value": "6077",
+              "selected": false
+            },
+            {
+              "text": "TOROPI",
+              "value": "1018",
+              "selected": false
+            },
+            {
+              "text": "TORRES",
+              "value": "8933",
+              "selected": false
+            },
+            {
+              "text": "TRAMANDAI",
+              "value": "8935",
+              "selected": false
+            },
+            {
+              "text": "TRAVESSEIRO",
+              "value": "6037",
+              "selected": false
+            },
+            {
+              "text": "TRES ARROIOS",
+              "value": "7331",
+              "selected": false
+            },
+            {
+              "text": "TRES CACHOEIRAS",
+              "value": "7329",
+              "selected": false
+            },
+            {
+              "text": "TRES COROAS",
+              "value": "8937",
+              "selected": false
+            },
+            {
+              "text": "TRES DE MAIO",
+              "value": "8939",
+              "selected": false
+            },
+            {
+              "text": "TRES FORQUILHAS",
+              "value": "5777",
+              "selected": false
+            },
+            {
+              "text": "TRES PALMEIRAS",
+              "value": "7327",
+              "selected": false
+            },
+            {
+              "text": "TRES PASSOS",
+              "value": "8941",
+              "selected": false
+            },
+            {
+              "text": "TRINDADE DO SUL",
+              "value": "7325",
+              "selected": false
+            },
+            {
+              "text": "TRIUNFO",
+              "value": "8943",
+              "selected": false
+            },
+            {
+              "text": "TUCUNDUVA",
+              "value": "8945",
+              "selected": false
+            },
+            {
+              "text": "TUNAS",
+              "value": "7323",
+              "selected": false
+            },
+            {
+              "text": "TUPANCI DO SUL",
+              "value": "5979",
+              "selected": false
+            },
+            {
+              "text": "TUPANCIRETA",
+              "value": "8947",
+              "selected": false
+            },
+            {
+              "text": "TUPANDI",
+              "value": "7321",
+              "selected": false
+            },
+            {
+              "text": "TUPARENDI",
+              "value": "8949",
+              "selected": false
+            },
+            {
+              "text": "TURUCU",
+              "value": "1020",
+              "selected": false
+            },
+            {
+              "text": "UBIRETAMA",
+              "value": "1022",
+              "selected": false
+            },
+            {
+              "text": "UNIAO DA SERRA",
+              "value": "5999",
+              "selected": false
+            },
+            {
+              "text": "UNISTALDA",
+              "value": "1024",
+              "selected": false
+            },
+            {
+              "text": "URUGUAIANA",
+              "value": "8951",
+              "selected": false
+            },
+            {
+              "text": "VACARIA",
+              "value": "8953",
+              "selected": false
+            },
+            {
+              "text": "VALE DO SOL",
+              "value": "5769",
+              "selected": false
+            },
+            {
+              "text": "VALE REAL",
+              "value": "6049",
+              "selected": false
+            },
+            {
+              "text": "VALE VERDE",
+              "value": "1026",
+              "selected": false
+            },
+            {
+              "text": "VANINI",
+              "value": "7319",
+              "selected": false
+            },
+            {
+              "text": "VENANCIO AIRES",
+              "value": "8955",
+              "selected": false
+            },
+            {
+              "text": "VERA CRUZ",
+              "value": "8957",
+              "selected": false
+            },
+            {
+              "text": "VERANOPOLIS",
+              "value": "8959",
+              "selected": false
+            },
+            {
+              "text": "VESPASIANO CORREA",
+              "value": "1028",
+              "selected": false
+            },
+            {
+              "text": "VIADUTOS",
+              "value": "8961",
+              "selected": false
+            },
+            {
+              "text": "VIAMAO",
+              "value": "8963",
+              "selected": false
+            },
+            {
+              "text": "VICENTE DUTRA",
+              "value": "8965",
+              "selected": false
+            },
+            {
+              "text": "VICTOR GRAEFF",
+              "value": "8969",
+              "selected": false
+            },
+            {
+              "text": "VILA FLORES",
+              "value": "7311",
+              "selected": false
+            },
+            {
+              "text": "VILA LANGARO",
+              "value": "1030",
+              "selected": false
+            },
+            {
+              "text": "VILA MARIA",
+              "value": "7309",
+              "selected": false
+            },
+            {
+              "text": "VILA NOVA DO SUL",
+              "value": "5795",
+              "selected": false
+            },
+            {
+              "text": "VISTA ALEGRE",
+              "value": "7307",
+              "selected": false
+            },
+            {
+              "text": "VISTA ALEGRE DO PRATA",
+              "value": "7305",
+              "selected": false
+            },
+            {
+              "text": "VISTA GAUCHA",
+              "value": "7303",
+              "selected": false
+            },
+            {
+              "text": "VITORIA DAS MISSOES",
+              "value": "6053",
+              "selected": false
+            },
+            {
+              "text": "WESTFALIA",
+              "value": "1176",
+              "selected": false
+            },
+            {
+              "text": "XANGRI-LA",
+              "value": "5785",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "id": "lbDestino",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": [
+            {
+              "text": "SAO BORJA",
+              "value": "8863",
+              "selected": false
+            }
+          ]
+        }
+      ],
+      "hidden": {
+        "municipios": "8863",
+        "uf": "RS",
+        "check": "false"
+      },
+      "body": " Estatísticas do Simples Nacional :: Optantes por UF e Município\nOptantes por UF e Município - Sinac\nANO 2026\n\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nSelecione o tipo de consulta:\t\nPor Dia\nPor UF\nPor Município\n\t \nInforme a data para pesquisa(dd/mm/aaaa):\t\n\t\n  \n\n\n\n"
+    },
+    {
+      "tag": "final",
+      "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+      "title": "Estatísticas Sinac",
+      "selects": [
+        {
+          "index": 0,
+          "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+          "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
+          "visible": true,
+          "value": "Por Município",
+          "options": [
+            {
+              "text": "Por Dia",
+              "value": "Por Dia",
+              "selected": false
+            },
+            {
+              "text": "Por UF",
+              "value": "Por UF",
+              "selected": false
+            },
+            {
+              "text": "Por Município",
+              "value": "Por Município",
+              "selected": true
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+          "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+          "visible": false,
+          "value": "UFNS",
+          "options": [
+            {
+              "text": "UF não selecionado",
+              "value": "UFNS",
+              "selected": true
+            },
+            {
+              "text": "AC - Acre",
+              "value": "AC",
+              "selected": false
+            },
+            {
+              "text": "AL - Alagoas",
+              "value": "AL",
+              "selected": false
+            },
+            {
+              "text": "AM - Amazonas",
+              "value": "AM",
+              "selected": false
+            },
+            {
+              "text": "AP - Amapá",
+              "value": "AP",
+              "selected": false
+            },
+            {
+              "text": "BA - Bahia",
+              "value": "BA",
+              "selected": false
+            },
+            {
+              "text": "CE - Ceará",
+              "value": "CE",
+              "selected": false
+            },
+            {
+              "text": "DF - Distrito Federal",
+              "value": "DF",
+              "selected": false
+            },
+            {
+              "text": "ES - Espírito Santo",
+              "value": "ES",
+              "selected": false
+            },
+            {
+              "text": "GO - Goiás",
+              "value": "GO",
+              "selected": false
+            },
+            {
+              "text": "MA - Maranhão",
+              "value": "MA",
+              "selected": false
+            },
+            {
+              "text": "MG - Minas Gerais",
+              "value": "MG",
+              "selected": false
+            },
+            {
+              "text": "MS - Mato Grosso do Sul",
+              "value": "MS",
+              "selected": false
+            },
+            {
+              "text": "MT - Mato Grosso",
+              "value": "MT",
+              "selected": false
+            },
+            {
+              "text": "PA - Pará",
+              "value": "PA",
+              "selected": false
+            },
+            {
+              "text": "PB - Paraíba",
+              "value": "PB",
+              "selected": false
+            },
+            {
+              "text": "PE - Pernambuco",
+              "value": "PE",
+              "selected": false
+            },
+            {
+              "text": "PI - Piauí",
+              "value": "PI",
+              "selected": false
+            },
+            {
+              "text": "PR - Paraná",
+              "value": "PR",
+              "selected": false
+            },
+            {
+              "text": "RJ - Rio de Janeiro",
+              "value": "RJ",
+              "selected": false
+            },
+            {
+              "text": "RN - Rio Grande do Norte",
+              "value": "RN",
+              "selected": false
+            },
+            {
+              "text": "RO - Rondônia",
+              "value": "RO",
+              "selected": false
+            },
+            {
+              "text": "RR - Roraima",
+              "value": "RR",
+              "selected": false
+            },
+            {
+              "text": "RS - Rio Grande do Sul",
+              "value": "RS",
+              "selected": false
+            },
+            {
+              "text": "SC - Santa Catarina",
+              "value": "SC",
+              "selected": false
+            },
+            {
+              "text": "SE - Sergipe",
+              "value": "SE",
+              "selected": false
+            },
+            {
+              "text": "SP - São Paulo",
+              "value": "SP",
+              "selected": false
+            },
+            {
+              "text": "TO - Tocantins",
+              "value": "TO",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "id": "lbOrigem",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": []
+        },
+        {
+          "index": 3,
+          "id": "lbDestino",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": []
+        }
+      ],
+      "hidden": {
+        "municipios": "8863",
+        "uf": "RS",
+        "check": "false"
+      },
+      "body": " Estatísticas do Simples Nacional :: Optantes por UF e Município\nOptantes por UF e Município - Sinac\nANO 2026\n\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nSelecione o tipo de consulta:\t\nPor Dia\nPor UF\nPor Município\n\t \nInforme a data para pesquisa(dd/mm/aaaa):\t\n\t\n  \n\nNão existem registros satisfazendo os critérios de pesquisa.\n\n\n"
+    }
+  ],
   "http_status": 200,
-  "title_before": "Estatísticas Sinac",
-  "body_before": "Estatísticas do Simples Nacional :: Optantes por UF e Município Optantes por UF e Município - Sinac ANO 2026 Posição Consolidada até 12/09/2026 Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
-  "selects_before": [
-    {
-      "index": 0,
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
-      "multiple": null,
-      "options": [
-        {
-          "text": "Por Dia",
-          "value": "Por Dia",
-          "selected": true
-        },
-        {
-          "text": "Por UF",
-          "value": "Por UF",
-          "selected": false
-        },
-        {
-          "text": "Por Município",
-          "value": "Por Município",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 1,
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
-      "multiple": null,
-      "options": [
-        {
-          "text": "-- Selecione uma opção --",
-          "value": "",
-          "selected": true
-        },
-        {
-          "text": "Janeiro/2026",
-          "value": "1",
-          "selected": false
-        },
-        {
-          "text": "Fevereiro/2026",
-          "value": "2",
-          "selected": false
-        },
-        {
-          "text": "Março/2026",
-          "value": "3",
-          "selected": false
-        },
-        {
-          "text": "Abril/2026",
-          "value": "4",
-          "selected": false
-        },
-        {
-          "text": "Maio/2026",
-          "value": "5",
-          "selected": false
-        },
-        {
-          "text": "Junho/2026",
-          "value": "6",
-          "selected": false
-        },
-        {
-          "text": "Julho/2026",
-          "value": "7",
-          "selected": false
-        },
-        {
-          "text": "Agosto/2026",
-          "value": "8",
-          "selected": false
-        },
-        {
-          "text": "Setembro/2026",
-          "value": "9",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 2,
-      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
-      "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
-      "multiple": null,
-      "options": [
-        {
-          "text": "UF não selecionado",
-          "value": "UFNS",
-          "selected": true
-        },
-        {
-          "text": "AC - Acre",
-          "value": "AC",
-          "selected": false
-        },
-        {
-          "text": "AL - Alagoas",
-          "value": "AL",
-          "selected": false
-        },
-        {
-          "text": "AM - Amazonas",
-          "value": "AM",
-          "selected": false
-        },
-        {
-          "text": "AP - Amapá",
-          "value": "AP",
-          "selected": false
-        },
-        {
-          "text": "BA - Bahia",
-          "value": "BA",
-          "selected": false
-        },
-        {
-          "text": "CE - Ceará",
-          "value": "CE",
-          "selected": false
-        },
-        {
-          "text": "DF - Distrito Federal",
-          "value": "DF",
-          "selected": false
-        },
-        {
-          "text": "ES - Espírito Santo",
-          "value": "ES",
-          "selected": false
-        },
-        {
-          "text": "GO - Goiás",
-          "value": "GO",
-          "selected": false
-        },
-        {
-          "text": "MA - Maranhão",
-          "value": "MA",
-          "selected": false
-        },
-        {
-          "text": "MG - Minas Gerais",
-          "value": "MG",
-          "selected": false
-        },
-        {
-          "text": "MS - Mato Grosso do Sul",
-          "value": "MS",
-          "selected": false
-        },
-        {
-          "text": "MT - Mato Grosso",
-          "value": "MT",
-          "selected": false
-        },
-        {
-          "text": "PA - Pará",
-          "value": "PA",
-          "selected": false
-        },
-        {
-          "text": "PB - Paraíba",
-          "value": "PB",
-          "selected": false
-        },
-        {
-          "text": "PE - Pernambuco",
-          "value": "PE",
-          "selected": false
-        },
-        {
-          "text": "PI - Piauí",
-          "value": "PI",
-          "selected": false
-        },
-        {
-          "text": "PR - Paraná",
-          "value": "PR",
-          "selected": false
-        },
-        {
-          "text": "RJ - Rio de Janeiro",
-          "value": "RJ",
-          "selected": false
-        },
-        {
-          "text": "RN - Rio Grande do Norte",
-          "value": "RN",
-          "selected": false
-        },
-        {
-          "text": "RO - Rondônia",
-          "value": "RO",
-          "selected": false
-        },
-        {
-          "text": "RR - Roraima",
-          "value": "RR",
-          "selected": false
-        },
-        {
-          "text": "RS - Rio Grande do Sul",
-          "value": "RS",
-          "selected": false
-        },
-        {
-          "text": "SC - Santa Catarina",
-          "value": "SC",
-          "selected": false
-        },
-        {
-          "text": "SE - Sergipe",
-          "value": "SE",
-          "selected": false
-        },
-        {
-          "text": "SP - São Paulo",
-          "value": "SP",
-          "selected": false
-        },
-        {
-          "text": "TO - Tocantins",
-          "value": "TO",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 3,
-      "id": "lbOrigem",
-      "name": null,
-      "multiple": "multiple",
-      "options": []
-    },
-    {
-      "index": 4,
-      "id": "lbDestino",
-      "name": null,
-      "multiple": "multiple",
-      "options": []
-    }
-  ],
-  "controls_before": [
-    {
-      "tag": "INPUT",
-      "id": "__EVENTTARGET",
-      "name": "__EVENTTARGET",
-      "type": "hidden",
-      "value": "",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "__EVENTARGUMENT",
-      "name": "__EVENTARGUMENT",
-      "type": "hidden",
-      "value": "",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "__LASTFOCUS",
-      "name": "__LASTFOCUS",
-      "type": "hidden",
-      "value": "",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "__VIEWSTATE",
-      "name": "__VIEWSTATE",
-      "type": "hidden",
-      "value": "sY8qEgppoj+1UTd2tv6LicsbmBSlaSLm1ukDwX/Hw4RUw/Rv8OYAonfmHrNZPMyOPVrBjeTQZA1QvMutsOyw1WWOfkDziv6vffFpMJB+LkLxUQiHbTSeSn/xbPV1/PeEgiWZ57UtNAj4/D9dIhdDexBr8A6MmoNTtZKM7If1W7bnSIXisBYUtl/TbbOlRiPk9zruxOq+s8iIxwURKY5DAwS4vOgs/Ervyz6vKCq/+ZpiEdYz4JQ0YsZj6XS5XcxrVGFBKxHvPlyCXJsb794WVoD6iL6U2Ue2GEh+ya+T/SGEFeXsYpQskSGbX6KZUtOwuHg2pCPepBI/APW3yn69hMQaguH/N0fVKeYbnsHf0i+yP83wInIBMrojeb8mCYW1jqWNfmIvkhEjZl3/vTMMbMeoCKv5W9J8XOyEsalFr5rxTtT4uF+bdECMtOLdU6V4blBEGomBtlxNJExrG3oZFA2kl27aDTC9GwEwIQHTnpFkiTKUU2GF1tc69dVAtzfIhnLwSQwPX3pWsjHw3VKxsgN/jY0pQq+rU7OghcPwbNB/YufR+tap4gES/khyu45z9SlMiuFDDCzakjlV1grS2A5DxDFv7Dp9XO7RjLX0sVc0F8pzWmEKVvDO5Q1tsK2CN1H2KE8/uLutQ7q4VetcsSYvwIr0SudWR3LNXmiSdms/cDNExYzAnhE3RqHyFQZoVxGL/ktSNcbZYBhJC5FdMEfb9P3KgXEn1WLJPKlP/4CbtQqKYg7jr3JefLQhym/GEKgFxgWtPjy9/tYbFL+nTJH3GAB0QhVZGo0mIV2IdySTiwKsGHKO9L4c7lIfRdjr65Fw8YpTzC+Ro5oCPwTNuRp94EfRw1ncOG/ZxU48xEZWMaVUYDNhhfQBWqJ7wooPWAn/2HtuZiWYcBbTkpN0V+iDg9opzfbON8661TvXrWSPpj0l1yeKNqoDo+iAMZ8hKRiJtrJbSUTI9xNOXNRaqd5x3Cj3ODY0ErHvLpEAX9ZLRRhVL/XajOSBmDI8DWGaKwHAv33+5qRe2Byg21eR5K5TdlP2dej5pJ1jYJGVQBvSHIWNwBLFmx5ViMFMtSzHuTBmuqb9NgggMKarNvQfKgHa3OZMFyXphZE7n+GQAQbIqzu0i4d9rHn4/pjciY19NVGXTphxeKbIn6nnjucOmPi20lpskrewF40inqT/MDujX19IM/Jsish6nCMRB047QJ6/AxEwf1PATbA0YxEKg/lqgWNUzwH8fPtTm6UkNZiPmbpvTMyTv6aB44yjq1UayjvpowIsZuXM+ntY4ErVrLTvkz7lQhyoE2UG2Bn+K7EdKMgip8nfRGYqdzv/HWuBhb9GB4eTpYV21mx8qUICWMmbs1oFNAw8j7ASblESOThDFg6oxH8ZKh2aaPlNGaku2YgZeh4kcoaYvS1KrvnejhDTIdWbFJkPMFjedle/1Vlfmxxv8ip2hO4kQJrzW53NgKBInPchGz2GJgvG4BiWxo+Kq0t/blU25/zjtF0IG9exfyhYZAy/GSLeoeGwUGc9XdeX5CoI/Z6lW/wV442bQ1SyylSrZkmd0CLplmrpXbMalehIzled6wcFQsVqNViTlgSbqTFVzigprdLDSC1WcD7nu0HutKGHXMsGndRwBMNuMnRwl5fHXj6I3bVqIlP4hBm9+g==",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "__VIEWSTATEGENERATOR",
-      "name": "__VIEWSTATEGENERATOR",
-      "type": "hidden",
-      "value": "FEAC32F1",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "__EVENTVALIDATION",
-      "name": "__EVENTVALIDATION",
-      "type": "hidden",
-      "value": "y5D/W0fFdv1EVePuQ6np6Cp4BUE70mJO0ent/R2P/aSLL/zRV7zzdoCj77h+5SyLV4qQ+D82m7GA4/a5sAnVcV3GocWybJhD/ymovm9eMcYcc6DBAr2MU2/Hp9uTrLZUNfeeLFYmS6s8HM5RoGLbfFX7oYWfSrd328YQsoSVun6Gd1wCWQjwVm1hrF0k7QcCfxJy7feNUW6hikBKpAPspLLMM5ufzliR4DzOdToNVjG0GNEtM4GbWjW5FdCkUoptyVH3IiflDZwog0vS0dc8tVTacfVHLx32jMvUJlIoDvsEJuYuQ3XOKfiEzKhhUsDi8HxZtgA+LbUJgTPrHMGneEmyX77xCe+TGaBxBNqSyZZhCOLkL22vCcOMpLSLu4W+ix7igywTWBew/8KjsyyBQTDdmEj7qGPYRAPWdE0N6r2cKr/U57itFJH0W6JnNSd76kIB4hoFJgTnDmUPwPwV/a1v818WSXc627OgcHqDelwnI9gEUumsO2dZSiZBhpzfQDoYni+6HVh5vk8s+WyGk/yS3bJEgKf39K4L3Iddk6hsaLV00Y3ija3N7wrG0fBGdF21SrN6YcEJFzxDnf3qNTQgwTrpV1X/Q8ghRkcmoZaT4lpnpY1BuSkICqd+tmL9g+if/aeNJ6sTXFfHLvOVnIqMYr0/GEvdZnoc5UZSQmuzp+MxTegD+jyEI9I67FF9ydekeJPwu4d1DHkReZtG5BCoEUjNfaZRwjTWtAPFTgpJfpxChuEaBEYmGuDrKzpUyspXsIfTHtpnyPEoq6ekxnESMDuunz37DuT36I9rui2bV4JDJscfrNzQkxk3YgAHcRQhGtyKRHfC+rcgXN7+wLjJrxxwIcGf7ljYWMzw5+Ii3gPJcYsCkV9Jl2yGtmNmbvHLXuzf0DuhQDqAgbLVG+uER25mjLHgn6a/NbJlOK5Yj/o2tXUDe59ShGEVyKTcoN/LoXUoO4BFPI2VTkWLGN0EQofBrGBg6l4bmXKTuLsyiUUY5D1iu2ivNwou8mVSwMo3A4Aelgd0pwDycxnhPyOkVahlvsnoBJN0SmLuxnTb5phAGV69YbVFgWiu2wxvIC/aCQ==",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "A",
-      "id": null,
-      "name": null,
-      "type": null,
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "A",
-      "id": "ctl00_ctl00_SiteMapPath_ctl00_LinkRaiz",
-      "name": null,
-      "type": null,
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": "Estatísticas do Simples Nacional"
-    },
-    {
-      "tag": "A",
-      "id": "ctl00_ctl00_SiteMapPath_SkipLink",
-      "name": null,
-      "type": null,
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_btnExibir",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$btnExibir",
-      "type": "submit",
-      "value": "Exibir Dados",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_btnLimpar",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$btnLimpar",
-      "type": "submit",
-      "value": "Limpar Dados",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "btVoltar",
-      "name": null,
-      "type": "button",
-      "value": "Voltar",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "ctl00_ctl00_Conteudo_AposTabela_hfMunicipios",
-      "name": "ctl00$ctl00$Conteudo$AposTabela$hfMunicipios",
-      "type": "hidden",
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "ctl00_ctl00_Conteudo_AposTabela_hfUF",
-      "name": "ctl00$ctl00$Conteudo$AposTabela$hfUF",
-      "type": "hidden",
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "ctl00_ctl00_Conteudo_AposTabela_hfCheck",
-      "name": "ctl00$ctl00$Conteudo$AposTabela$hfCheck",
-      "type": "hidden",
-      "value": "false",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "A",
-      "id": null,
-      "name": null,
-      "type": null,
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": "close"
-    },
-    {
-      "tag": "BUTTON",
-      "id": null,
-      "name": null,
-      "type": "button",
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": "Fechar"
-    },
-    {
-      "tag": "A",
-      "id": null,
-      "name": null,
-      "type": null,
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": "close"
-    },
-    {
-      "tag": "INPUT",
-      "id": "chkTodosMunicipios",
-      "name": null,
-      "type": "checkbox",
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "btnInserir",
-      "name": null,
-      "type": "button",
-      "value": "Inserir >",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "btnRemover",
-      "name": null,
-      "type": "button",
-      "value": "< Remover",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "INPUT",
-      "id": "btnRemoverTudo",
-      "name": null,
-      "type": "button",
-      "value": "<< Remover Tudo",
-      "title": null,
-      "aria": null,
-      "text": ""
-    },
-    {
-      "tag": "BUTTON",
-      "id": null,
-      "name": null,
-      "type": "button",
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": "Ok"
-    },
-    {
-      "tag": "BUTTON",
-      "id": null,
-      "name": null,
-      "type": "button",
-      "value": null,
-      "title": null,
-      "aria": null,
-      "text": "Cancelar"
-    }
-  ],
-  "rs_selected": true,
-  "selects_after_rs": [
-    {
-      "index": 0,
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
-      "multiple": null,
-      "options": [
-        {
-          "text": "Por Dia",
-          "value": "Por Dia",
-          "selected": true
-        },
-        {
-          "text": "Por UF",
-          "value": "Por UF",
-          "selected": false
-        },
-        {
-          "text": "Por Município",
-          "value": "Por Município",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 1,
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
-      "multiple": null,
-      "options": [
-        {
-          "text": "-- Selecione uma opção --",
-          "value": "",
-          "selected": true
-        },
-        {
-          "text": "Janeiro/2026",
-          "value": "1",
-          "selected": false
-        },
-        {
-          "text": "Fevereiro/2026",
-          "value": "2",
-          "selected": false
-        },
-        {
-          "text": "Março/2026",
-          "value": "3",
-          "selected": false
-        },
-        {
-          "text": "Abril/2026",
-          "value": "4",
-          "selected": false
-        },
-        {
-          "text": "Maio/2026",
-          "value": "5",
-          "selected": false
-        },
-        {
-          "text": "Junho/2026",
-          "value": "6",
-          "selected": false
-        },
-        {
-          "text": "Julho/2026",
-          "value": "7",
-          "selected": false
-        },
-        {
-          "text": "Agosto/2026",
-          "value": "8",
-          "selected": false
-        },
-        {
-          "text": "Setembro/2026",
-          "value": "9",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 2,
-      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
-      "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
-      "multiple": null,
-      "options": [
-        {
-          "text": "UF não selecionado",
-          "value": "UFNS",
-          "selected": false
-        },
-        {
-          "text": "AC - Acre",
-          "value": "AC",
-          "selected": false
-        },
-        {
-          "text": "AL - Alagoas",
-          "value": "AL",
-          "selected": false
-        },
-        {
-          "text": "AM - Amazonas",
-          "value": "AM",
-          "selected": false
-        },
-        {
-          "text": "AP - Amapá",
-          "value": "AP",
-          "selected": false
-        },
-        {
-          "text": "BA - Bahia",
-          "value": "BA",
-          "selected": false
-        },
-        {
-          "text": "CE - Ceará",
-          "value": "CE",
-          "selected": false
-        },
-        {
-          "text": "DF - Distrito Federal",
-          "value": "DF",
-          "selected": false
-        },
-        {
-          "text": "ES - Espírito Santo",
-          "value": "ES",
-          "selected": false
-        },
-        {
-          "text": "GO - Goiás",
-          "value": "GO",
-          "selected": false
-        },
-        {
-          "text": "MA - Maranhão",
-          "value": "MA",
-          "selected": false
-        },
-        {
-          "text": "MG - Minas Gerais",
-          "value": "MG",
-          "selected": false
-        },
-        {
-          "text": "MS - Mato Grosso do Sul",
-          "value": "MS",
-          "selected": false
-        },
-        {
-          "text": "MT - Mato Grosso",
-          "value": "MT",
-          "selected": false
-        },
-        {
-          "text": "PA - Pará",
-          "value": "PA",
-          "selected": false
-        },
-        {
-          "text": "PB - Paraíba",
-          "value": "PB",
-          "selected": false
-        },
-        {
-          "text": "PE - Pernambuco",
-          "value": "PE",
-          "selected": false
-        },
-        {
-          "text": "PI - Piauí",
-          "value": "PI",
-          "selected": false
-        },
-        {
-          "text": "PR - Paraná",
-          "value": "PR",
-          "selected": false
-        },
-        {
-          "text": "RJ - Rio de Janeiro",
-          "value": "RJ",
-          "selected": false
-        },
-        {
-          "text": "RN - Rio Grande do Norte",
-          "value": "RN",
-          "selected": false
-        },
-        {
-          "text": "RO - Rondônia",
-          "value": "RO",
-          "selected": false
-        },
-        {
-          "text": "RR - Roraima",
-          "value": "RR",
-          "selected": false
-        },
-        {
-          "text": "RS - Rio Grande do Sul",
-          "value": "RS",
-          "selected": true
-        },
-        {
-          "text": "SC - Santa Catarina",
-          "value": "SC",
-          "selected": false
-        },
-        {
-          "text": "SE - Sergipe",
-          "value": "SE",
-          "selected": false
-        },
-        {
-          "text": "SP - São Paulo",
-          "value": "SP",
-          "selected": false
-        },
-        {
-          "text": "TO - Tocantins",
-          "value": "TO",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 3,
-      "id": "lbOrigem",
-      "name": null,
-      "multiple": "multiple",
-      "options": []
-    },
-    {
-      "index": 4,
-      "id": "lbDestino",
-      "name": null,
-      "multiple": "multiple",
-      "options": []
-    }
-  ],
-  "sb_selected": false,
-  "selects_after_sb": [
-    {
-      "index": 0,
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
-      "multiple": null,
-      "options": [
-        {
-          "text": "Por Dia",
-          "value": "Por Dia",
-          "selected": true
-        },
-        {
-          "text": "Por UF",
-          "value": "Por UF",
-          "selected": false
-        },
-        {
-          "text": "Por Município",
-          "value": "Por Município",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 1,
-      "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistMes",
-      "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistMes",
-      "multiple": null,
-      "options": [
-        {
-          "text": "-- Selecione uma opção --",
-          "value": "",
-          "selected": true
-        },
-        {
-          "text": "Janeiro/2026",
-          "value": "1",
-          "selected": false
-        },
-        {
-          "text": "Fevereiro/2026",
-          "value": "2",
-          "selected": false
-        },
-        {
-          "text": "Março/2026",
-          "value": "3",
-          "selected": false
-        },
-        {
-          "text": "Abril/2026",
-          "value": "4",
-          "selected": false
-        },
-        {
-          "text": "Maio/2026",
-          "value": "5",
-          "selected": false
-        },
-        {
-          "text": "Junho/2026",
-          "value": "6",
-          "selected": false
-        },
-        {
-          "text": "Julho/2026",
-          "value": "7",
-          "selected": false
-        },
-        {
-          "text": "Agosto/2026",
-          "value": "8",
-          "selected": false
-        },
-        {
-          "text": "Setembro/2026",
-          "value": "9",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 2,
-      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
-      "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
-      "multiple": null,
-      "options": [
-        {
-          "text": "UF não selecionado",
-          "value": "UFNS",
-          "selected": false
-        },
-        {
-          "text": "AC - Acre",
-          "value": "AC",
-          "selected": false
-        },
-        {
-          "text": "AL - Alagoas",
-          "value": "AL",
-          "selected": false
-        },
-        {
-          "text": "AM - Amazonas",
-          "value": "AM",
-          "selected": false
-        },
-        {
-          "text": "AP - Amapá",
-          "value": "AP",
-          "selected": false
-        },
-        {
-          "text": "BA - Bahia",
-          "value": "BA",
-          "selected": false
-        },
-        {
-          "text": "CE - Ceará",
-          "value": "CE",
-          "selected": false
-        },
-        {
-          "text": "DF - Distrito Federal",
-          "value": "DF",
-          "selected": false
-        },
-        {
-          "text": "ES - Espírito Santo",
-          "value": "ES",
-          "selected": false
-        },
-        {
-          "text": "GO - Goiás",
-          "value": "GO",
-          "selected": false
-        },
-        {
-          "text": "MA - Maranhão",
-          "value": "MA",
-          "selected": false
-        },
-        {
-          "text": "MG - Minas Gerais",
-          "value": "MG",
-          "selected": false
-        },
-        {
-          "text": "MS - Mato Grosso do Sul",
-          "value": "MS",
-          "selected": false
-        },
-        {
-          "text": "MT - Mato Grosso",
-          "value": "MT",
-          "selected": false
-        },
-        {
-          "text": "PA - Pará",
-          "value": "PA",
-          "selected": false
-        },
-        {
-          "text": "PB - Paraíba",
-          "value": "PB",
-          "selected": false
-        },
-        {
-          "text": "PE - Pernambuco",
-          "value": "PE",
-          "selected": false
-        },
-        {
-          "text": "PI - Piauí",
-          "value": "PI",
-          "selected": false
-        },
-        {
-          "text": "PR - Paraná",
-          "value": "PR",
-          "selected": false
-        },
-        {
-          "text": "RJ - Rio de Janeiro",
-          "value": "RJ",
-          "selected": false
-        },
-        {
-          "text": "RN - Rio Grande do Norte",
-          "value": "RN",
-          "selected": false
-        },
-        {
-          "text": "RO - Rondônia",
-          "value": "RO",
-          "selected": false
-        },
-        {
-          "text": "RR - Roraima",
-          "value": "RR",
-          "selected": false
-        },
-        {
-          "text": "RS - Rio Grande do Sul",
-          "value": "RS",
-          "selected": true
-        },
-        {
-          "text": "SC - Santa Catarina",
-          "value": "SC",
-          "selected": false
-        },
-        {
-          "text": "SE - Sergipe",
-          "value": "SE",
-          "selected": false
-        },
-        {
-          "text": "SP - São Paulo",
-          "value": "SP",
-          "selected": false
-        },
-        {
-          "text": "TO - Tocantins",
-          "value": "TO",
-          "selected": false
-        }
-      ]
-    },
-    {
-      "index": 3,
-      "id": "lbOrigem",
-      "name": null,
-      "multiple": "multiple",
-      "options": []
-    },
-    {
-      "index": 4,
-      "id": "lbDestino",
-      "name": null,
-      "multiple": "multiple",
-      "options": []
-    }
-  ],
-  "consult_clicked": false,
-  "final_url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
-  "body_after": "Estatísticas do Simples Nacional :: Optantes por UF e Município Optantes por UF e Município - Sinac ANO 2026 Posição Consolidada até 12/09/2026 Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
+  "filter_ok": true,
+  "exibir_ok": true,
   "tables": [
     [
       [
-        "Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
+        "Parâmetros de Exibição Selecione o tipo de consulta: Por Dia Por UF Por Município Informe a data para pesquisa(dd/mm/aaaa):",
         "Selecione o tipo de consulta:",
         "Por Dia Por UF Por Município",
-        "Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026",
         "",
+        "Informe a data para pesquisa(dd/mm/aaaa):",
         "",
         ""
       ],
       [
         "Selecione o tipo de consulta:",
         "Por Dia Por UF Por Município",
-        "Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026"
+        ""
+      ],
+      [
+        "Informe a data para pesquisa(dd/mm/aaaa):",
+        "",
+        ""
       ]
     ],
     [
       [
         "Selecione o tipo de consulta:",
         "Por Dia Por UF Por Município",
-        "Mês: -- Selecione uma opção -- Janeiro/2026 Fevereiro/2026 Março/2026 Abril/2026 Maio/2026 Junho/2026 Julho/2026 Agosto/2026 Setembro/2026"
+        ""
+      ],
+      [
+        "Informe a data para pesquisa(dd/mm/aaaa):",
+        "",
+        ""
       ]
     ],
     [
@@ -1018,7 +3239,7 @@
     ],
     [
       [
-        "ACEGUAAGUA SANTAAGUDOAJURICABAALECRIMALEGRETEALEGRIAALMIRANTE TAMANDARE DO SULALPESTREALTO ALEGREALTO FELIZALVORADAAMARAL FERRADORAMETISTA DO SULANDRE DA ROCHAANTA GORDAANTONIO PRADOARAMBAREARARICAARATIBAARROIO DO MEIOARROIO DO PADREARROIO DO SALARROIO DO TIGREARROIO DOS RATOSARROIO GRANDEARVOREZINHAAUGUSTO PESTANAAUREABAGEBALNEARIO PINHALBARAOBARAO DE COTEGIPEBARAO DO TRIUNFOBARRA DO GUARITABARRA DO QUARAIBARRA DO RIBEIROBARRA DO RIO AZULBARRA FUNDABARRACAOBARROS CASSALBENJAMIN CONSTANT DO SULBENTO GONCALVESBOA VISTA DAS MISSOESBOA VISTA DO BURICABOA VISTA DO CADEADOBOA VISTA DO INCRABOA VISTA DO SULBOM JESUSBOM PRINCIPIOBOM PROGRESSOBOM RETIRO DO SULBOQUEIRAO DO LEAOBOSSOROCABOZANOBRAGABROCHIERBUTIACACAPAVA DO SULCACEQUICACHOEIRA DO SULCACHOEIRINHACACIQUE DOBLECAIBATECAICARACAMAQUACAMARGOCAMBARA DO SULCAMPESTRE DA SERRACAMPINA DAS MISSOESCAMPINAS DO SULCAMPO BOMCAMPO NOVOCAMPOS BORGESCANDELARIACANDIDO GODOICANDIOTACANELACANGUCUCANOASCANUDOS DO VALECAPAO BONITO DO SULCAPAO DA CANOACAPAO DO CIPOCAPAO DO LEAOCAPELA DE SANTANACAPITAOCAPIVARI DO SULCARAACARAZINHOCARLOS BARBOSACARLOS GOMESCASCACASEIROSCATUIPECAXIAS DO SULCENTENARIOCERRITOCERRO BRANCOCERRO GRANDECERRO GRANDE DO SULCERRO LARGOCHAPADACHARQUEADASCHARRUACHIAPETTACHUICHUVISCACIDREIRACIRIACOCOLINASCOLORADOCONDORCONSTANTINACOQUEIRO BAIXOCOQUEIROS DO SULCORONEL BARROSCORONEL BICACOCORONEL PILARCOTIPORACOXILHACRISSIUMALCRISTALCRISTAL DO SULCRUZ ALTACRUZALTENSECRUZEIRO DO SULDAVID CANABARRODERRUBADASDEZESSEIS DE NOVEMBRODILERMANDO DE AGUIARDOIS IRMAOSDOIS IRMAOS DAS MISSOESDOIS LAJEADOSDOM FELICIANODOM PEDRITODOM PEDRO DE ALCANTARADONA FRANCISCADOUTOR MAURICIO CARDOSODOUTOR RICARDOELDORADO DO SULENCANTADOENCRUZILHADA DO SULENGENHO VELHOENTRE IJUISENTRE RIOS DO SULEREBANGOERECHIMERNESTINAERVAL GRANDEERVAL SECOESMERALDAESPERANCA DO SULESPUMOSOESTACAOESTANCIA VELHAESTEIOESTRELAESTRELA VELHAEUGENIO DE CASTROFAGUNDES VARELAFARROUPILHAFAXINAL DO SOTURNOFAXINALZINHOFAZENDA VILANOVAFELIZFLORES DA CUNHAFLORIANO PEIXOTOFONTOURA XAVIERFORMIGUEIROFORQUETINHAFORTALEZA DOS VALOSFREDERICO WESTPHALENGARIBALDIGARRUCHOSGAURAMAGENERAL CAMARAGENTILGETULIO VARGASGIRUAGLORINHAGRAMADOGRAMADO DOS LOUREIROSGRAMADO XAVIERGRAVATAIGUABIJUGUAIBAGUAPOREGUARANI DAS MISSOESHARMONIAHERVALHERVEIRASHORIZONTINAHULHA NEGRAHUMAITAIBARAMAIBIACAIBIRAIARASIBIRAPUITAIBIRUBAIGREJINHAIJUIILOPOLISIMBEIMIGRANTEINDEPENDENCIAINHACORAIPEIPIRANGA DO SULIRAIITAARAITACURUBIITAPUCAITAQUIITATIITATIBA DO SULIVORAIVOTIJABOTICABAJACUIZINHOJACUTINGAJAGUARAOJAGUARIJAQUIRANAJARIJOIAJULIO DE CASTILHOSLAGOA BONITA DO SULLAGOA DOS TRES CANTOSLAGOA VERMELHALAGOAOLAJEADOLAJEADO DO BUGRELAVRAS DO SULLIBERATO SALZANOLINDOLFO COLLORLINHA NOVAMACAMBARAMACHADINHOMAMPITUBAMANOEL VIANAMAQUINEMARATAMARAUMARCELINO RAMOSMARIANA PIMENTELMARIANO MOROMARQUES DE SOUZAMATAMATO CASTELHANOMATO LEITAOMATO QUEIMADOMAXIMILIANO DE ALMEIDAMINAS DO LEAOMIRAGUAIMONTAURIMONTE ALEGRE DOS CAMPOSMONTE BELO DO SULMONTENEGROMORMACOMORRINHOS DO SULMORRO REDONDOMORRO REUTERMOSTARDASMUCUMMUITOS CAPOESMULITERNONAO-ME-TOQUENICOLAU VERGUEIRONONOAINOVA ALVORADANOVA ARACANOVA BASSANONOVA BOA VISTANOVA BRESCIANOVA CANDELARIANOVA ESPERANCA DO SULNOVA HARTZNOVA PADUANOVA PALMANOVA PETROPOLISNOVA PRATANOVA RAMADANOVA ROMA DO SULNOVA SANTA RITANOVO BARREIRONOVO CABRAISNOVO HAMBURGONOVO MACHADONOVO TIRADENTESNOVO XINGUOSORIOPAIM FILHOPALMARES DO SULPALMEIRA DAS MISSOESPALMITINHOPANAMBIPANTANO GRANDEPARAIPARAISO DO SULPARECI NOVOPAROBEPASSA SETEPASSO DO SOBRADOPASSO FUNDOPAULO BENTOPAVERAMAPEDRAS ALTASPEDRO OSORIOPEJUCARAPELOTASPICADA CAFEPINHALPINHAL DA SERRAPINHAL GRANDEPINHEIRINHO DO VALEPINHEIRO MACHADOPINTO BANDEIRAPIRAPOPIRATINIPLANALTOPOCO DAS ANTASPONTAOPONTE PRETAPORTAOPORTO ALEGREPORTO LUCENAPORTO MAUAPORTO VERA CRUZPORTO XAVIERPOUSO NOVOPRESIDENTE LUCENAPROGRESSOPROTASIO ALVESPUTINGAQUARAIQUATRO IRMAOSQUEVEDOSQUINZE DE NOVEMBROREDENTORARELVADORESTINGA SECARIO DOS INDIOSRIO GRANDERIO PARDORIOZINHOROCA SALESRODEIO BONITOROLADORROLANTERONDA ALTARONDINHAROQUE GONZALESROSARIO DO SULSAGRADA FAMILIASALDANHA MARINHOSALTO DO JACUISALVADOR DAS MISSOESSALVADOR DO SULSANANDUVASANTA BARBARA DO SULSANTA CECILIA DO SULSANTA CLARA DO SULSANTA CRUZ DO SULSANTA MARGARIDA DO SULSANTA MARIASANTA MARIA DO HERVALSANTA ROSASANTA TEREZASANTA VITORIA DO PALMARSANTANA DA BOA VISTASANTANA DO LIVRAMENTOSANTIAGOSANTO ANGELOSANTO ANTONIO DA PATRULHASANTO ANTONIO DAS MISSOESSANTO ANTONIO DO PALMASANTO ANTONIO DO PLANALTOSANTO AUGUSTOSANTO CRISTOSANTO EXPEDITO DO SULSAO BORJASAO DOMINGOS DO SULSAO FRANCISCO DE ASSISSAO FRANCISCO DE PAULASAO GABRIELSAO JERONIMOSAO JOAO DA URTIGASAO JOAO DO POLESINESAO JORGESAO JOSE DAS MISSOESSAO JOSE DO HERVALSAO JOSE DO HORTENCIOSAO JOSE DO INHACORASAO JOSE DO NORTESAO JOSE DO OUROSAO JOSE DO SULSAO JOSE DOS AUSENTESSAO LEOPOLDOSAO LOURENCO DO SULSAO LUIZ GONZAGASAO MARCOSSAO MARTINHOSAO MARTINHO DA SERRASAO MIGUEL DAS MISSOESSAO NICOLAUSAO PAULO DAS MISSOESSAO PEDRO DA SERRASAO PEDRO DAS MISSOESSAO PEDRO DO BUTIASAO PEDRO DO SULSAO SEBASTIAO DO CAISAO SEPESAO VALENTIMSAO VALENTIM DO SULSAO VALERIO DO SULSAO VENDELINOSAO VICENTE DO SULSAPIRANGASAPUCAIA DO SULSARANDISEBERISEDE NOVASEGREDOSELBACHSENADOR SALGADO FILHOSENTINELA DO SULSERAFINA CORREASERIOSERTAOSERTAO SANTANASETE DE SETEMBROSEVERIANO DE ALMEIDASILVEIRA MARTINSSINIMBUSOBRADINHOSOLEDADETABAITAPEJARATAPERATAPESTAQUARATAQUARITAQUARUCU DO SULTAVARESTENENTE PORTELATERRA DE AREIATEUTONIATIO HUGOTIRADENTES DO SULTOROPITORRESTRAMANDAITRAVESSEIROTRES ARROIOSTRES CACHOEIRASTRES COROASTRES DE MAIOTRES FORQUILHASTRES PALMEIRASTRES PASSOSTRINDADE DO SULTRIUNFOTUCUNDUVATUNASTUPANCI DO SULTUPANCIRETATUPANDITUPARENDITURUCUUBIRETAMAUNIAO DA SERRAUNISTALDAURUGUAIANAVACARIAVALE DO SOLVALE REALVALE VERDEVANINIVENANCIO AIRESVERA CRUZVERANOPOLISVESPASIANO CORREAVIADUTOSVIAMAOVICENTE DUTRAVICTOR GRAEFFVILA FLORESVILA LANGAROVILA MARIAVILA NOVA DO SULVISTA ALEGREVISTA ALEGRE DO PRATAVISTA GAUCHAVITORIA DAS MISSOESWESTFALIAXANGRI-LA",
+        "",
         "Selecionar todos Municípios",
         "Selecionar todos Municípios",
         "",
@@ -1036,28 +3257,6 @@
       ]
     ]
   ],
-  "sao_borja_rows": [
-    {
-      "table": 3,
-      "row": 0,
-      "cells": [
-        "ACEGUAAGUA SANTAAGUDOAJURICABAALECRIMALEGRETEALEGRIAALMIRANTE TAMANDARE DO SULALPESTREALTO ALEGREALTO FELIZALVORADAAMARAL FERRADORAMETISTA DO SULANDRE DA ROCHAANTA GORDAANTONIO PRADOARAMBAREARARICAARATIBAARROIO DO MEIOARROIO DO PADREARROIO DO SALARROIO DO TIGREARROIO DOS RATOSARROIO GRANDEARVOREZINHAAUGUSTO PESTANAAUREABAGEBALNEARIO PINHALBARAOBARAO DE COTEGIPEBARAO DO TRIUNFOBARRA DO GUARITABARRA DO QUARAIBARRA DO RIBEIROBARRA DO RIO AZULBARRA FUNDABARRACAOBARROS CASSALBENJAMIN CONSTANT DO SULBENTO GONCALVESBOA VISTA DAS MISSOESBOA VISTA DO BURICABOA VISTA DO CADEADOBOA VISTA DO INCRABOA VISTA DO SULBOM JESUSBOM PRINCIPIOBOM PROGRESSOBOM RETIRO DO SULBOQUEIRAO DO LEAOBOSSOROCABOZANOBRAGABROCHIERBUTIACACAPAVA DO SULCACEQUICACHOEIRA DO SULCACHOEIRINHACACIQUE DOBLECAIBATECAICARACAMAQUACAMARGOCAMBARA DO SULCAMPESTRE DA SERRACAMPINA DAS MISSOESCAMPINAS DO SULCAMPO BOMCAMPO NOVOCAMPOS BORGESCANDELARIACANDIDO GODOICANDIOTACANELACANGUCUCANOASCANUDOS DO VALECAPAO BONITO DO SULCAPAO DA CANOACAPAO DO CIPOCAPAO DO LEAOCAPELA DE SANTANACAPITAOCAPIVARI DO SULCARAACARAZINHOCARLOS BARBOSACARLOS GOMESCASCACASEIROSCATUIPECAXIAS DO SULCENTENARIOCERRITOCERRO BRANCOCERRO GRANDECERRO GRANDE DO SULCERRO LARGOCHAPADACHARQUEADASCHARRUACHIAPETTACHUICHUVISCACIDREIRACIRIACOCOLINASCOLORADOCONDORCONSTANTINACOQUEIRO BAIXOCOQUEIROS DO SULCORONEL BARROSCORONEL BICACOCORONEL PILARCOTIPORACOXILHACRISSIUMALCRISTALCRISTAL DO SULCRUZ ALTACRUZALTENSECRUZEIRO DO SULDAVID CANABARRODERRUBADASDEZESSEIS DE NOVEMBRODILERMANDO DE AGUIARDOIS IRMAOSDOIS IRMAOS DAS MISSOESDOIS LAJEADOSDOM FELICIANODOM PEDRITODOM PEDRO DE ALCANTARADONA FRANCISCADOUTOR MAURICIO CARDOSODOUTOR RICARDOELDORADO DO SULENCANTADOENCRUZILHADA DO SULENGENHO VELHOENTRE IJUISENTRE RIOS DO SULEREBANGOERECHIMERNESTINAERVAL GRANDEERVAL SECOESMERALDAESPERANCA DO SULESPUMOSOESTACAOESTANCIA VELHAESTEIOESTRELAESTRELA VELHAEUGENIO DE CASTROFAGUNDES VARELAFARROUPILHAFAXINAL DO SOTURNOFAXINALZINHOFAZENDA VILANOVAFELIZFLORES DA CUNHAFLORIANO PEIXOTOFONTOURA XAVIERFORMIGUEIROFORQUETINHAFORTALEZA DOS VALOSFREDERICO WESTPHALENGARIBALDIGARRUCHOSGAURAMAGENERAL CAMARAGENTILGETULIO VARGASGIRUAGLORINHAGRAMADOGRAMADO DOS LOUREIROSGRAMADO XAVIERGRAVATAIGUABIJUGUAIBAGUAPOREGUARANI DAS MISSOESHARMONIAHERVALHERVEIRASHORIZONTINAHULHA NEGRAHUMAITAIBARAMAIBIACAIBIRAIARASIBIRAPUITAIBIRUBAIGREJINHAIJUIILOPOLISIMBEIMIGRANTEINDEPENDENCIAINHACORAIPEIPIRANGA DO SULIRAIITAARAITACURUBIITAPUCAITAQUIITATIITATIBA DO SULIVORAIVOTIJABOTICABAJACUIZINHOJACUTINGAJAGUARAOJAGUARIJAQUIRANAJARIJOIAJULIO DE CASTILHOSLAGOA BONITA DO SULLAGOA DOS TRES CANTOSLAGOA VERMELHALAGOAOLAJEADOLAJEADO DO BUGRELAVRAS DO SULLIBERATO SALZANOLINDOLFO COLLORLINHA NOVAMACAMBARAMACHADINHOMAMPITUBAMANOEL VIANAMAQUINEMARATAMARAUMARCELINO RAMOSMARIANA PIMENTELMARIANO MOROMARQUES DE SOUZAMATAMATO CASTELHANOMATO LEITAOMATO QUEIMADOMAXIMILIANO DE ALMEIDAMINAS DO LEAOMIRAGUAIMONTAURIMONTE ALEGRE DOS CAMPOSMONTE BELO DO SULMONTENEGROMORMACOMORRINHOS DO SULMORRO REDONDOMORRO REUTERMOSTARDASMUCUMMUITOS CAPOESMULITERNONAO-ME-TOQUENICOLAU VERGUEIRONONOAINOVA ALVORADANOVA ARACANOVA BASSANONOVA BOA VISTANOVA BRESCIANOVA CANDELARIANOVA ESPERANCA DO SULNOVA HARTZNOVA PADUANOVA PALMANOVA PETROPOLISNOVA PRATANOVA RAMADANOVA ROMA DO SULNOVA SANTA RITANOVO BARREIRONOVO CABRAISNOVO HAMBURGONOVO MACHADONOVO TIRADENTESNOVO XINGUOSORIOPAIM FILHOPALMARES DO SULPALMEIRA DAS MISSOESPALMITINHOPANAMBIPANTANO GRANDEPARAIPARAISO DO SULPARECI NOVOPAROBEPASSA SETEPASSO DO SOBRADOPASSO FUNDOPAULO BENTOPAVERAMAPEDRAS ALTASPEDRO OSORIOPEJUCARAPELOTASPICADA CAFEPINHALPINHAL DA SERRAPINHAL GRANDEPINHEIRINHO DO VALEPINHEIRO MACHADOPINTO BANDEIRAPIRAPOPIRATINIPLANALTOPOCO DAS ANTASPONTAOPONTE PRETAPORTAOPORTO ALEGREPORTO LUCENAPORTO MAUAPORTO VERA CRUZPORTO XAVIERPOUSO NOVOPRESIDENTE LUCENAPROGRESSOPROTASIO ALVESPUTINGAQUARAIQUATRO IRMAOSQUEVEDOSQUINZE DE NOVEMBROREDENTORARELVADORESTINGA SECARIO DOS INDIOSRIO GRANDERIO PARDORIOZINHOROCA SALESRODEIO BONITOROLADORROLANTERONDA ALTARONDINHAROQUE GONZALESROSARIO DO SULSAGRADA FAMILIASALDANHA MARINHOSALTO DO JACUISALVADOR DAS MISSOESSALVADOR DO SULSANANDUVASANTA BARBARA DO SULSANTA CECILIA DO SULSANTA CLARA DO SULSANTA CRUZ DO SULSANTA MARGARIDA DO SULSANTA MARIASANTA MARIA DO HERVALSANTA ROSASANTA TEREZASANTA VITORIA DO PALMARSANTANA DA BOA VISTASANTANA DO LIVRAMENTOSANTIAGOSANTO ANGELOSANTO ANTONIO DA PATRULHASANTO ANTONIO DAS MISSOESSANTO ANTONIO DO PALMASANTO ANTONIO DO PLANALTOSANTO AUGUSTOSANTO CRISTOSANTO EXPEDITO DO SULSAO BORJASAO DOMINGOS DO SULSAO FRANCISCO DE ASSISSAO FRANCISCO DE PAULASAO GABRIELSAO JERONIMOSAO JOAO DA URTIGASAO JOAO DO POLESINESAO JORGESAO JOSE DAS MISSOESSAO JOSE DO HERVALSAO JOSE DO HORTENCIOSAO JOSE DO INHACORASAO JOSE DO NORTESAO JOSE DO OUROSAO JOSE DO SULSAO JOSE DOS AUSENTESSAO LEOPOLDOSAO LOURENCO DO SULSAO LUIZ GONZAGASAO MARCOSSAO MARTINHOSAO MARTINHO DA SERRASAO MIGUEL DAS MISSOESSAO NICOLAUSAO PAULO DAS MISSOESSAO PEDRO DA SERRASAO PEDRO DAS MISSOESSAO PEDRO DO BUTIASAO PEDRO DO SULSAO SEBASTIAO DO CAISAO SEPESAO VALENTIMSAO VALENTIM DO SULSAO VALERIO DO SULSAO VENDELINOSAO VICENTE DO SULSAPIRANGASAPUCAIA DO SULSARANDISEBERISEDE NOVASEGREDOSELBACHSENADOR SALGADO FILHOSENTINELA DO SULSERAFINA CORREASERIOSERTAOSERTAO SANTANASETE DE SETEMBROSEVERIANO DE ALMEIDASILVEIRA MARTINSSINIMBUSOBRADINHOSOLEDADETABAITAPEJARATAPERATAPESTAQUARATAQUARITAQUARUCU DO SULTAVARESTENENTE PORTELATERRA DE AREIATEUTONIATIO HUGOTIRADENTES DO SULTOROPITORRESTRAMANDAITRAVESSEIROTRES ARROIOSTRES CACHOEIRASTRES COROASTRES DE MAIOTRES FORQUILHASTRES PALMEIRASTRES PASSOSTRINDADE DO SULTRIUNFOTUCUNDUVATUNASTUPANCI DO SULTUPANCIRETATUPANDITUPARENDITURUCUUBIRETAMAUNIAO DA SERRAUNISTALDAURUGUAIANAVACARIAVALE DO SOLVALE REALVALE VERDEVANINIVENANCIO AIRESVERA CRUZVERANOPOLISVESPASIANO CORREAVIADUTOSVIAMAOVICENTE DUTRAVICTOR GRAEFFVILA FLORESVILA LANGAROVILA MARIAVILA NOVA DO SULVISTA ALEGREVISTA ALEGRE DO PRATAVISTA GAUCHAVITORIA DAS MISSOESWESTFALIAXANGRI-LA",
-        "Selecionar todos Municípios",
-        "Selecionar todos Municípios",
-        "",
-        "",
-        "",
-        ""
-      ]
-    }
-  ],
-  "log": [
-    {
-      "action": "select_rs",
-      "select_index": 2,
-      "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
-      "value": "RS",
-      "text": "RS - Rio Grande do Sul"
-    }
-  ]
+  "result_rows": [],
+  "final_url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1"
 }

@@ -103,3 +103,84 @@ Os dados de exportação oficiais acima são preservados em arquivo separado, ex
 2. auditar página a página conceitos, fórmulas, universo, período, unidade, geografia, filtros e limitações;
 3. só então preencher os campos do Radar que correspondam exatamente aos conceitos documentados;
 4. manter o fallback de exportações separado, sem substituição semântica da demanda/market share internos.
+
+## Atualização posterior — PDF integral recebido e auditado em 18/09/2026
+
+O estado anterior deste arquivo, que registrava impossibilidade técnica de leitura integral, foi **superado** após o recebimento direto do PDF oficial da NT CIET 05/2026.
+
+Arquivo auditado:
+`nota_tecnica_radar_mercado_v1.pdf`
+
+### Achados metodológicos confirmados
+
+1. **Fontes primárias**
+   - NFe como base principal;
+   - MDIC/Siscomex como complemento para rastrear países de destino/origem no comércio exterior.
+
+2. **Cobertura tributária**
+   - Regime Geral;
+   - Simples Nacional.
+
+3. **Granularidade**
+   - Setor industrial;
+   - NCM de 8 dígitos;
+   - Categorias agregadas de NCM.
+
+4. **Tempestividade**
+   - atualização mensal;
+   - mês imediatamente anterior disponível nos primeiros dias úteis.
+
+5. **Página Oportunidades**
+   - usa apenas CFOPs de operações efetivas;
+   - janela LTM de 12 meses, comparada aos 12 meses anteriores;
+   - valores corrigidos pelo D-ICMS;
+   - Part. RS = INT / (INT + OUF + EXT);
+   - dependência crítica: Part. RS < 5%;
+   - dependência alta: 5% a 15%;
+   - dependência média: 15% a 30%;
+   - volume financeiro saindo do RS = OUF + EXT.
+
+6. **Mercado Nacional**
+   - Consumidores: estados que compram da indústria do RS;
+   - Fornecedores: estados que vendem produtos ao RS, por NCM/Categoria;
+   - Concorrentes: estados que disputam o mercado gaúcho com a produção local;
+   - exterior excluído dessa página.
+
+7. **Competitividade RS**
+   - análise exclusivamente setorial;
+   - portfólio Top 90% das NCMs que representam as maiores saídas do setor;
+   - valores mensais por INT/OUF/EXT em 24 meses;
+   - market share móvel de 12 meses.
+
+8. **Perfil de Vendas**
+   - agregação por Produto/Categoria ou Setor;
+   - destino INT/OUF/EXT;
+   - detalhamento de UFs;
+   - países via Siscomex.
+
+9. **Composição de Mercado**
+   - origem do consumo do RS em INT/OUF/EXT;
+   - visão por Setor ou NCM;
+   - detalhamento de UFs e países.
+
+10. **Dados Abertos**
+    - seis bases em CSV:
+      1. Saídas por Setor;
+      2. Exportações por NCM;
+      3. Composição de Mercado;
+      4. Importações por NCM;
+      5. Portfólio de NCMs por Setor;
+      6. Categorias de Produtos.
+
+### Consequência metodológica para o SBMI
+
+A estratégia de extração deve mudar de **raspagem do Power BI** para **ingestão dos CSVs da página Dados Abertos**, quando os arquivos forem acessíveis.
+
+A evidência municipal encontrada em material histórico de 2023 permanece registrada apenas como histórica. A NT 05/2026 não documenta município como geografia de nenhuma das páginas correntes.
+
+### Artefato derivado
+
+Foi criado:
+`docs/data_sources/radar_nt_ciet_05_2026_dicionario_v001.csv`
+
+com a tradução estruturada de páginas, indicadores, fórmulas, filtros, geografia, unidade, atualização e limitações.

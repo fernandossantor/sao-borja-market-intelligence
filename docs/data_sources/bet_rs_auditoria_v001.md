@@ -119,3 +119,30 @@ A utilidade do seed é:
 - criar fallback regional enquanto a série municipal recente não é recuperada.
 
 Não usar essas variações de 2024 como diagnóstico corrente de 2026.
+
+## Retomada da subetapa 1B — 18/09/2026
+
+A página oficial Receita.doc foi reaberta e a descrição atual do produto confirma explicitamente que o BET inclui **nível de atividade, demografia de estabelecimentos por setor, categoria e COREDE/municípios**, além do desempenho da arrecadação estadual.
+
+Edições mais recentes confirmadas na listagem oficial:
+- ed. 28 — 07/08/2026;
+- ed. 29 — 08/09/2026.
+
+### Tentativa de recuperação das edições recentes
+
+- ed. 29: o PDF oficial foi identificado, mas o acesso automatizado retornou **cache miss**;
+- ed. 28: o PDF oficial foi identificado, mas o mecanismo web recusou a leitura por **tamanho do conteúdo**;
+- tentativa de download direto no ambiente de execução também não concluiu.
+
+### Resultado
+
+A existência da granularidade municipal é **confirmada pela descrição oficial da fonte**. A série municipal recente de São Borja, entretanto, ainda não foi extraída de forma reproduzível.
+
+Nenhum valor municipal foi estimado, interpolado ou copiado de fonte secundária.
+
+### Próximo passo operacional
+
+Quando um dos PDFs recentes puder ser lido integralmente, registrar:
+`edicao | periodo_referencia | indicador | setor/categoria | municipio | valor | unidade | fonte | nota_metodologica`
+
+e testar São Borja antes de qualquer promoção.

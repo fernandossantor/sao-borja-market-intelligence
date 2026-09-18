@@ -12,9 +12,27 @@ from sbmi.secondary_official_sources import (
 def test_filters_anp_annual_sales_by_ibge_code_and_uf():
     frame = pd.DataFrame(
         [
-            {"ANO": 2024, "UF": "RS", "MUNICÍPIO": "São Borja", "CÓDIGO IBGE": 4318002, "VENDAS": 10.0},
-            {"ANO": 2024, "UF": "RS", "MUNICÍPIO": "Itaqui", "CÓDIGO IBGE": 4310603, "VENDAS": 20.0},
-            {"ANO": 2024, "UF": "SC", "MUNICÍPIO": "Outro", "CÓDIGO IBGE": 4318002, "VENDAS": 30.0},
+            {
+                "ANO": 2024,
+                "UF": "RS",
+                "MUNICÍPIO": "São Borja",
+                "CÓDIGO IBGE": 4318002,
+                "VENDAS": 10.0,
+            },
+            {
+                "ANO": 2024,
+                "UF": "RS",
+                "MUNICÍPIO": "Itaqui",
+                "CÓDIGO IBGE": 4310603,
+                "VENDAS": 20.0,
+            },
+            {
+                "ANO": 2024,
+                "UF": "SC",
+                "MUNICÍPIO": "Outro",
+                "CÓDIGO IBGE": 4318002,
+                "VENDAS": 30.0,
+            },
         ]
     )
     result = filter_anp_annual_sales(frame)

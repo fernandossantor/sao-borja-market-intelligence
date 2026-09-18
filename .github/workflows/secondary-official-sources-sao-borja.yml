@@ -171,6 +171,43 @@ jobs:
                       api_rec["rows_detected"] = len(rows) if isinstance(rows, list) else None
                       if isinstance(rows, list):
                           pd.json_normalize(rows).to_csv(FILT / "anp_retailers_saoborja.csv", index=False)
+
+                          distributor_counts = {}
+                          product_rows = []
+                          for row in rows:
+                              distributor = str(row.get("distribuidora") or "").strip() or "NAO INFORMADA"
+                              distributor_counts[distributor] = distributor_counts.get(distributor, 0) + 1
+                              for product in row.get("produtos") or []:
+                                  product_rows.append({
+                                      "codigoSIMP": row.get("codigoSIMP"),
+                                      "cnpj": row.get("cnpj"),
+                                      "distribuidora": distributor,
+                                      "produto": product.get("produto"),
+                                      "tancagem_m3": product.get("tancagem"),
+                                      "qtde_bicos": product.get("qtdeBicos"),
+                                  })
+
+                          pd.DataFrame([
+                              {"distribuidora": k, "revendedores": v}
+                              for k, v in sorted(distributor_counts.items())
+                          ]).to_csv(FILT / "anp_retailers_distributor_summary.csv", index=False)
+
+                          if product_rows:
+                              products = pd.DataFrame(product_rows)
+                              products["tancagem_m3"] = pd.to_numeric(products["tancagem_m3"], errors="coerce")
+                              products["qtde_bicos"] = pd.to_numeric(products["qtde_bicos"], errors="coerce")
+                              summary = (
+                                  products.groupby("produto", dropna=False)
+                                  .agg(
+                                      revendedores=("codigoSIMP", "nunique"),
+                                      tancagem_m3=("tancagem_m3", "sum"),
+                                      bicos=("qtde_bicos", "sum"),
+                                  )
+                                  .reset_index()
+                                  .sort_values("produto")
+                              )
+                              summary.to_csv(FILT / "anp_retailers_product_summary.csv", index=False)
+                              products.to_csv(FILT / "anp_retailers_products_long.csv", index=False)
                   except Exception as exc:
                       api_rec["json_error"] = repr(exc)
               else:

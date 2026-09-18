@@ -279,3 +279,34 @@ Sem a fórmula do IFEP, é proibido:
 
 Arquivo:
 `docs/data_sources/observatorio_fecomercio_rs_gap_v028_v001.csv`
+
+## Retomada da proveniência — 18/09/2026
+
+A rota oficial `/page/fonte-dos-dados` foi revalidada, mas o conteúdo permanece carregado client-side e não é exposto textualmente no mecanismo automatizado utilizado nesta auditoria.
+
+### Evidência institucional adicional
+
+Material institucional recente sobre o Observatório reforça que a plataforma:
+- reúne dados e indicadores calculados pelo IFEP-RS sobre atividade empresarial;
+- permite analisar informações de diferentes cidades e regiões;
+- centraliza dimensões de empresas, empregos, receitas e despesas.
+
+Isso reforça a **capacidade territorial municipal da plataforma**, mas não resolve a proveniência fina por indicador.
+
+### Decisão de auditoria
+
+A matriz `observatorio_fecomercio_rs_matriz_indicadores_v001.csv` permanece com `PENDENTE` na coluna de fonte primária por indicador sempre que a relação não estiver documentada.
+
+Não foram feitas associações automáticas do tipo:
+- empregos → RAIS/Novo Caged;
+- empresas/MEI/Simples → Receita Federal;
+- receitas/despesas → qualquer base específica.
+
+Essas associações continuam metodologicamente plausíveis em alguns casos, mas **não verificadas**.
+
+### Pendência objetiva
+
+Recuperar diretamente da interface:
+`indicador | fonte_original | produtor | periodicidade | menor_geografia | unidade | transformação_IFEP`.
+
+Até lá, o Observatório permanece fonte integradora/secundária, e as bases primárias já canônicas no SBMI mantêm precedência.

@@ -71,3 +71,19 @@ Prioridade geográfica:
 3. Rio Grande do Sul.
 
 Nenhum resultado será promovido às bases canônicas antes da conclusão desta subetapa.
+
+
+## Tentativa de subetapa 1B — 17/09/2026
+
+A página oficial foi revalidada e confirma:
+- edição 29 publicada em 08/09/2026;
+- arquivo histórico contínuo desde a edição 01, de 24/05/2024;
+- descrição explícita de recortes por COREDE/municípios.
+
+Foi tentada a abertura automatizada das edições recentes 22, 23, 24 e 29. Os links oficiais dos PDFs foram identificados, mas o mecanismo de leitura disponível retornou erro de cache para esses arquivos nesta sessão.
+
+**Decisão metodológica:** não preencher valores municipais de São Borja a partir de fontes secundárias, snippets ou inferências enquanto a tabela oficial recente não puder ser lida de forma verificável.
+
+A etapa 1B permanece aberta. O achado válido até aqui é a **capacidade territorial declarada da fonte**, não uma série municipal já extraída.
+
+Como evidência adicional de estrutura regional, edições oficiais antigas indexadas publicamente permitem recuperar tabelas de vendas industriais por COREDE; isso confirma a consistência histórica do recorte Fronteira Oeste, mas não substitui a extração municipal atual.

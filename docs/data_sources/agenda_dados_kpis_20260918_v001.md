@@ -140,3 +140,55 @@ Sem atribuir score, a sequência mais eficiente é:
 Arquivos:
 - `agenda_dados_decisorios_20260918_v001.csv`;
 - `kpis_monitoramento_pom_20260918_v001.csv`.
+
+## 7. Atualização operacional — ANP, Cadastur e ANTT
+
+Após a definição da agenda, três rotas tiveram avanço material.
+
+### ANP
+
+São Borja foi extraído para:
+- gasolina C, etanol, diesel e GLP — 2023 e 2024;
+- cadastro corrente de revendedores — 18/09/2026.
+
+A lacuna “mobilidade por combustíveis” deixa de ser ausência de valor municipal.
+
+Novo estado:
+**VALORES MUNICIPAIS RECUPERADOS; INTERPRETAÇÃO CAUSAL BLOQUEADA.**
+
+### Cadastur
+
+Para o 2T2026 foram recuperados:
+- 2 meios de hospedagem Regular/Operação;
+- 90 UHs;
+- 180 leitos;
+- 7 agências de turismo localizadas;
+- 6 Regular/Operação;
+- 1 Em Implantação.
+
+Novo estado:
+**HOSPEDAGEM/AGÊNCIAS RECUPERADAS; DEMAIS CATEGORIAS E DEMANDA PENDENTES.**
+
+### ANTT
+
+O Anuário TRC 2025 acrescenta série específica do ponto de fronteira de São Borja:
+- 2023: 859.348 t exportadas;
+- 2024: 800.435 t;
+- 2025: 979.151 t.
+
+A participação de São Borja no total das seis fronteiras da tabela sobe de 14,50% em 2023 para 16,22% em 2025.
+
+### Consequência para a agenda
+
+A fronteira passa a ter:
+- fluxo físico exportador;
+- abastecimento municipal;
+- oferta turística formal;
+- estrutura empresarial local.
+
+O principal bloqueio permanece:
+**origem do cliente + permanência + gasto/ticket.**
+
+A comparação 2023→2024 também mostrou que exportações pela fronteira caíram 7%, enquanto gasolina, diesel e etanol vendidos no município cresceram fortemente.
+
+Portanto, vendas de combustível **não devem ser usadas como proxy direto do fluxo exportador fronteiriço**.

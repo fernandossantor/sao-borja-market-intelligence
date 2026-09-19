@@ -1,0 +1,219 @@
+name: bet-municipal-sao-borja-scan-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/bet-municipal-sao-borja-scan-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install extraction dependencies
+        run: |
+          python -m pip install --quiet requests beautifulsoup4
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+
+      - name: Download current BET editions and scan São Borja
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv
+          import hashlib
+          import re
+          import subprocess
+          import unicodedata
+          from pathlib import Path
+          from urllib.parse import urljoin
+
+          import requests
+          from bs4 import BeautifulSoup
+
+          BASE = "https://receitadoc.sefaz.rs.gov.br/boletins/"
+          OUT = Path("artifacts/bet_municipal_scan_2026")
+          RAW = OUT / "raw"
+          TXT = OUT / "text"
+          RAW.mkdir(parents=True, exist_ok=True)
+          TXT.mkdir(parents=True, exist_ok=True)
+
+          session = requests.Session()
+          session.headers.update({"User-Agent": "Mozilla/5.0 SBMI territorial audit"})
+          html_resp = session.get(BASE, timeout=120)
+          html_resp.raise_for_status()
+          html = html_resp.content
+          (RAW / "boletins.html").write_bytes(html)
+
+          def sha_bytes(b):
+              return hashlib.sha256(b).hexdigest()
+
+          def normalize(s):
+              s = unicodedata.normalize("NFKD", s)
+              s = "".join(ch for ch in s if not unicodedata.combining(ch))
+              return s.casefold()
+
+          soup = BeautifulSoup(html, "html.parser")
+          editions = []
+          for a in soup.find_all("a", href=True):
+              title = " ".join(a.get_text(" ", strip=True).split())
+              m = re.search(r"Boletim Econômico-Tributário\s+ed\.\s*(\d+)", title, flags=re.I)
+              if not m:
+                  continue
+              ed = int(m.group(1))
+              if 21 <= ed <= 29:
+                  editions.append((ed, title, urljoin(BASE, a["href"])))
+
+          # de-duplicate by edition, preserving first official listing occurrence
+          by_ed = {}
+          for rec in editions:
+              by_ed.setdefault(rec[0], rec)
+          editions = [by_ed[k] for k in sorted(by_ed)]
+
+          manifest = []
+          contexts = []
+          for ed, title, url in editions:
+              pdf_path = RAW / f"bet_ed{ed:02d}.pdf"
+              txt_path = TXT / f"bet_ed{ed:02d}.txt"
+              status = "OK"
+              err = ""
+              try:
+                  r = session.get(url, timeout=240)
+                  r.raise_for_status()
+                  pdf_path.write_bytes(r.content)
+                  if not r.content.startswith(b"%PDF"):
+                      raise RuntimeError("downloaded content is not a PDF")
+                  subprocess.run(
+                      ["pdftotext", "-layout", str(pdf_path), str(txt_path)],
+                      check=True,
+                      timeout=180,
+                  )
+                  text = txt_path.read_text(encoding="utf-8", errors="replace")
+                  lines = text.splitlines()
+                  hit_idx = [i for i, line in enumerate(lines) if "sao borja" in normalize(line)]
+                  for n, i in enumerate(hit_idx, start=1):
+                      lo = max(0, i - 5)
+                      hi = min(len(lines), i + 6)
+                      contexts.append(
+                          {
+                              "edition": ed,
+                              "occurrence": n,
+                              "line_index_1based": i + 1,
+                              "context": "\n".join(lines[lo:hi]).strip(),
+                              "source_url": url,
+                          }
+                      )
+                  pdf_sha = sha_bytes(r.content)
+                  pdf_bytes = len(r.content)
+                  text_lines = len(lines)
+                  sao_borja_occurrences = len(hit_idx)
+              except Exception as exc:
+                  status = "ERROR"
+                  err = f"{type(exc).__name__}: {exc}"
+                  pdf_sha = ""
+                  pdf_bytes = pdf_path.stat().st_size if pdf_path.exists() else 0
+                  text_lines = 0
+                  sao_borja_occurrences = 0
+
+              manifest.append(
+                  {
+                      "edition": ed,
+                      "title": title,
+                      "source_url": url,
+                      "download_status": status,
+                      "error": err,
+                      "pdf_bytes": pdf_bytes,
+                      "pdf_sha256": pdf_sha,
+                      "text_lines": text_lines,
+                      "sao_borja_occurrences": sao_borja_occurrences,
+                  }
+              )
+
+          with (OUT / "bet_municipal_scan_manifest.csv").open("w", newline="", encoding="utf-8-sig") as fh:
+              w = csv.DictWriter(fh, fieldnames=list(manifest[0].keys()) if manifest else [
+                  "edition","title","source_url","download_status","error","pdf_bytes","pdf_sha256","text_lines","sao_borja_occurrences"
+              ])
+              w.writeheader()
+              w.writerows(manifest)
+
+          with (OUT / "bet_municipal_sao_borja_context.csv").open("w", newline="", encoding="utf-8-sig") as fh:
+              fields = ["edition","occurrence","line_index_1based","context","source_url"]
+              w = csv.DictWriter(fh, fieldnames=fields)
+              w.writeheader()
+              w.writerows(contexts)
+
+          summary = {
+              "page_sha256": sha_bytes(html),
+              "editions_found": [r["edition"] for r in manifest],
+              "downloads_ok": sum(r["download_status"] == "OK" for r in manifest),
+              "downloads_error": sum(r["download_status"] != "OK" for r in manifest),
+              "editions_with_sao_borja": [r["edition"] for r in manifest if r["sao_borja_occurrences"] > 0],
+              "total_sao_borja_occurrences": sum(r["sao_borja_occurrences"] for r in manifest),
+          }
+          import json
+          (OUT / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Persist audit evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/bet_municipal_scan_2026"
+          DEST="docs/data_sources/bet_municipal_scan_2026"
+          mkdir -p "$DEST"
+          cp "$SRC/bet_municipal_scan_manifest.csv" "$DEST/"
+          cp "$SRC/bet_municipal_sao_borja_context.csv" "$DEST/"
+          cp "$SRC/summary.json" "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # BET — varredura municipal de São Borja — edições 21 a 29
+
+          **Fonte observada:** Receita Estadual/SEFAZ-RS — Receita.doc — Boletim Econômico-Tributário.
+          **Abrangência:** edições 21 a 29 da listagem oficial, publicadas em 2026.
+          **Finalidade:** localizar de forma reproduzível ocorrências explícitas de São Borja nos PDFs recentes antes de extrair qualquer série municipal.
+
+          O workflow preserva:
+          - URL oficial da edição;
+          - tamanho e SHA-256 do PDF baixado;
+          - status de download/extracao;
+          - quantidade de linhas extraídas;
+          - quantidade de ocorrências textuais de "São Borja";
+          - contexto textual de cada ocorrência.
+
+          **Limitação metodológica:** ausência de "São Borja" no texto extraído não é evidência de atividade zero. Pode significar que a edição mostra apenas subconjuntos de municípios, que a tabela não inclui o município naquele período, ou que o conteúdo relevante está em elemento gráfico não extraído como texto.
+
+          Nenhum valor municipal é estimado ou interpolado a partir do COREDE Fronteira Oeste.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: scan BET 2026 editions for São Borja municipal rows"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload scan artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bet-municipal-sao-borja-scan-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/bet_municipal_scan_2026/

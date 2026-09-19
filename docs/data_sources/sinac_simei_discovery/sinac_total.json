@@ -9,6 +9,10 @@
       "value": "Por Município"
     },
     {
+      "action": "set_query_date",
+      "date": "12/09/2026"
+    },
+    {
       "action": "filter_uf",
       "value": "RS"
     },
@@ -2994,207 +2998,19 @@
     {
       "tag": "final",
       "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
-      "title": "Estatísticas Sinac",
-      "selects": [
-        {
-          "index": 0,
-          "id": "ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
-          "name": "ctl00$ctl00$Conteudo$AntesTabela$droplistOpcao",
-          "visible": true,
-          "value": "Por Município",
-          "options": [
-            {
-              "text": "Por Dia",
-              "value": "Por Dia",
-              "selected": false
-            },
-            {
-              "text": "Por UF",
-              "value": "Por UF",
-              "selected": false
-            },
-            {
-              "text": "Por Município",
-              "value": "Por Município",
-              "selected": true
-            }
-          ]
-        },
-        {
-          "index": 1,
-          "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
-          "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
-          "visible": false,
-          "value": "UFNS",
-          "options": [
-            {
-              "text": "UF não selecionado",
-              "value": "UFNS",
-              "selected": true
-            },
-            {
-              "text": "AC - Acre",
-              "value": "AC",
-              "selected": false
-            },
-            {
-              "text": "AL - Alagoas",
-              "value": "AL",
-              "selected": false
-            },
-            {
-              "text": "AM - Amazonas",
-              "value": "AM",
-              "selected": false
-            },
-            {
-              "text": "AP - Amapá",
-              "value": "AP",
-              "selected": false
-            },
-            {
-              "text": "BA - Bahia",
-              "value": "BA",
-              "selected": false
-            },
-            {
-              "text": "CE - Ceará",
-              "value": "CE",
-              "selected": false
-            },
-            {
-              "text": "DF - Distrito Federal",
-              "value": "DF",
-              "selected": false
-            },
-            {
-              "text": "ES - Espírito Santo",
-              "value": "ES",
-              "selected": false
-            },
-            {
-              "text": "GO - Goiás",
-              "value": "GO",
-              "selected": false
-            },
-            {
-              "text": "MA - Maranhão",
-              "value": "MA",
-              "selected": false
-            },
-            {
-              "text": "MG - Minas Gerais",
-              "value": "MG",
-              "selected": false
-            },
-            {
-              "text": "MS - Mato Grosso do Sul",
-              "value": "MS",
-              "selected": false
-            },
-            {
-              "text": "MT - Mato Grosso",
-              "value": "MT",
-              "selected": false
-            },
-            {
-              "text": "PA - Pará",
-              "value": "PA",
-              "selected": false
-            },
-            {
-              "text": "PB - Paraíba",
-              "value": "PB",
-              "selected": false
-            },
-            {
-              "text": "PE - Pernambuco",
-              "value": "PE",
-              "selected": false
-            },
-            {
-              "text": "PI - Piauí",
-              "value": "PI",
-              "selected": false
-            },
-            {
-              "text": "PR - Paraná",
-              "value": "PR",
-              "selected": false
-            },
-            {
-              "text": "RJ - Rio de Janeiro",
-              "value": "RJ",
-              "selected": false
-            },
-            {
-              "text": "RN - Rio Grande do Norte",
-              "value": "RN",
-              "selected": false
-            },
-            {
-              "text": "RO - Rondônia",
-              "value": "RO",
-              "selected": false
-            },
-            {
-              "text": "RR - Roraima",
-              "value": "RR",
-              "selected": false
-            },
-            {
-              "text": "RS - Rio Grande do Sul",
-              "value": "RS",
-              "selected": false
-            },
-            {
-              "text": "SC - Santa Catarina",
-              "value": "SC",
-              "selected": false
-            },
-            {
-              "text": "SE - Sergipe",
-              "value": "SE",
-              "selected": false
-            },
-            {
-              "text": "SP - São Paulo",
-              "value": "SP",
-              "selected": false
-            },
-            {
-              "text": "TO - Tocantins",
-              "value": "TO",
-              "selected": false
-            }
-          ]
-        },
-        {
-          "index": 2,
-          "id": "lbOrigem",
-          "name": null,
-          "visible": false,
-          "value": "",
-          "options": []
-        },
-        {
-          "index": 3,
-          "id": "lbDestino",
-          "name": null,
-          "visible": false,
-          "value": "",
-          "options": []
-        }
-      ],
+      "title": "Loading https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1",
+      "selects": [],
       "hidden": {
         "municipios": "8863",
         "uf": "RS",
         "check": "false"
       },
-      "body": " Estatísticas do Simples Nacional :: Optantes por UF e Município\nOptantes por UF e Município - Sinac\nANO 2026\n\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nSelecione o tipo de consulta:\t\nPor Dia\nPor UF\nPor Município\n\t \nInforme a data para pesquisa(dd/mm/aaaa):\t\n\t\n  \n\nNão existem registros satisfazendo os critérios de pesquisa.\n\n\n"
+      "body": " Estatísticas do Simples Nacional :: Optantes por UF e Município\nOptantes por UF e Município - Sinac\nANO 2026\nTotal de Empresas Optantes em 12/09/2026, no estado RS, por Município e Data\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nSelecione o tipo de consulta:\t\nPor Dia\nPor UF\nPor Município\n\t \nInforme a data para pesquisa(dd/mm/aaaa):\t\n\t\n  \nMunicipio\tTotal\nSAO BORJA\t7.176\nTOTAL\t7.176\n\n\n\n "
     }
   ],
   "http_status": 200,
+  "position_date": "12/09/2026",
+  "date_ok": true,
   "filter_ok": true,
   "exibir_ok": true,
   "tables": [
@@ -3233,6 +3049,20 @@
     ],
     [
       [
+        "Municipio",
+        "Total"
+      ],
+      [
+        "SAO BORJA",
+        "7.176"
+      ],
+      [
+        "TOTAL",
+        "7.176"
+      ]
+    ],
+    [
+      [
         "UF:",
         "UF não selecionado AC - Acre AL - Alagoas AM - Amazonas AP - Amapá BA - Bahia CE - Ceará DF - Distrito Federal ES - Espírito Santo GO - Goiás MA - Maranhão MG - Minas Gerais MS - Mato Grosso do Sul MT - Mato Grosso PA - Pará PB - Paraíba PE - Pernambuco PI - Piauí PR - Paraná RJ - Rio de Janeiro RN - Rio Grande do Norte RO - Rondônia RR - Roraima RS - Rio Grande do Sul SC - Santa Catarina SE - Sergipe SP - São Paulo TO - Tocantins"
       ]
@@ -3257,6 +3087,29 @@
       ]
     ]
   ],
-  "result_rows": [],
+  "result_rows": [
+    {
+      "table": 2,
+      "row": 1,
+      "cells": [
+        "SAO BORJA",
+        "7.176"
+      ]
+    }
+  ],
+  "grid_rows": [
+    [
+      "Municipio",
+      "Total"
+    ],
+    [
+      "SAO BORJA",
+      "7.176"
+    ],
+    [
+      "TOTAL",
+      "7.176"
+    ]
+  ],
   "final_url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorDataMunicipio.aspx?tipoConsulta=1"
 }

@@ -38,6 +38,31 @@
     },
     {
       "action": "click_exibir"
+    },
+    {
+      "action": "cnae_page",
+      "page": 1,
+      "rows": 102
+    },
+    {
+      "action": "cnae_page",
+      "page": 2,
+      "rows": 102
+    },
+    {
+      "action": "cnae_page",
+      "page": 3,
+      "rows": 102
+    },
+    {
+      "action": "cnae_page",
+      "page": 4,
+      "rows": 102
+    },
+    {
+      "action": "cnae_page",
+      "page": 5,
+      "rows": 29
     }
   ],
   "snapshots": [
@@ -2935,19 +2960,4572 @@
     {
       "tag": "final",
       "url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?tipoConsulta=1",
-      "title": "Loading https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?tipoConsulta=1",
-      "selects": [],
+      "title": "Estatísticas Sinac",
+      "selects": [
+        {
+          "index": 0,
+          "id": "ctl00_ctl00_Conteudo_AntesTabela_ddlColuna",
+          "name": "ctl00$ctl00$Conteudo$AntesTabela$ddlColuna",
+          "visible": true,
+          "value": "Município",
+          "options": [
+            {
+              "text": "Sem agrupamento",
+              "value": "Sem agrupamento",
+              "selected": false
+            },
+            {
+              "text": "UF",
+              "value": "UF",
+              "selected": false
+            },
+            {
+              "text": "Município",
+              "value": "Município",
+              "selected": true
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "id": "ctl00_ctl00_Conteudo_AposTabela_ddlUf",
+          "name": "ctl00$ctl00$Conteudo$AposTabela$ddlUf",
+          "visible": false,
+          "value": "UFNS",
+          "options": [
+            {
+              "text": "UF não selecionado",
+              "value": "UFNS",
+              "selected": true
+            },
+            {
+              "text": "AC - Acre",
+              "value": "AC",
+              "selected": false
+            },
+            {
+              "text": "AL - Alagoas",
+              "value": "AL",
+              "selected": false
+            },
+            {
+              "text": "AM - Amazonas",
+              "value": "AM",
+              "selected": false
+            },
+            {
+              "text": "AP - Amapá",
+              "value": "AP",
+              "selected": false
+            },
+            {
+              "text": "BA - Bahia",
+              "value": "BA",
+              "selected": false
+            },
+            {
+              "text": "CE - Ceará",
+              "value": "CE",
+              "selected": false
+            },
+            {
+              "text": "DF - Distrito Federal",
+              "value": "DF",
+              "selected": false
+            },
+            {
+              "text": "ES - Espírito Santo",
+              "value": "ES",
+              "selected": false
+            },
+            {
+              "text": "GO - Goiás",
+              "value": "GO",
+              "selected": false
+            },
+            {
+              "text": "MA - Maranhão",
+              "value": "MA",
+              "selected": false
+            },
+            {
+              "text": "MG - Minas Gerais",
+              "value": "MG",
+              "selected": false
+            },
+            {
+              "text": "MS - Mato Grosso do Sul",
+              "value": "MS",
+              "selected": false
+            },
+            {
+              "text": "MT - Mato Grosso",
+              "value": "MT",
+              "selected": false
+            },
+            {
+              "text": "PA - Pará",
+              "value": "PA",
+              "selected": false
+            },
+            {
+              "text": "PB - Paraíba",
+              "value": "PB",
+              "selected": false
+            },
+            {
+              "text": "PE - Pernambuco",
+              "value": "PE",
+              "selected": false
+            },
+            {
+              "text": "PI - Piauí",
+              "value": "PI",
+              "selected": false
+            },
+            {
+              "text": "PR - Paraná",
+              "value": "PR",
+              "selected": false
+            },
+            {
+              "text": "RJ - Rio de Janeiro",
+              "value": "RJ",
+              "selected": false
+            },
+            {
+              "text": "RN - Rio Grande do Norte",
+              "value": "RN",
+              "selected": false
+            },
+            {
+              "text": "RO - Rondônia",
+              "value": "RO",
+              "selected": false
+            },
+            {
+              "text": "RR - Roraima",
+              "value": "RR",
+              "selected": false
+            },
+            {
+              "text": "RS - Rio Grande do Sul",
+              "value": "RS",
+              "selected": false
+            },
+            {
+              "text": "SC - Santa Catarina",
+              "value": "SC",
+              "selected": false
+            },
+            {
+              "text": "SE - Sergipe",
+              "value": "SE",
+              "selected": false
+            },
+            {
+              "text": "SP - São Paulo",
+              "value": "SP",
+              "selected": false
+            },
+            {
+              "text": "TO - Tocantins",
+              "value": "TO",
+              "selected": false
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "id": "lbOrigem",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": []
+        },
+        {
+          "index": 3,
+          "id": "lbDestino",
+          "name": null,
+          "visible": false,
+          "value": "",
+          "options": []
+        }
+      ],
       "hidden": {
         "municipios": "8863",
         "uf": "RS",
         "check": "false"
       },
-      "body": " Estatísticas do Simples Nacional :: Optantes por CNAE UF e município\nOptantes por CNAE UF e município - Sinac\nANO 2026\nTotal de Empresas Optantes em 12/09/2026, no estado RS, por Município e CNAE\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nAgrupamento:\t\nSem agrupamento\nUF\nMunicípio\n\t\n\t\n  \nPágina 1 de 5    \n\nInforme Página:  \nMunicipio\tTotal\nSAO BORJA - 0115600\t4\nSAO BORJA - 0151201\t1\nSAO BORJA - 0151202\t1\nSAO BORJA - 0155505\t1\nSAO BORJA - 0159801\t1\nSAO BORJA - 0159802\t1\nSAO BORJA - 0161001\t12\nSAO BORJA - 0161002\t9\nSAO BORJA - 0161003\t68\nSAO BORJA - 0161099\t2\nSAO BORJA - 0162802\t3\nSAO BORJA - 0163600\t3\nSAO BORJA - 0322104\t1\nSAO BORJA - 1012101\t1\nSAO BORJA - 1013901\t3\nSAO BORJA - 1020101\t1\nSAO BORJA - 1031700\t2\nSAO BORJA - 1032599\t1\nSAO BORJA - 1041400\t1\nSAO BORJA - 1053800\t3\nSAO BORJA - 1061901\t1\nSAO BORJA - 1061902\t4\nSAO BORJA - 1066000\t2\nSAO BORJA - 1091101\t30\nSAO BORJA - 1091102\t60\nSAO BORJA - 1092900\t2\nSAO BORJA - 1093701\t1\nSAO BORJA - 1094500\t2\nSAO BORJA - 1096100\t4\nSAO BORJA - 1099604\t2\nSAO BORJA - 1111901\t1\nSAO BORJA - 1112700\t1\nSAO BORJA - 1113502\t1\nSAO BORJA - 1340599\t3\nSAO BORJA - 1351100\t3\nSAO BORJA - 1359600\t25\nSAO BORJA - 1411801\t1\nSAO BORJA - 1412601\t31\nSAO BORJA - 1412602\t36\nSAO BORJA - 1412603\t3\nSAO BORJA - 1422300\t7\nSAO BORJA - 1529700\t2\nSAO BORJA - 1531901\t1\nSAO BORJA - 1622699\t9\nSAO BORJA - 1629301\t4\nSAO BORJA - 1732000\t2\nSAO BORJA - 1749400\t3\nSAO BORJA - 1813001\t4\nSAO BORJA - 1813099\t8\nSAO BORJA - 1821100\t4\nSAO BORJA - 1822999\t1\nSAO BORJA - 2062200\t1\nSAO BORJA - 2212900\t1\nSAO BORJA - 2229399\t2\nSAO BORJA - 2330301\t1\nSAO BORJA - 2330302\t2\nSAO BORJA - 2330399\t3\nSAO BORJA - 2342702\t1\nSAO BORJA - 2349499\t3\nSAO BORJA - 2391503\t4\nSAO BORJA - 2399101\t1\nSAO BORJA - 2424501\t1\nSAO BORJA - 2511000\t3\nSAO BORJA - 2512800\t13\nSAO BORJA - 2522500\t1\nSAO BORJA - 2532201\t6\nSAO BORJA - 2539001\t59\nSAO BORJA - 2539002\t1\nSAO BORJA - 2541100\t6\nSAO BORJA - 2542000\t24\nSAO BORJA - 2543800\t1\nSAO BORJA - 2593400\t1\nSAO BORJA - 2599301\t4\nSAO BORJA - 2599302\t1\nSAO BORJA - 2599399\t1\nSAO BORJA - 2950600\t3\nSAO BORJA - 3101200\t22\nSAO BORJA - 3102100\t1\nSAO BORJA - 3103900\t1\nSAO BORJA - 3212400\t3\nSAO BORJA - 3240099\t1\nSAO BORJA - 3250706\t2\nSAO BORJA - 3299002\t1\nSAO BORJA - 3299003\t2\nSAO BORJA - 3299006\t3\nSAO BORJA - 3299099\t32\nSAO BORJA - 3312102\t1\nSAO BORJA - 3313901\t3\nSAO BORJA - 3313999\t1\nSAO BORJA - 3314701\t1\nSAO BORJA - 3314702\t3\nSAO BORJA - 3314704\t1\nSAO BORJA - 3314707\t6\nSAO BORJA - 3314710\t4\nSAO BORJA - 3314711\t57\nSAO BORJA - 3314712\t27\nSAO BORJA - 3314719\t2\nSAO BORJA - 3317102\t1\nSAO BORJA - 3319800\t6\nSAO BORJA - 3321000\t11\nTOTAL\t713\n\n\n "
+      "body": " Estatísticas do Simples Nacional :: Optantes por CNAE UF e município\nOptantes por CNAE UF e município - Sinac\nANO 2026\nTotal de Empresas Optantes em 12/09/2026, no estado RS, por Município e CNAE\n\nPosição Consolidada até 12/09/2026\nParâmetros de Exibição\nAgrupamento:\t\nSem agrupamento\nUF\nMunicípio\n\t\n\t\n  \nPágina 5 de 5    \n\nInforme Página:  \nMunicipio\tTotal\nSAO BORJA - 9001999\t2\nSAO BORJA - 9311500\t6\nSAO BORJA - 9312300\t3\nSAO BORJA - 9313100\t19\nSAO BORJA - 9329803\t2\nSAO BORJA - 9329804\t2\nSAO BORJA - 9329899\t6\nSAO BORJA - 9511800\t39\nSAO BORJA - 9512600\t14\nSAO BORJA - 9521500\t14\nSAO BORJA - 9529101\t2\nSAO BORJA - 9529102\t7\nSAO BORJA - 9529104\t4\nSAO BORJA - 9529105\t17\nSAO BORJA - 9529106\t1\nSAO BORJA - 9529199\t2\nSAO BORJA - 9601701\t10\nSAO BORJA - 9601703\t1\nSAO BORJA - 9602501\t287\nSAO BORJA - 9602502\t98\nSAO BORJA - 9603301\t1\nSAO BORJA - 9603304\t2\nSAO BORJA - 9609206\t11\nSAO BORJA - 9609207\t4\nSAO BORJA - 9609208\t17\nSAO BORJA - 9609299\t16\nSAO BORJA - 9700500\t184\nTOTAL\t771\n\n\n "
     }
   ],
   "http_status": 200,
+  "position_date": "12/09/2026",
   "filter_ok": true,
   "exibir_ok": true,
+  "cnae_pages": [
+    {
+      "page": 1,
+      "rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 0115600",
+          "4"
+        ],
+        [
+          "SAO BORJA - 0151201",
+          "1"
+        ],
+        [
+          "SAO BORJA - 0151202",
+          "1"
+        ],
+        [
+          "SAO BORJA - 0155505",
+          "1"
+        ],
+        [
+          "SAO BORJA - 0159801",
+          "1"
+        ],
+        [
+          "SAO BORJA - 0159802",
+          "1"
+        ],
+        [
+          "SAO BORJA - 0161001",
+          "12"
+        ],
+        [
+          "SAO BORJA - 0161002",
+          "9"
+        ],
+        [
+          "SAO BORJA - 0161003",
+          "68"
+        ],
+        [
+          "SAO BORJA - 0161099",
+          "2"
+        ],
+        [
+          "SAO BORJA - 0162802",
+          "3"
+        ],
+        [
+          "SAO BORJA - 0163600",
+          "3"
+        ],
+        [
+          "SAO BORJA - 0322104",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1012101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1013901",
+          "3"
+        ],
+        [
+          "SAO BORJA - 1020101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1031700",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1032599",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1041400",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1053800",
+          "3"
+        ],
+        [
+          "SAO BORJA - 1061901",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1061902",
+          "4"
+        ],
+        [
+          "SAO BORJA - 1066000",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1091101",
+          "30"
+        ],
+        [
+          "SAO BORJA - 1091102",
+          "60"
+        ],
+        [
+          "SAO BORJA - 1092900",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1093701",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1094500",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1096100",
+          "4"
+        ],
+        [
+          "SAO BORJA - 1099604",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1111901",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1112700",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1113502",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1340599",
+          "3"
+        ],
+        [
+          "SAO BORJA - 1351100",
+          "3"
+        ],
+        [
+          "SAO BORJA - 1359600",
+          "25"
+        ],
+        [
+          "SAO BORJA - 1411801",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1412601",
+          "31"
+        ],
+        [
+          "SAO BORJA - 1412602",
+          "36"
+        ],
+        [
+          "SAO BORJA - 1412603",
+          "3"
+        ],
+        [
+          "SAO BORJA - 1422300",
+          "7"
+        ],
+        [
+          "SAO BORJA - 1529700",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1531901",
+          "1"
+        ],
+        [
+          "SAO BORJA - 1622699",
+          "9"
+        ],
+        [
+          "SAO BORJA - 1629301",
+          "4"
+        ],
+        [
+          "SAO BORJA - 1732000",
+          "2"
+        ],
+        [
+          "SAO BORJA - 1749400",
+          "3"
+        ],
+        [
+          "SAO BORJA - 1813001",
+          "4"
+        ],
+        [
+          "SAO BORJA - 1813099",
+          "8"
+        ],
+        [
+          "SAO BORJA - 1821100",
+          "4"
+        ],
+        [
+          "SAO BORJA - 1822999",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2062200",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2212900",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2229399",
+          "2"
+        ],
+        [
+          "SAO BORJA - 2330301",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2330302",
+          "2"
+        ],
+        [
+          "SAO BORJA - 2330399",
+          "3"
+        ],
+        [
+          "SAO BORJA - 2342702",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2349499",
+          "3"
+        ],
+        [
+          "SAO BORJA - 2391503",
+          "4"
+        ],
+        [
+          "SAO BORJA - 2399101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2424501",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2511000",
+          "3"
+        ],
+        [
+          "SAO BORJA - 2512800",
+          "13"
+        ],
+        [
+          "SAO BORJA - 2522500",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2532201",
+          "6"
+        ],
+        [
+          "SAO BORJA - 2539001",
+          "59"
+        ],
+        [
+          "SAO BORJA - 2539002",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2541100",
+          "6"
+        ],
+        [
+          "SAO BORJA - 2542000",
+          "24"
+        ],
+        [
+          "SAO BORJA - 2543800",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2593400",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2599301",
+          "4"
+        ],
+        [
+          "SAO BORJA - 2599302",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2599399",
+          "1"
+        ],
+        [
+          "SAO BORJA - 2950600",
+          "3"
+        ],
+        [
+          "SAO BORJA - 3101200",
+          "22"
+        ],
+        [
+          "SAO BORJA - 3102100",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3103900",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3212400",
+          "3"
+        ],
+        [
+          "SAO BORJA - 3240099",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3250706",
+          "2"
+        ],
+        [
+          "SAO BORJA - 3299002",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3299003",
+          "2"
+        ],
+        [
+          "SAO BORJA - 3299006",
+          "3"
+        ],
+        [
+          "SAO BORJA - 3299099",
+          "32"
+        ],
+        [
+          "SAO BORJA - 3312102",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3313901",
+          "3"
+        ],
+        [
+          "SAO BORJA - 3313999",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3314701",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3314702",
+          "3"
+        ],
+        [
+          "SAO BORJA - 3314704",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3314707",
+          "6"
+        ],
+        [
+          "SAO BORJA - 3314710",
+          "4"
+        ],
+        [
+          "SAO BORJA - 3314711",
+          "57"
+        ],
+        [
+          "SAO BORJA - 3314712",
+          "27"
+        ],
+        [
+          "SAO BORJA - 3314719",
+          "2"
+        ],
+        [
+          "SAO BORJA - 3317102",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3319800",
+          "6"
+        ],
+        [
+          "SAO BORJA - 3321000",
+          "11"
+        ],
+        [
+          "TOTAL",
+          "713"
+        ]
+      ]
+    },
+    {
+      "page": 2,
+      "rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 3329501",
+          "28"
+        ],
+        [
+          "SAO BORJA - 3811400",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3831901",
+          "1"
+        ],
+        [
+          "SAO BORJA - 3831999",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4120400",
+          "12"
+        ],
+        [
+          "SAO BORJA - 4213800",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4292801",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4311802",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4312600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4313400",
+          "19"
+        ],
+        [
+          "SAO BORJA - 4319300",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4321500",
+          "123"
+        ],
+        [
+          "SAO BORJA - 4322301",
+          "15"
+        ],
+        [
+          "SAO BORJA - 4322302",
+          "37"
+        ],
+        [
+          "SAO BORJA - 4322303",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4329101",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4329104",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4330402",
+          "8"
+        ],
+        [
+          "SAO BORJA - 4330403",
+          "12"
+        ],
+        [
+          "SAO BORJA - 4330404",
+          "81"
+        ],
+        [
+          "SAO BORJA - 4330405",
+          "10"
+        ],
+        [
+          "SAO BORJA - 4330499",
+          "5"
+        ],
+        [
+          "SAO BORJA - 4391600",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4399103",
+          "361"
+        ],
+        [
+          "SAO BORJA - 4399199",
+          "22"
+        ],
+        [
+          "SAO BORJA - 4511101",
+          "4"
+        ],
+        [
+          "SAO BORJA - 4511102",
+          "14"
+        ],
+        [
+          "SAO BORJA - 4511103",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4512901",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4520001",
+          "140"
+        ],
+        [
+          "SAO BORJA - 4520002",
+          "47"
+        ],
+        [
+          "SAO BORJA - 4520003",
+          "20"
+        ],
+        [
+          "SAO BORJA - 4520004",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4520005",
+          "66"
+        ],
+        [
+          "SAO BORJA - 4520006",
+          "26"
+        ],
+        [
+          "SAO BORJA - 4520007",
+          "18"
+        ],
+        [
+          "SAO BORJA - 4530701",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4530703",
+          "94"
+        ],
+        [
+          "SAO BORJA - 4530704",
+          "11"
+        ],
+        [
+          "SAO BORJA - 4530705",
+          "8"
+        ],
+        [
+          "SAO BORJA - 4541206",
+          "22"
+        ],
+        [
+          "SAO BORJA - 4543900",
+          "14"
+        ],
+        [
+          "SAO BORJA - 4611700",
+          "5"
+        ],
+        [
+          "SAO BORJA - 4612500",
+          "4"
+        ],
+        [
+          "SAO BORJA - 4613300",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4614100",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4617600",
+          "13"
+        ],
+        [
+          "SAO BORJA - 4618401",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4618499",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4619200",
+          "9"
+        ],
+        [
+          "SAO BORJA - 4623101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4623102",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4623106",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4623109",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4623199",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4632001",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4633801",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4637106",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4637199",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4639701",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4639702",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4644301",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4645101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4645103",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4647802",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4649402",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4649408",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4649499",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4661300",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4664800",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4665600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4682600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4687703",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4689399",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4691500",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4692300",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4711302",
+          "7"
+        ],
+        [
+          "SAO BORJA - 4712100",
+          "343"
+        ],
+        [
+          "SAO BORJA - 4713002",
+          "8"
+        ],
+        [
+          "SAO BORJA - 4721102",
+          "42"
+        ],
+        [
+          "SAO BORJA - 4721103",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4721104",
+          "9"
+        ],
+        [
+          "SAO BORJA - 4722901",
+          "29"
+        ],
+        [
+          "SAO BORJA - 4722902",
+          "5"
+        ],
+        [
+          "SAO BORJA - 4723700",
+          "187"
+        ],
+        [
+          "SAO BORJA - 4724500",
+          "23"
+        ],
+        [
+          "SAO BORJA - 4729601",
+          "17"
+        ],
+        [
+          "SAO BORJA - 4729602",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4729699",
+          "49"
+        ],
+        [
+          "SAO BORJA - 4732600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4741500",
+          "4"
+        ],
+        [
+          "SAO BORJA - 4742300",
+          "12"
+        ],
+        [
+          "SAO BORJA - 4743100",
+          "10"
+        ],
+        [
+          "SAO BORJA - 4744001",
+          "43"
+        ],
+        [
+          "SAO BORJA - 4744002",
+          "7"
+        ],
+        [
+          "SAO BORJA - 4744003",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4744004",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4744005",
+          "9"
+        ],
+        [
+          "SAO BORJA - 4744006",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4744099",
+          "13"
+        ],
+        [
+          "TOTAL",
+          "2.133"
+        ]
+      ]
+    },
+    {
+      "page": 3,
+      "rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 4751201",
+          "38"
+        ],
+        [
+          "SAO BORJA - 4752100",
+          "24"
+        ],
+        [
+          "SAO BORJA - 4753900",
+          "19"
+        ],
+        [
+          "SAO BORJA - 4754701",
+          "14"
+        ],
+        [
+          "SAO BORJA - 4754702",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4754703",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4755501",
+          "6"
+        ],
+        [
+          "SAO BORJA - 4755502",
+          "30"
+        ],
+        [
+          "SAO BORJA - 4755503",
+          "40"
+        ],
+        [
+          "SAO BORJA - 4756300",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4757100",
+          "17"
+        ],
+        [
+          "SAO BORJA - 4759801",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4759899",
+          "13"
+        ],
+        [
+          "SAO BORJA - 4761001",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4761002",
+          "8"
+        ],
+        [
+          "SAO BORJA - 4761003",
+          "19"
+        ],
+        [
+          "SAO BORJA - 4762800",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4763601",
+          "14"
+        ],
+        [
+          "SAO BORJA - 4763602",
+          "8"
+        ],
+        [
+          "SAO BORJA - 4763603",
+          "7"
+        ],
+        [
+          "SAO BORJA - 4763604",
+          "4"
+        ],
+        [
+          "SAO BORJA - 4771701",
+          "5"
+        ],
+        [
+          "SAO BORJA - 4771702",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4771704",
+          "16"
+        ],
+        [
+          "SAO BORJA - 4772500",
+          "71"
+        ],
+        [
+          "SAO BORJA - 4773300",
+          "7"
+        ],
+        [
+          "SAO BORJA - 4774100",
+          "10"
+        ],
+        [
+          "SAO BORJA - 4781400",
+          "468"
+        ],
+        [
+          "SAO BORJA - 4782201",
+          "14"
+        ],
+        [
+          "SAO BORJA - 4783101",
+          "25"
+        ],
+        [
+          "SAO BORJA - 4783102",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4784900",
+          "18"
+        ],
+        [
+          "SAO BORJA - 4785701",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4785799",
+          "12"
+        ],
+        [
+          "SAO BORJA - 4789001",
+          "43"
+        ],
+        [
+          "SAO BORJA - 4789002",
+          "10"
+        ],
+        [
+          "SAO BORJA - 4789003",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4789004",
+          "38"
+        ],
+        [
+          "SAO BORJA - 4789005",
+          "15"
+        ],
+        [
+          "SAO BORJA - 4789007",
+          "5"
+        ],
+        [
+          "SAO BORJA - 4789008",
+          "6"
+        ],
+        [
+          "SAO BORJA - 4789009",
+          "1"
+        ],
+        [
+          "SAO BORJA - 4789099",
+          "73"
+        ],
+        [
+          "SAO BORJA - 4921301",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4923001",
+          "6"
+        ],
+        [
+          "SAO BORJA - 4923002",
+          "99"
+        ],
+        [
+          "SAO BORJA - 4924800",
+          "9"
+        ],
+        [
+          "SAO BORJA - 4929901",
+          "10"
+        ],
+        [
+          "SAO BORJA - 4929902",
+          "5"
+        ],
+        [
+          "SAO BORJA - 4929904",
+          "3"
+        ],
+        [
+          "SAO BORJA - 4930201",
+          "124"
+        ],
+        [
+          "SAO BORJA - 4930202",
+          "330"
+        ],
+        [
+          "SAO BORJA - 4930203",
+          "2"
+        ],
+        [
+          "SAO BORJA - 4930204",
+          "9"
+        ],
+        [
+          "SAO BORJA - 5099899",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5211702",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5212500",
+          "10"
+        ],
+        [
+          "SAO BORJA - 5223100",
+          "5"
+        ],
+        [
+          "SAO BORJA - 5229002",
+          "3"
+        ],
+        [
+          "SAO BORJA - 5229099",
+          "4"
+        ],
+        [
+          "SAO BORJA - 5240199",
+          "2"
+        ],
+        [
+          "SAO BORJA - 5250801",
+          "3"
+        ],
+        [
+          "SAO BORJA - 5250802",
+          "8"
+        ],
+        [
+          "SAO BORJA - 5250803",
+          "2"
+        ],
+        [
+          "SAO BORJA - 5250804",
+          "2"
+        ],
+        [
+          "SAO BORJA - 5320201",
+          "20"
+        ],
+        [
+          "SAO BORJA - 5320202",
+          "67"
+        ],
+        [
+          "SAO BORJA - 5510801",
+          "14"
+        ],
+        [
+          "SAO BORJA - 5510802",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5510803",
+          "3"
+        ],
+        [
+          "SAO BORJA - 5590603",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5590699",
+          "8"
+        ],
+        [
+          "SAO BORJA - 5611201",
+          "65"
+        ],
+        [
+          "SAO BORJA - 5611203",
+          "161"
+        ],
+        [
+          "SAO BORJA - 5611204",
+          "37"
+        ],
+        [
+          "SAO BORJA - 5611205",
+          "18"
+        ],
+        [
+          "SAO BORJA - 5612100",
+          "62"
+        ],
+        [
+          "SAO BORJA - 5620101",
+          "18"
+        ],
+        [
+          "SAO BORJA - 5620102",
+          "13"
+        ],
+        [
+          "SAO BORJA - 5620103",
+          "3"
+        ],
+        [
+          "SAO BORJA - 5620104",
+          "121"
+        ],
+        [
+          "SAO BORJA - 5811500",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5812301",
+          "4"
+        ],
+        [
+          "SAO BORJA - 5812302",
+          "3"
+        ],
+        [
+          "SAO BORJA - 5813100",
+          "6"
+        ],
+        [
+          "SAO BORJA - 5819100",
+          "14"
+        ],
+        [
+          "SAO BORJA - 5911101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5911199",
+          "3"
+        ],
+        [
+          "SAO BORJA - 5912099",
+          "16"
+        ],
+        [
+          "SAO BORJA - 5913800",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5914600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 5920100",
+          "1"
+        ],
+        [
+          "SAO BORJA - 6010100",
+          "3"
+        ],
+        [
+          "SAO BORJA - 6110803",
+          "5"
+        ],
+        [
+          "SAO BORJA - 6190601",
+          "2"
+        ],
+        [
+          "SAO BORJA - 6190699",
+          "3"
+        ],
+        [
+          "SAO BORJA - 6201501",
+          "5"
+        ],
+        [
+          "SAO BORJA - 6202300",
+          "4"
+        ],
+        [
+          "SAO BORJA - 6203100",
+          "4"
+        ],
+        [
+          "SAO BORJA - 6209100",
+          "1"
+        ],
+        [
+          "TOTAL",
+          "2.448"
+        ]
+      ]
+    },
+    {
+      "page": 4,
+      "rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 6311900",
+          "3"
+        ],
+        [
+          "SAO BORJA - 6319400",
+          "1"
+        ],
+        [
+          "SAO BORJA - 6391700",
+          "1"
+        ],
+        [
+          "SAO BORJA - 6399200",
+          "2"
+        ],
+        [
+          "SAO BORJA - 6619302",
+          "2"
+        ],
+        [
+          "SAO BORJA - 6622300",
+          "10"
+        ],
+        [
+          "SAO BORJA - 6821801",
+          "9"
+        ],
+        [
+          "SAO BORJA - 6821802",
+          "8"
+        ],
+        [
+          "SAO BORJA - 6822600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 6911701",
+          "39"
+        ],
+        [
+          "SAO BORJA - 6920601",
+          "36"
+        ],
+        [
+          "SAO BORJA - 7020400",
+          "12"
+        ],
+        [
+          "SAO BORJA - 7111100",
+          "7"
+        ],
+        [
+          "SAO BORJA - 7112000",
+          "12"
+        ],
+        [
+          "SAO BORJA - 7119701",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7119703",
+          "2"
+        ],
+        [
+          "SAO BORJA - 7119704",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7120100",
+          "3"
+        ],
+        [
+          "SAO BORJA - 7311400",
+          "2"
+        ],
+        [
+          "SAO BORJA - 7312200",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7319002",
+          "166"
+        ],
+        [
+          "SAO BORJA - 7319003",
+          "12"
+        ],
+        [
+          "SAO BORJA - 7319004",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7319099",
+          "12"
+        ],
+        [
+          "SAO BORJA - 7410202",
+          "2"
+        ],
+        [
+          "SAO BORJA - 7410299",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7420001",
+          "22"
+        ],
+        [
+          "SAO BORJA - 7420004",
+          "3"
+        ],
+        [
+          "SAO BORJA - 7490101",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7490102",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7490103",
+          "24"
+        ],
+        [
+          "SAO BORJA - 7490104",
+          "9"
+        ],
+        [
+          "SAO BORJA - 7490105",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7500100",
+          "11"
+        ],
+        [
+          "SAO BORJA - 7711000",
+          "3"
+        ],
+        [
+          "SAO BORJA - 7721700",
+          "12"
+        ],
+        [
+          "SAO BORJA - 7722500",
+          "3"
+        ],
+        [
+          "SAO BORJA - 7723300",
+          "4"
+        ],
+        [
+          "SAO BORJA - 7729202",
+          "2"
+        ],
+        [
+          "SAO BORJA - 7731400",
+          "5"
+        ],
+        [
+          "SAO BORJA - 7732201",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7739003",
+          "3"
+        ],
+        [
+          "SAO BORJA - 7739099",
+          "2"
+        ],
+        [
+          "SAO BORJA - 7810800",
+          "1"
+        ],
+        [
+          "SAO BORJA - 7911200",
+          "11"
+        ],
+        [
+          "SAO BORJA - 7990200",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8011101",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8020001",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8020002",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8111700",
+          "4"
+        ],
+        [
+          "SAO BORJA - 8122200",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8129000",
+          "6"
+        ],
+        [
+          "SAO BORJA - 8130300",
+          "46"
+        ],
+        [
+          "SAO BORJA - 8211300",
+          "28"
+        ],
+        [
+          "SAO BORJA - 8219901",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8219999",
+          "106"
+        ],
+        [
+          "SAO BORJA - 8230001",
+          "39"
+        ],
+        [
+          "SAO BORJA - 8230002",
+          "6"
+        ],
+        [
+          "SAO BORJA - 8291100",
+          "13"
+        ],
+        [
+          "SAO BORJA - 8299703",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8299705",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8299706",
+          "4"
+        ],
+        [
+          "SAO BORJA - 8299707",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8299799",
+          "9"
+        ],
+        [
+          "SAO BORJA - 8511200",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8531700",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8550302",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8591100",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8592901",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8592902",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8592903",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8592999",
+          "14"
+        ],
+        [
+          "SAO BORJA - 8593700",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8599601",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8599603",
+          "6"
+        ],
+        [
+          "SAO BORJA - 8599604",
+          "50"
+        ],
+        [
+          "SAO BORJA - 8599605",
+          "8"
+        ],
+        [
+          "SAO BORJA - 8599699",
+          "68"
+        ],
+        [
+          "SAO BORJA - 8610102",
+          "8"
+        ],
+        [
+          "SAO BORJA - 8630502",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8630503",
+          "38"
+        ],
+        [
+          "SAO BORJA - 8630504",
+          "20"
+        ],
+        [
+          "SAO BORJA - 8630599",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8640201",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8640202",
+          "4"
+        ],
+        [
+          "SAO BORJA - 8640207",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8650001",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8650003",
+          "14"
+        ],
+        [
+          "SAO BORJA - 8650004",
+          "12"
+        ],
+        [
+          "SAO BORJA - 8650005",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8650006",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8660700",
+          "3"
+        ],
+        [
+          "SAO BORJA - 8690901",
+          "5"
+        ],
+        [
+          "SAO BORJA - 8711502",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8712300",
+          "49"
+        ],
+        [
+          "SAO BORJA - 8800600",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8888888",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9001902",
+          "22"
+        ],
+        [
+          "SAO BORJA - 9001905",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9001906",
+          "10"
+        ],
+        [
+          "TOTAL",
+          "1.111"
+        ]
+      ]
+    },
+    {
+      "page": 5,
+      "rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 9001999",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9311500",
+          "6"
+        ],
+        [
+          "SAO BORJA - 9312300",
+          "3"
+        ],
+        [
+          "SAO BORJA - 9313100",
+          "19"
+        ],
+        [
+          "SAO BORJA - 9329803",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9329804",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9329899",
+          "6"
+        ],
+        [
+          "SAO BORJA - 9511800",
+          "39"
+        ],
+        [
+          "SAO BORJA - 9512600",
+          "14"
+        ],
+        [
+          "SAO BORJA - 9521500",
+          "14"
+        ],
+        [
+          "SAO BORJA - 9529101",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9529102",
+          "7"
+        ],
+        [
+          "SAO BORJA - 9529104",
+          "4"
+        ],
+        [
+          "SAO BORJA - 9529105",
+          "17"
+        ],
+        [
+          "SAO BORJA - 9529106",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9529199",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9601701",
+          "10"
+        ],
+        [
+          "SAO BORJA - 9601703",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9602501",
+          "287"
+        ],
+        [
+          "SAO BORJA - 9602502",
+          "98"
+        ],
+        [
+          "SAO BORJA - 9603301",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9603304",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9609206",
+          "11"
+        ],
+        [
+          "SAO BORJA - 9609207",
+          "4"
+        ],
+        [
+          "SAO BORJA - 9609208",
+          "17"
+        ],
+        [
+          "SAO BORJA - 9609299",
+          "16"
+        ],
+        [
+          "SAO BORJA - 9700500",
+          "184"
+        ],
+        [
+          "TOTAL",
+          "771"
+        ]
+      ]
+    }
+  ],
+  "cnae_rows": [
+    {
+      "page": 1,
+      "cnae": "0115600",
+      "label": "SAO BORJA - 0115600",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "0151201",
+      "label": "SAO BORJA - 0151201",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "0151202",
+      "label": "SAO BORJA - 0151202",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "0155505",
+      "label": "SAO BORJA - 0155505",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "0159801",
+      "label": "SAO BORJA - 0159801",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "0159802",
+      "label": "SAO BORJA - 0159802",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "0161001",
+      "label": "SAO BORJA - 0161001",
+      "value": 12
+    },
+    {
+      "page": 1,
+      "cnae": "0161002",
+      "label": "SAO BORJA - 0161002",
+      "value": 9
+    },
+    {
+      "page": 1,
+      "cnae": "0161003",
+      "label": "SAO BORJA - 0161003",
+      "value": 68
+    },
+    {
+      "page": 1,
+      "cnae": "0161099",
+      "label": "SAO BORJA - 0161099",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "0162802",
+      "label": "SAO BORJA - 0162802",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "0163600",
+      "label": "SAO BORJA - 0163600",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "0322104",
+      "label": "SAO BORJA - 0322104",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1012101",
+      "label": "SAO BORJA - 1012101",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1013901",
+      "label": "SAO BORJA - 1013901",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "1020101",
+      "label": "SAO BORJA - 1020101",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1031700",
+      "label": "SAO BORJA - 1031700",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1032599",
+      "label": "SAO BORJA - 1032599",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1041400",
+      "label": "SAO BORJA - 1041400",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1053800",
+      "label": "SAO BORJA - 1053800",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "1061901",
+      "label": "SAO BORJA - 1061901",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1061902",
+      "label": "SAO BORJA - 1061902",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "1066000",
+      "label": "SAO BORJA - 1066000",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1091101",
+      "label": "SAO BORJA - 1091101",
+      "value": 30
+    },
+    {
+      "page": 1,
+      "cnae": "1091102",
+      "label": "SAO BORJA - 1091102",
+      "value": 60
+    },
+    {
+      "page": 1,
+      "cnae": "1092900",
+      "label": "SAO BORJA - 1092900",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1093701",
+      "label": "SAO BORJA - 1093701",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1094500",
+      "label": "SAO BORJA - 1094500",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1096100",
+      "label": "SAO BORJA - 1096100",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "1099604",
+      "label": "SAO BORJA - 1099604",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1111901",
+      "label": "SAO BORJA - 1111901",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1112700",
+      "label": "SAO BORJA - 1112700",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1113502",
+      "label": "SAO BORJA - 1113502",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1340599",
+      "label": "SAO BORJA - 1340599",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "1351100",
+      "label": "SAO BORJA - 1351100",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "1359600",
+      "label": "SAO BORJA - 1359600",
+      "value": 25
+    },
+    {
+      "page": 1,
+      "cnae": "1411801",
+      "label": "SAO BORJA - 1411801",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1412601",
+      "label": "SAO BORJA - 1412601",
+      "value": 31
+    },
+    {
+      "page": 1,
+      "cnae": "1412602",
+      "label": "SAO BORJA - 1412602",
+      "value": 36
+    },
+    {
+      "page": 1,
+      "cnae": "1412603",
+      "label": "SAO BORJA - 1412603",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "1422300",
+      "label": "SAO BORJA - 1422300",
+      "value": 7
+    },
+    {
+      "page": 1,
+      "cnae": "1529700",
+      "label": "SAO BORJA - 1529700",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1531901",
+      "label": "SAO BORJA - 1531901",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "1622699",
+      "label": "SAO BORJA - 1622699",
+      "value": 9
+    },
+    {
+      "page": 1,
+      "cnae": "1629301",
+      "label": "SAO BORJA - 1629301",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "1732000",
+      "label": "SAO BORJA - 1732000",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "1749400",
+      "label": "SAO BORJA - 1749400",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "1813001",
+      "label": "SAO BORJA - 1813001",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "1813099",
+      "label": "SAO BORJA - 1813099",
+      "value": 8
+    },
+    {
+      "page": 1,
+      "cnae": "1821100",
+      "label": "SAO BORJA - 1821100",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "1822999",
+      "label": "SAO BORJA - 1822999",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2062200",
+      "label": "SAO BORJA - 2062200",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2212900",
+      "label": "SAO BORJA - 2212900",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2229399",
+      "label": "SAO BORJA - 2229399",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "2330301",
+      "label": "SAO BORJA - 2330301",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2330302",
+      "label": "SAO BORJA - 2330302",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "2330399",
+      "label": "SAO BORJA - 2330399",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "2342702",
+      "label": "SAO BORJA - 2342702",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2349499",
+      "label": "SAO BORJA - 2349499",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "2391503",
+      "label": "SAO BORJA - 2391503",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "2399101",
+      "label": "SAO BORJA - 2399101",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2424501",
+      "label": "SAO BORJA - 2424501",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2511000",
+      "label": "SAO BORJA - 2511000",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "2512800",
+      "label": "SAO BORJA - 2512800",
+      "value": 13
+    },
+    {
+      "page": 1,
+      "cnae": "2522500",
+      "label": "SAO BORJA - 2522500",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2532201",
+      "label": "SAO BORJA - 2532201",
+      "value": 6
+    },
+    {
+      "page": 1,
+      "cnae": "2539001",
+      "label": "SAO BORJA - 2539001",
+      "value": 59
+    },
+    {
+      "page": 1,
+      "cnae": "2539002",
+      "label": "SAO BORJA - 2539002",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2541100",
+      "label": "SAO BORJA - 2541100",
+      "value": 6
+    },
+    {
+      "page": 1,
+      "cnae": "2542000",
+      "label": "SAO BORJA - 2542000",
+      "value": 24
+    },
+    {
+      "page": 1,
+      "cnae": "2543800",
+      "label": "SAO BORJA - 2543800",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2593400",
+      "label": "SAO BORJA - 2593400",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2599301",
+      "label": "SAO BORJA - 2599301",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "2599302",
+      "label": "SAO BORJA - 2599302",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2599399",
+      "label": "SAO BORJA - 2599399",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "2950600",
+      "label": "SAO BORJA - 2950600",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "3101200",
+      "label": "SAO BORJA - 3101200",
+      "value": 22
+    },
+    {
+      "page": 1,
+      "cnae": "3102100",
+      "label": "SAO BORJA - 3102100",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3103900",
+      "label": "SAO BORJA - 3103900",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3212400",
+      "label": "SAO BORJA - 3212400",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "3240099",
+      "label": "SAO BORJA - 3240099",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3250706",
+      "label": "SAO BORJA - 3250706",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "3299002",
+      "label": "SAO BORJA - 3299002",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3299003",
+      "label": "SAO BORJA - 3299003",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "3299006",
+      "label": "SAO BORJA - 3299006",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "3299099",
+      "label": "SAO BORJA - 3299099",
+      "value": 32
+    },
+    {
+      "page": 1,
+      "cnae": "3312102",
+      "label": "SAO BORJA - 3312102",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3313901",
+      "label": "SAO BORJA - 3313901",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "3313999",
+      "label": "SAO BORJA - 3313999",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3314701",
+      "label": "SAO BORJA - 3314701",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3314702",
+      "label": "SAO BORJA - 3314702",
+      "value": 3
+    },
+    {
+      "page": 1,
+      "cnae": "3314704",
+      "label": "SAO BORJA - 3314704",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3314707",
+      "label": "SAO BORJA - 3314707",
+      "value": 6
+    },
+    {
+      "page": 1,
+      "cnae": "3314710",
+      "label": "SAO BORJA - 3314710",
+      "value": 4
+    },
+    {
+      "page": 1,
+      "cnae": "3314711",
+      "label": "SAO BORJA - 3314711",
+      "value": 57
+    },
+    {
+      "page": 1,
+      "cnae": "3314712",
+      "label": "SAO BORJA - 3314712",
+      "value": 27
+    },
+    {
+      "page": 1,
+      "cnae": "3314719",
+      "label": "SAO BORJA - 3314719",
+      "value": 2
+    },
+    {
+      "page": 1,
+      "cnae": "3317102",
+      "label": "SAO BORJA - 3317102",
+      "value": 1
+    },
+    {
+      "page": 1,
+      "cnae": "3319800",
+      "label": "SAO BORJA - 3319800",
+      "value": 6
+    },
+    {
+      "page": 1,
+      "cnae": "3321000",
+      "label": "SAO BORJA - 3321000",
+      "value": 11
+    },
+    {
+      "page": 2,
+      "cnae": "3329501",
+      "label": "SAO BORJA - 3329501",
+      "value": 28
+    },
+    {
+      "page": 2,
+      "cnae": "3811400",
+      "label": "SAO BORJA - 3811400",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "3831901",
+      "label": "SAO BORJA - 3831901",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "3831999",
+      "label": "SAO BORJA - 3831999",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4120400",
+      "label": "SAO BORJA - 4120400",
+      "value": 12
+    },
+    {
+      "page": 2,
+      "cnae": "4213800",
+      "label": "SAO BORJA - 4213800",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4292801",
+      "label": "SAO BORJA - 4292801",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4311802",
+      "label": "SAO BORJA - 4311802",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4312600",
+      "label": "SAO BORJA - 4312600",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4313400",
+      "label": "SAO BORJA - 4313400",
+      "value": 19
+    },
+    {
+      "page": 2,
+      "cnae": "4319300",
+      "label": "SAO BORJA - 4319300",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4321500",
+      "label": "SAO BORJA - 4321500",
+      "value": 123
+    },
+    {
+      "page": 2,
+      "cnae": "4322301",
+      "label": "SAO BORJA - 4322301",
+      "value": 15
+    },
+    {
+      "page": 2,
+      "cnae": "4322302",
+      "label": "SAO BORJA - 4322302",
+      "value": 37
+    },
+    {
+      "page": 2,
+      "cnae": "4322303",
+      "label": "SAO BORJA - 4322303",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4329101",
+      "label": "SAO BORJA - 4329101",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4329104",
+      "label": "SAO BORJA - 4329104",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4330402",
+      "label": "SAO BORJA - 4330402",
+      "value": 8
+    },
+    {
+      "page": 2,
+      "cnae": "4330403",
+      "label": "SAO BORJA - 4330403",
+      "value": 12
+    },
+    {
+      "page": 2,
+      "cnae": "4330404",
+      "label": "SAO BORJA - 4330404",
+      "value": 81
+    },
+    {
+      "page": 2,
+      "cnae": "4330405",
+      "label": "SAO BORJA - 4330405",
+      "value": 10
+    },
+    {
+      "page": 2,
+      "cnae": "4330499",
+      "label": "SAO BORJA - 4330499",
+      "value": 5
+    },
+    {
+      "page": 2,
+      "cnae": "4391600",
+      "label": "SAO BORJA - 4391600",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4399103",
+      "label": "SAO BORJA - 4399103",
+      "value": 361
+    },
+    {
+      "page": 2,
+      "cnae": "4399199",
+      "label": "SAO BORJA - 4399199",
+      "value": 22
+    },
+    {
+      "page": 2,
+      "cnae": "4511101",
+      "label": "SAO BORJA - 4511101",
+      "value": 4
+    },
+    {
+      "page": 2,
+      "cnae": "4511102",
+      "label": "SAO BORJA - 4511102",
+      "value": 14
+    },
+    {
+      "page": 2,
+      "cnae": "4511103",
+      "label": "SAO BORJA - 4511103",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4512901",
+      "label": "SAO BORJA - 4512901",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4520001",
+      "label": "SAO BORJA - 4520001",
+      "value": 140
+    },
+    {
+      "page": 2,
+      "cnae": "4520002",
+      "label": "SAO BORJA - 4520002",
+      "value": 47
+    },
+    {
+      "page": 2,
+      "cnae": "4520003",
+      "label": "SAO BORJA - 4520003",
+      "value": 20
+    },
+    {
+      "page": 2,
+      "cnae": "4520004",
+      "label": "SAO BORJA - 4520004",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4520005",
+      "label": "SAO BORJA - 4520005",
+      "value": 66
+    },
+    {
+      "page": 2,
+      "cnae": "4520006",
+      "label": "SAO BORJA - 4520006",
+      "value": 26
+    },
+    {
+      "page": 2,
+      "cnae": "4520007",
+      "label": "SAO BORJA - 4520007",
+      "value": 18
+    },
+    {
+      "page": 2,
+      "cnae": "4530701",
+      "label": "SAO BORJA - 4530701",
+      "value": 3
+    },
+    {
+      "page": 2,
+      "cnae": "4530703",
+      "label": "SAO BORJA - 4530703",
+      "value": 94
+    },
+    {
+      "page": 2,
+      "cnae": "4530704",
+      "label": "SAO BORJA - 4530704",
+      "value": 11
+    },
+    {
+      "page": 2,
+      "cnae": "4530705",
+      "label": "SAO BORJA - 4530705",
+      "value": 8
+    },
+    {
+      "page": 2,
+      "cnae": "4541206",
+      "label": "SAO BORJA - 4541206",
+      "value": 22
+    },
+    {
+      "page": 2,
+      "cnae": "4543900",
+      "label": "SAO BORJA - 4543900",
+      "value": 14
+    },
+    {
+      "page": 2,
+      "cnae": "4611700",
+      "label": "SAO BORJA - 4611700",
+      "value": 5
+    },
+    {
+      "page": 2,
+      "cnae": "4612500",
+      "label": "SAO BORJA - 4612500",
+      "value": 4
+    },
+    {
+      "page": 2,
+      "cnae": "4613300",
+      "label": "SAO BORJA - 4613300",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4614100",
+      "label": "SAO BORJA - 4614100",
+      "value": 3
+    },
+    {
+      "page": 2,
+      "cnae": "4617600",
+      "label": "SAO BORJA - 4617600",
+      "value": 13
+    },
+    {
+      "page": 2,
+      "cnae": "4618401",
+      "label": "SAO BORJA - 4618401",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4618499",
+      "label": "SAO BORJA - 4618499",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4619200",
+      "label": "SAO BORJA - 4619200",
+      "value": 9
+    },
+    {
+      "page": 2,
+      "cnae": "4623101",
+      "label": "SAO BORJA - 4623101",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4623102",
+      "label": "SAO BORJA - 4623102",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4623106",
+      "label": "SAO BORJA - 4623106",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4623109",
+      "label": "SAO BORJA - 4623109",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4623199",
+      "label": "SAO BORJA - 4623199",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4632001",
+      "label": "SAO BORJA - 4632001",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4633801",
+      "label": "SAO BORJA - 4633801",
+      "value": 3
+    },
+    {
+      "page": 2,
+      "cnae": "4637106",
+      "label": "SAO BORJA - 4637106",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4637199",
+      "label": "SAO BORJA - 4637199",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4639701",
+      "label": "SAO BORJA - 4639701",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4639702",
+      "label": "SAO BORJA - 4639702",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4644301",
+      "label": "SAO BORJA - 4644301",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4645101",
+      "label": "SAO BORJA - 4645101",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4645103",
+      "label": "SAO BORJA - 4645103",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4647802",
+      "label": "SAO BORJA - 4647802",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4649402",
+      "label": "SAO BORJA - 4649402",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4649408",
+      "label": "SAO BORJA - 4649408",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4649499",
+      "label": "SAO BORJA - 4649499",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4661300",
+      "label": "SAO BORJA - 4661300",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4664800",
+      "label": "SAO BORJA - 4664800",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4665600",
+      "label": "SAO BORJA - 4665600",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4682600",
+      "label": "SAO BORJA - 4682600",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4687703",
+      "label": "SAO BORJA - 4687703",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4689399",
+      "label": "SAO BORJA - 4689399",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4691500",
+      "label": "SAO BORJA - 4691500",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4692300",
+      "label": "SAO BORJA - 4692300",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4711302",
+      "label": "SAO BORJA - 4711302",
+      "value": 7
+    },
+    {
+      "page": 2,
+      "cnae": "4712100",
+      "label": "SAO BORJA - 4712100",
+      "value": 343
+    },
+    {
+      "page": 2,
+      "cnae": "4713002",
+      "label": "SAO BORJA - 4713002",
+      "value": 8
+    },
+    {
+      "page": 2,
+      "cnae": "4721102",
+      "label": "SAO BORJA - 4721102",
+      "value": 42
+    },
+    {
+      "page": 2,
+      "cnae": "4721103",
+      "label": "SAO BORJA - 4721103",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4721104",
+      "label": "SAO BORJA - 4721104",
+      "value": 9
+    },
+    {
+      "page": 2,
+      "cnae": "4722901",
+      "label": "SAO BORJA - 4722901",
+      "value": 29
+    },
+    {
+      "page": 2,
+      "cnae": "4722902",
+      "label": "SAO BORJA - 4722902",
+      "value": 5
+    },
+    {
+      "page": 2,
+      "cnae": "4723700",
+      "label": "SAO BORJA - 4723700",
+      "value": 187
+    },
+    {
+      "page": 2,
+      "cnae": "4724500",
+      "label": "SAO BORJA - 4724500",
+      "value": 23
+    },
+    {
+      "page": 2,
+      "cnae": "4729601",
+      "label": "SAO BORJA - 4729601",
+      "value": 17
+    },
+    {
+      "page": 2,
+      "cnae": "4729602",
+      "label": "SAO BORJA - 4729602",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4729699",
+      "label": "SAO BORJA - 4729699",
+      "value": 49
+    },
+    {
+      "page": 2,
+      "cnae": "4732600",
+      "label": "SAO BORJA - 4732600",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4741500",
+      "label": "SAO BORJA - 4741500",
+      "value": 4
+    },
+    {
+      "page": 2,
+      "cnae": "4742300",
+      "label": "SAO BORJA - 4742300",
+      "value": 12
+    },
+    {
+      "page": 2,
+      "cnae": "4743100",
+      "label": "SAO BORJA - 4743100",
+      "value": 10
+    },
+    {
+      "page": 2,
+      "cnae": "4744001",
+      "label": "SAO BORJA - 4744001",
+      "value": 43
+    },
+    {
+      "page": 2,
+      "cnae": "4744002",
+      "label": "SAO BORJA - 4744002",
+      "value": 7
+    },
+    {
+      "page": 2,
+      "cnae": "4744003",
+      "label": "SAO BORJA - 4744003",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4744004",
+      "label": "SAO BORJA - 4744004",
+      "value": 2
+    },
+    {
+      "page": 2,
+      "cnae": "4744005",
+      "label": "SAO BORJA - 4744005",
+      "value": 9
+    },
+    {
+      "page": 2,
+      "cnae": "4744006",
+      "label": "SAO BORJA - 4744006",
+      "value": 1
+    },
+    {
+      "page": 2,
+      "cnae": "4744099",
+      "label": "SAO BORJA - 4744099",
+      "value": 13
+    },
+    {
+      "page": 3,
+      "cnae": "4751201",
+      "label": "SAO BORJA - 4751201",
+      "value": 38
+    },
+    {
+      "page": 3,
+      "cnae": "4752100",
+      "label": "SAO BORJA - 4752100",
+      "value": 24
+    },
+    {
+      "page": 3,
+      "cnae": "4753900",
+      "label": "SAO BORJA - 4753900",
+      "value": 19
+    },
+    {
+      "page": 3,
+      "cnae": "4754701",
+      "label": "SAO BORJA - 4754701",
+      "value": 14
+    },
+    {
+      "page": 3,
+      "cnae": "4754702",
+      "label": "SAO BORJA - 4754702",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "4754703",
+      "label": "SAO BORJA - 4754703",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "4755501",
+      "label": "SAO BORJA - 4755501",
+      "value": 6
+    },
+    {
+      "page": 3,
+      "cnae": "4755502",
+      "label": "SAO BORJA - 4755502",
+      "value": 30
+    },
+    {
+      "page": 3,
+      "cnae": "4755503",
+      "label": "SAO BORJA - 4755503",
+      "value": 40
+    },
+    {
+      "page": 3,
+      "cnae": "4756300",
+      "label": "SAO BORJA - 4756300",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "4757100",
+      "label": "SAO BORJA - 4757100",
+      "value": 17
+    },
+    {
+      "page": 3,
+      "cnae": "4759801",
+      "label": "SAO BORJA - 4759801",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "4759899",
+      "label": "SAO BORJA - 4759899",
+      "value": 13
+    },
+    {
+      "page": 3,
+      "cnae": "4761001",
+      "label": "SAO BORJA - 4761001",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "4761002",
+      "label": "SAO BORJA - 4761002",
+      "value": 8
+    },
+    {
+      "page": 3,
+      "cnae": "4761003",
+      "label": "SAO BORJA - 4761003",
+      "value": 19
+    },
+    {
+      "page": 3,
+      "cnae": "4762800",
+      "label": "SAO BORJA - 4762800",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "4763601",
+      "label": "SAO BORJA - 4763601",
+      "value": 14
+    },
+    {
+      "page": 3,
+      "cnae": "4763602",
+      "label": "SAO BORJA - 4763602",
+      "value": 8
+    },
+    {
+      "page": 3,
+      "cnae": "4763603",
+      "label": "SAO BORJA - 4763603",
+      "value": 7
+    },
+    {
+      "page": 3,
+      "cnae": "4763604",
+      "label": "SAO BORJA - 4763604",
+      "value": 4
+    },
+    {
+      "page": 3,
+      "cnae": "4771701",
+      "label": "SAO BORJA - 4771701",
+      "value": 5
+    },
+    {
+      "page": 3,
+      "cnae": "4771702",
+      "label": "SAO BORJA - 4771702",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "4771704",
+      "label": "SAO BORJA - 4771704",
+      "value": 16
+    },
+    {
+      "page": 3,
+      "cnae": "4772500",
+      "label": "SAO BORJA - 4772500",
+      "value": 71
+    },
+    {
+      "page": 3,
+      "cnae": "4773300",
+      "label": "SAO BORJA - 4773300",
+      "value": 7
+    },
+    {
+      "page": 3,
+      "cnae": "4774100",
+      "label": "SAO BORJA - 4774100",
+      "value": 10
+    },
+    {
+      "page": 3,
+      "cnae": "4781400",
+      "label": "SAO BORJA - 4781400",
+      "value": 468
+    },
+    {
+      "page": 3,
+      "cnae": "4782201",
+      "label": "SAO BORJA - 4782201",
+      "value": 14
+    },
+    {
+      "page": 3,
+      "cnae": "4783101",
+      "label": "SAO BORJA - 4783101",
+      "value": 25
+    },
+    {
+      "page": 3,
+      "cnae": "4783102",
+      "label": "SAO BORJA - 4783102",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "4784900",
+      "label": "SAO BORJA - 4784900",
+      "value": 18
+    },
+    {
+      "page": 3,
+      "cnae": "4785701",
+      "label": "SAO BORJA - 4785701",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "4785799",
+      "label": "SAO BORJA - 4785799",
+      "value": 12
+    },
+    {
+      "page": 3,
+      "cnae": "4789001",
+      "label": "SAO BORJA - 4789001",
+      "value": 43
+    },
+    {
+      "page": 3,
+      "cnae": "4789002",
+      "label": "SAO BORJA - 4789002",
+      "value": 10
+    },
+    {
+      "page": 3,
+      "cnae": "4789003",
+      "label": "SAO BORJA - 4789003",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "4789004",
+      "label": "SAO BORJA - 4789004",
+      "value": 38
+    },
+    {
+      "page": 3,
+      "cnae": "4789005",
+      "label": "SAO BORJA - 4789005",
+      "value": 15
+    },
+    {
+      "page": 3,
+      "cnae": "4789007",
+      "label": "SAO BORJA - 4789007",
+      "value": 5
+    },
+    {
+      "page": 3,
+      "cnae": "4789008",
+      "label": "SAO BORJA - 4789008",
+      "value": 6
+    },
+    {
+      "page": 3,
+      "cnae": "4789009",
+      "label": "SAO BORJA - 4789009",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "4789099",
+      "label": "SAO BORJA - 4789099",
+      "value": 73
+    },
+    {
+      "page": 3,
+      "cnae": "4921301",
+      "label": "SAO BORJA - 4921301",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "4923001",
+      "label": "SAO BORJA - 4923001",
+      "value": 6
+    },
+    {
+      "page": 3,
+      "cnae": "4923002",
+      "label": "SAO BORJA - 4923002",
+      "value": 99
+    },
+    {
+      "page": 3,
+      "cnae": "4924800",
+      "label": "SAO BORJA - 4924800",
+      "value": 9
+    },
+    {
+      "page": 3,
+      "cnae": "4929901",
+      "label": "SAO BORJA - 4929901",
+      "value": 10
+    },
+    {
+      "page": 3,
+      "cnae": "4929902",
+      "label": "SAO BORJA - 4929902",
+      "value": 5
+    },
+    {
+      "page": 3,
+      "cnae": "4929904",
+      "label": "SAO BORJA - 4929904",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "4930201",
+      "label": "SAO BORJA - 4930201",
+      "value": 124
+    },
+    {
+      "page": 3,
+      "cnae": "4930202",
+      "label": "SAO BORJA - 4930202",
+      "value": 330
+    },
+    {
+      "page": 3,
+      "cnae": "4930203",
+      "label": "SAO BORJA - 4930203",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "4930204",
+      "label": "SAO BORJA - 4930204",
+      "value": 9
+    },
+    {
+      "page": 3,
+      "cnae": "5099899",
+      "label": "SAO BORJA - 5099899",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5211702",
+      "label": "SAO BORJA - 5211702",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5212500",
+      "label": "SAO BORJA - 5212500",
+      "value": 10
+    },
+    {
+      "page": 3,
+      "cnae": "5223100",
+      "label": "SAO BORJA - 5223100",
+      "value": 5
+    },
+    {
+      "page": 3,
+      "cnae": "5229002",
+      "label": "SAO BORJA - 5229002",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "5229099",
+      "label": "SAO BORJA - 5229099",
+      "value": 4
+    },
+    {
+      "page": 3,
+      "cnae": "5240199",
+      "label": "SAO BORJA - 5240199",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "5250801",
+      "label": "SAO BORJA - 5250801",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "5250802",
+      "label": "SAO BORJA - 5250802",
+      "value": 8
+    },
+    {
+      "page": 3,
+      "cnae": "5250803",
+      "label": "SAO BORJA - 5250803",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "5250804",
+      "label": "SAO BORJA - 5250804",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "5320201",
+      "label": "SAO BORJA - 5320201",
+      "value": 20
+    },
+    {
+      "page": 3,
+      "cnae": "5320202",
+      "label": "SAO BORJA - 5320202",
+      "value": 67
+    },
+    {
+      "page": 3,
+      "cnae": "5510801",
+      "label": "SAO BORJA - 5510801",
+      "value": 14
+    },
+    {
+      "page": 3,
+      "cnae": "5510802",
+      "label": "SAO BORJA - 5510802",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5510803",
+      "label": "SAO BORJA - 5510803",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "5590603",
+      "label": "SAO BORJA - 5590603",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5590699",
+      "label": "SAO BORJA - 5590699",
+      "value": 8
+    },
+    {
+      "page": 3,
+      "cnae": "5611201",
+      "label": "SAO BORJA - 5611201",
+      "value": 65
+    },
+    {
+      "page": 3,
+      "cnae": "5611203",
+      "label": "SAO BORJA - 5611203",
+      "value": 161
+    },
+    {
+      "page": 3,
+      "cnae": "5611204",
+      "label": "SAO BORJA - 5611204",
+      "value": 37
+    },
+    {
+      "page": 3,
+      "cnae": "5611205",
+      "label": "SAO BORJA - 5611205",
+      "value": 18
+    },
+    {
+      "page": 3,
+      "cnae": "5612100",
+      "label": "SAO BORJA - 5612100",
+      "value": 62
+    },
+    {
+      "page": 3,
+      "cnae": "5620101",
+      "label": "SAO BORJA - 5620101",
+      "value": 18
+    },
+    {
+      "page": 3,
+      "cnae": "5620102",
+      "label": "SAO BORJA - 5620102",
+      "value": 13
+    },
+    {
+      "page": 3,
+      "cnae": "5620103",
+      "label": "SAO BORJA - 5620103",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "5620104",
+      "label": "SAO BORJA - 5620104",
+      "value": 121
+    },
+    {
+      "page": 3,
+      "cnae": "5811500",
+      "label": "SAO BORJA - 5811500",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5812301",
+      "label": "SAO BORJA - 5812301",
+      "value": 4
+    },
+    {
+      "page": 3,
+      "cnae": "5812302",
+      "label": "SAO BORJA - 5812302",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "5813100",
+      "label": "SAO BORJA - 5813100",
+      "value": 6
+    },
+    {
+      "page": 3,
+      "cnae": "5819100",
+      "label": "SAO BORJA - 5819100",
+      "value": 14
+    },
+    {
+      "page": 3,
+      "cnae": "5911101",
+      "label": "SAO BORJA - 5911101",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5911199",
+      "label": "SAO BORJA - 5911199",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "5912099",
+      "label": "SAO BORJA - 5912099",
+      "value": 16
+    },
+    {
+      "page": 3,
+      "cnae": "5913800",
+      "label": "SAO BORJA - 5913800",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5914600",
+      "label": "SAO BORJA - 5914600",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "5920100",
+      "label": "SAO BORJA - 5920100",
+      "value": 1
+    },
+    {
+      "page": 3,
+      "cnae": "6010100",
+      "label": "SAO BORJA - 6010100",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "6110803",
+      "label": "SAO BORJA - 6110803",
+      "value": 5
+    },
+    {
+      "page": 3,
+      "cnae": "6190601",
+      "label": "SAO BORJA - 6190601",
+      "value": 2
+    },
+    {
+      "page": 3,
+      "cnae": "6190699",
+      "label": "SAO BORJA - 6190699",
+      "value": 3
+    },
+    {
+      "page": 3,
+      "cnae": "6201501",
+      "label": "SAO BORJA - 6201501",
+      "value": 5
+    },
+    {
+      "page": 3,
+      "cnae": "6202300",
+      "label": "SAO BORJA - 6202300",
+      "value": 4
+    },
+    {
+      "page": 3,
+      "cnae": "6203100",
+      "label": "SAO BORJA - 6203100",
+      "value": 4
+    },
+    {
+      "page": 3,
+      "cnae": "6209100",
+      "label": "SAO BORJA - 6209100",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "6311900",
+      "label": "SAO BORJA - 6311900",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "6319400",
+      "label": "SAO BORJA - 6319400",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "6391700",
+      "label": "SAO BORJA - 6391700",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "6399200",
+      "label": "SAO BORJA - 6399200",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "6619302",
+      "label": "SAO BORJA - 6619302",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "6622300",
+      "label": "SAO BORJA - 6622300",
+      "value": 10
+    },
+    {
+      "page": 4,
+      "cnae": "6821801",
+      "label": "SAO BORJA - 6821801",
+      "value": 9
+    },
+    {
+      "page": 4,
+      "cnae": "6821802",
+      "label": "SAO BORJA - 6821802",
+      "value": 8
+    },
+    {
+      "page": 4,
+      "cnae": "6822600",
+      "label": "SAO BORJA - 6822600",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "6911701",
+      "label": "SAO BORJA - 6911701",
+      "value": 39
+    },
+    {
+      "page": 4,
+      "cnae": "6920601",
+      "label": "SAO BORJA - 6920601",
+      "value": 36
+    },
+    {
+      "page": 4,
+      "cnae": "7020400",
+      "label": "SAO BORJA - 7020400",
+      "value": 12
+    },
+    {
+      "page": 4,
+      "cnae": "7111100",
+      "label": "SAO BORJA - 7111100",
+      "value": 7
+    },
+    {
+      "page": 4,
+      "cnae": "7112000",
+      "label": "SAO BORJA - 7112000",
+      "value": 12
+    },
+    {
+      "page": 4,
+      "cnae": "7119701",
+      "label": "SAO BORJA - 7119701",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7119703",
+      "label": "SAO BORJA - 7119703",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "7119704",
+      "label": "SAO BORJA - 7119704",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7120100",
+      "label": "SAO BORJA - 7120100",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "7311400",
+      "label": "SAO BORJA - 7311400",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "7312200",
+      "label": "SAO BORJA - 7312200",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7319002",
+      "label": "SAO BORJA - 7319002",
+      "value": 166
+    },
+    {
+      "page": 4,
+      "cnae": "7319003",
+      "label": "SAO BORJA - 7319003",
+      "value": 12
+    },
+    {
+      "page": 4,
+      "cnae": "7319004",
+      "label": "SAO BORJA - 7319004",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7319099",
+      "label": "SAO BORJA - 7319099",
+      "value": 12
+    },
+    {
+      "page": 4,
+      "cnae": "7410202",
+      "label": "SAO BORJA - 7410202",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "7410299",
+      "label": "SAO BORJA - 7410299",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7420001",
+      "label": "SAO BORJA - 7420001",
+      "value": 22
+    },
+    {
+      "page": 4,
+      "cnae": "7420004",
+      "label": "SAO BORJA - 7420004",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "7490101",
+      "label": "SAO BORJA - 7490101",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7490102",
+      "label": "SAO BORJA - 7490102",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7490103",
+      "label": "SAO BORJA - 7490103",
+      "value": 24
+    },
+    {
+      "page": 4,
+      "cnae": "7490104",
+      "label": "SAO BORJA - 7490104",
+      "value": 9
+    },
+    {
+      "page": 4,
+      "cnae": "7490105",
+      "label": "SAO BORJA - 7490105",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7500100",
+      "label": "SAO BORJA - 7500100",
+      "value": 11
+    },
+    {
+      "page": 4,
+      "cnae": "7711000",
+      "label": "SAO BORJA - 7711000",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "7721700",
+      "label": "SAO BORJA - 7721700",
+      "value": 12
+    },
+    {
+      "page": 4,
+      "cnae": "7722500",
+      "label": "SAO BORJA - 7722500",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "7723300",
+      "label": "SAO BORJA - 7723300",
+      "value": 4
+    },
+    {
+      "page": 4,
+      "cnae": "7729202",
+      "label": "SAO BORJA - 7729202",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "7731400",
+      "label": "SAO BORJA - 7731400",
+      "value": 5
+    },
+    {
+      "page": 4,
+      "cnae": "7732201",
+      "label": "SAO BORJA - 7732201",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7739003",
+      "label": "SAO BORJA - 7739003",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "7739099",
+      "label": "SAO BORJA - 7739099",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "7810800",
+      "label": "SAO BORJA - 7810800",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "7911200",
+      "label": "SAO BORJA - 7911200",
+      "value": 11
+    },
+    {
+      "page": 4,
+      "cnae": "7990200",
+      "label": "SAO BORJA - 7990200",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8011101",
+      "label": "SAO BORJA - 8011101",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8020001",
+      "label": "SAO BORJA - 8020001",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8020002",
+      "label": "SAO BORJA - 8020002",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8111700",
+      "label": "SAO BORJA - 8111700",
+      "value": 4
+    },
+    {
+      "page": 4,
+      "cnae": "8122200",
+      "label": "SAO BORJA - 8122200",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8129000",
+      "label": "SAO BORJA - 8129000",
+      "value": 6
+    },
+    {
+      "page": 4,
+      "cnae": "8130300",
+      "label": "SAO BORJA - 8130300",
+      "value": 46
+    },
+    {
+      "page": 4,
+      "cnae": "8211300",
+      "label": "SAO BORJA - 8211300",
+      "value": 28
+    },
+    {
+      "page": 4,
+      "cnae": "8219901",
+      "label": "SAO BORJA - 8219901",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8219999",
+      "label": "SAO BORJA - 8219999",
+      "value": 106
+    },
+    {
+      "page": 4,
+      "cnae": "8230001",
+      "label": "SAO BORJA - 8230001",
+      "value": 39
+    },
+    {
+      "page": 4,
+      "cnae": "8230002",
+      "label": "SAO BORJA - 8230002",
+      "value": 6
+    },
+    {
+      "page": 4,
+      "cnae": "8291100",
+      "label": "SAO BORJA - 8291100",
+      "value": 13
+    },
+    {
+      "page": 4,
+      "cnae": "8299703",
+      "label": "SAO BORJA - 8299703",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8299705",
+      "label": "SAO BORJA - 8299705",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8299706",
+      "label": "SAO BORJA - 8299706",
+      "value": 4
+    },
+    {
+      "page": 4,
+      "cnae": "8299707",
+      "label": "SAO BORJA - 8299707",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8299799",
+      "label": "SAO BORJA - 8299799",
+      "value": 9
+    },
+    {
+      "page": 4,
+      "cnae": "8511200",
+      "label": "SAO BORJA - 8511200",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8531700",
+      "label": "SAO BORJA - 8531700",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8550302",
+      "label": "SAO BORJA - 8550302",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8591100",
+      "label": "SAO BORJA - 8591100",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8592901",
+      "label": "SAO BORJA - 8592901",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8592902",
+      "label": "SAO BORJA - 8592902",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8592903",
+      "label": "SAO BORJA - 8592903",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8592999",
+      "label": "SAO BORJA - 8592999",
+      "value": 14
+    },
+    {
+      "page": 4,
+      "cnae": "8593700",
+      "label": "SAO BORJA - 8593700",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8599601",
+      "label": "SAO BORJA - 8599601",
+      "value": 2
+    },
+    {
+      "page": 4,
+      "cnae": "8599603",
+      "label": "SAO BORJA - 8599603",
+      "value": 6
+    },
+    {
+      "page": 4,
+      "cnae": "8599604",
+      "label": "SAO BORJA - 8599604",
+      "value": 50
+    },
+    {
+      "page": 4,
+      "cnae": "8599605",
+      "label": "SAO BORJA - 8599605",
+      "value": 8
+    },
+    {
+      "page": 4,
+      "cnae": "8599699",
+      "label": "SAO BORJA - 8599699",
+      "value": 68
+    },
+    {
+      "page": 4,
+      "cnae": "8610102",
+      "label": "SAO BORJA - 8610102",
+      "value": 8
+    },
+    {
+      "page": 4,
+      "cnae": "8630502",
+      "label": "SAO BORJA - 8630502",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8630503",
+      "label": "SAO BORJA - 8630503",
+      "value": 38
+    },
+    {
+      "page": 4,
+      "cnae": "8630504",
+      "label": "SAO BORJA - 8630504",
+      "value": 20
+    },
+    {
+      "page": 4,
+      "cnae": "8630599",
+      "label": "SAO BORJA - 8630599",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8640201",
+      "label": "SAO BORJA - 8640201",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8640202",
+      "label": "SAO BORJA - 8640202",
+      "value": 4
+    },
+    {
+      "page": 4,
+      "cnae": "8640207",
+      "label": "SAO BORJA - 8640207",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8650001",
+      "label": "SAO BORJA - 8650001",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8650003",
+      "label": "SAO BORJA - 8650003",
+      "value": 14
+    },
+    {
+      "page": 4,
+      "cnae": "8650004",
+      "label": "SAO BORJA - 8650004",
+      "value": 12
+    },
+    {
+      "page": 4,
+      "cnae": "8650005",
+      "label": "SAO BORJA - 8650005",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8650006",
+      "label": "SAO BORJA - 8650006",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8660700",
+      "label": "SAO BORJA - 8660700",
+      "value": 3
+    },
+    {
+      "page": 4,
+      "cnae": "8690901",
+      "label": "SAO BORJA - 8690901",
+      "value": 5
+    },
+    {
+      "page": 4,
+      "cnae": "8711502",
+      "label": "SAO BORJA - 8711502",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8712300",
+      "label": "SAO BORJA - 8712300",
+      "value": 49
+    },
+    {
+      "page": 4,
+      "cnae": "8800600",
+      "label": "SAO BORJA - 8800600",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "8888888",
+      "label": "SAO BORJA - 8888888",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "9001902",
+      "label": "SAO BORJA - 9001902",
+      "value": 22
+    },
+    {
+      "page": 4,
+      "cnae": "9001905",
+      "label": "SAO BORJA - 9001905",
+      "value": 1
+    },
+    {
+      "page": 4,
+      "cnae": "9001906",
+      "label": "SAO BORJA - 9001906",
+      "value": 10
+    },
+    {
+      "page": 5,
+      "cnae": "9001999",
+      "label": "SAO BORJA - 9001999",
+      "value": 2
+    },
+    {
+      "page": 5,
+      "cnae": "9311500",
+      "label": "SAO BORJA - 9311500",
+      "value": 6
+    },
+    {
+      "page": 5,
+      "cnae": "9312300",
+      "label": "SAO BORJA - 9312300",
+      "value": 3
+    },
+    {
+      "page": 5,
+      "cnae": "9313100",
+      "label": "SAO BORJA - 9313100",
+      "value": 19
+    },
+    {
+      "page": 5,
+      "cnae": "9329803",
+      "label": "SAO BORJA - 9329803",
+      "value": 2
+    },
+    {
+      "page": 5,
+      "cnae": "9329804",
+      "label": "SAO BORJA - 9329804",
+      "value": 2
+    },
+    {
+      "page": 5,
+      "cnae": "9329899",
+      "label": "SAO BORJA - 9329899",
+      "value": 6
+    },
+    {
+      "page": 5,
+      "cnae": "9511800",
+      "label": "SAO BORJA - 9511800",
+      "value": 39
+    },
+    {
+      "page": 5,
+      "cnae": "9512600",
+      "label": "SAO BORJA - 9512600",
+      "value": 14
+    },
+    {
+      "page": 5,
+      "cnae": "9521500",
+      "label": "SAO BORJA - 9521500",
+      "value": 14
+    },
+    {
+      "page": 5,
+      "cnae": "9529101",
+      "label": "SAO BORJA - 9529101",
+      "value": 2
+    },
+    {
+      "page": 5,
+      "cnae": "9529102",
+      "label": "SAO BORJA - 9529102",
+      "value": 7
+    },
+    {
+      "page": 5,
+      "cnae": "9529104",
+      "label": "SAO BORJA - 9529104",
+      "value": 4
+    },
+    {
+      "page": 5,
+      "cnae": "9529105",
+      "label": "SAO BORJA - 9529105",
+      "value": 17
+    },
+    {
+      "page": 5,
+      "cnae": "9529106",
+      "label": "SAO BORJA - 9529106",
+      "value": 1
+    },
+    {
+      "page": 5,
+      "cnae": "9529199",
+      "label": "SAO BORJA - 9529199",
+      "value": 2
+    },
+    {
+      "page": 5,
+      "cnae": "9601701",
+      "label": "SAO BORJA - 9601701",
+      "value": 10
+    },
+    {
+      "page": 5,
+      "cnae": "9601703",
+      "label": "SAO BORJA - 9601703",
+      "value": 1
+    },
+    {
+      "page": 5,
+      "cnae": "9602501",
+      "label": "SAO BORJA - 9602501",
+      "value": 287
+    },
+    {
+      "page": 5,
+      "cnae": "9602502",
+      "label": "SAO BORJA - 9602502",
+      "value": 98
+    },
+    {
+      "page": 5,
+      "cnae": "9603301",
+      "label": "SAO BORJA - 9603301",
+      "value": 1
+    },
+    {
+      "page": 5,
+      "cnae": "9603304",
+      "label": "SAO BORJA - 9603304",
+      "value": 2
+    },
+    {
+      "page": 5,
+      "cnae": "9609206",
+      "label": "SAO BORJA - 9609206",
+      "value": 11
+    },
+    {
+      "page": 5,
+      "cnae": "9609207",
+      "label": "SAO BORJA - 9609207",
+      "value": 4
+    },
+    {
+      "page": 5,
+      "cnae": "9609208",
+      "label": "SAO BORJA - 9609208",
+      "value": 17
+    },
+    {
+      "page": 5,
+      "cnae": "9609299",
+      "label": "SAO BORJA - 9609299",
+      "value": 16
+    },
+    {
+      "page": 5,
+      "cnae": "9700500",
+      "label": "SAO BORJA - 9700500",
+      "value": 184
+    }
+  ],
+  "page_totals": [
+    {
+      "page": 1,
+      "value": 713
+    },
+    {
+      "page": 2,
+      "value": 2133
+    },
+    {
+      "page": 3,
+      "value": 2448
+    },
+    {
+      "page": 4,
+      "value": 1111
+    },
+    {
+      "page": 5,
+      "value": 771
+    }
+  ],
+  "cnae_sum": 7176,
   "tables": [
     [
       [
@@ -2977,408 +7555,116 @@
         "Total"
       ],
       [
-        "SAO BORJA - 0115600",
-        "4"
-      ],
-      [
-        "SAO BORJA - 0151201",
-        "1"
-      ],
-      [
-        "SAO BORJA - 0151202",
-        "1"
-      ],
-      [
-        "SAO BORJA - 0155505",
-        "1"
-      ],
-      [
-        "SAO BORJA - 0159801",
-        "1"
-      ],
-      [
-        "SAO BORJA - 0159802",
-        "1"
-      ],
-      [
-        "SAO BORJA - 0161001",
-        "12"
-      ],
-      [
-        "SAO BORJA - 0161002",
-        "9"
-      ],
-      [
-        "SAO BORJA - 0161003",
-        "68"
-      ],
-      [
-        "SAO BORJA - 0161099",
+        "SAO BORJA - 9001999",
         "2"
       ],
       [
-        "SAO BORJA - 0162802",
+        "SAO BORJA - 9311500",
+        "6"
+      ],
+      [
+        "SAO BORJA - 9312300",
         "3"
       ],
       [
-        "SAO BORJA - 0163600",
-        "3"
+        "SAO BORJA - 9313100",
+        "19"
       ],
       [
-        "SAO BORJA - 0322104",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1012101",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1013901",
-        "3"
-      ],
-      [
-        "SAO BORJA - 1020101",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1031700",
+        "SAO BORJA - 9329803",
         "2"
       ],
       [
-        "SAO BORJA - 1032599",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1041400",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1053800",
-        "3"
-      ],
-      [
-        "SAO BORJA - 1061901",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1061902",
-        "4"
-      ],
-      [
-        "SAO BORJA - 1066000",
+        "SAO BORJA - 9329804",
         "2"
       ],
       [
-        "SAO BORJA - 1091101",
-        "30"
+        "SAO BORJA - 9329899",
+        "6"
       ],
       [
-        "SAO BORJA - 1091102",
-        "60"
+        "SAO BORJA - 9511800",
+        "39"
       ],
       [
-        "SAO BORJA - 1092900",
+        "SAO BORJA - 9512600",
+        "14"
+      ],
+      [
+        "SAO BORJA - 9521500",
+        "14"
+      ],
+      [
+        "SAO BORJA - 9529101",
         "2"
       ],
       [
-        "SAO BORJA - 1093701",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1094500",
-        "2"
-      ],
-      [
-        "SAO BORJA - 1096100",
-        "4"
-      ],
-      [
-        "SAO BORJA - 1099604",
-        "2"
-      ],
-      [
-        "SAO BORJA - 1111901",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1112700",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1113502",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1340599",
-        "3"
-      ],
-      [
-        "SAO BORJA - 1351100",
-        "3"
-      ],
-      [
-        "SAO BORJA - 1359600",
-        "25"
-      ],
-      [
-        "SAO BORJA - 1411801",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1412601",
-        "31"
-      ],
-      [
-        "SAO BORJA - 1412602",
-        "36"
-      ],
-      [
-        "SAO BORJA - 1412603",
-        "3"
-      ],
-      [
-        "SAO BORJA - 1422300",
+        "SAO BORJA - 9529102",
         "7"
       ],
       [
-        "SAO BORJA - 1529700",
-        "2"
-      ],
-      [
-        "SAO BORJA - 1531901",
-        "1"
-      ],
-      [
-        "SAO BORJA - 1622699",
-        "9"
-      ],
-      [
-        "SAO BORJA - 1629301",
+        "SAO BORJA - 9529104",
         "4"
       ],
       [
-        "SAO BORJA - 1732000",
+        "SAO BORJA - 9529105",
+        "17"
+      ],
+      [
+        "SAO BORJA - 9529106",
+        "1"
+      ],
+      [
+        "SAO BORJA - 9529199",
         "2"
       ],
       [
-        "SAO BORJA - 1749400",
-        "3"
+        "SAO BORJA - 9601701",
+        "10"
       ],
       [
-        "SAO BORJA - 1813001",
-        "4"
-      ],
-      [
-        "SAO BORJA - 1813099",
-        "8"
-      ],
-      [
-        "SAO BORJA - 1821100",
-        "4"
-      ],
-      [
-        "SAO BORJA - 1822999",
+        "SAO BORJA - 9601703",
         "1"
       ],
       [
-        "SAO BORJA - 2062200",
+        "SAO BORJA - 9602501",
+        "287"
+      ],
+      [
+        "SAO BORJA - 9602502",
+        "98"
+      ],
+      [
+        "SAO BORJA - 9603301",
         "1"
       ],
       [
-        "SAO BORJA - 2212900",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2229399",
+        "SAO BORJA - 9603304",
         "2"
       ],
       [
-        "SAO BORJA - 2330301",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2330302",
-        "2"
-      ],
-      [
-        "SAO BORJA - 2330399",
-        "3"
-      ],
-      [
-        "SAO BORJA - 2342702",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2349499",
-        "3"
-      ],
-      [
-        "SAO BORJA - 2391503",
-        "4"
-      ],
-      [
-        "SAO BORJA - 2399101",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2424501",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2511000",
-        "3"
-      ],
-      [
-        "SAO BORJA - 2512800",
-        "13"
-      ],
-      [
-        "SAO BORJA - 2522500",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2532201",
-        "6"
-      ],
-      [
-        "SAO BORJA - 2539001",
-        "59"
-      ],
-      [
-        "SAO BORJA - 2539002",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2541100",
-        "6"
-      ],
-      [
-        "SAO BORJA - 2542000",
-        "24"
-      ],
-      [
-        "SAO BORJA - 2543800",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2593400",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2599301",
-        "4"
-      ],
-      [
-        "SAO BORJA - 2599302",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2599399",
-        "1"
-      ],
-      [
-        "SAO BORJA - 2950600",
-        "3"
-      ],
-      [
-        "SAO BORJA - 3101200",
-        "22"
-      ],
-      [
-        "SAO BORJA - 3102100",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3103900",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3212400",
-        "3"
-      ],
-      [
-        "SAO BORJA - 3240099",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3250706",
-        "2"
-      ],
-      [
-        "SAO BORJA - 3299002",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3299003",
-        "2"
-      ],
-      [
-        "SAO BORJA - 3299006",
-        "3"
-      ],
-      [
-        "SAO BORJA - 3299099",
-        "32"
-      ],
-      [
-        "SAO BORJA - 3312102",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3313901",
-        "3"
-      ],
-      [
-        "SAO BORJA - 3313999",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3314701",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3314702",
-        "3"
-      ],
-      [
-        "SAO BORJA - 3314704",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3314707",
-        "6"
-      ],
-      [
-        "SAO BORJA - 3314710",
-        "4"
-      ],
-      [
-        "SAO BORJA - 3314711",
-        "57"
-      ],
-      [
-        "SAO BORJA - 3314712",
-        "27"
-      ],
-      [
-        "SAO BORJA - 3314719",
-        "2"
-      ],
-      [
-        "SAO BORJA - 3317102",
-        "1"
-      ],
-      [
-        "SAO BORJA - 3319800",
-        "6"
-      ],
-      [
-        "SAO BORJA - 3321000",
+        "SAO BORJA - 9609206",
         "11"
       ],
       [
+        "SAO BORJA - 9609207",
+        "4"
+      ],
+      [
+        "SAO BORJA - 9609208",
+        "17"
+      ],
+      [
+        "SAO BORJA - 9609299",
+        "16"
+      ],
+      [
+        "SAO BORJA - 9700500",
+        "184"
+      ],
+      [
         "TOTAL",
-        "713"
+        "771"
       ]
     ],
     [
@@ -3412,143 +7698,143 @@
       "table": 2,
       "row": 1,
       "cells": [
-        "SAO BORJA - 0115600",
-        "4"
+        "SAO BORJA - 9001999",
+        "2"
       ]
     },
     {
       "table": 2,
       "row": 2,
       "cells": [
-        "SAO BORJA - 0151201",
-        "1"
+        "SAO BORJA - 9311500",
+        "6"
       ]
     },
     {
       "table": 2,
       "row": 3,
       "cells": [
-        "SAO BORJA - 0151202",
-        "1"
+        "SAO BORJA - 9312300",
+        "3"
       ]
     },
     {
       "table": 2,
       "row": 4,
       "cells": [
-        "SAO BORJA - 0155505",
-        "1"
+        "SAO BORJA - 9313100",
+        "19"
       ]
     },
     {
       "table": 2,
       "row": 5,
       "cells": [
-        "SAO BORJA - 0159801",
-        "1"
+        "SAO BORJA - 9329803",
+        "2"
       ]
     },
     {
       "table": 2,
       "row": 6,
       "cells": [
-        "SAO BORJA - 0159802",
-        "1"
+        "SAO BORJA - 9329804",
+        "2"
       ]
     },
     {
       "table": 2,
       "row": 7,
       "cells": [
-        "SAO BORJA - 0161001",
-        "12"
+        "SAO BORJA - 9329899",
+        "6"
       ]
     },
     {
       "table": 2,
       "row": 8,
       "cells": [
-        "SAO BORJA - 0161002",
-        "9"
+        "SAO BORJA - 9511800",
+        "39"
       ]
     },
     {
       "table": 2,
       "row": 9,
       "cells": [
-        "SAO BORJA - 0161003",
-        "68"
+        "SAO BORJA - 9512600",
+        "14"
       ]
     },
     {
       "table": 2,
       "row": 10,
       "cells": [
-        "SAO BORJA - 0161099",
-        "2"
+        "SAO BORJA - 9521500",
+        "14"
       ]
     },
     {
       "table": 2,
       "row": 11,
       "cells": [
-        "SAO BORJA - 0162802",
-        "3"
+        "SAO BORJA - 9529101",
+        "2"
       ]
     },
     {
       "table": 2,
       "row": 12,
       "cells": [
-        "SAO BORJA - 0163600",
-        "3"
+        "SAO BORJA - 9529102",
+        "7"
       ]
     },
     {
       "table": 2,
       "row": 13,
       "cells": [
-        "SAO BORJA - 0322104",
-        "1"
+        "SAO BORJA - 9529104",
+        "4"
       ]
     },
     {
       "table": 2,
       "row": 14,
       "cells": [
-        "SAO BORJA - 1012101",
-        "1"
+        "SAO BORJA - 9529105",
+        "17"
       ]
     },
     {
       "table": 2,
       "row": 15,
       "cells": [
-        "SAO BORJA - 1013901",
-        "3"
+        "SAO BORJA - 9529106",
+        "1"
       ]
     },
     {
       "table": 2,
       "row": 16,
       "cells": [
-        "SAO BORJA - 1020101",
-        "1"
+        "SAO BORJA - 9529199",
+        "2"
       ]
     },
     {
       "table": 2,
       "row": 17,
       "cells": [
-        "SAO BORJA - 1031700",
-        "2"
+        "SAO BORJA - 9601701",
+        "10"
       ]
     },
     {
       "table": 2,
       "row": 18,
       "cells": [
-        "SAO BORJA - 1032599",
+        "SAO BORJA - 9601703",
         "1"
       ]
     },
@@ -3556,23 +7842,23 @@
       "table": 2,
       "row": 19,
       "cells": [
-        "SAO BORJA - 1041400",
-        "1"
+        "SAO BORJA - 9602501",
+        "287"
       ]
     },
     {
       "table": 2,
       "row": 20,
       "cells": [
-        "SAO BORJA - 1053800",
-        "3"
+        "SAO BORJA - 9602502",
+        "98"
       ]
     },
     {
       "table": 2,
       "row": 21,
       "cells": [
-        "SAO BORJA - 1061901",
+        "SAO BORJA - 9603301",
         "1"
       ]
     },
@@ -3580,634 +7866,168 @@
       "table": 2,
       "row": 22,
       "cells": [
-        "SAO BORJA - 1061902",
-        "4"
+        "SAO BORJA - 9603304",
+        "2"
       ]
     },
     {
       "table": 2,
       "row": 23,
       "cells": [
-        "SAO BORJA - 1066000",
-        "2"
+        "SAO BORJA - 9609206",
+        "11"
       ]
     },
     {
       "table": 2,
       "row": 24,
       "cells": [
-        "SAO BORJA - 1091101",
-        "30"
+        "SAO BORJA - 9609207",
+        "4"
       ]
     },
     {
       "table": 2,
       "row": 25,
       "cells": [
-        "SAO BORJA - 1091102",
-        "60"
+        "SAO BORJA - 9609208",
+        "17"
       ]
     },
     {
       "table": 2,
       "row": 26,
       "cells": [
-        "SAO BORJA - 1092900",
-        "2"
+        "SAO BORJA - 9609299",
+        "16"
       ]
     },
     {
       "table": 2,
       "row": 27,
       "cells": [
-        "SAO BORJA - 1093701",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 28,
-      "cells": [
-        "SAO BORJA - 1094500",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 29,
-      "cells": [
-        "SAO BORJA - 1096100",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 30,
-      "cells": [
-        "SAO BORJA - 1099604",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 31,
-      "cells": [
-        "SAO BORJA - 1111901",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 32,
-      "cells": [
-        "SAO BORJA - 1112700",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 33,
-      "cells": [
-        "SAO BORJA - 1113502",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 34,
-      "cells": [
-        "SAO BORJA - 1340599",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 35,
-      "cells": [
-        "SAO BORJA - 1351100",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 36,
-      "cells": [
-        "SAO BORJA - 1359600",
-        "25"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 37,
-      "cells": [
-        "SAO BORJA - 1411801",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 38,
-      "cells": [
-        "SAO BORJA - 1412601",
-        "31"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 39,
-      "cells": [
-        "SAO BORJA - 1412602",
-        "36"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 40,
-      "cells": [
-        "SAO BORJA - 1412603",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 41,
-      "cells": [
-        "SAO BORJA - 1422300",
-        "7"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 42,
-      "cells": [
-        "SAO BORJA - 1529700",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 43,
-      "cells": [
-        "SAO BORJA - 1531901",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 44,
-      "cells": [
-        "SAO BORJA - 1622699",
-        "9"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 45,
-      "cells": [
-        "SAO BORJA - 1629301",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 46,
-      "cells": [
-        "SAO BORJA - 1732000",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 47,
-      "cells": [
-        "SAO BORJA - 1749400",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 48,
-      "cells": [
-        "SAO BORJA - 1813001",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 49,
-      "cells": [
-        "SAO BORJA - 1813099",
-        "8"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 50,
-      "cells": [
-        "SAO BORJA - 1821100",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 51,
-      "cells": [
-        "SAO BORJA - 1822999",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 52,
-      "cells": [
-        "SAO BORJA - 2062200",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 53,
-      "cells": [
-        "SAO BORJA - 2212900",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 54,
-      "cells": [
-        "SAO BORJA - 2229399",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 55,
-      "cells": [
-        "SAO BORJA - 2330301",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 56,
-      "cells": [
-        "SAO BORJA - 2330302",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 57,
-      "cells": [
-        "SAO BORJA - 2330399",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 58,
-      "cells": [
-        "SAO BORJA - 2342702",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 59,
-      "cells": [
-        "SAO BORJA - 2349499",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 60,
-      "cells": [
-        "SAO BORJA - 2391503",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 61,
-      "cells": [
-        "SAO BORJA - 2399101",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 62,
-      "cells": [
-        "SAO BORJA - 2424501",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 63,
-      "cells": [
-        "SAO BORJA - 2511000",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 64,
-      "cells": [
-        "SAO BORJA - 2512800",
-        "13"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 65,
-      "cells": [
-        "SAO BORJA - 2522500",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 66,
-      "cells": [
-        "SAO BORJA - 2532201",
-        "6"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 67,
-      "cells": [
-        "SAO BORJA - 2539001",
-        "59"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 68,
-      "cells": [
-        "SAO BORJA - 2539002",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 69,
-      "cells": [
-        "SAO BORJA - 2541100",
-        "6"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 70,
-      "cells": [
-        "SAO BORJA - 2542000",
-        "24"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 71,
-      "cells": [
-        "SAO BORJA - 2543800",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 72,
-      "cells": [
-        "SAO BORJA - 2593400",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 73,
-      "cells": [
-        "SAO BORJA - 2599301",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 74,
-      "cells": [
-        "SAO BORJA - 2599302",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 75,
-      "cells": [
-        "SAO BORJA - 2599399",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 76,
-      "cells": [
-        "SAO BORJA - 2950600",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 77,
-      "cells": [
-        "SAO BORJA - 3101200",
-        "22"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 78,
-      "cells": [
-        "SAO BORJA - 3102100",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 79,
-      "cells": [
-        "SAO BORJA - 3103900",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 80,
-      "cells": [
-        "SAO BORJA - 3212400",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 81,
-      "cells": [
-        "SAO BORJA - 3240099",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 82,
-      "cells": [
-        "SAO BORJA - 3250706",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 83,
-      "cells": [
-        "SAO BORJA - 3299002",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 84,
-      "cells": [
-        "SAO BORJA - 3299003",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 85,
-      "cells": [
-        "SAO BORJA - 3299006",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 86,
-      "cells": [
-        "SAO BORJA - 3299099",
-        "32"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 87,
-      "cells": [
-        "SAO BORJA - 3312102",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 88,
-      "cells": [
-        "SAO BORJA - 3313901",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 89,
-      "cells": [
-        "SAO BORJA - 3313999",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 90,
-      "cells": [
-        "SAO BORJA - 3314701",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 91,
-      "cells": [
-        "SAO BORJA - 3314702",
-        "3"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 92,
-      "cells": [
-        "SAO BORJA - 3314704",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 93,
-      "cells": [
-        "SAO BORJA - 3314707",
-        "6"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 94,
-      "cells": [
-        "SAO BORJA - 3314710",
-        "4"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 95,
-      "cells": [
-        "SAO BORJA - 3314711",
-        "57"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 96,
-      "cells": [
-        "SAO BORJA - 3314712",
-        "27"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 97,
-      "cells": [
-        "SAO BORJA - 3314719",
-        "2"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 98,
-      "cells": [
-        "SAO BORJA - 3317102",
-        "1"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 99,
-      "cells": [
-        "SAO BORJA - 3319800",
-        "6"
-      ]
-    },
-    {
-      "table": 2,
-      "row": 100,
-      "cells": [
-        "SAO BORJA - 3321000",
-        "11"
+        "SAO BORJA - 9700500",
+        "184"
       ]
     }
+  ],
+  "grid_rows": [
+    [
+      "Municipio",
+      "Total"
+    ],
+    [
+      "SAO BORJA - 9001999",
+      "2"
+    ],
+    [
+      "SAO BORJA - 9311500",
+      "6"
+    ],
+    [
+      "SAO BORJA - 9312300",
+      "3"
+    ],
+    [
+      "SAO BORJA - 9313100",
+      "19"
+    ],
+    [
+      "SAO BORJA - 9329803",
+      "2"
+    ],
+    [
+      "SAO BORJA - 9329804",
+      "2"
+    ],
+    [
+      "SAO BORJA - 9329899",
+      "6"
+    ],
+    [
+      "SAO BORJA - 9511800",
+      "39"
+    ],
+    [
+      "SAO BORJA - 9512600",
+      "14"
+    ],
+    [
+      "SAO BORJA - 9521500",
+      "14"
+    ],
+    [
+      "SAO BORJA - 9529101",
+      "2"
+    ],
+    [
+      "SAO BORJA - 9529102",
+      "7"
+    ],
+    [
+      "SAO BORJA - 9529104",
+      "4"
+    ],
+    [
+      "SAO BORJA - 9529105",
+      "17"
+    ],
+    [
+      "SAO BORJA - 9529106",
+      "1"
+    ],
+    [
+      "SAO BORJA - 9529199",
+      "2"
+    ],
+    [
+      "SAO BORJA - 9601701",
+      "10"
+    ],
+    [
+      "SAO BORJA - 9601703",
+      "1"
+    ],
+    [
+      "SAO BORJA - 9602501",
+      "287"
+    ],
+    [
+      "SAO BORJA - 9602502",
+      "98"
+    ],
+    [
+      "SAO BORJA - 9603301",
+      "1"
+    ],
+    [
+      "SAO BORJA - 9603304",
+      "2"
+    ],
+    [
+      "SAO BORJA - 9609206",
+      "11"
+    ],
+    [
+      "SAO BORJA - 9609207",
+      "4"
+    ],
+    [
+      "SAO BORJA - 9609208",
+      "17"
+    ],
+    [
+      "SAO BORJA - 9609299",
+      "16"
+    ],
+    [
+      "SAO BORJA - 9700500",
+      "184"
+    ],
+    [
+      "TOTAL",
+      "771"
+    ]
   ],
   "final_url": "https://www8.receita.fazenda.gov.br/simplesnacional/aplicacoes/atbhe/estatisticassinac.app/EstatisticasOptantesPorCNAE.aspx?tipoConsulta=1"
 }

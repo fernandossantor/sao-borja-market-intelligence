@@ -1,1788 +1,582 @@
-[
-  {
-    "name": "sinac_total",
-    "http_status": 200,
-    "filter_ok": true,
-    "exibir_ok": true,
-    "result_rows": [],
-    "error": null,
-    "log": [
-      {
-        "action": "select",
-        "selector": "#ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
-        "value": "Por Município"
-      },
-      {
-        "action": "filter_uf",
-        "value": "RS"
-      },
-      {
-        "action": "select_sao_borja",
-        "value": "8863",
-        "text": "SAO BORJA"
-      },
-      {
-        "action": "insert_sao_borja"
-      },
-      {
-        "action": "destination_snapshot",
-        "options": [
-          {
-            "text": "SAO BORJA",
-            "value": "8863"
-          }
-        ]
-      },
-      {
-        "action": "hidden_filter_set",
-        "municipios": [
-          "8863"
+{
+  "summary": [
+    {
+      "name": "sinac_total",
+      "http_status": 200,
+      "position_date": "12/09/2026",
+      "date_ok": true,
+      "filter_ok": true,
+      "exibir_ok": true,
+      "grid_rows": [
+        [
+          "Municipio",
+          "Total"
         ],
-        "uf": "RS"
-      },
-      {
-        "action": "click_exibir"
-      }
-    ]
-  },
-  {
-    "name": "simei_total",
-    "http_status": 200,
-    "filter_ok": true,
-    "exibir_ok": true,
-    "result_rows": [],
-    "error": null,
-    "log": [
-      {
-        "action": "select",
-        "selector": "#ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
-        "value": "Por Município"
-      },
-      {
-        "action": "filter_uf",
-        "value": "RS"
-      },
-      {
-        "action": "select_sao_borja",
-        "value": "8863",
-        "text": "SAO BORJA"
-      },
-      {
-        "action": "insert_sao_borja"
-      },
-      {
-        "action": "destination_snapshot",
-        "options": [
-          {
-            "text": "SAO BORJA",
-            "value": "8863"
-          }
-        ]
-      },
-      {
-        "action": "hidden_filter_set",
-        "municipios": [
-          "8863"
+        [
+          "SAO BORJA",
+          "7.176"
         ],
-        "uf": "RS"
-      },
-      {
-        "action": "click_exibir"
-      }
-    ]
-  },
-  {
-    "name": "sinac_cnae",
-    "http_status": 200,
-    "filter_ok": true,
-    "exibir_ok": true,
-    "result_rows": [
-      {
-        "table": 2,
-        "row": 1,
-        "cells": [
-          "SAO BORJA - 0115600",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 2,
-        "cells": [
-          "SAO BORJA - 0151201",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 3,
-        "cells": [
-          "SAO BORJA - 0151202",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 4,
-        "cells": [
-          "SAO BORJA - 0155505",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 5,
-        "cells": [
-          "SAO BORJA - 0159801",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 6,
-        "cells": [
-          "SAO BORJA - 0159802",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 7,
-        "cells": [
-          "SAO BORJA - 0161001",
-          "12"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 8,
-        "cells": [
-          "SAO BORJA - 0161002",
-          "9"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 9,
-        "cells": [
-          "SAO BORJA - 0161003",
-          "68"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 10,
-        "cells": [
-          "SAO BORJA - 0161099",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 11,
-        "cells": [
-          "SAO BORJA - 0162802",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 12,
-        "cells": [
-          "SAO BORJA - 0163600",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 13,
-        "cells": [
-          "SAO BORJA - 0322104",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 14,
-        "cells": [
-          "SAO BORJA - 1012101",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 15,
-        "cells": [
-          "SAO BORJA - 1013901",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 16,
-        "cells": [
-          "SAO BORJA - 1020101",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 17,
-        "cells": [
-          "SAO BORJA - 1031700",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 18,
-        "cells": [
-          "SAO BORJA - 1032599",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 19,
-        "cells": [
-          "SAO BORJA - 1041400",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 20,
-        "cells": [
-          "SAO BORJA - 1053800",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 21,
-        "cells": [
-          "SAO BORJA - 1061901",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 22,
-        "cells": [
-          "SAO BORJA - 1061902",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 23,
-        "cells": [
-          "SAO BORJA - 1066000",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 24,
-        "cells": [
-          "SAO BORJA - 1091101",
-          "30"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 25,
-        "cells": [
-          "SAO BORJA - 1091102",
-          "60"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 26,
-        "cells": [
-          "SAO BORJA - 1092900",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 27,
-        "cells": [
-          "SAO BORJA - 1093701",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 28,
-        "cells": [
-          "SAO BORJA - 1094500",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 29,
-        "cells": [
-          "SAO BORJA - 1096100",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 30,
-        "cells": [
-          "SAO BORJA - 1099604",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 31,
-        "cells": [
-          "SAO BORJA - 1111901",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 32,
-        "cells": [
-          "SAO BORJA - 1112700",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 33,
-        "cells": [
-          "SAO BORJA - 1113502",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 34,
-        "cells": [
-          "SAO BORJA - 1340599",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 35,
-        "cells": [
-          "SAO BORJA - 1351100",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 36,
-        "cells": [
-          "SAO BORJA - 1359600",
-          "25"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 37,
-        "cells": [
-          "SAO BORJA - 1411801",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 38,
-        "cells": [
-          "SAO BORJA - 1412601",
-          "31"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 39,
-        "cells": [
-          "SAO BORJA - 1412602",
-          "36"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 40,
-        "cells": [
-          "SAO BORJA - 1412603",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 41,
-        "cells": [
-          "SAO BORJA - 1422300",
-          "7"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 42,
-        "cells": [
-          "SAO BORJA - 1529700",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 43,
-        "cells": [
-          "SAO BORJA - 1531901",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 44,
-        "cells": [
-          "SAO BORJA - 1622699",
-          "9"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 45,
-        "cells": [
-          "SAO BORJA - 1629301",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 46,
-        "cells": [
-          "SAO BORJA - 1732000",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 47,
-        "cells": [
-          "SAO BORJA - 1749400",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 48,
-        "cells": [
-          "SAO BORJA - 1813001",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 49,
-        "cells": [
-          "SAO BORJA - 1813099",
-          "8"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 50,
-        "cells": [
-          "SAO BORJA - 1821100",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 51,
-        "cells": [
-          "SAO BORJA - 1822999",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 52,
-        "cells": [
-          "SAO BORJA - 2062200",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 53,
-        "cells": [
-          "SAO BORJA - 2212900",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 54,
-        "cells": [
-          "SAO BORJA - 2229399",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 55,
-        "cells": [
-          "SAO BORJA - 2330301",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 56,
-        "cells": [
-          "SAO BORJA - 2330302",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 57,
-        "cells": [
-          "SAO BORJA - 2330399",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 58,
-        "cells": [
-          "SAO BORJA - 2342702",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 59,
-        "cells": [
-          "SAO BORJA - 2349499",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 60,
-        "cells": [
-          "SAO BORJA - 2391503",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 61,
-        "cells": [
-          "SAO BORJA - 2399101",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 62,
-        "cells": [
-          "SAO BORJA - 2424501",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 63,
-        "cells": [
-          "SAO BORJA - 2511000",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 64,
-        "cells": [
-          "SAO BORJA - 2512800",
-          "13"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 65,
-        "cells": [
-          "SAO BORJA - 2522500",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 66,
-        "cells": [
-          "SAO BORJA - 2532201",
-          "6"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 67,
-        "cells": [
-          "SAO BORJA - 2539001",
-          "59"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 68,
-        "cells": [
-          "SAO BORJA - 2539002",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 69,
-        "cells": [
-          "SAO BORJA - 2541100",
-          "6"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 70,
-        "cells": [
-          "SAO BORJA - 2542000",
-          "24"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 71,
-        "cells": [
-          "SAO BORJA - 2543800",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 72,
-        "cells": [
-          "SAO BORJA - 2593400",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 73,
-        "cells": [
-          "SAO BORJA - 2599301",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 74,
-        "cells": [
-          "SAO BORJA - 2599302",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 75,
-        "cells": [
-          "SAO BORJA - 2599399",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 76,
-        "cells": [
-          "SAO BORJA - 2950600",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 77,
-        "cells": [
-          "SAO BORJA - 3101200",
-          "22"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 78,
-        "cells": [
-          "SAO BORJA - 3102100",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 79,
-        "cells": [
-          "SAO BORJA - 3103900",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 80,
-        "cells": [
-          "SAO BORJA - 3212400",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 81,
-        "cells": [
-          "SAO BORJA - 3240099",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 82,
-        "cells": [
-          "SAO BORJA - 3250706",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 83,
-        "cells": [
-          "SAO BORJA - 3299002",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 84,
-        "cells": [
-          "SAO BORJA - 3299003",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 85,
-        "cells": [
-          "SAO BORJA - 3299006",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 86,
-        "cells": [
-          "SAO BORJA - 3299099",
-          "32"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 87,
-        "cells": [
-          "SAO BORJA - 3312102",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 88,
-        "cells": [
-          "SAO BORJA - 3313901",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 89,
-        "cells": [
-          "SAO BORJA - 3313999",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 90,
-        "cells": [
-          "SAO BORJA - 3314701",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 91,
-        "cells": [
-          "SAO BORJA - 3314702",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 92,
-        "cells": [
-          "SAO BORJA - 3314704",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 93,
-        "cells": [
-          "SAO BORJA - 3314707",
-          "6"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 94,
-        "cells": [
-          "SAO BORJA - 3314710",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 95,
-        "cells": [
-          "SAO BORJA - 3314711",
-          "57"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 96,
-        "cells": [
-          "SAO BORJA - 3314712",
-          "27"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 97,
-        "cells": [
-          "SAO BORJA - 3314719",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 98,
-        "cells": [
-          "SAO BORJA - 3317102",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 99,
-        "cells": [
-          "SAO BORJA - 3319800",
-          "6"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 100,
-        "cells": [
-          "SAO BORJA - 3321000",
-          "11"
-        ]
-      }
-    ],
-    "error": null,
-    "log": [
-      {
-        "action": "select",
-        "selector": "#ctl00_ctl00_Conteudo_AntesTabela_ddlColuna",
-        "value": "Município"
-      },
-      {
-        "action": "filter_uf",
-        "value": "RS"
-      },
-      {
-        "action": "select_sao_borja",
-        "value": "8863",
-        "text": "SAO BORJA"
-      },
-      {
-        "action": "insert_sao_borja"
-      },
-      {
-        "action": "destination_snapshot",
-        "options": [
-          {
-            "text": "SAO BORJA",
-            "value": "8863"
-          }
-        ]
-      },
-      {
-        "action": "hidden_filter_set",
-        "municipios": [
-          "8863"
+        [
+          "TOTAL",
+          "7.176"
+        ]
+      ],
+      "cnae_rows_count": 0,
+      "cnae_sum": null,
+      "page_totals": [],
+      "error": null,
+      "log": [
+        {
+          "action": "select",
+          "selector": "#ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+          "value": "Por Município"
+        },
+        {
+          "action": "set_query_date",
+          "date": "12/09/2026"
+        },
+        {
+          "action": "filter_uf",
+          "value": "RS"
+        },
+        {
+          "action": "select_sao_borja",
+          "value": "8863",
+          "text": "SAO BORJA"
+        },
+        {
+          "action": "insert_sao_borja"
+        },
+        {
+          "action": "destination_snapshot",
+          "options": [
+            {
+              "text": "SAO BORJA",
+              "value": "8863"
+            }
+          ]
+        },
+        {
+          "action": "hidden_filter_set",
+          "municipios": [
+            "8863"
+          ],
+          "uf": "RS"
+        },
+        {
+          "action": "click_exibir"
+        }
+      ]
+    },
+    {
+      "name": "simei_total",
+      "http_status": 200,
+      "position_date": "12/09/2026",
+      "date_ok": true,
+      "filter_ok": true,
+      "exibir_ok": true,
+      "grid_rows": [
+        [
+          "Municipio",
+          "Total"
         ],
-        "uf": "RS"
-      },
-      {
-        "action": "click_exibir"
-      }
-    ]
-  },
-  {
-    "name": "simei_cnae",
-    "http_status": 200,
-    "filter_ok": true,
-    "exibir_ok": true,
-    "result_rows": [
-      {
-        "table": 2,
-        "row": 1,
-        "cells": [
-          "SAO BORJA - 0159801",
-          "1"
+        [
+          "SAO BORJA",
+          "4.883"
+        ],
+        [
+          "TOTAL",
+          "4.883"
         ]
-      },
-      {
-        "table": 2,
-        "row": 2,
-        "cells": [
-          "SAO BORJA - 0159802",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 3,
-        "cells": [
-          "SAO BORJA - 0161002",
-          "9"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 4,
-        "cells": [
-          "SAO BORJA - 0161003",
-          "43"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 5,
-        "cells": [
-          "SAO BORJA - 0162802",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 6,
-        "cells": [
-          "SAO BORJA - 0322104",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 7,
-        "cells": [
-          "SAO BORJA - 1013901",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 8,
-        "cells": [
-          "SAO BORJA - 1031700",
+      ],
+      "cnae_rows_count": 0,
+      "cnae_sum": null,
+      "page_totals": [],
+      "error": null,
+      "log": [
+        {
+          "action": "select",
+          "selector": "#ctl00_ctl00_Conteudo_AntesTabela_droplistOpcao",
+          "value": "Por Município"
+        },
+        {
+          "action": "set_query_date",
+          "date": "12/09/2026"
+        },
+        {
+          "action": "filter_uf",
+          "value": "RS"
+        },
+        {
+          "action": "select_sao_borja",
+          "value": "8863",
+          "text": "SAO BORJA"
+        },
+        {
+          "action": "insert_sao_borja"
+        },
+        {
+          "action": "destination_snapshot",
+          "options": [
+            {
+              "text": "SAO BORJA",
+              "value": "8863"
+            }
+          ]
+        },
+        {
+          "action": "hidden_filter_set",
+          "municipios": [
+            "8863"
+          ],
+          "uf": "RS"
+        },
+        {
+          "action": "click_exibir"
+        }
+      ]
+    },
+    {
+      "name": "sinac_cnae",
+      "http_status": 200,
+      "position_date": "12/09/2026",
+      "date_ok": null,
+      "filter_ok": true,
+      "exibir_ok": true,
+      "grid_rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 9001999",
           "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 9,
-        "cells": [
-          "SAO BORJA - 1032599",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 10,
-        "cells": [
-          "SAO BORJA - 1061902",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 11,
-        "cells": [
-          "SAO BORJA - 1091101",
-          "29"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 12,
-        "cells": [
-          "SAO BORJA - 1091102",
-          "57"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 13,
-        "cells": [
-          "SAO BORJA - 1092900",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 14,
-        "cells": [
-          "SAO BORJA - 1093701",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 15,
-        "cells": [
-          "SAO BORJA - 1094500",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 16,
-        "cells": [
-          "SAO BORJA - 1096100",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 17,
-        "cells": [
-          "SAO BORJA - 1099604",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 18,
-        "cells": [
-          "SAO BORJA - 1340599",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 19,
-        "cells": [
-          "SAO BORJA - 1351100",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 20,
-        "cells": [
-          "SAO BORJA - 1359600",
-          "23"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 21,
-        "cells": [
-          "SAO BORJA - 1411801",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 22,
-        "cells": [
-          "SAO BORJA - 1412601",
-          "27"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 23,
-        "cells": [
-          "SAO BORJA - 1412602",
-          "36"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 24,
-        "cells": [
-          "SAO BORJA - 1412603",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 25,
-        "cells": [
-          "SAO BORJA - 1422300",
+        ],
+        [
+          "SAO BORJA - 9311500",
           "6"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 26,
-        "cells": [
-          "SAO BORJA - 1529700",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 27,
-        "cells": [
-          "SAO BORJA - 1622699",
-          "7"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 28,
-        "cells": [
-          "SAO BORJA - 1629301",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 29,
-        "cells": [
-          "SAO BORJA - 1732000",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 30,
-        "cells": [
-          "SAO BORJA - 1749400",
+        ],
+        [
+          "SAO BORJA - 9312300",
           "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 31,
-        "cells": [
-          "SAO BORJA - 1813001",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 32,
-        "cells": [
-          "SAO BORJA - 1813099",
-          "5"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 33,
-        "cells": [
-          "SAO BORJA - 1821100",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 34,
-        "cells": [
-          "SAO BORJA - 2229399",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 35,
-        "cells": [
-          "SAO BORJA - 2330399",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 36,
-        "cells": [
-          "SAO BORJA - 2342702",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 37,
-        "cells": [
-          "SAO BORJA - 2349499",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 38,
-        "cells": [
-          "SAO BORJA - 2391503",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 39,
-        "cells": [
-          "SAO BORJA - 2399101",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 40,
-        "cells": [
-          "SAO BORJA - 2512800",
-          "8"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 41,
-        "cells": [
-          "SAO BORJA - 2532201",
-          "5"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 42,
-        "cells": [
-          "SAO BORJA - 2539001",
-          "48"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 43,
-        "cells": [
-          "SAO BORJA - 2539002",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 44,
-        "cells": [
-          "SAO BORJA - 2541100",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 45,
-        "cells": [
-          "SAO BORJA - 2542000",
-          "17"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 46,
-        "cells": [
-          "SAO BORJA - 2543800",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 47,
-        "cells": [
-          "SAO BORJA - 2599301",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 48,
-        "cells": [
-          "SAO BORJA - 2599399",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 49,
-        "cells": [
-          "SAO BORJA - 2950600",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 50,
-        "cells": [
-          "SAO BORJA - 3101200",
-          "14"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 51,
-        "cells": [
-          "SAO BORJA - 3102100",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 52,
-        "cells": [
-          "SAO BORJA - 3212400",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 53,
-        "cells": [
-          "SAO BORJA - 3240099",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 54,
-        "cells": [
-          "SAO BORJA - 3299002",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 55,
-        "cells": [
-          "SAO BORJA - 3299006",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 56,
-        "cells": [
-          "SAO BORJA - 3299099",
-          "31"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 57,
-        "cells": [
-          "SAO BORJA - 3313901",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 58,
-        "cells": [
-          "SAO BORJA - 3313999",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 59,
-        "cells": [
-          "SAO BORJA - 3314702",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 60,
-        "cells": [
-          "SAO BORJA - 3314707",
-          "5"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 61,
-        "cells": [
-          "SAO BORJA - 3314710",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 62,
-        "cells": [
-          "SAO BORJA - 3314711",
-          "39"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 63,
-        "cells": [
-          "SAO BORJA - 3314712",
-          "24"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 64,
-        "cells": [
-          "SAO BORJA - 3314719",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 65,
-        "cells": [
-          "SAO BORJA - 3317102",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 66,
-        "cells": [
-          "SAO BORJA - 3319800",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 67,
-        "cells": [
-          "SAO BORJA - 3321000",
-          "9"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 68,
-        "cells": [
-          "SAO BORJA - 3329501",
-          "27"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 69,
-        "cells": [
-          "SAO BORJA - 3831901",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 70,
-        "cells": [
-          "SAO BORJA - 4321500",
-          "109"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 71,
-        "cells": [
-          "SAO BORJA - 4322301",
-          "13"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 72,
-        "cells": [
-          "SAO BORJA - 4322302",
-          "35"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 73,
-        "cells": [
-          "SAO BORJA - 4329101",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 74,
-        "cells": [
-          "SAO BORJA - 4329104",
-          "1"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 75,
-        "cells": [
-          "SAO BORJA - 4330402",
-          "8"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 76,
-        "cells": [
-          "SAO BORJA - 4330403",
-          "10"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 77,
-        "cells": [
-          "SAO BORJA - 4330404",
-          "76"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 78,
-        "cells": [
-          "SAO BORJA - 4330405",
-          "10"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 79,
-        "cells": [
-          "SAO BORJA - 4330499",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 80,
-        "cells": [
-          "SAO BORJA - 4399103",
-          "339"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 81,
-        "cells": [
-          "SAO BORJA - 4399199",
+        ],
+        [
+          "SAO BORJA - 9313100",
           "19"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 82,
-        "cells": [
-          "SAO BORJA - 4520001",
-          "108"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 83,
-        "cells": [
-          "SAO BORJA - 4520002",
-          "41"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 84,
-        "cells": [
-          "SAO BORJA - 4520003",
-          "17"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 85,
-        "cells": [
-          "SAO BORJA - 4520005",
-          "61"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 86,
-        "cells": [
-          "SAO BORJA - 4520006",
-          "18"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 87,
-        "cells": [
-          "SAO BORJA - 4520007",
-          "16"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 88,
-        "cells": [
-          "SAO BORJA - 4530703",
-          "29"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 89,
-        "cells": [
-          "SAO BORJA - 4530704",
-          "6"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 90,
-        "cells": [
-          "SAO BORJA - 4530705",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 91,
-        "cells": [
-          "SAO BORJA - 4541206",
-          "13"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 92,
-        "cells": [
-          "SAO BORJA - 4543900",
-          "14"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 93,
-        "cells": [
-          "SAO BORJA - 4712100",
-          "176"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 94,
-        "cells": [
-          "SAO BORJA - 4713002",
-          "7"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 95,
-        "cells": [
-          "SAO BORJA - 4721102",
-          "20"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 96,
-        "cells": [
-          "SAO BORJA - 4721103",
-          "2"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 97,
-        "cells": [
-          "SAO BORJA - 4721104",
-          "4"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 98,
-        "cells": [
-          "SAO BORJA - 4722901",
-          "7"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 99,
-        "cells": [
-          "SAO BORJA - 4722902",
-          "3"
-        ]
-      },
-      {
-        "table": 2,
-        "row": 100,
-        "cells": [
-          "SAO BORJA - 4723700",
-          "144"
-        ]
-      }
-    ],
-    "error": null,
-    "log": [
-      {
-        "action": "select",
-        "selector": "#ctl00_ctl00_Conteudo_AntesTabela_ddlColuna",
-        "value": "Município"
-      },
-      {
-        "action": "filter_uf",
-        "value": "RS"
-      },
-      {
-        "action": "select_sao_borja",
-        "value": "8863",
-        "text": "SAO BORJA"
-      },
-      {
-        "action": "insert_sao_borja"
-      },
-      {
-        "action": "destination_snapshot",
-        "options": [
-          {
-            "text": "SAO BORJA",
-            "value": "8863"
-          }
-        ]
-      },
-      {
-        "action": "hidden_filter_set",
-        "municipios": [
-          "8863"
         ],
-        "uf": "RS"
-      },
-      {
-        "action": "click_exibir"
-      }
-    ]
+        [
+          "SAO BORJA - 9329803",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9329804",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9329899",
+          "6"
+        ],
+        [
+          "SAO BORJA - 9511800",
+          "39"
+        ],
+        [
+          "SAO BORJA - 9512600",
+          "14"
+        ],
+        [
+          "SAO BORJA - 9521500",
+          "14"
+        ],
+        [
+          "SAO BORJA - 9529101",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9529102",
+          "7"
+        ],
+        [
+          "SAO BORJA - 9529104",
+          "4"
+        ],
+        [
+          "SAO BORJA - 9529105",
+          "17"
+        ],
+        [
+          "SAO BORJA - 9529106",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9529199",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9601701",
+          "10"
+        ],
+        [
+          "SAO BORJA - 9601703",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9602501",
+          "287"
+        ],
+        [
+          "SAO BORJA - 9602502",
+          "98"
+        ],
+        [
+          "SAO BORJA - 9603301",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9603304",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9609206",
+          "11"
+        ],
+        [
+          "SAO BORJA - 9609207",
+          "4"
+        ],
+        [
+          "SAO BORJA - 9609208",
+          "17"
+        ],
+        [
+          "SAO BORJA - 9609299",
+          "16"
+        ],
+        [
+          "SAO BORJA - 9700500",
+          "184"
+        ],
+        [
+          "TOTAL",
+          "771"
+        ]
+      ],
+      "cnae_rows_count": 427,
+      "cnae_sum": 7176,
+      "page_totals": [
+        {
+          "page": 1,
+          "value": 713
+        },
+        {
+          "page": 2,
+          "value": 2133
+        },
+        {
+          "page": 3,
+          "value": 2448
+        },
+        {
+          "page": 4,
+          "value": 1111
+        },
+        {
+          "page": 5,
+          "value": 771
+        }
+      ],
+      "error": null,
+      "log": [
+        {
+          "action": "select",
+          "selector": "#ctl00_ctl00_Conteudo_AntesTabela_ddlColuna",
+          "value": "Município"
+        },
+        {
+          "action": "filter_uf",
+          "value": "RS"
+        },
+        {
+          "action": "select_sao_borja",
+          "value": "8863",
+          "text": "SAO BORJA"
+        },
+        {
+          "action": "insert_sao_borja"
+        },
+        {
+          "action": "destination_snapshot",
+          "options": [
+            {
+              "text": "SAO BORJA",
+              "value": "8863"
+            }
+          ]
+        },
+        {
+          "action": "hidden_filter_set",
+          "municipios": [
+            "8863"
+          ],
+          "uf": "RS"
+        },
+        {
+          "action": "click_exibir"
+        },
+        {
+          "action": "cnae_page",
+          "page": 1,
+          "rows": 102
+        },
+        {
+          "action": "cnae_page",
+          "page": 2,
+          "rows": 102
+        },
+        {
+          "action": "cnae_page",
+          "page": 3,
+          "rows": 102
+        },
+        {
+          "action": "cnae_page",
+          "page": 4,
+          "rows": 102
+        },
+        {
+          "action": "cnae_page",
+          "page": 5,
+          "rows": 29
+        }
+      ]
+    },
+    {
+      "name": "simei_cnae",
+      "http_status": 200,
+      "position_date": "12/09/2026",
+      "date_ok": null,
+      "filter_ok": true,
+      "exibir_ok": true,
+      "grid_rows": [
+        [
+          "Municipio",
+          "Total"
+        ],
+        [
+          "SAO BORJA - 8299703",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8299707",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8299799",
+          "4"
+        ],
+        [
+          "SAO BORJA - 8592902",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8592903",
+          "2"
+        ],
+        [
+          "SAO BORJA - 8592999",
+          "14"
+        ],
+        [
+          "SAO BORJA - 8593700",
+          "1"
+        ],
+        [
+          "SAO BORJA - 8599603",
+          "6"
+        ],
+        [
+          "SAO BORJA - 8599604",
+          "36"
+        ],
+        [
+          "SAO BORJA - 8599605",
+          "7"
+        ],
+        [
+          "SAO BORJA - 8599699",
+          "66"
+        ],
+        [
+          "SAO BORJA - 8712300",
+          "49"
+        ],
+        [
+          "SAO BORJA - 9001902",
+          "19"
+        ],
+        [
+          "SAO BORJA - 9001906",
+          "9"
+        ],
+        [
+          "SAO BORJA - 9329803",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9329899",
+          "5"
+        ],
+        [
+          "SAO BORJA - 9511800",
+          "32"
+        ],
+        [
+          "SAO BORJA - 9512600",
+          "13"
+        ],
+        [
+          "SAO BORJA - 9521500",
+          "10"
+        ],
+        [
+          "SAO BORJA - 9529101",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9529102",
+          "5"
+        ],
+        [
+          "SAO BORJA - 9529104",
+          "4"
+        ],
+        [
+          "SAO BORJA - 9529105",
+          "16"
+        ],
+        [
+          "SAO BORJA - 9529199",
+          "2"
+        ],
+        [
+          "SAO BORJA - 9601701",
+          "6"
+        ],
+        [
+          "SAO BORJA - 9601703",
+          "1"
+        ],
+        [
+          "SAO BORJA - 9602501",
+          "276"
+        ],
+        [
+          "SAO BORJA - 9602502",
+          "94"
+        ],
+        [
+          "SAO BORJA - 9609206",
+          "11"
+        ],
+        [
+          "SAO BORJA - 9609207",
+          "4"
+        ],
+        [
+          "SAO BORJA - 9609208",
+          "16"
+        ],
+        [
+          "SAO BORJA - 9609299",
+          "12"
+        ],
+        [
+          "SAO BORJA - 9700500",
+          "184"
+        ],
+        [
+          "TOTAL",
+          "911"
+        ]
+      ],
+      "cnae_rows_count": 233,
+      "cnae_sum": 4883,
+      "page_totals": [
+        {
+          "page": 1,
+          "value": 1880
+        },
+        {
+          "page": 2,
+          "value": 2092
+        },
+        {
+          "page": 3,
+          "value": 911
+        }
+      ],
+      "error": null,
+      "log": [
+        {
+          "action": "select",
+          "selector": "#ctl00_ctl00_Conteudo_AntesTabela_ddlColuna",
+          "value": "Município"
+        },
+        {
+          "action": "filter_uf",
+          "value": "RS"
+        },
+        {
+          "action": "select_sao_borja",
+          "value": "8863",
+          "text": "SAO BORJA"
+        },
+        {
+          "action": "insert_sao_borja"
+        },
+        {
+          "action": "destination_snapshot",
+          "options": [
+            {
+              "text": "SAO BORJA",
+              "value": "8863"
+            }
+          ]
+        },
+        {
+          "action": "hidden_filter_set",
+          "municipios": [
+            "8863"
+          ],
+          "uf": "RS"
+        },
+        {
+          "action": "click_exibir"
+        },
+        {
+          "action": "cnae_page",
+          "page": 1,
+          "rows": 102
+        },
+        {
+          "action": "cnae_page",
+          "page": 2,
+          "rows": 102
+        },
+        {
+          "action": "cnae_page",
+          "page": 3,
+          "rows": 35
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "sinac_total": 7176,
+    "simei_total": 4883,
+    "sinac_cnae_sum": 7176,
+    "simei_cnae_sum": 4883,
+    "sinac_reconciles": true,
+    "simei_reconciles": true
   }
-]
+}

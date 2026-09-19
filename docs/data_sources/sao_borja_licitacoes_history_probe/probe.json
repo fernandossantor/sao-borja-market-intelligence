@@ -1,0 +1,188 @@
+{
+  "/licitacoes/buscarExercicios/1": {
+    "status": 200,
+    "bytes": 22382,
+    "content_type": "text/html; charset=UTF-8",
+    "prefix": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <link href=\"\" id=\"base\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.min.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery-ui.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/ui.jqgrid.css\" /><script type=\"text/javascript\" src=\"/js/jquery.js\"></script><script type=\"text/javascript\" src=\"/js/jquery.json.js\"></script><script type=\"text/javascript\" src=\"/js/grid.locale-pt-br.js\"></script><scri"
+  },
+  "/licitacoes/getExercicios/1": {
+    "status": 200,
+    "bytes": 22373,
+    "content_type": "text/html; charset=UTF-8",
+    "prefix": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <link href=\"\" id=\"base\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.min.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery-ui.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/ui.jqgrid.css\" /><script type=\"text/javascript\" src=\"/js/jquery.js\"></script><script type=\"text/javascript\" src=\"/js/jquery.json.js\"></script><script type=\"text/javascript\" src=\"/js/grid.locale-pt-br.js\"></script><scri"
+  },
+  "/licitacoes/buscarInstituicoes": {
+    "status": 200,
+    "bytes": 22388,
+    "content_type": "text/html; charset=UTF-8",
+    "prefix": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <link href=\"\" id=\"base\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.min.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery-ui.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/ui.jqgrid.css\" /><script type=\"text/javascript\" src=\"/js/jquery.js\"></script><script type=\"text/javascript\" src=\"/js/jquery.json.js\"></script><script type=\"text/javascript\" src=\"/js/grid.locale-pt-br.js\"></script><scri"
+  },
+  "search_2019": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2019&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  },
+  "search_2020": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2020&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  },
+  "search_2021": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2021&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  },
+  "search_2022": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2022&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  },
+  "search_2023": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2023&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  },
+  "search_2024": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2024&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  },
+  "search_2025": {
+    "status": 200,
+    "bytes": 25073,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar?instituicao=1&exercicio=2025&mes=&modalidade=&situacao=",
+    "main_text": "Resultado da Busca de Licitações",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "relevant_links": [
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      }
+    ],
+    "route_markers": [
+      "/licitacoes/consulta/",
+      "/licitacoes/getRelatorio",
+      "/licitacoes/pesquisarLicitacoes"
+    ]
+  }
+}

@@ -1,0 +1,178 @@
+name: mip-rs-import-content-target-products
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/mip-rs-import-content-target-products.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Extract outside-RS supply shares for selected products
+        run: |
+          cat > /tmp/mip_import_content.py <<'PY'
+          import csv, io, json, re, ssl, urllib.request, zipfile
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+
+          OUT=Path("artifacts/mip_rs_import_content")
+          OUT.mkdir(parents=True,exist_ok=True)
+          URL="https://dee.rs.gov.br/upload/arquivos/202409/11100149-20240906162755mip-rs-2019-117-52-v2-1.xlsx"
+          req=urllib.request.Request(URL,headers={"User-Agent":"SBMI exploratory audit/1.0"})
+          with urllib.request.urlopen(req,timeout=120,context=ssl.create_default_context()) as r:
+              raw=r.read(); status=r.status
+
+          NSM="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+          NSR="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+          NSP="http://schemas.openxmlformats.org/package/2006/relationships"
+          ns={"m":NSM,"r":NSR,"p":NSP}
+
+          def colnum(ref):
+              letters=re.match(r"([A-Z]+)",ref).group(1)
+              n=0
+              for ch in letters:n=n*26+(ord(ch)-64)
+              return n-1
+
+          def normalize(s):
+              import unicodedata
+              return "".join(c for c in unicodedata.normalize("NFD",s.lower()) if unicodedata.category(c)!="Mn")
+
+          keywords=[
+            "fertiliz","adubo","defensiv","agrotoxic","pestic",
+            "maquinas agr","maquina agr","tratores","sement",
+            "oleo diesel","diesel","gasolina","combust",
+            "servicos financeiros","intermediacao financeira","seguros",
+            "transporte terrestre","armazen","energia eletrica"
+          ]
+
+          with zipfile.ZipFile(io.BytesIO(raw)) as z:
+              shared=[]
+              if "xl/sharedStrings.xml" in z.namelist():
+                  root=ET.fromstring(z.read("xl/sharedStrings.xml"))
+                  for si in root.findall("m:si",ns):
+                      shared.append("".join(t.text or "" for t in si.iter(f"{{{NSM}}}t")))
+              wb=ET.fromstring(z.read("xl/workbook.xml"))
+              relroot=ET.fromstring(z.read("xl/_rels/workbook.xml.rels"))
+              rels={x.attrib["Id"]:x.attrib["Target"] for x in relroot}
+              target=None
+              for sh in wb.find("m:sheets",ns):
+                  if sh.attrib["name"]=="1":
+                      rid=sh.attrib[f"{{{NSR}}}id"]
+                      target=rels[rid]
+                      if not target.startswith("xl/"):target="xl/"+target.lstrip("/")
+              if not target: raise RuntimeError("sheet 1 not found")
+
+              root=ET.fromstring(z.read(target))
+              rows=[]
+              for row in root.findall(".//m:sheetData/m:row",ns):
+                  cells={}
+                  for c in row.findall("m:c",ns):
+                      idx=colnum(c.attrib["r"]); typ=c.attrib.get("t")
+                      v=c.find("m:v",ns)
+                      if typ=="inlineStr":
+                          ise=c.find("m:is",ns)
+                          val="".join(t.text or "" for t in ise.iter(f"{{{NSM}}}t")) if ise is not None else ""
+                      elif v is None: val=""
+                      elif typ=="s":
+                          try: val=shared[int(v.text)]
+                          except: val=v.text or ""
+                      else: val=v.text or ""
+                      cells[idx]=val
+                  rows.append((int(row.attrib.get("r","0")),cells))
+
+              # Fixed layout validated from official table:
+              # A code, B product; C offer consumer; K offer basic;
+              # BM import world, BN import other UFs, BO total imports.
+              out=[]
+              for rnum,cells in rows:
+                  desc=str(cells.get(1,"")).strip()
+                  nd=normalize(desc)
+                  matched=[k for k in keywords if k in nd]
+                  if not matched: continue
+                  def num(i):
+                      try:return float(str(cells.get(i,"")).replace(",","."))
+                      except:return None
+                  offer_cons=num(2); offer_basic=num(10)
+                  imp_world=num(64); imp_uf=num(65); imp_total=num(66)
+                  if imp_total is None and imp_world is not None and imp_uf is not None:
+                      imp_total=imp_world+imp_uf
+                  share=None
+                  if offer_basic not in (None,0) and imp_total is not None:
+                      share=imp_total/offer_basic
+                  out.append({
+                      "row":rnum,"code":str(cells.get(0,"")).strip(),"product":desc,
+                      "offer_consumer_mi":offer_cons,"offer_basic_mi":offer_basic,
+                      "import_world_mi":imp_world,"import_other_uf_mi":imp_uf,
+                      "imports_total_mi":imp_total,"outside_rs_share_basic":share,
+                      "matched_keywords":matched
+                  })
+
+              with (OUT/"selected_products_import_content.csv").open("w",newline="",encoding="utf-8-sig") as f:
+                  fields=["row","code","product","offer_consumer_mi","offer_basic_mi","import_world_mi","import_other_uf_mi","imports_total_mi","outside_rs_share_basic","matched_keywords"]
+                  w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
+                  for x in out:
+                      y=x.copy();y["matched_keywords"]=";".join(x["matched_keywords"]);w.writerow(y)
+              (OUT/"selected_products_import_content.json").write_text(json.dumps({
+                  "source":URL,"http_status":status,"bytes":len(raw),
+                  "geography":"Rio Grande do Sul","period":2019,
+                  "method":"imports_total / oferta_total_preco_basico",
+                  "layout_control":"sheet 1: K=oferta básica; BM=mundo; BN=demais UFs; BO=total importações",
+                  "rows":out,
+                  "limitation":"Benchmark estadual. A parcela externa ao RS não mede parcela externa a São Borja; é limite inferior conceitual para dependência extramunicipal quando o produto é consumido localmente."
+              },ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps({"http_status":status,"matches":len(out),"products":[x["product"] for x in out]},ensure_ascii=False,indent=2))
+          PY
+          python /tmp/mip_import_content.py
+
+      - name: Persist exploratory evidence
+        run: |
+          mkdir -p docs/data_sources/mip_rs_import_content
+          cp artifacts/mip_rs_import_content/selected_products_import_content.csv docs/data_sources/mip_rs_import_content/
+          cp artifacts/mip_rs_import_content/selected_products_import_content.json docs/data_sources/mip_rs_import_content/
+          cat > docs/data_sources/mip_rs_import_content/README.md <<'EOF'
+          # MIP-RS 2019 — conteúdo de oferta externa ao RS em produtos selecionados
+
+          Camada exploratória, não canônica.
+
+          Indicador: (importações do resto do mundo + importações das demais UFs) /
+          oferta total a preço básico do produto no RS.
+
+          Uso: calibrar dependência de cadeias externas em insumos/bens/serviços
+          relevantes para a hipótese de circulação territorial.
+
+          Controle: parcela externa ao RS NÃO é parcela externa a São Borja. Como
+          benchmark, ela identifica apenas dependência que necessariamente ultrapassa
+          o município e o próprio estado; compras de outras cidades gaúchas continuam
+          invisíveis nessa medida.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/mip_rs_import_content
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: extract MIP RS outside-state supply benchmarks"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mip-rs-import-content
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mip_rs_import_content/

@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     env:
-      OFFICIAL: "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2026-08"
+      RFB_ROOT: "https://arquivos.receitafederal.gov.br/"
+      RFB_PERIOD: "2026-08"
       MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
       SAO_BORJA_TOM: "8863"
     steps:
@@ -38,8 +39,24 @@ jobs:
           OUT="artifacts/rfb_official_vs_mirror_control_validation_2026_08"
           mkdir -p "$OUT/raw/official" "$OUT/raw/mirror"
 
+          official_share="$(curl -4 -fsSL -o /dev/null -w '%{url_effective}' "$RFB_ROOT" || true)"
+          official_token="$(printf '%s' "$official_share" | sed -n 's#.*index.php/s/\([^/?]*\).*#\1#p')"
+          if [[ -z "$official_token" ]]; then
+            landing="$(curl -4 -fsSL "$RFB_ROOT" || true)"
+            official_token="$(printf '%s' "$landing" | grep -oE 'index.php/s/[A-Za-z0-9]+' | head -1 | sed 's#^.*/##')"
+          fi
+          if [[ -z "$official_token" ]]; then
+            echo "Could not discover current public RFB share token from official host" >&2
+            exit 2
+          fi
+          echo "Official RFB public share discovered from official host."
+
           for source in official mirror; do
-            if [[ "$source" == "official" ]]; then base="$OFFICIAL"; else base="$MIRROR"; fi
+            if [[ "$source" == "official" ]]; then
+              base="https://arquivos.receitafederal.gov.br/public.php/dav/files/${official_token}/${RFB_PERIOD}"
+            else
+              base="$MIRROR"
+            fi
             for i in {0..9}; do
               echo "$source Estabelecimentos${i}.zip"
               curl -fL --retry 5 --retry-all-errors --retry-delay 5 \

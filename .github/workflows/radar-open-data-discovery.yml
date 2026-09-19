@@ -273,6 +273,7 @@ jobs:
             echo "No discovery changes to commit."
           else
             git commit -m "data: discover Radar Dados Abertos public downloads"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
             git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
           fi
 

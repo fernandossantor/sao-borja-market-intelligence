@@ -1,0 +1,93 @@
+name: sao-borja-licitacoes-endpoint-deep-probe
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-licitacoes-endpoint-deep-probe.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - run: python -m pip install --quiet requests beautifulsoup4
+      - name: Extract inline endpoint semantics and probe
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+          from bs4 import BeautifulSoup
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("docs/data_sources/sao_borja_licitacoes_endpoint_deep_probe")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({"User-Agent":"SBMI territorial audit/1.0"})
+
+          params={"instituicao":"1","exercicio":"2025","mes":"","modalidade":"","situacao":""}
+          r=s.get(BASE+"/licitacoes/pesquisar",params=params,timeout=45)
+          html=r.text
+          soup=BeautifulSoup(html,"html.parser")
+          scripts=[x.get_text("\n") for x in soup.find_all("script") if not x.get("src")]
+          inline="\n\n".join(scripts)
+          markers=["/licitacoes/pesquisarLicitacoes","/licitacoes/getRelatorio","/licitacoes/consulta/"]
+          snippets={}
+          for m in markers:
+            positions=[x.start() for x in re.finditer(re.escape(m),inline)]
+            snippets[m]=[inline[max(0,p-1800):p+3600] for p in positions]
+          (OUT/"inline_snippets.txt").write_text("\n\n=====\n\n".join(
+            m+"\n"+("\n---\n".join(v) if v else "NO_SNIPPET") for m,v in snippets.items()
+          ),encoding="utf-8")
+
+          report={"search_status":r.status_code,"search_bytes":len(r.content),"snippets_count":{k:len(v) for k,v in snippets.items()}}
+
+          # Recover jqGrid-style postData and candidate parameter names from the inline JS.
+          report["candidate_tokens"]=sorted(set(re.findall(r"\b(?:instituicao|exercicio|mes|modalidade|situacao|page|rows|sidx|sord|aParametros|parametros|filtros|filters)\b",inline,re.I)))
+          report["route_markers"]=sorted(set(re.findall(r"/licitacoes/[A-Za-z0-9_/?=&.-]+",inline)))
+
+          # Conservative endpoint probes: tiny page only; no personal data are persisted.
+          candidates=[
+            {"instituicao":"1","exercicio":"2025","mes":"","modalidade":"","situacao":"","page":"1","rows":"10","sidx":"","sord":"asc"},
+            {"instituicao":"1","exercicio":"2025","mes":"","modalidade":"","situacao":"","page":"1","rows":"10","sidx":"numero","sord":"asc"},
+          ]
+          ep=[]
+          for payload in candidates:
+            try:
+              q=s.post(BASE+"/licitacoes/pesquisarLicitacoes",data=payload,timeout=30)
+              rec={"payload":payload,"status":q.status_code,"bytes":len(q.content),"content_type":q.headers.get("content-type"),"prefix":q.text[:500]}
+              try:
+                data=q.json()
+                rec["json"]=True
+                rec["top_keys"]=list(data.keys()) if isinstance(data,dict) else None
+                rec["records"]=data.get("records") if isinstance(data,dict) else None
+                rec["total"]=data.get("total") if isinstance(data,dict) else None
+                rec["returned_rows"]=len(data.get("rows",[])) if isinstance(data,dict) and isinstance(data.get("rows"),list) else None
+                # deliberately do not persist row payload
+              except Exception as e:
+                rec["json"]=False;rec["parse_error"]=repr(e)
+              ep.append(rec)
+            except Exception as e:
+              ep.append({"payload":payload,"request_error":repr(e)})
+          report["endpoint_probes"]=ep
+          (OUT/"probe.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > docs/data_sources/sao_borja_licitacoes_endpoint_deep_probe/README.md <<'EOF'
+          # Portal PMSB — licitações — endpoint deep probe
+
+          Auditoria técnica da rota dinâmica de resultados de licitações. O probe persiste apenas metadados de resposta, contagens e snippets de JavaScript; não persiste registros individuais de fornecedores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/sao_borja_licitacoes_endpoint_deep_probe
+          git commit -m "data: audit PMSB licitacoes dynamic endpoint" || exit 0
+          git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+          git push origin HEAD:explore/receita-estadual-rs-market-intel-v1

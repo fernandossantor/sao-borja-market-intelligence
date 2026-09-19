@@ -1,17 +1,31 @@
-# TCE-RS/SIAPC — despesa orçamentária por empenhos — São Borja — 2019–2025 — v2
+# TCE-RS/SIAPC — tentativa de extração consolidada — São Borja — 2019–2025 — v2
 
-**Fonte observada:** Tribunal de Contas do Estado do Rio Grande do Sul — Dados Abertos SIAPC — conjunto anual consolidado “Despesa orçamentária por empenhos”.
-**Órgão filtrado:** PM DE SÃO BORJA, código TCE-RS 58000.
-**Período:** 2019–2025.
-**Unidade:** R$ correntes/nominais.
-**Rota oficial:** arquivos anuais consolidados `empenhos/<ano>.csv.7z` (fallback ZIP), processados em streaming e filtrados por órgão.
+> **STATUS: EXTRAÇÃO NÃO MATERIALIZADA. NÃO USAR COMO SÉRIE HISTÓRICA DE CREDORES.**
 
-O TCE-RS descreve essa base como contendo empenhos do exercício, liquidações e pagamentos, inclusive liquidações/pagamentos relacionados a empenhos de exercícios anteriores. Os dados são oriundos do SIAPC e, segundo o próprio TCE-RS, não foram analisados pelo Tribunal, sendo de responsabilidade das entidades remetentes.
+**Fonte pretendida:** Tribunal de Contas do Estado do Rio Grande do Sul — Dados Abertos SIAPC — conjunto anual consolidado “Despesa orçamentária por empenhos”.
 
-A camada persistida NÃO contém linhas de credores pessoa física, nomes de credores ou CPFs. Para CNPJ, persiste apenas agregado anual por documento empresarial válido, necessário para análises territoriais futuras.
+**Órgão-alvo:** PM DE SÃO BORJA, código TCE-RS 58000.
 
-CPF/CNPJ são classificados somente quando os dígitos verificadores validam após restauração de zeros à esquerda. Documentos inválidos, sintéticos, ausentes ou ambíguos permanecem em agregado separado.
+**Período pretendido:** 2019–2025.
 
-A comparação com SICONFI/DCA é controle conceitual, não teste de igualdade. A base de empenhos do TCE inclui operações relacionadas a empenhos de exercícios anteriores; o DCA possui escopo contábil próprio. Diferenças devem ser explicadas antes de qualquer fusão.
+O workflow que produziu esta pasta terminou com estado GitHub `success`, porém isso ocorreu porque a rotina permitia continuar mesmo quando os downloads falhavam. Os arquivos desta pasta demonstram que **nenhum dado anual foi efetivamente obtido**:
 
-**Não interpretar credor como fornecedor mercantil**, nem todo pagamento a CNPJ como compra/contratação.
+- `source_manifest.tsv`: 2019–2025 = `FAILED`, bytes = 0;
+- `yearly_payment_aggregate.csv`: todos os anos = `NO_SUMMARY`;
+- `schema_inventory.csv`: vazio;
+- `cnpj_payments_2019_2025.csv`: somente cabeçalho.
+
+Portanto, esta pasta é **evidência diagnóstica de uma tentativa malsucedida**, e não um produto de dados.
+
+A auditoria de rede posterior confirmou que `dados.tce.rs.gov.br` resolve por DNS, mas as conexões TCP a partir do GitHub Actions expiram tanto na porta 443 quanto na porta 80. Ver:
+
+- `docs/data_sources/tce_host_network_diagnostic/network.txt`;
+- `docs/data_sources/tce_siapc_empenhos_transport_closure_2019_2025.md`.
+
+A fonte oficial não foi considerada ausente. O impedimento identificado é de transporte/acessibilidade no ambiente de execução.
+
+A metodologia de reabertura foi preparada em:
+
+`.github/workflows/tce-siapc-empenhos-per-organ-parallel-2019-2025.yml`.
+
+Não persistir ou inferir números históricos de credores a partir desta pasta.

@@ -1,0 +1,139 @@
+{
+  "/acordos": {
+    "status": 200,
+    "bytes": 23148,
+    "content_type": "text/html; charset=UTF-8",
+    "route_strings": [
+      "/>\n            <a id=",
+      "/acordos/pesquisar",
+      "/cms/dashboard",
+      "/consultas/pesquisar",
+      "/css/jquery-ui.css",
+      "/css/style.min.css",
+      "/css/ui.jqgrid.css",
+      "/img/loader.gif",
+      "/img/lupa.png",
+      "/img/top_header.png",
+      "/img/wheelchair.png",
+      "/js/acordos/index.js",
+      "/js/arquivos.js",
+      "/js/consulta.js",
+      "/js/grid.locale-pt-br.js",
+      "/js/jqGrid.js",
+      "/js/jquery.js",
+      "/js/jquery.json.js"
+    ],
+    "institution_snippets": [
+      " >  <span class='crumb_span'>Contratos</span></div>\n\n<br/>\n\n<div class=\"main\">\n  <h3>Consulta de Contratos</h3>\n\n  <form action=\"/acordos/pesquisar\" id=\"FiltroIndexForm\" method=\"get\" accept-charset=\"utf-8\"><div class=\"input select\"><label for=\"FiltroInstituicao\">Instituição</label><select name=\"instituicao\" class=\"required x6\" id=\"FiltroInstituicao\">\n<option value=\"\">Selecione...</option>\n</select></div><div class=\"input select\"><label for=\"FiltroExercicio\">Exercício</label><select name=\"exercicio\" class=\"required\" id=\"FiltroExercicio\">\n<option value=\"\">Selecione...</option>\n</select></div><div class=\"input select\"><label for=\"FiltroMes\">Mês</label><sel"
+    ]
+  },
+  "/licitacoes": {
+    "status": 200,
+    "bytes": 23566,
+    "content_type": "text/html; charset=UTF-8",
+    "route_strings": [
+      "/>\n            <a id=",
+      "/cms/dashboard",
+      "/consultas/pesquisar",
+      "/css/jquery-ui.css",
+      "/css/style.min.css",
+      "/css/ui.jqgrid.css",
+      "/img/loader.gif",
+      "/img/lupa.png",
+      "/img/top_header.png",
+      "/img/wheelchair.png",
+      "/js/arquivos.js",
+      "/js/consulta.js",
+      "/js/grid.locale-pt-br.js",
+      "/js/jqGrid.js",
+      "/js/jquery.js",
+      "/js/jquery.json.js",
+      "/js/licitacoes.js",
+      "/licitacoes/pesquisar"
+    ],
+    "institution_snippets": [
+      "<span class='crumb_span'>Licitações</span></div>\n<div class=\"main\">\n  <h3>Consulta de Licitações</h3>\n  <form action=\"/licitacoes/pesquisar\" id=\"LicitacoesIndexForm\" method=\"get\" accept-charset=\"utf-8\"><div class=\"input select\"><label for=\"LicitacoesInstituicao\">Instituição</label><select name=\"instituicao\" class=\"x6\" id=\"LicitacoesInstituicao\">\n<option value=\"\">SELECIONE...</option>\n</select></div><div class=\"input select\"><label for=\"LicitacoesExercicio\">Exercício</label><select name=\"exercicio\" class=\"x6\" id=\"LicitacoesExercicio\">\n<option value=\"\">Selecione...</option>\n</select></div><div class=\"input select\"><label for=\"LicitacoesMes\">Mês</label><se",
+      "ption>\n<option value=\"8\">Agosto</option>\n<option value=\"9\">Setembro</option>\n<option value=\"10\">Outubro</option>\n<option value=\"11\">Novembro</option>\n<option value=\"12\">Dezembro</option>\n</select></div><div class=\"input select\"><label for=\"LicitacoesModalidade\">Modalidade</label><select name=\"modalidade\" class=\"x6\" id=\"LicitacoesModalidade\">\n<option value=\"\">SELECIONE...</option>\n</select></div><div class=\"input select\"><label for=\"LicitacoesSituacao\">Situações</label><select name=\"situacao\" class=\"x6\" id=\"LicitacoesSituacao\">\n<option value=\"\">SELECIONE...</option>\n</select></div><div class=\"buttons\"><button type=\"submit\">Pesquisar</button></div></div>"
+    ]
+  },
+  "/js/consulta.js": {
+    "status": 200,
+    "bytes": 3730,
+    "content_type": "text/javascript",
+    "route_strings": [],
+    "institution_snippets": []
+  },
+  "/js/acordos/index.js": {
+    "status": 200,
+    "bytes": 1282,
+    "content_type": "text/javascript",
+    "route_strings": [
+      "/acordos/buscarExercicios/"
+    ],
+    "institution_snippets": [
+      "       if (this.value == '') {\n\n          alert(\"Campo \" + $(this).parent().find('label').text() + \" Ã© de preenchimento obrigatÃ³rio.\");\n\n          lPass = false;\n          return false;\n        }\n      })\n\n      return lPass;\n    })\n\n    $('#FiltroInstituicao').live('change', function() {\n      var oExercicio = $('#FiltroExercicio');\n\n      $.getJSON( sBaseUrl + '/acordos/buscarExercicios/' + this.value, function(data) {\n\n        if (!Object.keys(data).length) {\n          alert('Nenhum exercÃ­cio encontrado para a instituiÃ§Ã£o selecionada.')\n          return false\n        }\n\n        oExercicio.find('option:not(:first)').remove()\n        data = Object",
+      ".keys(data).reverse();\n\n        $.each(data, function(i, sLabel) {\n          oExercicio.append('<option value=\"' + sLabel + '\">' + sLabel + '</option>')\n        })\n      })\n    })\n\n  });\n})(jQuery);"
+    ]
+  },
+  "/js/licitacoes.js": {
+    "status": 200,
+    "bytes": 22210,
+    "content_type": "text/html; charset=UTF-8",
+    "route_strings": [
+      "/>\n            <a id=",
+      "/cms/dashboard",
+      "/consultas/pesquisar",
+      "/css/jquery-ui.css",
+      "/css/style.min.css",
+      "/css/ui.jqgrid.css",
+      "/img/loader.gif",
+      "/img/lupa.png",
+      "/img/top_header.png",
+      "/img/wheelchair.png",
+      "/js/arquivos.js",
+      "/js/consulta.js",
+      "/js/grid.locale-pt-br.js",
+      "/js/jqGrid.js",
+      "/js/jquery.js",
+      "/js/jquery.json.js"
+    ],
+    "institution_snippets": []
+  },
+  "/js/licitacoes/index.js": {
+    "status": 200,
+    "bytes": 22210,
+    "content_type": "text/html; charset=UTF-8",
+    "route_strings": [
+      "/>\n            <a id=",
+      "/cms/dashboard",
+      "/consultas/pesquisar",
+      "/css/jquery-ui.css",
+      "/css/style.min.css",
+      "/css/ui.jqgrid.css",
+      "/img/loader.gif",
+      "/img/lupa.png",
+      "/img/top_header.png",
+      "/img/wheelchair.png",
+      "/js/arquivos.js",
+      "/js/consulta.js",
+      "/js/grid.locale-pt-br.js",
+      "/js/jqGrid.js",
+      "/js/jquery.js",
+      "/js/jquery.json.js"
+    ],
+    "institution_snippets": []
+  },
+  "buscarExercicios_probe_1_100": [],
+  "/acordos/pesquisar": {
+    "status": 200,
+    "bytes": 23766,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+    "prefix": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <link href=\"\" id=\"base\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.min.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery-ui.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/ui.jqgrid.css\" /><script type=\"text/javascript\" src=\"/js/jquery.js\"></script><script type=\"text/javascript\" src=\"/js/jquery.json.js\"></script><script type=\"text/javascript\" src=\"/js/grid.locale-pt-br.js\"></script><script type=\"text/javascript\" src=\"/js/jqGrid.js\"></script><script type=\"text/javascript\" src=\"/js/arquivos.js\"></script><script type=\"text/javascript\" src=\"/js/consulta.js\"></script>  <title>Portal da Transpar&ecirc;ncia</title>\n\n  <script type=\"text/javascript\">\n    $(document).ready(function(){\n\n      $(\"#cororiginalid\").attr('checked',true);\n\n      $(\"#acessibilidademin\").click(function(){\n        if($(this).css('margin-left') == '0px'){\n\n          $(this).animate({\"margin-left\": \"-500px\"}, 500);\n          $(\"#acessibilidademax\").animate({\"margin-left\": \"0px\"}, 500);\n        }else{\n\n          $(this).animate({\"margin-left\": \"0px\"}, 500);\n          $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n        }\n\n      });\n\n      $(\"#fecharacessibilidade\").click(function(){\n        $(\"#acessibilidademin\").animate({\"margin-left\": \"0px\"}, 500);\n        $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n      });\n\n      $('#fechaacessibilidadex').click(function(){\n        $(\"#acessibilidademin\").animate({\"margin-left\": \"0px\"}, 500);\n        $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n      });\n\n      $(\"#irparabusca\").click(function(){\n        $(\"#search\").focus();\n      });\n\n      $(\"#aumentarfonte\").click(function(){\n        var fonteatual = $('#main_content').css('font-size').replace('px','');\n        var numerico = new Number(fonteatual);\n        numerico = parseInt(numerico);\n\n        if(numerico < 17){\n          numerico += 1;\n          $('#main_content').css('font-size',numerico+'px');\n        }\n\n\n\n      });\n\n      $(\"#diminuirfonte\").click(function(){\n        var fonteatual = $('#main_content').css('font-size').replace('px','');\n        var numerico = new Number(fonteatual);\n        numerico = parseInt(numerico);\n\n        if(numerico > 7){\n          numerico -= 1;\n          $('#main_content').css('font-size',numerico+'px');\n        }\n\n      });\n\n      $(\"#fontepadrao\").click(function(){\n        $('#main_content').css('font-size','11px');\n      });\n\n      $(\"#cororiginalid\").click(function(){\n        $('#general_content').css('background','none repeat scroll 0 0 #fff');\n        $('#buscar h3').css('background-color','#eee');\n        $('#navbar ul li a').css('color','#000');\n        $('#content').css('background','none repeat scroll 0 0 #ededed');\n        $('#consulta_dados fieldset').css('background-color','#fff');\n        $('#consulta_dados fieldset').css('color','#333');\n        $('table tbody tr td').css('background','none repeat scroll 0 0 #fff');\n        $('table tbody tr td').css('color','#000');\n        $('table tbody tr th').css('background','none repeat scroll 0 0 #fff');\n        $('table tbody tr th').css('color','#000');\n        $('.ui-jqgrid-bdiv').css('background-color','#fff');\n        $('#breadcrumb').css('color','#333');\n        $('#main_content').css('color','#333');\n        $('#main_footer').css('background-color','#ededed');\n        $('#consulta_dados fieldset legend').css('color','#000');\n        $('html').css('background-color','#ededed');\n        $('#footer').css('color','#888');\n        $('#footer a').css('color','#888');\n\n        $(\"#acessibilidademin img\").attr('src','img/acessibilidade.jpg');\n        $(\"#acessibilidademin\").css('color','rgb(16, 78, 139)');\n\n        $(\"#teclasatalho\").css('background-color','#e6efff');\n        $(\"#teclasatalho\").css('color','#000');\n"
+  },
+  "/licitacoes/pesquisar": {
+    "status": 200,
+    "bytes": 69324,
+    "url": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar",
+    "prefix": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <link href=\"\" id=\"base\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.min.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery-ui.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/ui.jqgrid.css\" /><script type=\"text/javascript\" src=\"/js/jquery.js\"></script><script type=\"text/javascript\" src=\"/js/jquery.json.js\"></script><script type=\"text/javascript\" src=\"/js/grid.locale-pt-br.js\"></script><script type=\"text/javascript\" src=\"/js/jqGrid.js\"></script><script type=\"text/javascript\" src=\"/js/arquivos.js\"></script><script type=\"text/javascript\" src=\"/js/consulta.js\"></script>  <title>Portal da Transpar&ecirc;ncia</title>\n\n  <script type=\"text/javascript\">\n    $(document).ready(function(){\n\n      $(\"#cororiginalid\").attr('checked',true);\n\n      $(\"#acessibilidademin\").click(function(){\n        if($(this).css('margin-left') == '0px'){\n\n          $(this).animate({\"margin-left\": \"-500px\"}, 500);\n          $(\"#acessibilidademax\").animate({\"margin-left\": \"0px\"}, 500);\n        }else{\n\n          $(this).animate({\"margin-left\": \"0px\"}, 500);\n          $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n        }\n\n      });\n\n      $(\"#fecharacessibilidade\").click(function(){\n        $(\"#acessibilidademin\").animate({\"margin-left\": \"0px\"}, 500);\n        $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n      });\n\n      $('#fechaacessibilidadex').click(function(){\n        $(\"#acessibilidademin\").animate({\"margin-left\": \"0px\"}, 500);\n        $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n      });\n\n      $(\"#irparabusca\").click(function(){\n        $(\"#search\").focus();\n      });\n\n      $(\"#aumentarfonte\").click(function(){\n        var fonteatual = $('#main_content').css('font-size').replace('px','');\n        var numerico = new Number(fonteatual);\n        numerico = parseInt(numerico);\n\n        if(numerico < 17){\n          numerico += 1;\n          $('#main_content').css('font-size',numerico+'px');\n        }\n\n\n\n      });\n\n      $(\"#diminuirfonte\").click(function(){\n        var fonteatual = $('#main_content').css('font-size').replace('px','');\n        var numerico = new Number(fonteatual);\n        numerico = parseInt(numerico);\n\n        if(numerico > 7){\n          numerico -= 1;\n          $('#main_content').css('font-size',numerico+'px');\n        }\n\n      });\n\n      $(\"#fontepadrao\").click(function(){\n        $('#main_content').css('font-size','11px');\n      });\n\n      $(\"#cororiginalid\").click(function(){\n        $('#general_content').css('background','none repeat scroll 0 0 #fff');\n        $('#buscar h3').css('background-color','#eee');\n        $('#navbar ul li a').css('color','#000');\n        $('#content').css('background','none repeat scroll 0 0 #ededed');\n        $('#consulta_dados fieldset').css('background-color','#fff');\n        $('#consulta_dados fieldset').css('color','#333');\n        $('table tbody tr td').css('background','none repeat scroll 0 0 #fff');\n        $('table tbody tr td').css('color','#000');\n        $('table tbody tr th').css('background','none repeat scroll 0 0 #fff');\n        $('table tbody tr th').css('color','#000');\n        $('.ui-jqgrid-bdiv').css('background-color','#fff');\n        $('#breadcrumb').css('color','#333');\n        $('#main_content').css('color','#333');\n        $('#main_footer').css('background-color','#ededed');\n        $('#consulta_dados fieldset legend').css('color','#000');\n        $('html').css('background-color','#ededed');\n        $('#footer').css('color','#888');\n        $('#footer a').css('color','#888');\n\n        $(\"#acessibilidademin img\").attr('src','img/acessibilidade.jpg');\n        $(\"#acessibilidademin\").css('color','rgb(16, 78, 139)');\n\n        $(\"#teclasatalho\").css('background-color','#e6efff');\n        $(\"#teclasatalho\").css('color','#000');\n"
+  }
+}

@@ -1,0 +1,113 @@
+name: sao-borja-ordem-cronologica-history-discovery
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-ordem-cronologica-history-discovery.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - name: Install parser
+        run: python -m pip install --quiet beautifulsoup4 requests
+      - name: Discover historical payment-order routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+          from bs4 import BeautifulSoup
+          from urllib.parse import urljoin,urlparse
+
+          BASE='https://transparencia.saoborja.rs.gov.br'
+          OUT=Path('artifacts/sao_borja_ordem_cronologica_history_discovery'); OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 SBMI audit/1.0'})
+
+          report={}
+          for target in ['/ordem_cronologica','/ordem_cronologica/loadLink/1']:
+              r=s.get(BASE+target,timeout=60); r.raise_for_status()
+              soup=BeautifulSoup(r.text,'html.parser')
+              scripts=[urljoin(BASE,x.get('src')) for x in soup.find_all('script') if x.get('src')]
+              forms=[]
+              for f in soup.find_all('form'):
+                  forms.append({'action':urljoin(BASE,f.get('action') or target),'method':(f.get('method') or 'GET').upper(),
+                                'fields':[{'name':x.get('name'),'id':x.get('id'),'value':x.get('value'),'tag':x.name} for x in f.find_all(['input','select','button']) if x.get('name') or x.get('id')]})
+              selects={}
+              for sel in soup.find_all('select'):
+                  selects[sel.get('name') or sel.get('id') or 'unnamed']=[{'value':o.get('value'),'text':' '.join(o.stripped_strings)} for o in sel.find_all('option')]
+              report[target]={'status':r.status_code,'bytes':len(r.content),'forms':forms,'selects':selects,'scripts':scripts,
+                              'route_strings':sorted(set(re.findall(r'''["'](/[^"']{1,180})["']''',r.text)))[:500]}
+              safe=target.strip('/').replace('/','_') or 'root'
+              (OUT/f'{safe}.html').write_text(r.text,encoding='utf-8')
+              # persist same-origin JS and scan route strings
+              js=[]
+              for u in scripts:
+                  if urlparse(u).netloc != urlparse(BASE).netloc: continue
+                  try:
+                      q=s.get(u,timeout=30)
+                      rec={'url':u,'status':q.status_code,'bytes':len(q.content)}
+                      if q.status_code==200:
+                          rec['routes']=sorted(set(re.findall(r'''["'](/[^"']{1,180})["']''',q.text)))[:500]
+                          name=re.sub(r'[^A-Za-z0-9_.-]+','_',urlparse(u).path.strip('/')) or 'script'
+                          (OUT/f'{name}.txt').write_text(q.text,encoding='utf-8')
+                      js.append(rec)
+                  except Exception as e: js.append({'url':u,'error':repr(e)})
+              report[target]['js']=js
+
+          # Test whether prior exercise values are accepted by the loadLink page via query/form-free route.
+          year_tests=[]
+          for year in range(2019,2026):
+              for params in ({'iExercicio':str(year)},{'exercicio':str(year)}):
+                  try:
+                      r=s.get(BASE+'/ordem_cronologica/loadLink/1',params=params,timeout=45)
+                      txt=r.text
+                      year_tests.append({'year':year,'params':params,'status':r.status_code,'bytes':len(r.content),
+                                         'year_present':str(year) in txt,'select_years':sorted(set(re.findall(r'<option[^>]+value=["\']?(20\d{2})',txt,re.I)))})
+                  except Exception as e: year_tests.append({'year':year,'params':params,'error':repr(e)})
+          report['year_tests']=year_tests
+
+          (OUT/'discovery.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(report,ensure_ascii=False,indent=2)[:30000])
+          PY
+      - name: Persist evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST=docs/data_sources/sao_borja_ordem_cronologica_history_discovery
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_ordem_cronologica_history_discovery/discovery.json "$DEST/"
+          for f in artifacts/sao_borja_ordem_cronologica_history_discovery/js_*.txt artifacts/sao_borja_ordem_cronologica_history_discovery/*ordem*.txt; do
+            [ -f "$f" ] && cp "$f" "$DEST/" || true
+          done
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — Ordem Cronológica dos Pagamentos — descoberta histórica
+
+          Fonte: Portal da Transparência da Prefeitura de São Borja.
+
+          Objetivo: verificar se a consulta pública de ordem cronológica pode fornecer uma rota histórica reproduzível de pagamentos, complementando a lacuna de credores do SIAPC.
+
+          Esta camada registra apenas estrutura de interface, anos, rotas e parâmetros. Nenhum dado pessoal é persistido.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: discover historical chronological payments route"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sao-borja-ordem-cronologica-history-discovery
+          path: artifacts/sao_borja_ordem_cronologica_history_discovery/

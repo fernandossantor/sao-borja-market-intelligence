@@ -1,0 +1,199 @@
+name: sao-borja-transparencia-cnpj-rubricas-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-transparencia-cnpj-rubricas-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Aggregate CNPJ creditor payments by budget rubric
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_transparencia_cnpj_rubricas_2026"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json,re,requests,time
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          SRC=Path("docs/data_sources/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv")
+          OUT=Path("artifacts/sao_borja_transparencia_cnpj_rubricas_2026")
+
+          def fnum(v):
+              try:return float(v)
+              except:return 0.0
+
+          creditors=[]
+          with SRC.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  r["pago_R$"]=fnum(r["pago_R$"])
+                  if r["pago_R$"]>0: creditors.append(r)
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+          page=s.get(BASE+"/despesas",timeout=60);page.raise_for_status()
+          m=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",page.text)
+          if not m:raise RuntimeError("dtDataImportacao missing")
+          dt_import=m.group(1)
+          dt_end=datetime.strptime(dt_import,"%Y-%m-%d").strftime("%d/%m")
+
+          def post_json(path,data,tries=4):
+              last=None
+              for i in range(tries):
+                  try:
+                      r=s.post(BASE+path,data=data,timeout=90)
+                      r.raise_for_status()
+                      return r.json()
+                  except Exception as e:
+                      last=e;time.sleep(0.5*(i+1))
+              raise last
+
+          rubric=defaultdict(lambda:{"empenhos":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0,"cnpjs":set()})
+          instagg=defaultdict(lambda:{"cnpjs":set(),"empenhos":0,"pago":0.0})
+          pair=defaultdict(lambda:{"nome":"","rubrica":"","empenhos":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0})
+          errors=[]
+          cred_recon=[]
+
+          for ix,c in enumerate(creditors,1):
+              base={
+                "iExercicio":"2026","dtDataImportacao":dt_import,"sViewAtual":"instituicoes",
+                "iNivel":"4","dtInicio":"01/01","dtFim":dt_end,
+                "aHistorico":"descricao","iIdLink":"3","iCredor":str(c["id_credor"])
+              }
+              try:
+                  inst=post_json("/despesas/getInstit",{
+                      "aParametros":json.dumps(base,ensure_ascii=False,separators=(",",":")),
+                      "page":1,"rows":100,"sidx":"descricao","sord":"asc","_search":"false"
+                  })
+                  isum=0.0; ecnt=0
+                  for ir in inst.get("rows",[]):
+                      iid=str(ir.get("id",""))
+                      icell=ir.get("cell",[])
+                      idesc=str(icell[0]) if icell else ""
+                      p=base.copy();p.update({"iInstituicao":iid,"iNivel":"5","sViewAtual":"empenhos"})
+                      emp=post_json("/despesas/getEmpenhos",{
+                          "aParametros":json.dumps(p,ensure_ascii=False,separators=(",",":")),
+                          "page":1,"rows":5000,"sidx":"data","sord":"asc","_search":"false"
+                      })
+                      for er in emp.get("rows",[]):
+                          cell=er.get("cell",[])
+                          if len(cell)<12:continue
+                          rub=str(cell[5] or "").strip()
+                          vals={"empenhado":fnum(cell[8]),"anulado":fnum(cell[9]),"liquidado":fnum(cell[10]),"pago":fnum(cell[11])}
+                          key=(c["cnpj"],rub)
+                          x=pair[key];x["nome"]=c["nome_credor"];x["rubrica"]=rub;x["empenhos"]+=1
+                          for k,v in vals.items():x[k]+=v
+                          y=rubric[rub];y["empenhos"]+=1;y["cnpjs"].add(c["cnpj"])
+                          for k,v in vals.items():y[k]+=v
+                          z=instagg[idesc];z["cnpjs"].add(c["cnpj"]);z["empenhos"]+=1;z["pago"]+=vals["pago"]
+                          isum+=vals["pago"];ecnt+=1
+                  cred_recon.append({"cnpj":c["cnpj"],"nome":c["nome_credor"],
+                                     "pago_credor":round(c["pago_R$"],2),"pago_empenhos":round(isum,2),
+                                     "diferenca":round(isum-c["pago_R$"],2),"empenhos":ecnt})
+              except Exception as e:
+                  errors.append({"cnpj":c["cnpj"],"id":c["id_credor"],"error":repr(e)})
+              if ix%50==0: print("processed",ix,"of",len(creditors),"errors",len(errors))
+              time.sleep(0.03)
+
+          with (OUT/"cnpj_rubrica_summary_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["cnpj","nome_credor","rubrica","empenhos","empenhado_R$","anulado_R$","liquidado_R$","pago_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
+              for (cnpj,rub),v in sorted(pair.items(),key=lambda kv:kv[1]["pago"],reverse=True):
+                  w.writerow({"cnpj":cnpj,"nome_credor":v["nome"],"rubrica":rub,"empenhos":v["empenhos"],
+                              "empenhado_R$":round(v["empenhado"],2),"anulado_R$":round(v["anulado"],2),
+                              "liquidado_R$":round(v["liquidado"],2),"pago_R$":round(v["pago"],2)})
+
+          with (OUT/"rubrica_total_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["rubrica","cnpjs","empenhos","empenhado_R$","anulado_R$","liquidado_R$","pago_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
+              for rub,v in sorted(rubric.items(),key=lambda kv:kv[1]["pago"],reverse=True):
+                  w.writerow({"rubrica":rub,"cnpjs":len(v["cnpjs"]),"empenhos":v["empenhos"],
+                              "empenhado_R$":round(v["empenhado"],2),"anulado_R$":round(v["anulado"],2),
+                              "liquidado_R$":round(v["liquidado"],2),"pago_R$":round(v["pago"],2)})
+
+          with (OUT/"institution_total_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["instituicao","cnpjs","empenhos","pago_R$"])
+              for name,v in sorted(instagg.items(),key=lambda kv:kv[1]["pago"],reverse=True):
+                  w.writerow([name,len(v["cnpjs"]),v["empenhos"],round(v["pago"],2)])
+
+          source_paid=round(sum(c["pago_R$"] for c in creditors),2)
+          emp_paid=round(sum(x["pago"] for x in rubric.values()),2)
+          reconciled=sum(1 for x in cred_recon if abs(x["diferenca"])<0.02)
+          report={
+              "source":"Portal da Transparência PMSB",
+              "period":{"start":"01/01/2026","end":dt_end+"/2026","data_importacao":dt_import},
+              "cnpj_creditors_positive_paid":len(creditors),
+              "cnpj_creditors_processed":len(cred_recon),
+              "errors":errors,
+              "source_cnpj_paid_total":source_paid,
+              "empenho_grid_paid_total":emp_paid,
+              "difference":round(emp_paid-source_paid,2),
+              "creditors_reconciled_cent":reconciled,
+              "creditors_not_reconciled_cent":len(cred_recon)-reconciled,
+              "rubrics":len(rubric),
+              "institutions":len(instagg),
+              "control":"Rubric aggregation is descriptive. Procurement eligibility is not assigned in this workflow."
+          }
+          (OUT/"reconciliation.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        if: success()
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_transparencia_cnpj_rubricas_2026"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_transparencia_cnpj_rubricas_2026/*.csv "$DEST/"
+          cp artifacts/sao_borja_transparencia_cnpj_rubricas_2026/reconciliation.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # PMSB — pagamentos a credores CNPJ por rubrica — 2026
+
+          Camada exploratória, não canônica.
+
+          Fonte oficial municipal: Portal da Transparência de São Borja.
+          Período: 01/01/2026 até a data de atualização indicada pelo portal.
+
+          A extração percorre somente credores CNPJ com pagamento positivo e agrega os
+          empenhos por rubrica orçamentária. O objetivo é separar, em etapa posterior,
+          despesas potencialmente associadas à aquisição de bens/serviços de
+          transferências, dívida, tributos, benefícios e outras naturezas.
+
+          Esta camada NÃO classifica automaticamente uma rubrica como compra pública
+          elegível e NÃO classifica CNPJ como local/externo. Ambas as decisões exigem
+          regras separadas e auditáveis.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: aggregate 2026 CNPJ payments by budget rubric"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-transparencia-cnpj-rubricas-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_transparencia_cnpj_rubricas_2026/

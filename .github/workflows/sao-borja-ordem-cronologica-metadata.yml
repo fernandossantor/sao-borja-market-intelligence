@@ -1,0 +1,101 @@
+name: sao-borja-ordem-cronologica-metadata
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-ordem-cronologica-metadata.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - name: Extract institution, years and creditor lists
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+
+          BASE='https://transparencia.saoborja.rs.gov.br'
+          OUT=Path('artifacts/sao_borja_ordem_cronologica_metadata');OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session();s.headers.update({'User-Agent':'Mozilla/5.0 SBMI audit/1.0','X-Requested-With':'XMLHttpRequest'})
+          home=s.get(BASE+'/ordem_cronologica',timeout=30);home.raise_for_status()
+          m=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\)",home.text,re.S)
+          if not m: raise RuntimeError('initial oParametros not found')
+          initial=json.loads(m.group(1).replace("\\'","'"));initial['rows']=1000;initial['page']=1
+          r=s.post(BASE+'/ordem_cronologica/getInstit',data={'aParametros':json.dumps(initial,separators=(',',':')),'page':1,'rows':1000,'sidx':'descricao','sord':'asc'},timeout=45);r.raise_for_status()
+          inst_payload=r.json()
+          rows=inst_payload.get('rows',[])
+          institutions=[]
+          for x in rows:
+              if isinstance(x,dict) and isinstance(x.get('cell'),list):
+                  desc=x['cell'][0] if x['cell'] else ''
+                  iid=x.get('id') or (x['cell'][1] if len(x['cell'])>1 else None)
+              elif isinstance(x,dict):
+                  desc=x.get('descricao','');iid=x.get('iInstituicao') or x.get('id')
+              else: continue
+              institutions.append({'id':str(iid),'descricao':str(desc)})
+          target=[x for x in institutions if 'PREFEIT' in x['descricao'].upper() or 'SAO BORJA' in x['descricao'].upper() or 'SÃO BORJA' in x['descricao'].upper()]
+          if not target: raise RuntimeError(f'PM target not found among institutions={institutions}')
+          chosen=target[0]
+
+          # mimic selection so server-side session can preserve institution if needed
+          selected=dict(initial);selected['iInstituicao']=chosen['id'];selected['iNivel']=2
+          sel=s.post(BASE+'/ordem_cronologica/loadLink/1',data=selected,timeout=45);sel.raise_for_status()
+
+          variants=[]
+          candidates=[
+            {'iIdLink':'1'},
+            {'iIdLink':'1','iInstituicao':chosen['id']},
+            selected
+          ]
+          for params in candidates:
+              rec={'params':params}
+              for key,route in [('years','/ordem_cronologica/getExercicio/'),('lists','/ordem_cronologica/getLista/')]:
+                  try:
+                      q=s.post(BASE+route,data={'aParametros':json.dumps(params,separators=(',',':'))},timeout=45)
+                      rec[key]={'status':q.status_code,'bytes':len(q.content),'prefix':q.text[:1000]}
+                      try: rec[key]['json']=q.json()
+                      except Exception: pass
+                  except Exception as e: rec[key]={'error':repr(e)}
+              variants.append(rec)
+
+          out={'source':BASE+'/ordem_cronologica','initial_params':initial,'institution_payload_meta':{'records':inst_payload.get('records'),'total':inst_payload.get('total'),'row_count':len(rows)},'institutions':institutions,'chosen':chosen,'metadata_variants':variants}
+          (OUT/'metadata.json').write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+      - name: Persist evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST=docs/data_sources/sao_borja_ordem_cronologica_metadata
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_ordem_cronologica_metadata/metadata.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — Ordem Cronológica — metadados reproduzíveis
+
+          Fonte: Portal da Transparência da Prefeitura de São Borja.
+
+          Registra instituição pública, exercícios e listas de credores fornecidos pelos endpoints usados pela própria interface. Não contém registros individuais de credores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract chronological payment metadata"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sao-borja-ordem-cronologica-metadata
+          path: artifacts/sao_borja_ordem_cronologica_metadata/

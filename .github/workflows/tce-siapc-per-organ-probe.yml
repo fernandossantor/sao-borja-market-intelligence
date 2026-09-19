@@ -1,0 +1,83 @@
+name: tce-siapc-per-organ-probe
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/tce-siapc-per-organ-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Probe official per-organ routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/tce_siapc_per_organ_probe"
+          mkdir -p "$OUT"
+          printf 'year\tscheme\tformat\turl\thttp_code\turl_effective\tcontent_type\tcontent_length\taccept_ranges\tlocation\n' > "$OUT/probe.tsv"
+          for year in {2019..2025}; do
+            for scheme in http https; do
+              for ext in csv.7z csv.zip; do
+                url="$scheme://dados.tce.rs.gov.br/dados/municipal/empenhos/$year/58000.$ext"
+                safeext="$(echo "$ext" | tr '.' '_')"
+                hdr="$OUT/h_${year}_${scheme}_${safeext}.txt"
+                code="$(curl -sS -L -I --retry 2 --retry-all-errors --connect-timeout 15 --max-time 45 -D "$hdr" -o /dev/null -w '%{http_code}' "$url" || true)"
+                effective="$(curl -sS -L -I --connect-timeout 15 --max-time 45 -o /dev/null -w '%{url_effective}' "$url" || true)"
+                ctype="$(awk 'BEGIN{IGNORECASE=1} /^content-type:/{v=$0} END{sub(/^[^:]+:[[:space:]]*/, "", v); gsub(/\r/,"",v); print v}' "$hdr" || true)"
+                clen="$(awk 'BEGIN{IGNORECASE=1} /^content-length:/{v=$0} END{sub(/^[^:]+:[[:space:]]*/, "", v); gsub(/\r/,"",v); print v}' "$hdr" || true)"
+                ranges="$(awk 'BEGIN{IGNORECASE=1} /^accept-ranges:/{v=$0} END{sub(/^[^:]+:[[:space:]]*/, "", v); gsub(/\r/,"",v); print v}' "$hdr" || true)"
+                loc="$(awk 'BEGIN{IGNORECASE=1} /^location:/{v=$0} END{sub(/^[^:]+:[[:space:]]*/, "", v); gsub(/\r/,"",v); print v}' "$hdr" || true)"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$year" "$scheme" "$ext" "$url" "$code" "$effective" "$ctype" "$clen" "$ranges" "$loc" >> "$OUT/probe.tsv"
+              done
+            done
+          done
+          cat "$OUT/probe.tsv"
+
+      - name: Persist probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/tce_siapc_per_organ_probe_2019_2025"
+          mkdir -p "$DEST"
+          cp artifacts/tce_siapc_per_organ_probe/probe.tsv "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # TCE-RS/SIAPC — teste de transporte das rotas por órgão — São Borja — 2019–2025
+
+          Fonte/documentação oficial: Dados Abertos TCE-RS/SIAPC, conjunto “Despesa orçamentária por empenhos”.
+
+          A documentação oficial informa a rota:
+          `/dados/municipal/empenhos/<ano>/<codigo-do-orgao>.<formato>`,
+          com formatos `csv.7z` e `csv.zip`.
+
+          Este teste usa apenas requisições HEAD para os anos 2019–2025, órgão 58000, nos esquemas HTTP e HTTPS. Nenhum dado de credor é persistido.
+
+          O resultado serve exclusivamente para diagnosticar transporte/disponibilidade da rota antes de baixar arquivos completos.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: probe SIAPC per-organ transport routes"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload probe artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tce-siapc-per-organ-probe
+          retention-days: 14
+          path: artifacts/tce_siapc_per_organ_probe/

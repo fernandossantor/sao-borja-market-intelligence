@@ -1,0 +1,408 @@
+[
+  {
+    "year": 2019,
+    "sample_id": "261",
+    "status": 200,
+    "bytes": 28839,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "170",
+      "2019",
+      "CHAMAMENTO PÚBLICO/CREDENCIAMENTO",
+      "1",
+      "21/06/2019",
+      "14:47",
+      "21/06/2019",
+      "09:00",
+      "",
+      "Julgada",
+      "PMSB",
+      "Chamamento Público para Credenciamento de Empresas para Fornecimento de Aparelhos de Amplificação Sonora Individual  AASI, a fim de atender aos usuários do CER II, de São Borja / RS"
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "170",
+          "2019",
+          "CHAMAMENTO PÚBLICO/CREDENCIAMENTO",
+          "1",
+          "21/06/2019",
+          "14:47",
+          "21/06/2019",
+          "09:00",
+          "",
+          "Julgada",
+          "PMSB",
+          "Chamamento Público para Credenciamento de Empresas para Fornecimento de Aparelhos de Amplificação Sonora Individual  AASI, a fim de atender aos usuários do CER II, de São Borja / RS"
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  },
+  {
+    "year": 2020,
+    "sample_id": "19628",
+    "status": 200,
+    "bytes": 28854,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "90",
+      "2020",
+      "CONCORRÊNCIA",
+      "1",
+      "07/07/2020",
+      "11:49",
+      "20/05/2021",
+      "09:00",
+      "",
+      "Homologada",
+      "PMSB",
+      "Contratação de empresa para execução dos serviços de Transbordo e Transporte de Resíduos Sólidos Urbanos (RSU) da Unidade de Transbordo até Aterro Sanitário para Disposição Final de Resíduos Sólidos Urbanos,"
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "90",
+          "2020",
+          "CONCORRÊNCIA",
+          "1",
+          "07/07/2020",
+          "11:49",
+          "20/05/2021",
+          "09:00",
+          "",
+          "Homologada",
+          "PMSB",
+          "Contratação de empresa para execução dos serviços de Transbordo e Transporte de Resíduos Sólidos Urbanos (RSU) da Unidade de Transbordo até Aterro Sanitário para Disposição Final de Resíduos Sólidos Urbanos,"
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  },
+  {
+    "year": 2021,
+    "sample_id": "19801",
+    "status": 200,
+    "bytes": 28866,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "39",
+      "2021",
+      "CHAMADA PÚBLICA/PNAE",
+      "1",
+      "10/03/2021",
+      "08:19",
+      "05/04/2021",
+      "12:00",
+      "",
+      "Homologada",
+      "PMSB",
+      "Chamada Pública n° 01/2021, para aquisição de gêneros alimentícios diretamente da Agricultura Familiar e do Empreendedor Familiar Rural conforme § 1° do art. 14 da Lei nº 11.947/2009 e Resolução FNDE n°. 04/2015."
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "39",
+          "2021",
+          "CHAMADA PÚBLICA/PNAE",
+          "1",
+          "10/03/2021",
+          "08:19",
+          "05/04/2021",
+          "12:00",
+          "",
+          "Homologada",
+          "PMSB",
+          "Chamada Pública n° 01/2021, para aquisição de gêneros alimentícios diretamente da Agricultura Familiar e do Empreendedor Familiar Rural conforme § 1° do art. 14 da Lei nº 11.947/2009 e Resolução FNDE n°. 04/2015."
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  },
+  {
+    "year": 2022,
+    "sample_id": "19988",
+    "status": 200,
+    "bytes": 28689,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "25",
+      "2022",
+      "PREGÃO PRESENCIAL",
+      "1",
+      "15/02/2022",
+      "08:59",
+      "18/05/2022",
+      "09:00",
+      "",
+      "Homologada",
+      "PMSB",
+      "Registro de preço para gênero alimentício - II."
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "25",
+          "2022",
+          "PREGÃO PRESENCIAL",
+          "1",
+          "15/02/2022",
+          "08:59",
+          "18/05/2022",
+          "09:00",
+          "",
+          "Homologada",
+          "PMSB",
+          "Registro de preço para gênero alimentício - II."
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  },
+  {
+    "year": 2023,
+    "sample_id": "20285",
+    "status": 200,
+    "bytes": 28688,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "32",
+      "2023",
+      "CHAMAMENTO PÚBLICO/CREDENCIAMENTO",
+      "1",
+      "27/02/2023",
+      "10:45",
+      "06/03/2023",
+      "09:00",
+      "",
+      "Homologada",
+      "PMSB",
+      "Credenciamento de Fonoaudiologia."
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "32",
+          "2023",
+          "CHAMAMENTO PÚBLICO/CREDENCIAMENTO",
+          "1",
+          "27/02/2023",
+          "10:45",
+          "06/03/2023",
+          "09:00",
+          "",
+          "Homologada",
+          "PMSB",
+          "Credenciamento de Fonoaudiologia."
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  },
+  {
+    "year": 2024,
+    "sample_id": "20512",
+    "status": 200,
+    "bytes": 28794,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "7",
+      "2024",
+      "CHAMADA PÚBLICA/PNAE",
+      "1",
+      "26/01/2024",
+      "08:21",
+      "19/02/2024",
+      "12:00",
+      "",
+      "Homologada",
+      "SMPOP",
+      "Chamada Pública n° 01/2024,  para gêneros alimentícios a serem distribuídos nas Escolas Municipais de Ensino Fundamental, Educação Infantil, EJA."
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "7",
+          "2024",
+          "CHAMADA PÚBLICA/PNAE",
+          "1",
+          "26/01/2024",
+          "08:21",
+          "19/02/2024",
+          "12:00",
+          "",
+          "Homologada",
+          "SMPOP",
+          "Chamada Pública n° 01/2024,  para gêneros alimentícios a serem distribuídos nas Escolas Municipais de Ensino Fundamental, Educação Infantil, EJA."
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  },
+  {
+    "year": 2025,
+    "sample_id": "21269",
+    "status": 200,
+    "bytes": 29412,
+    "labels": [
+      "",
+      "Consulta Licitação",
+      "22",
+      "2025",
+      "PRD DISPENSA EXCETO PEQUENO VALOR",
+      "1",
+      "13/02/2025",
+      "10:06",
+      "13/02/2025",
+      "10:06",
+      "",
+      "Homologada",
+      "Prefeitura de São Borja",
+      "Contratação de empresa para fornecer cursos do Projeto Qualificação Profissional na área de Comércio e Logística com intuito de fortalecer a qualificação e capacitação profissional da população, em especial o público socialmente vulnerável com inscrição no Cad. Único, que buscam a inserção no mercado de trabalho. A contratação é relacionada ao convênio FPE nº 3145/2024 firmado com o Governo do Estado do Rio Grande do Sul. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 2698/2025, de dispensa de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Desenvolvimento Econômico, Turismo e Inovação"
+    ],
+    "tables": [
+      {
+        "index": 0,
+        "headers": [
+          "22",
+          "2025",
+          "PRD DISPENSA EXCETO PEQUENO VALOR",
+          "1",
+          "13/02/2025",
+          "10:06",
+          "13/02/2025",
+          "10:06",
+          "",
+          "Homologada",
+          "Prefeitura de São Borja",
+          "Contratação de empresa para fornecer cursos do Projeto Qualificação Profissional na área de Comércio e Logística com intuito de fortalecer a qualificação e capacitação profissional da população, em especial o público socialmente vulnerável com inscrição no Cad. Único, que buscam a inserção no mercado de trabalho. A contratação é relacionada ao convênio FPE nº 3145/2024 firmado com o Governo do Estado do Rio Grande do Sul. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 2698/2025, de dispensa de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Desenvolvimento Econômico, Turismo e Inovação"
+        ],
+        "row_count": 6
+      },
+      {
+        "index": 1,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 2,
+        "headers": [],
+        "row_count": 0
+      },
+      {
+        "index": 3,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "route_markers": []
+  }
+]

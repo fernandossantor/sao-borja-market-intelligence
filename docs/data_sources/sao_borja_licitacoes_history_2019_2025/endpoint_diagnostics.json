@@ -1,0 +1,65 @@
+[
+  {
+    "year": 2019,
+    "page": 1,
+    "status": 200,
+    "bytes": 50119,
+    "declared_records": 179,
+    "declared_pages": 1,
+    "returned_rows": 179
+  },
+  {
+    "year": 2020,
+    "page": 1,
+    "status": 200,
+    "bytes": 75417,
+    "declared_records": 218,
+    "declared_pages": 1,
+    "returned_rows": 218
+  },
+  {
+    "year": 2021,
+    "page": 1,
+    "status": 200,
+    "bytes": 50792,
+    "declared_records": 159,
+    "declared_pages": 1,
+    "returned_rows": 159
+  },
+  {
+    "year": 2022,
+    "page": 1,
+    "status": 200,
+    "bytes": 77842,
+    "declared_records": 238,
+    "declared_pages": 1,
+    "returned_rows": 238
+  },
+  {
+    "year": 2023,
+    "page": 1,
+    "status": 200,
+    "bytes": 71658,
+    "declared_records": 194,
+    "declared_pages": 1,
+    "returned_rows": 194
+  },
+  {
+    "year": 2024,
+    "page": 1,
+    "status": 200,
+    "bytes": 223181,
+    "declared_records": 666,
+    "declared_pages": 1,
+    "returned_rows": 666
+  },
+  {
+    "year": 2025,
+    "page": 1,
+    "status": 200,
+    "bytes": 116828,
+    "declared_records": 253,
+    "declared_pages": 1,
+    "returned_rows": 253
+  }
+]

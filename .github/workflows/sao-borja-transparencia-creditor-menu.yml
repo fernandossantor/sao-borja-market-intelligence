@@ -1,0 +1,129 @@
+name: sao-borja-transparencia-creditor-menu
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-transparencia-creditor-menu.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Reproduce public creditor menu request
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_transparencia_creditor_menu"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+          from urllib.parse import urljoin
+
+          OUT=Path("artifacts/sao_borja_transparencia_creditor_menu")
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+
+          r=s.get(BASE+"/despesas",timeout=60)
+          r.raise_for_status()
+          html=r.text
+          (OUT/"despesas.html").write_text(html,encoding="utf-8")
+          m=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",html)
+          dt_import=m.group(1) if m else ""
+
+          data=[
+            ("iExercicio","2026"),
+            ("dtDataImportacao",dt_import),
+            ("sViewAtual",""),
+            ("iNivel","3"),
+            ("dtInicio","01/01"),
+            ("dtFim","18/09"),
+            ("aHistorico[0][descricao]","Descrição"),
+            ("aHistorico[0][valor_empenhado]","Valor Empenhado"),
+            ("aHistorico[0][valor_anulado]","Valor Anulado"),
+            ("aHistorico[0][valor_liquidado]","Valor Liquidado"),
+            ("aHistorico[0][valor_pago]","Valor Pago"),
+          ]
+          q=s.post(BASE+"/despesas/loadLink/3",data=data,timeout=120)
+          (OUT/"creditor_menu_response.txt").write_bytes(q.content)
+
+          txt=q.text
+          endpoints=sorted(set(re.findall(r'["\']([^"\']*(?:despesas|credor|empenh|liquid|pagament)[^"\']*)["\']',txt,re.I)))
+          scripts=sorted(set(re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',txt,re.I)))
+          forms=[]
+          for fm in re.finditer(r'<form\b([^>]*)>',txt,re.I|re.S):
+              attrs=fm.group(1)
+              action=re.search(r'action=["\']([^"\']*)["\']',attrs,re.I)
+              method=re.search(r'method=["\']([^"\']*)["\']',attrs,re.I)
+              forms.append({"action":action.group(1) if action else "","method":method.group(1) if method else ""})
+
+          input_names=sorted(set(re.findall(r'<(?:input|select)[^>]+(?:name|id)=["\']([^"\']+)["\']',txt,re.I)))
+          js_calls=[m.group(0) for m in re.finditer(r'\$\.ajax\s*\([^)]{0,1800}',txt,re.I|re.S)]
+          result={
+            "source_page":BASE+"/despesas",
+            "request_url":BASE+"/despesas/loadLink/3",
+            "method":"POST",
+            "period":{"year":2026,"start":"01/01","end":"18/09","data_importacao":dt_import},
+            "http_status":q.status_code,
+            "content_type":q.headers.get("content-type"),
+            "response_bytes":len(q.content),
+            "response_prefix":txt[:5000],
+            "endpoint_mentions":endpoints,
+            "scripts":scripts,
+            "forms":forms,
+            "input_names_or_ids":input_names,
+            "ajax_fragments":js_calls[:50],
+          }
+          (OUT/"creditor_menu_discovery.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({k:v for k,v in result.items() if k not in ("response_prefix","ajax_fragments")},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact discovery
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_transparencia_creditor_menu"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_transparencia_creditor_menu/creditor_menu_discovery.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal da Transparência de São Borja — menu de despesas por credor
+
+          Camada exploratória, não canônica.
+
+          Reprodução da chamada pública usada pela página oficial de despesas:
+          POST /despesas/loadLink/3
+
+          Período piloto: 01/01 a 18/09/2026, com data de importação lida dinamicamente
+          da própria página. O objetivo desta etapa é descobrir os parâmetros/endpoints
+          de navegação por credor; ainda não é uma extração de valores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: reproduce municipal creditor expense menu"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-transparencia-creditor-menu
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_transparencia_creditor_menu/

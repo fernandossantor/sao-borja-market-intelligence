@@ -1,0 +1,397 @@
+name: sao-borja-public-accounts-dca-series-reconcile
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-public-accounts-dca-series-reconcile.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Build reconciled annual fiscal series
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_public_accounts_dca_series_reconcile"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv
+          import json
+          import math
+          import re
+          import unicodedata
+          from collections import defaultdict
+          from pathlib import Path
+
+          SRC=Path("docs/data_sources/sao_borja_public_accounts_siconfi_dca_2019_2025/dca_rows_2019_2025.csv")
+          OUT=Path("artifacts/sao_borja_public_accounts_dca_series_reconcile")
+          YEARS=list(range(2019,2026))
+
+          def norm(x):
+              s=unicodedata.normalize("NFKD",str(x or ""))
+              s="".join(ch for ch in s if not unicodedata.combining(ch))
+              return re.sub(r"\s+"," ",s.upper()).strip()
+
+          def val(row):
+              try:return float(str(row.get("valor","")).replace(",","."))
+              except:return math.nan
+
+          with SRC.open(encoding="utf-8-sig",newline="") as fh:
+              rows=list(csv.DictReader(fh))
+
+          by_year=defaultdict(list)
+          for row in rows:
+              by_year[int(row["_exercise"])].append(row)
+
+          def subset(year, annex=None, column=None, pred=None):
+              out=[]
+              for r in by_year[year]:
+                  if annex and r.get("_annex_requested")!=annex: continue
+                  if column and norm(r.get("coluna"))!=norm(column): continue
+                  if pred and not pred(r): continue
+                  out.append(r)
+              return out
+
+          def require_one(label, matches, year):
+              if len(matches)!=1:
+                  raise RuntimeError(f"{year} {label}: expected 1 row, got {len(matches)}: "+
+                                     " | ".join(str(x.get("conta")) for x in matches[:10]))
+              return matches[0]
+
+          def top_account(year, label_norm, column):
+              ms=subset(
+                  year,"DCA-Anexo I-D",column,
+                  lambda r: norm(r.get("conta")).endswith(" - "+label_norm)
+                            or norm(r.get("conta"))==label_norm
+              )
+              if not ms:
+                  raise RuntimeError(f"{year} expense top account missing: {label_norm}")
+              # Prefer the least specific account in case the label appears at more than one level.
+              def specificity(r):
+                  code=re.sub(r"^[A-Z]+","",str(r.get("cod_conta","")))
+                  parts=re.split(r"[.]",code)
+                  return sum(1 for p in parts if p and set(p)!={"0"})
+              ms=sorted(ms,key=lambda r:(specificity(r),len(str(r.get("cod_conta","")))))
+              return ms[0]
+
+          def revenue_parent(year, tail, column):
+              ms=subset(
+                  year,"DCA-Anexo I-C",column,
+                  lambda r: norm(r.get("conta")).endswith(tail)
+              )
+              return require_one(tail+" / "+column,ms,year)
+
+          def sum_revenue_components(year, predicate, column):
+              ms=subset(year,"DCA-Anexo I-C",column,predicate)
+              return sum(val(r) for r in ms if not math.isnan(val(r))),ms
+
+          def hierarchy_specificity(row):
+              code=re.sub(r"^[A-Z]+","",str(row.get("cod_conta","")))
+              parts=re.split(r"[.]",code)
+              return sum(1 for p in parts if p and set(p)!={"0"})
+
+          annual=[]
+          component_audit=[]
+          checkpoint_transfer_rounded={
+              2019:160074000,2020:186542000,2021:206741000,2022:203615000,
+              2023:251995000,2024:279066000,2025:295355000
+          }
+
+          for year in YEARS:
+              rec={"year":year,"unit":"R$","geography":"São Borja/RS","source":"SICONFI DCA"}
+
+              rc_g=revenue_parent(year,"RECEITAS CORRENTES","Receitas Brutas Realizadas")
+              rc_f=revenue_parent(year,"RECEITAS CORRENTES","Deduções - FUNDEB")
+              rc_o=subset(year,"DCA-Anexo I-C","Outras Deduções da Receita",
+                          lambda r:norm(r.get("conta")).endswith("RECEITAS CORRENTES"))
+              rec["receita_corrente_bruta"]=val(rc_g)
+              rec["receita_corrente_deducao_fundeb"]=val(rc_f)
+              rec["receita_corrente_outras_deducoes"]=sum(val(r) for r in rc_o) if rc_o else 0.0
+              rec["receita_corrente_liquida_calculada"]=(
+                  rec["receita_corrente_bruta"]
+                  -rec["receita_corrente_deducao_fundeb"]
+                  -rec["receita_corrente_outras_deducoes"]
+              )
+
+              tr_g=revenue_parent(year,"TRANSFERENCIAS CORRENTES","Receitas Brutas Realizadas")
+              tr_f=revenue_parent(year,"TRANSFERENCIAS CORRENTES","Deduções - FUNDEB")
+              tr_o=subset(year,"DCA-Anexo I-C","Outras Deduções da Receita",
+                          lambda r:norm(r.get("conta")).endswith("TRANSFERENCIAS CORRENTES"))
+              rec["transferencias_correntes_brutas"]=val(tr_g)
+              rec["transferencias_correntes_deducao_fundeb"]=val(tr_f)
+              rec["transferencias_correntes_outras_deducoes"]=sum(val(r) for r in tr_o) if tr_o else 0.0
+              rec["transferencias_correntes_liquidas_calculadas"]=(
+                  rec["transferencias_correntes_brutas"]
+                  -rec["transferencias_correntes_deducao_fundeb"]
+                  -rec["transferencias_correntes_outras_deducoes"]
+              )
+              rec["transferencias_correntes_brutas_pct_receita_corrente_bruta"]=(
+                  100*rec["transferencias_correntes_brutas"]/rec["receita_corrente_bruta"]
+              )
+
+              fpm_pred=lambda r:"FUNDO DE PARTICIPACAO DOS MUNICIPIOS" in norm(r.get("conta"))
+              fpm_g,fpm_rows=sum_revenue_components(year,fpm_pred,"Receitas Brutas Realizadas")
+              fpm_f,_=sum_revenue_components(year,fpm_pred,"Deduções - FUNDEB")
+              fpm_o,_=sum_revenue_components(year,fpm_pred,"Outras Deduções da Receita")
+              rec["fpm_bruto_componentes_somados"]=fpm_g
+              rec["fpm_deducao_fundeb_componentes_somados"]=fpm_f
+              rec["fpm_outras_deducoes_componentes_somados"]=fpm_o
+              rec["fpm_liquido_calculado"]=fpm_g-fpm_f-fpm_o
+              rec["fpm_componentes_n"]=len(fpm_rows)
+              for r in fpm_rows:
+                  component_audit.append({
+                      "year":year,"metric":"FPM","cod_conta":r.get("cod_conta"),
+                      "conta":r.get("conta"),"coluna":r.get("coluna"),"valor":r.get("valor")
+                  })
+
+              for key,needle in [
+                  ("icms","COTA-PARTE DO ICMS"),
+                  ("ipva","COTA-PARTE DO IPVA"),
+                  ("itr","COTA-PARTE DO IMPOSTO SOBRE A PROPRIEDADE TERRITORIAL RURAL"),
+              ]:
+                  pred=lambda r,n=needle:n in norm(r.get("conta"))
+                  gross, gross_rows=sum_revenue_components(year,pred,"Receitas Brutas Realizadas")
+                  df,_=sum_revenue_components(year,pred,"Deduções - FUNDEB")
+                  od,_=sum_revenue_components(year,pred,"Outras Deduções da Receita")
+                  if len(gross_rows)!=1:
+                      raise RuntimeError(f"{year} {key}: expected one gross row, got {len(gross_rows)}")
+                  rec[f"{key}_bruto"]=gross
+                  rec[f"{key}_deducao_fundeb"]=df
+                  rec[f"{key}_outras_deducoes"]=od
+                  rec[f"{key}_liquido_calculado"]=gross-df-od
+
+              fundeb_matches=subset(
+                  year,"DCA-Anexo I-C","Receitas Brutas Realizadas",
+                  lambda r:(
+                    "FUNDO DE MANUTENCAO E DESENVOLVIMENTO DA EDUCACAO BASICA" in norm(r.get("conta"))
+                    or "TRANSFERENCIAS DE RECURSOS DO FUNDEB" in norm(r.get("conta"))
+                  )
+              )
+              if not fundeb_matches:
+                  raise RuntimeError(f"{year}: dedicated FUNDEB revenue row not found")
+              fundeb_matches=sorted(
+                  fundeb_matches,
+                  key=lambda r:(hierarchy_specificity(r),len(norm(r.get("conta"))))
+              )
+              chosen=fundeb_matches[0]
+              rec["fundeb_recebido_bruto"]=val(chosen)
+              rec["fundeb_conta_selecionada"]=chosen.get("conta")
+              rec["fundeb_candidatos_n"]=len(fundeb_matches)
+              for r in fundeb_matches:
+                  component_audit.append({
+                      "year":year,"metric":"FUNDEB_CANDIDATE","cod_conta":r.get("cod_conta"),
+                      "conta":r.get("conta"),"coluna":r.get("coluna"),"valor":r.get("valor"),
+                      "selected":str(r is chosen)
+                  })
+
+              total_cols={
+                  "Despesas Empenhadas":"despesa_total_empenhada",
+                  "Despesas Liquidadas":"despesa_total_liquidada",
+                  "Despesas Pagas":"despesa_total_paga",
+              }
+              for col,outkey in total_cols.items():
+                  r=require_one(
+                      "Total Geral da Despesa "+col,
+                      subset(year,"DCA-Anexo I-D",col,
+                             lambda x:norm(x.get("conta"))=="TOTAL GERAL DA DESPESA"),
+                      year
+                  )
+                  rec[outkey]=val(r)
+
+              expense_groups={
+                  "pessoal_encargos":"PESSOAL E ENCARGOS SOCIAIS",
+                  "juros_encargos_divida":"JUROS E ENCARGOS DA DIVIDA",
+                  "outras_despesas_correntes":"OUTRAS DESPESAS CORRENTES",
+                  "investimentos":"INVESTIMENTOS",
+                  "amortizacao_divida":"AMORTIZACAO DA DIVIDA",
+              }
+              for prefix,label in expense_groups.items():
+                  for col,suffix in [
+                      ("Despesas Empenhadas","empenhado"),
+                      ("Despesas Liquidadas","liquidado"),
+                      ("Despesas Pagas","pago"),
+                  ]:
+                      r=top_account(year,label,col)
+                      rec[f"{prefix}_{suffix}"]=val(r)
+                      if suffix=="pago":
+                          rec[f"{prefix}_conta"]=r.get("conta")
+
+              # Specific economic rubrics useful for market-intelligence comparison.
+              # They are accounting categories, not a legal universe of procurement.
+              rubric_codes={
+                  "material_consumo":"3.3.90.30.00",
+                  "material_distribuicao_gratuita":"3.3.90.32.00",
+                  "passagens_locomocao":"3.3.90.33.00",
+                  "consultoria":"3.3.90.35.00",
+                  "servicos_pf":"3.3.90.36.00",
+                  "servicos_pj":"3.3.90.39.00",
+                  "tic_pj":"3.3.90.40.00",
+                  "obras_instalacoes":"4.4.90.51.00",
+                  "equipamentos_material_permanente":"4.4.90.52.00",
+              }
+              for key,code in rubric_codes.items():
+                  for col,suffix in [
+                      ("Despesas Empenhadas","empenhado"),
+                      ("Despesas Liquidadas","liquidado"),
+                      ("Despesas Pagas","pago"),
+                  ]:
+                      ms=subset(
+                          year,"DCA-Anexo I-D",col,
+                          lambda r,c=code: norm(r.get("conta")).startswith(c+" - ")
+                      )
+                      if len(ms)>1:
+                          raise RuntimeError(f"{year} {key} {col}: multiple rows")
+                      rec[f"{key}_{suffix}"]=val(ms[0]) if ms else 0.0
+
+              rec["checkpoint_transfer_rounding_difference"]=(
+                  round(rec["transferencias_correntes_brutas"]/1000)*1000
+                  -checkpoint_transfer_rounded[year]
+              )
+              if year==2025:
+                  rec["checkpoint_receita_corrente_rounding_difference"]=(
+                      round(rec["receita_corrente_bruta"]/1000)*1000-395602000
+                  )
+              annual.append(rec)
+
+          for i,rec in enumerate(annual):
+              if i==0:
+                  rec["receita_corrente_bruta_yoy_pct"]=""
+                  rec["transferencias_correntes_brutas_yoy_pct"]=""
+                  rec["despesa_total_paga_yoy_pct"]=""
+              else:
+                  prev=annual[i-1]
+                  for key,out in [
+                      ("receita_corrente_bruta","receita_corrente_bruta_yoy_pct"),
+                      ("transferencias_correntes_brutas","transferencias_correntes_brutas_yoy_pct"),
+                      ("despesa_total_paga","despesa_total_paga_yoy_pct"),
+                  ]:
+                      rec[out]=100*(rec[key]/prev[key]-1)
+
+          fields=[]
+          for rec in annual:
+              for k in rec:
+                  if k not in fields: fields.append(k)
+          with (OUT/"fiscal_series_2019_2025.csv").open("w",newline="",encoding="utf-8-sig") as fh:
+              w=csv.DictWriter(fh,fieldnames=fields);w.writeheader();w.writerows(annual)
+
+          cafields=sorted({k for r in component_audit for k in r})
+          with (OUT/"component_audit.csv").open("w",newline="",encoding="utf-8-sig") as fh:
+              w=csv.DictWriter(fh,fieldnames=cafields);w.writeheader();w.writerows(component_audit)
+
+          function_rows=[]
+          for year in YEARS:
+              for r in subset(
+                  year,"DCA-Anexo I-E",None,
+                  lambda x:(
+                      x.get("cod_conta")=="TotalDespesas"
+                      and re.match(r"^\d{2} - ",str(x.get("conta","")))
+                      and norm(x.get("coluna")) in {
+                          "DESPESAS EMPENHADAS","DESPESAS LIQUIDADAS","DESPESAS PAGAS"
+                      }
+                  )
+              ):
+                  function_rows.append({
+                      "year":year,
+                      "function":r.get("conta"),
+                      "stage":r.get("coluna"),
+                      "value_R$":val(r),
+                      "source":"SICONFI DCA Anexo I-E",
+                      "nature":"observed",
+                  })
+          with (OUT/"expense_by_function_2019_2025.csv").open("w",newline="",encoding="utf-8-sig") as fh:
+              w=csv.DictWriter(fh,fieldnames=["year","function","stage","value_R$","source","nature"])
+              w.writeheader();w.writerows(function_rows)
+
+          avg_share=sum(r["transferencias_correntes_brutas_pct_receita_corrente_bruta"] for r in annual)/len(annual)
+          validation={
+              "source":"Tesouro Nacional — SICONFI/DCA",
+              "territory":"São Borja/RS",
+              "period":"2019-2025",
+              "unit":"R$ correntes de cada exercício; percentuais nominais quando indicados",
+              "transfer_checkpoint_rounded_all_match":all(
+                  abs(r["checkpoint_transfer_rounding_difference"])<0.01 for r in annual
+              ),
+              "revenue_2025_checkpoint_rounded_match":abs(
+                  annual[-1].get("checkpoint_receita_corrente_rounding_difference",999999)
+              )<0.01,
+              "mean_gross_current_transfers_share_pct_calculated":avg_share,
+              "formulas":{
+                  "receita_corrente_liquida_calculada":"receita_corrente_bruta - deducao_fundeb - outras_deducoes",
+                  "transferencias_correntes_liquidas_calculadas":"transferencias_correntes_brutas - deducao_fundeb - outras_deducoes",
+                  "participacao_transferencias_brutas":"transferencias_correntes_brutas / receita_corrente_bruta * 100",
+                  "variacao_nominal_yoy":"(valor_t / valor_t-1 - 1) * 100",
+                  "fpm_liquido_calculado":"soma componentes FPM brutos - deducoes FUNDEB - outras deducoes",
+              },
+              "limitations":[
+                  "Valores são nominais; não foram deflacionados.",
+                  "Rubricas econômicas de despesa não equivalem ao universo jurídico de licitações/contratos.",
+                  "DCA é anual; 2026 permanece separado como execução parcial corrente.",
+                  "FPM é calculado como soma dos componentes cuja conta menciona Fundo de Participação dos Municípios; os componentes são preservados em arquivo de auditoria.",
+                  "FUNDEB recebido usa a conta dedicada menos específica entre as candidatas, preservando todas as candidatas para auditoria.",
+              ],
+          }
+          (OUT/"validation_and_formulas.json").write_text(
+              json.dumps(validation,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
+          print(json.dumps(validation,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist reconciled series
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_public_accounts_reconciled_2019_2025"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_public_accounts_dca_series_reconcile/fiscal_series_2019_2025.csv "$DEST/"
+          cp artifacts/sao_borja_public_accounts_dca_series_reconcile/expense_by_function_2019_2025.csv "$DEST/"
+          cp artifacts/sao_borja_public_accounts_dca_series_reconcile/component_audit.csv "$DEST/"
+          cp artifacts/sao_borja_public_accounts_dca_series_reconcile/validation_and_formulas.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — série fiscal anual reconciliada — 2019–2025
+
+          **Fonte observada:** Tesouro Nacional — SICONFI, DCA, anexos I-C, I-D e I-E.
+          **Abrangência:** Prefeitura Municipal de São Borja/RS, IBGE 4318002.
+          **Período:** exercícios fechados de 2019 a 2025.
+          **Unidade:** R$ correntes de cada exercício; percentuais quando explicitados.
+
+          A série separa valores observados das contas oficiais e cálculos derivados.
+          São preservados receita corrente, transferências correntes, FPM, ICMS, IPVA,
+          ITR, Fundeb, despesa total por estágio, pessoal e encargos, juros e encargos da
+          dívida, investimentos, amortização da dívida e rubricas econômicas selecionadas.
+          O arquivo de função preserva a classificação funcional anual.
+
+          Fórmulas e validações estão em `validation_and_formulas.json`. As rubricas
+          econômicas de bens/serviços/obras não são tratadas como sinônimo do universo
+          jurídico de compras públicas.
+
+          **2026 não é anualizado nem projetado.** A execução de 01/01–18/09/2026
+          permanece em camada separada do Portal PMSB.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: reconcile SICONFI fiscal series 2019 2025"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-public-accounts-reconciled-2019-2025
+          retention-days: 30
+          path: artifacts/sao_borja_public_accounts_dca_series_reconcile/

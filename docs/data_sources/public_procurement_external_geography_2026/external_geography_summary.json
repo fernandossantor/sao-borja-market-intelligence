@@ -1,0 +1,218 @@
+{
+  "core_total_R$": 72039491.18,
+  "external_no_local_footprint_R$": 18103465.56,
+  "external_share_core": 0.2512991869246566,
+  "external_within_RS_R$": 11019578.73,
+  "external_within_RS_share_external": 0.6086999582194911,
+  "external_outside_RS_R$": 7083886.83,
+  "external_outside_RS_share_external": 0.39130004178050876,
+  "top_ufs": [
+    {
+      "uf": "RS",
+      "vendors": 255,
+      "pago_R$": 11019578.73,
+      "share_external": 0.6086999582194911
+    },
+    {
+      "uf": "SC",
+      "vendors": 37,
+      "pago_R$": 2025795.0,
+      "share_external": 0.11190095030622413
+    },
+    {
+      "uf": "PR",
+      "vendors": 48,
+      "pago_R$": 1738744.08,
+      "share_external": 0.09604481938760903
+    },
+    {
+      "uf": "DF",
+      "vendors": 11,
+      "pago_R$": 1363330.92,
+      "share_external": 0.07530773130048145
+    },
+    {
+      "uf": "SP",
+      "vendors": 26,
+      "pago_R$": 949115.01,
+      "share_external": 0.05242725525973822
+    },
+    {
+      "uf": "PA",
+      "vendors": 1,
+      "pago_R$": 625800.0,
+      "share_external": 0.03456796699648042
+    },
+    {
+      "uf": "MG",
+      "vendors": 14,
+      "pago_R$": 160901.76,
+      "share_external": 0.008887898257199767
+    },
+    {
+      "uf": "ES",
+      "vendors": 6,
+      "pago_R$": 129816.44,
+      "share_external": 0.0071708060299146385
+    },
+    {
+      "uf": "AM",
+      "vendors": 1,
+      "pago_R$": 61347.44,
+      "share_external": 0.003388712497984281
+    },
+    {
+      "uf": "RJ",
+      "vendors": 4,
+      "pago_R$": 13831.68,
+      "share_external": 0.0007640349276859672
+    }
+  ],
+  "top_municipalities": [
+    {
+      "uf": "RS",
+      "municipio": "PORTO ALEGRE",
+      "vendors": 52,
+      "pago_R$": 1468231.28,
+      "share_external": 0.08110222184442342
+    },
+    {
+      "uf": "PR",
+      "municipio": "CURITIBA",
+      "vendors": 9,
+      "pago_R$": 1393435.94,
+      "share_external": 0.07697067367470387
+    },
+    {
+      "uf": "DF",
+      "municipio": "BRASILIA",
+      "vendors": 11,
+      "pago_R$": 1363330.92,
+      "share_external": 0.07530773130048145
+    },
+    {
+      "uf": "SC",
+      "municipio": "PINHALZINHO",
+      "vendors": 2,
+      "pago_R$": 1223110.83,
+      "share_external": 0.06756224800971201
+    },
+    {
+      "uf": "RS",
+      "municipio": "SANTO ANTONIO DAS MISSOES",
+      "vendors": 3,
+      "pago_R$": 1079066.4,
+      "share_external": 0.059605515663488234
+    },
+    {
+      "uf": "RS",
+      "municipio": "PASSO FUNDO",
+      "vendors": 6,
+      "pago_R$": 974506.18,
+      "share_external": 0.053829813787322156
+    },
+    {
+      "uf": "RS",
+      "municipio": "NOVO CABRAIS",
+      "vendors": 2,
+      "pago_R$": 838130.42,
+      "share_external": 0.046296683760476624
+    },
+    {
+      "uf": "RS",
+      "municipio": "VENANCIO AIRES",
+      "vendors": 1,
+      "pago_R$": 793985.5,
+      "share_external": 0.043858204793358904
+    },
+    {
+      "uf": "RS",
+      "municipio": "SANTA MARIA",
+      "vendors": 9,
+      "pago_R$": 762536.51,
+      "share_external": 0.042121024147157814
+    },
+    {
+      "uf": "SP",
+      "municipio": "BARUERI",
+      "vendors": 1,
+      "pago_R$": 702005.12,
+      "share_external": 0.038777388653755636
+    },
+    {
+      "uf": "PA",
+      "municipio": "PARAGOMINAS",
+      "vendors": 1,
+      "pago_R$": 625800.0,
+      "share_external": 0.03456796699648042
+    },
+    {
+      "uf": "RS",
+      "municipio": "IJUI",
+      "vendors": 7,
+      "pago_R$": 361816.35,
+      "share_external": 0.019986026918483554
+    },
+    {
+      "uf": "RS",
+      "municipio": "LAJEADO",
+      "vendors": 6,
+      "pago_R$": 319200.05,
+      "share_external": 0.017631985927892137
+    },
+    {
+      "uf": "RS",
+      "municipio": "CAXIAS DO SUL",
+      "vendors": 5,
+      "pago_R$": 250842.99,
+      "share_external": 0.013856075742439225
+    },
+    {
+      "uf": "RS",
+      "municipio": "ROSARIO DO SUL",
+      "vendors": 1,
+      "pago_R$": 244278.52,
+      "share_external": 0.013493467269589457
+    },
+    {
+      "uf": "RS",
+      "municipio": "BARAO DE COTEGIPE",
+      "vendors": 9,
+      "pago_R$": 232094.16,
+      "share_external": 0.012820427074074539
+    },
+    {
+      "uf": "RS",
+      "municipio": "URUGUAIANA",
+      "vendors": 4,
+      "pago_R$": 224816.57,
+      "share_external": 0.012418427248357192
+    },
+    {
+      "uf": "SC",
+      "municipio": "CHAPECO",
+      "vendors": 3,
+      "pago_R$": 192177.06,
+      "share_external": 0.010615484607799036
+    },
+    {
+      "uf": "RS",
+      "municipio": "TUCUNDUVA",
+      "vendors": 1,
+      "pago_R$": 175239.79,
+      "share_external": 0.009679902967705592
+    },
+    {
+      "uf": "RS",
+      "municipio": "ERECHIM",
+      "vendors": 11,
+      "pago_R$": 167413.26,
+      "share_external": 0.009247580770938313
+    }
+  ],
+  "limitations": [
+    "Geography is the exact creditor CNPJ registration in the RFB snapshot, not the physical place from which goods/services were delivered.",
+    "Only creditors with no active local footprint are in the external denominator.",
+    "RFB bytes were transported through a mirror in this exploratory run."
+  ]
+}

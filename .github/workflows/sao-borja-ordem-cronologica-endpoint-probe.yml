@@ -1,0 +1,96 @@
+name: sao-borja-ordem-cronologica-endpoint-probe
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-ordem-cronologica-endpoint-probe.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - name: Install parser
+        run: python -m pip install --quiet beautifulsoup4 requests
+      - name: Probe order-payment endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+
+          BASE='https://transparencia.saoborja.rs.gov.br'
+          OUT=Path('artifacts/sao_borja_ordem_cronologica_endpoint_probe'); OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 SBMI audit/1.0','X-Requested-With':'XMLHttpRequest'})
+          html=s.get(BASE+'/ordem_cronologica/loadLink/1',timeout=60).text
+          routes=['/ordem_cronologica/getInstit','/ordem_cronologica/getExercicio/','/ordem_cronologica/getElementos','/ordem_cronologica/getLista/','/ordem_cronologica/getRelatorio']
+          snippets={}
+          for route in routes:
+              arr=[]
+              start=0
+              while True:
+                  i=html.find(route,start)
+                  if i<0: break
+                  arr.append(html[max(0,i-900):min(len(html),i+1600)])
+                  start=i+1
+              snippets[route]=arr
+
+          report={'inline_route_snippets':snippets,'probes':{}}
+          # try harmless method variants without creditor data persistence
+          for route in ['/ordem_cronologica/getInstit','/ordem_cronologica/getElementos']:
+              tests=[]
+              for method in ['GET','POST']:
+                  try:
+                      r=s.request(method,BASE+route,timeout=45)
+                      body=r.text.strip()
+                      js=None
+                      try: js=r.json()
+                      except Exception: pass
+                      tests.append({'method':method,'status':r.status_code,'content_type':r.headers.get('content-type',''),'bytes':len(r.content),'json':js,'prefix':None if js is not None else re.sub(r'\b\d{11,14}\b','[DOC]',body[:1500])})
+                  except Exception as e: tests.append({'method':method,'error':repr(e)})
+              report['probes'][route]=tests
+
+          # Extract likely parameter names from snippets.
+          flat='\n'.join(x for arr in snippets.values() for x in arr)
+          report['candidate_param_names']=sorted(set(re.findall(r'''(?:data|aDados|params?)\s*[:=]\s*\{([^}]{0,1500})\}''',flat,re.I|re.S)))[:50]
+          report['input_names']=sorted(set(re.findall(r'''(?:name|id)=["']([^"']+)["']''',html,re.I)))
+          (OUT/'endpoint_probe.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          (OUT/'inline_routes.txt').write_text('\n\n===== ROUTE =====\n\n'.join(route+'\n'+('\n---\n'.join(snippets[route])) for route in routes),encoding='utf-8')
+          print(json.dumps(report['probes'],ensure_ascii=False,indent=2))
+          PY
+      - name: Persist evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST=docs/data_sources/sao_borja_ordem_cronologica_endpoint_probe
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_ordem_cronologica_endpoint_probe/endpoint_probe.json "$DEST/"
+          cp artifacts/sao_borja_ordem_cronologica_endpoint_probe/inline_routes.txt "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — Ordem Cronológica — endpoints públicos
+
+          Fonte: Portal da Transparência da Prefeitura de São Borja.
+
+          Objetivo: documentar método/parâmetros dos endpoints públicos usados pela própria interface e avaliar se a rota pode complementar o histórico de pagamentos. Nenhum registro individual de credor é persistido nesta etapa.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: probe chronological payment endpoints"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sao-borja-ordem-cronologica-endpoint-probe
+          path: artifacts/sao_borja_ordem_cronologica_endpoint_probe/

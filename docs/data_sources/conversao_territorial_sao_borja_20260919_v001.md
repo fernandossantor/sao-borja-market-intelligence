@@ -76,3 +76,16 @@ Ainda faltam dois fechamentos de alto valor antes de estimar uma taxa de retenç
 - compras B2B privadas e destino monetário do gasto das famílias.
 
 Nenhuma base ou caderno canônico foi alterado nesta etapa.
+
+
+## Correções necessárias à formulação inicial
+
+Três ajustes deixam a hipótese mais robusta:
+
+1. **Comércio e serviços não “geram pouco” no agregado.** Em 2021, comércio e demais serviços privados, excluída a administração pública, responderam por R$ 928,203 milhões de VAB (39,51%), acima do agro (R$ 795,875 milhões; 33,87%). A formulação correta é que segmentos intensivos em emprego e transação — sobretudo varejo, alimentação e apoio — têm remuneração típica comprimida e funcionam como principal circuito de circulação cotidiana. No varejo, o valor bruto das mercadorias vendidas também não pode ser confundido com VAB.
+
+2. **O setor público é um grande circuito de entrada e estabilização, mas não está demonstrado como “o maior” fluxo total.** O que está demonstrado é: 74,66% das receitas correntes municipais realizadas em 2025 vieram de transferências correntes; há folhas federal/estadual e benefícios pagos a residentes; e a TRU-RS mostra altíssima intensidade de remunerações na produção pública. Comparar sua escala total com agro e setor privado exigiria uma conta integrada sem dupla contagem.
+
+3. **Insumos externos não são vazamento do VAB agro.** Eles pertencem ao estágio valor da produção → consumo intermediário → VAB. Depois de formado o VAB, o vazamento potencial passa a depender de quem apropria e onde usa as rendas geradas.
+
+Como referência de intensidade da conversão laboral no benchmark estadual, a razão remunerações/VAB do terciário privado amplo é aproximadamente **3,17 vezes** a da agropecuária; no circuito público, aproximadamente **7,02 vezes**. Isso é uma comparação estrutural RS-2019, não uma mensuração municipal.

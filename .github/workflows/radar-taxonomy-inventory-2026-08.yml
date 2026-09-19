@@ -1,0 +1,156 @@
+name: radar-taxonomy-inventory-2026-08
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/radar-taxonomy-inventory-2026-08.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pandas requests
+
+      - name: Download official current taxonomies
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=".data/tmp/radar_taxonomy_2026_08"
+          mkdir -p "$SRC"
+          base="https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos"
+          printf 'file\tbytes\tsha256\n' > "$SRC/source_manifest.tsv"
+          for file in Categorias_Produtos.csv Portfolio_NCMs_Setor.csv; do
+            curl --fail --location --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 1800 --output "$SRC/$file" "$base/$file"
+            printf '%s\t%s\t%s\n' "$file" "$(stat -c%s "$SRC/$file")" "$(sha256sum "$SRC/$file" | awk '{print $1}')" >> "$SRC/source_manifest.tsv"
+          done
+
+      - name: Build complete taxonomy inventories and crosswalk
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          import pandas as pd
+
+          SRC=Path(".data/tmp/radar_taxonomy_2026_08")
+          OUT=Path("artifacts/radar_taxonomy_inventory_2026_08")
+          OUT.mkdir(parents=True,exist_ok=True)
+
+          cat=pd.read_csv(SRC/"Categorias_Produtos.csv",dtype=str,encoding="utf-8-sig")
+          port=pd.read_csv(SRC/"Portfolio_NCMs_Setor.csv",dtype=str,encoding="utf-8-sig")
+
+          required_cat={"ncm8","ncm4","ncm2","grupo_afinidade_final","codxdescr_ncm8"}
+          required_port={"emit_atividade","emit_classe","emit_setor","cod_ncm","ncm_descr"}
+          if not required_cat.issubset(cat.columns):
+              raise SystemExit(f"Unexpected Categorias schema: {list(cat.columns)}")
+          if not required_port.issubset(port.columns):
+              raise SystemExit(f"Unexpected Portfolio schema: {list(port.columns)}")
+
+          cat["ncm8"]=cat["ncm8"].str.replace(r"\D","",regex=True).str.zfill(8)
+          port["cod_ncm"]=port["cod_ncm"].str.replace(r"\D","",regex=True).str.zfill(8)
+
+          groups=(cat.groupby("grupo_afinidade_final",dropna=False)
+                    .agg(n_ncm=("ncm8","nunique"),n_rows=("ncm8","size"))
+                    .reset_index()
+                    .sort_values(["n_ncm","grupo_afinidade_final"],ascending=[False,True]))
+          groups.to_csv(OUT/"grupos_afinidade_inventory.csv",index=False,encoding="utf-8-sig")
+
+          sectors=(port.groupby(["emit_setor","emit_atividade","emit_classe"],dropna=False)
+                     .agg(n_ncm=("cod_ncm","nunique"),n_rows=("cod_ncm","size"))
+                     .reset_index()
+                     .sort_values(["emit_setor","emit_atividade","emit_classe"]))
+          sectors.to_csv(OUT/"portfolio_setor_atividade_classe_inventory.csv",index=False,encoding="utf-8-sig")
+
+          cw=(cat[["ncm8","grupo_afinidade_final","codxdescr_ncm8"]]
+              .drop_duplicates()
+              .merge(port[["cod_ncm","emit_setor","emit_atividade","emit_classe","ncm_descr"]].drop_duplicates(),
+                     how="outer",left_on="ncm8",right_on="cod_ncm",indicator=True))
+          cw["ncm"]=cw["ncm8"].fillna(cw["cod_ncm"])
+          cross=(cw.groupby(["grupo_afinidade_final","emit_setor","emit_atividade","emit_classe","_merge"],dropna=False)
+                  .agg(n_ncm=("ncm","nunique"))
+                  .reset_index()
+                  .sort_values("n_ncm",ascending=False))
+          cross.to_csv(OUT/"grupo_x_portfolio_crosswalk_summary.csv",index=False,encoding="utf-8-sig")
+
+          coverage={
+            "categorias_rows":int(len(cat)),
+            "categorias_unique_ncm8":int(cat["ncm8"].nunique()),
+            "grupos_afinidade":int(cat["grupo_afinidade_final"].nunique(dropna=True)),
+            "portfolio_rows":int(len(port)),
+            "portfolio_unique_ncm":int(port["cod_ncm"].nunique()),
+            "portfolio_setores":int(port["emit_setor"].nunique(dropna=True)),
+            "portfolio_atividades":int(port["emit_atividade"].nunique(dropna=True)),
+            "portfolio_classes":int(port["emit_classe"].nunique(dropna=True)),
+            "ncm_in_both":int((cw["_merge"]=="both").sum()),
+            "ncm_only_categorias":int((cw["_merge"]=="left_only").sum()),
+            "ncm_only_portfolio":int((cw["_merge"]=="right_only").sum()),
+            "canonical_rows_promoted":0
+          }
+          (OUT/"validation_summary.json").write_text(json.dumps(coverage,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(coverage,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/radar_taxonomy_inventory_2026_08"
+          DEST="docs/data_sources/radar_taxonomy_inventory_2026_08"
+          mkdir -p "$DEST"
+          cp .data/tmp/radar_taxonomy_2026_08/source_manifest.tsv "$DEST/"
+          cp "$SRC/grupos_afinidade_inventory.csv" "$DEST/"
+          cp "$SRC/portfolio_setor_atividade_classe_inventory.csv" "$DEST/"
+          cp "$SRC/grupo_x_portfolio_crosswalk_summary.csv" "$DEST/"
+          cp "$SRC/validation_summary.json" "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Radar do Mercado — inventário das taxonomias correntes — 2026-08
+
+          Fonte: Receita Estadual/SEFAZ-RS — Radar do Mercado — Dados Abertos.
+          Arquivos: Categorias_Produtos.csv e Portfolio_NCMs_Setor.csv.
+          Finalidade: preservar as categorias efetivamente publicadas e preparar a definição auditável de cestas por cadeia/mercado sem criar taxonomias próprias antes de examinar as classificações oficiais.
+
+          Saídas:
+          - inventário completo de grupo_afinidade_final;
+          - inventário completo de setor × atividade × classe do portfólio;
+          - resumo do cruzamento entre as duas taxonomias por NCM;
+          - controles de cobertura e hashes.
+
+          Nenhuma cesta setorial é promovida nesta etapa. A seleção futura de NCMs deverá registrar regra, abrangência, inclusões/exclusões e versão da taxonomia.
+
+          Limitação: as taxonomias são estaduais e de produtos/NCM; não representam demanda municipal nem substituem CNAE para atividades de serviços.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: inventory Radar product taxonomies"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-taxonomy-inventory-2026-08
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/radar_taxonomy_inventory_2026_08/

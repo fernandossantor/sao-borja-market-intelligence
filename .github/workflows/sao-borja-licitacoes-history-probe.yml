@@ -1,0 +1,74 @@
+name: sao-borja-licitacoes-history-probe
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-licitacoes-history-probe.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - run: python -m pip install --quiet requests beautifulsoup4
+      - name: Probe procurement notices history
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          import requests
+          from bs4 import BeautifulSoup
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("docs/data_sources/sao_borja_licitacoes_history_probe");OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session();s.headers.update({"User-Agent":"SBMI territorial audit/1.0"})
+          report={}
+          # Probe likely institution ids against years route patterns referenced by page scripts/endpoints.
+          for route in ["/licitacoes/buscarExercicios/1","/licitacoes/getExercicios/1","/licitacoes/buscarInstituicoes"]:
+            try:
+              r=s.get(BASE+route,timeout=30)
+              rec={"status":r.status_code,"bytes":len(r.content),"content_type":r.headers.get("content-type"),"prefix":r.text[:600]}
+              try: rec["json"]=r.json()
+              except Exception: pass
+              report[route]=rec
+            except Exception as e: report[route]={"error":repr(e)}
+          for year in range(2019,2026):
+            try:
+              r=s.get(BASE+"/licitacoes/pesquisar",params={"instituicao":"1","exercicio":str(year),"mes":"","modalidade":"","situacao":""},timeout=45)
+              soup=BeautifulSoup(r.text,"html.parser")
+              main=soup.select_one(".main")
+              tables=[]
+              for ti,t in enumerate(soup.find_all("table")):
+                headers=[x.get_text(" ",strip=True) for x in t.find_all("th")]
+                rows=t.find_all("tr")
+                tables.append({"index":ti,"headers":headers,"row_count":max(0,len(rows)-1)})
+              links=[{"text":a.get_text(" ",strip=True)[:180],"href":a.get("href")} for a in soup.find_all("a") if a.get("href")]
+              report[f"search_{year}"]={
+                "status":r.status_code,"bytes":len(r.content),"url":r.url,
+                "main_text":main.get_text(" ",strip=True)[:3000] if main else None,
+                "tables":tables,
+                "relevant_links":[x for x in links if x["href"] and ("licit" in x["href"].lower() or "arquivo" in x["href"].lower())][-100:],
+                "route_markers":sorted(set(re.findall(r"/licitacoes/[A-Za-z0-9_/?=&.-]+",r.text)))[:100]
+              }
+            except Exception as e: report[f"search_{year}"]={"error":repr(e)}
+          (OUT/"probe.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+      - name: Persist
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > docs/data_sources/sao_borja_licitacoes_history_probe/README.md <<'EOF'
+          # Portal PMSB — licitações — probe histórico
+          Teste exploratório das rotas públicas de licitações 2019–2025. Não confundir processo licitatório com pagamento efetivo ou fornecedor contratado.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/sao_borja_licitacoes_history_probe
+          git commit -m "data: probe PMSB procurement notice history" || exit 0
+          git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+          git push origin HEAD:explore/receita-estadual-rs-market-intel-v1

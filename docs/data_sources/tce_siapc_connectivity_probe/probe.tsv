@@ -1,0 +1,9 @@
+label	url	http_code	remote_ip	content_type	size_download	exit_code
+https_home	https://dados.tce.rs.gov.br/	000			0	28
+http_home	http://dados.tce.rs.gov.br/	000			0	28
+https_ckan	https://dados.tce.rs.gov.br/api/3/action/status_show	000			0	28
+http_ckan	http://dados.tce.rs.gov.br/api/3/action/status_show	000			0	28
+https_per_org_2025_7z	https://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.7z	000			0	28
+http_per_org_2025_7z	http://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.7z	000			0	28
+https_per_org_2025_zip	https://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.zip	000			0	28
+http_per_org_2025_zip	http://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.zip	000			0	28

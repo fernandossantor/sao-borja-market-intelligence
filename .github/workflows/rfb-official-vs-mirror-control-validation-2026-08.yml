@@ -39,16 +39,7 @@ jobs:
           OUT="artifacts/rfb_official_vs_mirror_control_validation_2026_08"
           mkdir -p "$OUT/raw/official" "$OUT/raw/mirror"
 
-          RFB_FILE_BASE="$(python - <<'PY'
-from pathlib import Path
-import re
-text = Path(".github/workflows/bens-essenciais-operadores-rfb-join.yml").read_text(encoding="utf-8")
-m = re.search(r"^\\s*RFB_FILE_BASE:\\s*['\"]([^'\"]+)['\"]\\s*$", text, re.M)
-if not m:
-    raise SystemExit("RFB_FILE_BASE not found in reference workflow")
-print(m.group(1))
-PY
-)"
+          RFB_FILE_BASE="$(awk -F"'" '/RFB_FILE_BASE:/ {print $2; exit}' "$RFB_REFERENCE_WORKFLOW")"
           test -n "$RFB_FILE_BASE"
           echo "Official RFB public DAV base reused from validated repository workflow."
 

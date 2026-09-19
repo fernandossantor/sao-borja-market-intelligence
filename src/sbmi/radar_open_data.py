@@ -31,7 +31,7 @@ RICE_NCM_DESCRIPTIONS = {
 RICE_NCMS = tuple(RICE_NCM_DESCRIPTIONS)
 
 _COLUMN_ALIASES = {
-    "ncm": {"ncm", "co_ncm", "codigo_ncm", "cod_ncm", "codigo_do_ncm"},
+    "ncm": {"ncm", "co_ncm", "codigo_ncm", "cod_ncm", "codigo_do_ncm", "ncm8"},
     "period": {
         "ano_mes",
         "anomes",
@@ -49,6 +49,7 @@ _COLUMN_ALIASES = {
         "vl_nfe",
         "valor_nominal",
         "vl_fob",
+        "vlr_nominal",
     },
     "origin_type": {
         "origem",

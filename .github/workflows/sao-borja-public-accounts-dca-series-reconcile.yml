@@ -86,12 +86,15 @@ jobs:
               ms=sorted(ms,key=lambda r:(specificity(r),len(str(r.get("cod_conta","")))))
               return ms[0]
 
-          def revenue_parent(year, tail, column):
+          def numeric_code(row):
+              return re.sub(r"^[A-Z]+","",str(row.get("cod_conta","")))
+
+          def revenue_parent(year, account_code, column):
               ms=subset(
                   year,"DCA-Anexo I-C",column,
-                  lambda r: norm(r.get("conta")).endswith(tail)
+                  lambda r: numeric_code(r)==account_code
               )
-              return require_one(tail+" / "+column,ms,year)
+              return require_one(account_code+" / "+column,ms,year)
 
           def sum_revenue_components(year, predicate, column):
               ms=subset(year,"DCA-Anexo I-C",column,predicate)
@@ -112,10 +115,10 @@ jobs:
           for year in YEARS:
               rec={"year":year,"unit":"R$","geography":"São Borja/RS","source":"SICONFI DCA"}
 
-              rc_g=revenue_parent(year,"RECEITAS CORRENTES","Receitas Brutas Realizadas")
-              rc_f=revenue_parent(year,"RECEITAS CORRENTES","Deduções - FUNDEB")
+              rc_g=revenue_parent(year,"1.0.0.0.00.0.0","Receitas Brutas Realizadas")
+              rc_f=revenue_parent(year,"1.0.0.0.00.0.0","Deduções - FUNDEB")
               rc_o=subset(year,"DCA-Anexo I-C","Outras Deduções da Receita",
-                          lambda r:norm(r.get("conta")).endswith("RECEITAS CORRENTES"))
+                          lambda r:numeric_code(r)=="1.0.0.0.00.0.0")
               rec["receita_corrente_bruta"]=val(rc_g)
               rec["receita_corrente_deducao_fundeb"]=val(rc_f)
               rec["receita_corrente_outras_deducoes"]=sum(val(r) for r in rc_o) if rc_o else 0.0
@@ -125,10 +128,10 @@ jobs:
                   -rec["receita_corrente_outras_deducoes"]
               )
 
-              tr_g=revenue_parent(year,"TRANSFERENCIAS CORRENTES","Receitas Brutas Realizadas")
-              tr_f=revenue_parent(year,"TRANSFERENCIAS CORRENTES","Deduções - FUNDEB")
+              tr_g=revenue_parent(year,"1.7.0.0.00.0.0","Receitas Brutas Realizadas")
+              tr_f=revenue_parent(year,"1.7.0.0.00.0.0","Deduções - FUNDEB")
               tr_o=subset(year,"DCA-Anexo I-C","Outras Deduções da Receita",
-                          lambda r:norm(r.get("conta")).endswith("TRANSFERENCIAS CORRENTES"))
+                          lambda r:numeric_code(r)=="1.7.0.0.00.0.0")
               rec["transferencias_correntes_brutas"]=val(tr_g)
               rec["transferencias_correntes_deducao_fundeb"]=val(tr_f)
               rec["transferencias_correntes_outras_deducoes"]=sum(val(r) for r in tr_o) if tr_o else 0.0

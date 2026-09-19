@@ -1,0 +1,72 @@
+{
+  "source_payments": "Portal da Transparência da Prefeitura de São Borja",
+  "source_geography": "RFB Dados Abertos CNPJ, competência 2026-08; bytes transported through mirror in this run",
+  "period_payments": "2026-01-01 to 2026-09-18",
+  "core_paid_R$": 72039491.18,
+  "core_vendors": 618,
+  "classification": {
+    "LOCAL_EXACT_ACTIVE": {
+      "vendors": 186,
+      "pago_R$": 43751499.71,
+      "share_core": 0.6073266064675708
+    },
+    "LOCAL_EXACT_NONACTIVE_SNAPSHOT": {
+      "vendors": 3,
+      "pago_R$": 489.0,
+      "share_core": 6.787943556932812e-06
+    },
+    "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT": {
+      "vendors": 20,
+      "pago_R$": 10184036.91,
+      "share_core": 0.1413674186642136
+    },
+    "EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT": {
+      "vendors": 407,
+      "pago_R$": 18093515.56,
+      "share_core": 0.25116106823673945
+    },
+    "EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT": {
+      "vendors": 2,
+      "pago_R$": 9950.0,
+      "share_core": 0.00013811868791714004
+    },
+    "RFB_NOT_FOUND": {
+      "vendors": 0,
+      "pago_R$": 0.0,
+      "share_core": 0.0
+    }
+  },
+  "indicators": {
+    "strict_local_active_share": 0.6073266064675708,
+    "operational_local_presence_share": 0.7486940251317844,
+    "registered_local_upper_bound_share_including_nonactive_exact": 0.7487008130753413,
+    "external_active_no_local_footprint_share": 0.25116106823673945,
+    "external_plus_nonactive_no_local_footprint_share": 0.2512991869246566,
+    "indeterminate_notfound_share": 0.0
+  },
+  "sensitivity_excluding_fundacao_ivan_goulart": {
+    "excluded_cnpj": "96488598000189",
+    "excluded_paid_R$": 28342657.23,
+    "denominator_R$": 43696833.95,
+    "strict_local_active_share": 0.3526306390442717,
+    "operational_local_presence_share": 0.5856918471320941,
+    "registered_local_upper_bound_share_including_nonactive_exact": 0.5857030378742096,
+    "external_active_no_local_footprint_share": 0.4140692568414319,
+    "external_plus_nonactive_no_local_footprint_share": 0.414296962125787,
+    "indeterminate_notfound_share": 0.0
+  },
+  "controls": {
+    "sum_classes_R$": 72039491.18,
+    "reconciles_core": true,
+    "rfb_vendor_matches": 618,
+    "rfb_vendor_notfound": 0
+  },
+  "interpretation_rule": "These are first-order territorial exposure indicators for rubric-compatible payments, not final leakage rates.",
+  "limitations": [
+    "RFB bytes were obtained via a transport mirror because the official host timed out; results remain exploratory until official hash/reexecution reconciliation.",
+    "LOCAL_EXACT_NONACTIVE_SNAPSHOT is kept separate because a supplier may have received payment earlier in 2026 and become nonactive by the August 2026 RFB snapshot.",
+    "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT does not prove that the local establishment executed the contract.",
+    "External supplier does not imply 100% leakage; local supplier does not imply 100% retention.",
+    "The rubric-compatible core includes institutional service arrangements; the Fundação Ivan Goulart sensitivity isolates the dominant case."
+  ]
+}

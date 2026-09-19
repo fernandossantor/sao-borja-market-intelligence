@@ -1,0 +1,11 @@
+grupo,componentes,valor_R$_ha,participacao_custo_total_pct,natureza,interpretacao,limitacao
+Insumos industriais comercializáveis,"Sementes e mudas + fertilizantes + agrotóxicos",3154.77,25.61,DADO OBSERVADO + CÁLCULO,"Itens com forte possibilidade de cadeia extramunicipal; distribuição/margem pode ser local","Origem efetiva dos fornecedores não informada"
+Operações mecanizadas,"Operação com avião + tratores/colheitadeiras + conjunto de irrigação",1872.15,15.20,DADO OBSERVADO + CÁLCULO,"Mistura serviço operacional potencialmente local com equipamento/capital de origem externa","Não converter integralmente em saída territorial"
+Logística e armazenagem,"Transporte externo + armazenagem",1212.66,9.85,DADO OBSERVADO + CÁLCULO,"Pode gerar retenção quando operadores são locais e vazamento quando contratados fora","Prestador não identificado"
+Financiamento,"Juros do financiamento",650.42,5.28,DADO OBSERVADO,"Canal financeiro relevante","Instituição e destino final dos juros não identificados"
+Núcleo de exposição selecionado,"Insumos industriais + operações mecanizadas + logística/armazenagem + juros",6890.00,55.94,CÁLCULO ANALÍTICO,"Parcela do custo cuja retenção depende fortemente da localização de fornecedor/prestador/capital","Exposição não é vazamento observado"
+Capital/depreciação ampliado,"Depreciação de implementos + máquinas + seguro do capital fixo + remuneração esperada do capital fixo",1980.50,16.08,CÁLCULO ANALÍTICO,"Conexão adicional com bens de capital e financiamento","Depreciação/remuneração do capital não equivalem a saída de caixa no período"
+Exposição ampliada,"Núcleo selecionado + capital/depreciação",8870.50,72.02,CÁLCULO ANALÍTICO,"Limite amplo de conexão com cadeias/capital","Não usar como taxa de vazamento"
+SENSIBILIDADE 25% sourcing externo no núcleo,"6890 × 25%",1722.50,13.985,SIMULAÇÃO,"Primeira rodada potencialmente externa sob hipótese explícita","Não é estimativa observada"
+SENSIBILIDADE 50% sourcing externo no núcleo,"6890 × 50%",3445.00,27.970,SIMULAÇÃO,"Primeira rodada potencialmente externa sob hipótese explícita","Não é estimativa observada"
+SENSIBILIDADE 75% sourcing externo no núcleo,"6890 × 75%",5167.50,41.955,SIMULAÇÃO,"Primeira rodada potencialmente externa sob hipótese explícita","Não é estimativa observada"

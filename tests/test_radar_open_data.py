@@ -130,7 +130,7 @@ def test_maps_official_radar_current_long_schema(tmp_path: Path):
             "ncm_descr": ["Arroz quebrado"] * 3,
             "emit_uf": ["RS", "SC", "EX"],
             "tipo_operacao": ["INT", "OUF", "EXT"],
-            "vlr_nominal": [80, 15, 5],
+            "vlr_nominal": ["72.507.234", "18.313", "4.968.350"],
             "corte_sigilo": [0, 0, 0],
         }
     ).to_csv(source / "Composicao_de_Mercado_08_2026.csv", index=False)
@@ -143,7 +143,8 @@ def test_maps_official_radar_current_long_schema(tmp_path: Path):
 
     row = result.composition_summary.iloc[0]
     assert row["ncm"] == "10064000"
-    assert row["int_rs"] == 80
-    assert row["ouf"] == 15
-    assert row["ext"] == 5
-    assert row["part_rs"] == 0.8
+    assert row["int_rs"] == 72507234
+    assert row["ouf"] == 18313
+    assert row["ext"] == 4968350
+    expected = 72507234 / (72507234 + 18313 + 4968350)
+    assert row["part_rs"] == expected

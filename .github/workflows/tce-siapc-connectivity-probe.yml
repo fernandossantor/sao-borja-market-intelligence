@@ -33,10 +33,12 @@ jobs:
             label="$1"; url="$2"
             tmp="$(mktemp)"
             meta="$(mktemp)"
+            set +e
             curl -4 -L -sS --connect-timeout 12 --max-time 40 \
               -o "$tmp" -w '%{http_code}\t%{remote_ip}\t%{content_type}\t%{size_download}' \
               "$url" > "$meta"
             ec=$?
+            set -e
             vals="$(cat "$meta" 2>/dev/null || true)"
             printf '%s\t%s\t%s\t%s\n' "$label" "$url" "$vals" "$ec" >> "$OUT/probe.tsv"
             rm -f "$tmp" "$meta"

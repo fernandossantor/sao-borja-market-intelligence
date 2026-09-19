@@ -1,0 +1,225 @@
+name: mip-tru-sector-benchmarks
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/mip-tru-sector-benchmarks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Extract official TRU-RS 2019 value-added benchmarks
+        run: |
+          cat > /tmp/tru_bench.py <<'PY'
+          import csv, io, json, re, ssl, urllib.request, zipfile
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+
+          OUT=Path("artifacts/mip_tru_sector_benchmarks")
+          OUT.mkdir(parents=True,exist_ok=True)
+          URL="https://dee.rs.gov.br/upload/arquivos/202409/11095935-20240906160547tru-rs-2019-v3-1.xlsx"
+          req=urllib.request.Request(URL,headers={"User-Agent":"SBMI exploratory audit/1.0"})
+          with urllib.request.urlopen(req,timeout=120,context=ssl.create_default_context()) as r:
+              raw=r.read(); status=r.status
+          (OUT/"tru_rs_2019.xlsx").write_bytes(raw)
+
+          NSM="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+          NSR="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+          NSP="http://schemas.openxmlformats.org/package/2006/relationships"
+          ns={"m":NSM,"r":NSR,"p":NSP}
+
+          def colnum(ref):
+              letters=re.match(r"([A-Z]+)",ref).group(1)
+              n=0
+              for ch in letters: n=n*26+(ord(ch)-64)
+              return n-1
+
+          with zipfile.ZipFile(io.BytesIO(raw)) as z:
+              shared=[]
+              if "xl/sharedStrings.xml" in z.namelist():
+                  root=ET.fromstring(z.read("xl/sharedStrings.xml"))
+                  for si in root.findall("m:si",ns):
+                      shared.append("".join(t.text or "" for t in si.iter(f"{{{NSM}}}t")))
+              wb=ET.fromstring(z.read("xl/workbook.xml"))
+              relroot=ET.fromstring(z.read("xl/_rels/workbook.xml.rels"))
+              rels={x.attrib["Id"]:x.attrib["Target"] for x in relroot}
+              sheets=[]
+              for sh in wb.find("m:sheets",ns):
+                  rid=sh.attrib[f"{{{NSR}}}id"]
+                  target=rels[rid]
+                  if not target.startswith("xl/"): target="xl/"+target.lstrip("/")
+                  sheets.append((sh.attrib["name"],target))
+
+              def read_sheet(target):
+                  root=ET.fromstring(z.read(target))
+                  out=[]
+                  for row in root.findall(".//m:sheetData/m:row",ns):
+                      cells={}
+                      for c in row.findall("m:c",ns):
+                          ref=c.attrib["r"]; idx=colnum(ref); typ=c.attrib.get("t")
+                          v=c.find("m:v",ns)
+                          if typ=="inlineStr":
+                              isel=c.find("m:is",ns)
+                              val="".join(t.text or "" for t in isel.iter(f"{{{NSM}}}t")) if isel is not None else ""
+                          elif v is None: val=""
+                          elif typ=="s":
+                              try: val=shared[int(v.text)]
+                              except Exception: val=v.text or ""
+                          else: val=v.text or ""
+                          cells[idx]=val
+                      out.append((int(row.attrib.get("r","0")),cells))
+                  return out
+
+              inventory=[]
+              targets=[
+                  "Agricultura, inclusive o apoio à agricultura e a pós-colheita",
+                  "Pecuária, inclusive o apoio à pecuária",
+                  "Fabricação e refino de açúcar e outros produtos alimentares",
+                  "Construção",
+                  "Comércio por atacado e a varejo",
+                  "Transporte terrestre",
+                  "Armazenamento, atividades auxiliares dos transportes e correio",
+                  "Alojamento",
+                  "Alimentação",
+                  "Intermediação financeira, seguros e previdência complementar",
+                  "Atividades profissionais, científicas e técnicas",
+                  "Atividades administrativas e serviços complementares",
+                  "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social",
+                  "Educação e saúde privadas",
+              ]
+              comps=[
+                  "Valor Adicionado Bruto",
+                  "Remunerações",
+                  "Salários",
+                  "Excedente operacional bruto e rendimento misto bruto",
+                  "Valor da produção",
+                  "Consumo intermediário",
+              ]
+
+              result=[]
+              diagnostic=[]
+              for sname,target in sheets:
+                  rows=read_sheet(target)
+                  # compact sheet inventory
+                  inventory.append({"sheet":sname,"rows":len(rows)})
+                  # find header row containing several target activities
+                  header_candidates=[]
+                  for rnum,cells in rows:
+                      vals={i:str(v).strip() for i,v in cells.items()}
+                      count=sum(any(t.lower() in v.lower() for t in targets) for v in vals.values())
+                      if count>=3: header_candidates.append((rnum,vals,count))
+                  # find component rows
+                  component_rows=[]
+                  for rnum,cells in rows:
+                      for i,v in cells.items():
+                          vv=str(v).strip()
+                          for comp in comps:
+                              if comp.lower() in vv.lower():
+                                  component_rows.append((rnum,cells,comp,i))
+                                  break
+                  if header_candidates or component_rows:
+                      diagnostic.append({
+                          "sheet":sname,
+                          "header_candidates":[{"row":r,"count":c,"cells":v} for r,v,c in header_candidates[:4]],
+                          "component_rows":[{"row":r,"component":comp,"label_col":i,"cells":cells} for r,cells,comp,i in component_rows[:30]]
+                      })
+
+                  for hr,header,hcount in header_candidates:
+                      amap={}
+                      for ci,label in header.items():
+                          for t in targets:
+                              if t.lower() in label.lower():
+                                  amap[t]=ci
+                      if len(amap)<3: continue
+                      for rr,cells,comp,label_col in component_rows:
+                          # component rows normally below same table; allow sheet-wide, but require numeric target cells
+                          rowout={"sheet":sname,"header_row":hr,"component_row":rr,"component":comp}
+                          nvalid=0
+                          for t,ci in amap.items():
+                              val=cells.get(ci,"")
+                              try:
+                                  num=float(str(val).replace(",","."))
+                                  rowout[t]=num; nvalid+=1
+                              except Exception:
+                                  rowout[t]=None
+                          if nvalid>=3:
+                              result.append(rowout)
+
+              (OUT/"tru_diagnostic.json").write_text(json.dumps({
+                  "url":URL,"http_status":status,"bytes":len(raw),
+                  "sheets":inventory,"diagnostic":diagnostic
+              },ensure_ascii=False,indent=2),encoding="utf-8")
+
+              # de-duplicate candidate component records
+              seen=set(); clean=[]
+              for x in result:
+                  key=(x["sheet"],x["component_row"],x["component"])
+                  if key not in seen:
+                      seen.add(key); clean.append(x)
+              (OUT/"tru_component_candidates.json").write_text(json.dumps(clean,ensure_ascii=False,indent=2),encoding="utf-8")
+
+              # Long form for auditing and easy spreadsheet import
+              with (OUT/"tru_component_benchmarks_long.csv").open("w",newline="",encoding="utf-8-sig") as f:
+                  w=csv.writer(f)
+                  w.writerow(["sheet","component","activity","value_2019","unit","nature","geography","limitation"])
+                  for x in clean:
+                      for t in targets:
+                          if x.get(t) is not None:
+                              w.writerow([x["sheet"],x["component"],t,x[t],"R$ milhões (conforme TRU, verificar unidade da tabela)","DADO OBSERVADO — BENCHMARK","Rio Grande do Sul","Benchmark estadual 2019; não aplicar como coeficiente municipal sem marcação"])
+
+              print(json.dumps({"http_status":status,"bytes":len(raw),"sheets":len(sheets),
+                                "diagnostic_sheets":len(diagnostic),"candidate_rows":len(clean)},ensure_ascii=False))
+          PY
+          python /tmp/tru_bench.py
+
+      - name: Persist exploratory extraction
+        run: |
+          mkdir -p docs/data_sources/mip_tru_sector_benchmarks
+          cp artifacts/mip_tru_sector_benchmarks/tru_diagnostic.json docs/data_sources/mip_tru_sector_benchmarks/
+          cp artifacts/mip_tru_sector_benchmarks/tru_component_candidates.json docs/data_sources/mip_tru_sector_benchmarks/
+          cp artifacts/mip_tru_sector_benchmarks/tru_component_benchmarks_long.csv docs/data_sources/mip_tru_sector_benchmarks/
+          cat > docs/data_sources/mip_tru_sector_benchmarks/README.md <<'EOF'
+          # TRU/MIP-RS 2019 — benchmarks setoriais para circulação territorial
+
+          Camada exploratória, não canônica.
+
+          Fonte oficial: DEE/SPGG-RS — Tabelas de Recursos e Usos do RS 2019.
+
+          Finalidade: obter benchmarks estaduais de valor da produção, consumo
+          intermediário e componentes do valor adicionado para calibrar cenários de
+          geração versus retenção/circulação em São Borja.
+
+          Regra: coeficientes estaduais são benchmarks estruturais, não estimativas
+          municipais observadas.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/mip_tru_sector_benchmarks
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: extract TRU RS sector circulation benchmarks"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mip-tru-sector-benchmarks
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mip_tru_sector_benchmarks/

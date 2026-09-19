@@ -17,6 +17,8 @@ jobs:
     timeout-minutes: 240
     env:
       RFB_REFERENCE_WORKFLOW: ".github/workflows/bens-essenciais-operadores-rfb-join.yml"
+      RFB_CLEAN_BASE: "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj"
+      RFB_LEGACY_BASE: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj"
       RFB_PERIOD: "2026-08"
       MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
       SAO_BORJA_TOM: "8863"
@@ -39,24 +41,52 @@ jobs:
           OUT="artifacts/rfb_official_vs_mirror_control_validation_2026_08"
           mkdir -p "$OUT/raw/official" "$OUT/raw/mirror"
 
-          RFB_FILE_BASE="$(awk -F"'" '/RFB_FILE_BASE:/ {print $2; exit}' "$RFB_REFERENCE_WORKFLOW")"
-          test -n "$RFB_FILE_BASE"
-          echo "Official RFB public DAV base reused from validated repository workflow."
+          RFB_DAV_BASE="$(awk -F"'" '/RFB_FILE_BASE:/ {print $2; exit}' "$RFB_REFERENCE_WORKFLOW")"
+          test -n "$RFB_DAV_BASE"
 
-          for source in official mirror; do
-            if [[ "$source" == "official" ]]; then
-              base="${RFB_FILE_BASE}/${RFB_PERIOD}"
-            else
-              base="$MIRROR"
-            fi
-            for i in {0..9}; do
-              echo "$source Estabelecimentos${i}.zip"
-              curl -fL --retry 5 --retry-all-errors --retry-delay 5 \
-                --connect-timeout 120 --max-time 2400 \
-                "$base/Estabelecimentos${i}.zip" \
-                -o "$OUT/raw/$source/Estabelecimentos${i}.zip"
-              unzip -tq "$OUT/raw/$source/Estabelecimentos${i}.zip"
+          download_one() {
+            local url="$1"
+            local out="$2"
+            curl -4 --http1.1 --fail --location \
+              --retry 4 --retry-all-errors --retry-delay 8 --retry-max-time 180 \
+              --connect-timeout 35 --max-time 2400 \
+              --output "$out" "$url"
+          }
+
+          download_official() {
+            local file="$1"
+            local out="$2"
+            local bases=(
+              "$RFB_CLEAN_BASE"
+              "$RFB_LEGACY_BASE"
+              "$RFB_DAV_BASE"
+            )
+            local labels=("clean_official_path" "legacy_official_path" "public_dav_path")
+            local idx
+            for idx in 0 1 2; do
+              local url="${bases[$idx]}/${RFB_PERIOD}/$file"
+              echo "official $file via ${labels[$idx]}"
+              rm -f "$out"
+              if download_one "$url" "$out" && unzip -tq "$out"; then
+                printf '%s,%s\n' "$file" "${labels[$idx]}" >> "$OUT/official_transport_used.csv"
+                return 0
+              fi
             done
+            echo "All official RFB transport candidates failed for $file" >&2
+            return 56
+          }
+
+          printf 'file,transport\n' > "$OUT/official_transport_used.csv"
+          for i in {0..9}; do
+            file="Estabelecimentos${i}.zip"
+            download_official "$file" "$OUT/raw/official/$file"
+          done
+
+          for i in {0..9}; do
+            file="Estabelecimentos${i}.zip"
+            echo "mirror $file"
+            download_one "$MIRROR/$file" "$OUT/raw/mirror/$file"
+            unzip -tq "$OUT/raw/mirror/$file"
           done
 
       - name: Compare bytes and structural classification
@@ -290,6 +320,7 @@ jobs:
           cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/validation.json "$DEST/"
           cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/structural_comparison.csv "$DEST/"
           cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/byte_comparison.csv "$DEST/"
+          cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/official_transport_used.csv "$DEST/"
           cat > "$DEST/README.md" <<'EOF'
           # RFB 2026-08 — comparação oficial × espelho × controle canônico de São Borja
 

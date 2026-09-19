@@ -1,0 +1,201 @@
+name: sao-borja-ordem-cronologica-paid-cnpj-2019-2025
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-ordem-cronologica-paid-cnpj-2019-2025.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install parser
+        run: python -m pip install --quiet requests
+
+      - name: Extract paid CNPJ aggregates from Ordem Cronológica
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv, json, re, time
+          from collections import defaultdict
+          from decimal import Decimal, InvalidOperation
+          from pathlib import Path
+          import requests
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("artifacts/sao_borja_ordem_cronologica_paid_cnpj_2019_2025")
+          OUT.mkdir(parents=True,exist_ok=True)
+          HIG="96488598000189"
+          lists={"1":"RECURSOS VINCULADOS","2":"PEQUENO VALOR","4":"DISPENSA"}
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit/1.0","Accept":"application/json,text/plain,*/*"})
+
+          def digits(v): return re.sub(r"\D","",str(v or ""))
+          def cnpj_ok(raw):
+              x=digits(raw).zfill(14)
+              if len(x)!=14 or len(set(x))==1: return None
+              n=[int(c) for c in x]
+              w1=[5,4,3,2,9,8,7,6,5,4,3,2]; w2=[6,5,4,3,2,9,8,7,6,5,4,3,2]
+              r=sum(n[i]*w1[i] for i in range(12))%11; d1=0 if r<2 else 11-r
+              r=sum(n[i]*w2[i] for i in range(13))%11; d2=0 if r<2 else 11-r
+              return x if n[12]==d1 and n[13]==d2 else None
+          def money(v):
+              s=str(v or "").strip().replace("R$","").replace("\xa0","").replace(" ","")
+              if not s: return None
+              if "," in s: s=s.replace(".","").replace(",",".")
+              try: return Decimal(s)
+              except InvalidOperation: return None
+          def get_cell(row,name,index):
+              if isinstance(row,dict):
+                  if name in row: return row.get(name)
+                  cell=row.get("cell")
+                  if isinstance(cell,list) and len(cell)>index: return cell[index]
+              return None
+          def request_page(year,lcode,page,rows=1000):
+              variants=[
+                {"iIdLink":"1","iInstituicao":"1","iExercicio":str(year),"iPago":"1","iTipoLista":lcode},
+                {"iIdLink":"1","iInstituicao":"1","iExercicio":str(year),"iPago":"1","iTipoLista":lcode,
+                 "dtInicio":f"{year}-01-01","dtFim":f"{year}-12-31"},
+                {"iIdLink":"1","iInstituicao":"1","iExercicio":str(year),"iPago":"1","iTipoLista":lcode,
+                 "dtInicio":f"01/01/{year}","dtFim":f"31/12/{year}"}
+              ]
+              last=None
+              for vi,p in enumerate(variants):
+                  data={"aParametros":json.dumps(p,separators=(",",":")),"page":page,"rows":rows,
+                        "sidx":"pagamento","sord":"asc","_search":"false"}
+                  r=s.post(BASE+"/ordem_cronologica/getElementos",data=data,timeout=60)
+                  last={"status":r.status_code,"bytes":len(r.content),"variant":vi,"prefix":r.text[:300]}
+                  r.raise_for_status()
+                  try: obj=r.json()
+                  except Exception: continue
+                  if isinstance(obj,dict) and isinstance(obj.get("rows"),list):
+                      # accept empty only after last variant; non-empty is decisive
+                      if obj.get("rows") or vi==len(variants)-1:
+                          return obj,last,p
+              raise RuntimeError(f"No JSON grid for {year} list {lcode}: {last}")
+
+          cnpj_agg=defaultdict(lambda: {"value":Decimal("0"),"rows":0})
+          yearly=defaultdict(lambda: {"value":Decimal("0"),"rows":0,"valid_cnpj_rows":0,"valid_cnpj_value":Decimal("0"),"invalid_or_person_rows":0})
+          hig=defaultdict(lambda: {"value":Decimal("0"),"rows":0})
+          manifest=[]; examples_meta=[]
+          for year in range(2019,2026):
+              for lcode,lname in lists.items():
+                  obj,meta,params=request_page(year,lcode,1)
+                  records=int(obj.get("records") or len(obj.get("rows",[])) or 0)
+                  total_pages=int(obj.get("total") or 1)
+                  rows_all=list(obj.get("rows",[]))
+                  if total_pages>1:
+                      for pg in range(2,total_pages+1):
+                          data={"aParametros":json.dumps(params,separators=(",",":")),"page":pg,"rows":1000,
+                                "sidx":"pagamento","sord":"asc","_search":"false"}
+                          r=s.post(BASE+"/ordem_cronologica/getElementos",data=data,timeout=60); r.raise_for_status()
+                          o=r.json(); rows_all.extend(o.get("rows",[])); time.sleep(.1)
+                  manifest.append({"year":year,"list_code":lcode,"list_name":lname,"records_reported":records,
+                                   "rows_downloaded":len(rows_all),"pages":total_pages,"http_status":meta["status"],
+                                   "response_bytes_first_page":meta["bytes"],"parameter_variant":meta["variant"]})
+                  if rows_all:
+                      row=rows_all[0]
+                      examples_meta.append({"year":year,"list_code":lcode,"row_type":type(row).__name__,
+                                            "row_keys":sorted(row.keys()) if isinstance(row,dict) else [],
+                                            "cell_len":len(row.get("cell",[])) if isinstance(row,dict) and isinstance(row.get("cell"),list) else None})
+                  for row in rows_all:
+                      doc=get_cell(row,"cpfcnpj",5)
+                      val=get_cell(row,"valor",10)
+                      amt=money(val)
+                      if amt is None: continue
+                      yearly[year]["value"]+=amt; yearly[year]["rows"]+=1
+                      cnpj=cnpj_ok(doc)
+                      if cnpj:
+                          yearly[year]["valid_cnpj_rows"]+=1; yearly[year]["valid_cnpj_value"]+=amt
+                          k=(year,lcode,cnpj); cnpj_agg[k]["value"]+=amt; cnpj_agg[k]["rows"]+=1
+                          if cnpj==HIG:
+                              hig[(year,lcode)]["value"]+=amt; hig[(year,lcode)]["rows"]+=1
+                      else:
+                          yearly[year]["invalid_or_person_rows"]+=1
+
+          with (OUT/"source_manifest.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.DictWriter(f,fieldnames=list(manifest[0].keys()));w.writeheader();w.writerows(manifest)
+          with (OUT/"yearly_paid_scope.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              cols=["year","paid_value_scope","paid_rows_scope","valid_cnpj_value","valid_cnpj_rows","invalid_or_person_rows"]
+              w=csv.DictWriter(f,fieldnames=cols);w.writeheader()
+              for y in range(2019,2026):
+                  d=yearly[y]; w.writerow({"year":y,"paid_value_scope":str(d["value"]),"paid_rows_scope":d["rows"],
+                  "valid_cnpj_value":str(d["valid_cnpj_value"]),"valid_cnpj_rows":d["valid_cnpj_rows"],
+                  "invalid_or_person_rows":d["invalid_or_person_rows"]})
+          with (OUT/"cnpj_paid_aggregates_2019_2025.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              cols=["year","list_code","list_name","cnpj","paid_value","payment_rows"]
+              w=csv.DictWriter(f,fieldnames=cols);w.writeheader()
+              for (y,l,c),d in sorted(cnpj_agg.items()):
+                  w.writerow({"year":y,"list_code":l,"list_name":lists[l],"cnpj":c,"paid_value":str(d["value"]),"payment_rows":d["rows"]})
+          with (OUT/"fundacao_ivan_goulart_paid_2019_2025.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              cols=["year","list_code","list_name","cnpj","paid_value","payment_rows"]
+              w=csv.DictWriter(f,fieldnames=cols);w.writeheader()
+              for y in range(2019,2026):
+                  for l in lists:
+                      d=hig[(y,l)]
+                      w.writerow({"year":y,"list_code":l,"list_name":lists[l],"cnpj":HIG,"paid_value":str(d["value"]),"payment_rows":d["rows"]})
+          (OUT/"schema_meta.json").write_text(json.dumps(examples_meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          (OUT/"privacy_control.json").write_text(json.dumps({
+            "row_level_person_data_persisted":False,
+            "cpf_values_persisted":False,
+            "creditor_names_persisted":False,
+            "cnpj_aggregates_persisted":True,
+            "fundacao_ivan_goulart_cnpj_public_entity_aggregate_persisted":True
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"manifest":manifest,"yearly":{str(k):{kk:str(vv) for kk,vv in v.items()} for k,v in yearly.items()},
+                            "hig":{f"{k[0]}_{k[1]}":{kk:str(vv) for kk,vv in v.items()} for k,v in hig.items()}},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/sao_borja_ordem_cronologica_paid_cnpj_2019_2025"
+          DEST="docs/data_sources/sao_borja_ordem_cronologica_paid_cnpj_2019_2025"
+          mkdir -p "$DEST"
+          cp "$SRC"/* "$DEST"/
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — Ordem Cronológica — pagamentos por CNPJ — 2019–2025
+
+          **Fonte observada:** Portal da Transparência da Prefeitura Municipal de São Borja, módulo Ordem Cronológica.
+          **Instituição:** PREFEITURA MUNICIPAL DE SÃO BORJA (iInstituicao=1).
+          **Período:** 2019–2025.
+          **Situação:** pagos (iPago=1).
+          **Listas publicadas:** Recursos Vinculados, Pequeno Valor e Dispensa.
+          **Unidade:** R$ correntes/nominais.
+
+          Esta camada é uma rota oficial municipal e serve para histórico de pagamentos/credores dentro do escopo da Ordem Cronológica. Ela **não é equivalente ao universo contábil SIAPC/SICONFI**, nem deve ser tratada como total de compras, total de despesas ou total de fornecedores.
+
+          Privacidade: não são persistidos nomes ou documentos de pessoas físicas. Apenas agregados por CNPJ válido. A Fundação Ivan Goulart/Hospital Ivan Goulart (CNPJ 96.488.598/0001-89) é preservada em agregado específico para análise institucional no Caderno Geral.
+
+          A comparação com SICONFI/DCA é apenas conceitual/de cobertura. Diferenças de escopo devem ser explicitadas.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract municipal paid CNPJ history 2019 2025"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-ordem-cronologica-paid-cnpj-2019-2025
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_ordem_cronologica_paid_cnpj_2019_2025/

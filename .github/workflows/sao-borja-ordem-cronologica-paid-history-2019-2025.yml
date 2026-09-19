@@ -1,0 +1,259 @@
+name: sao-borja-ordem-cronologica-paid-history-2019-2025
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-ordem-cronologica-paid-history-2019-2025.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install parser
+        run: python -m pip install --quiet requests
+
+      - name: Extract paid historical order records without personal-data persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv, json, re
+          from collections import defaultdict
+          from decimal import Decimal, InvalidOperation
+          from pathlib import Path
+          import requests
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI territorial audit/1.0"})
+
+          YEARS=range(2019,2026)
+          LISTS={"1":"RECURSOS VINCULADOS","2":"PEQUENO VALOR","4":"DISPENSA"}
+          SICONFI={
+            2019:Decimal("191651936.23"),2020:Decimal("204996862.35"),
+            2021:Decimal("226187346.98"),2022:Decimal("280509051.03"),
+            2023:Decimal("313794938.68"),2024:Decimal("350893671.81"),
+            2025:Decimal("367749323.89")
+          }
+
+          def digits(v): return re.sub(r"\D","",str(v or ""))
+
+          def cnpj_ok(raw):
+              x=digits(raw)
+              if len(x)!=14 or len(set(x))==1: return None
+              n=[int(i) for i in x]
+              w1=[5,4,3,2,9,8,7,6,5,4,3,2]
+              w2=[6,5,4,3,2,9,8,7,6,5,4,3,2]
+              r=sum(n[i]*w1[i] for i in range(12))%11
+              d1=0 if r<2 else 11-r
+              r=sum(n[i]*w2[i] for i in range(13))%11
+              d2=0 if r<2 else 11-r
+              return x if (n[12],n[13])==(d1,d2) else None
+
+          def cpf_ok(raw):
+              x=digits(raw)
+              if len(x)!=11 or len(set(x))==1: return None
+              n=[int(i) for i in x]
+              d1=(sum(n[i]*(10-i) for i in range(9))*10)%11
+              d1=0 if d1==10 else d1
+              d2=(sum(n[i]*(11-i) for i in range(10))*10)%11
+              d2=0 if d2==10 else d2
+              return x if (n[9],n[10])==(d1,d2) else None
+
+          def money(v):
+              x=str(v or "").strip().replace("R$","").replace("\xa0","").replace(" ","")
+              if not x:return Decimal("0")
+              if "," in x:
+                  x=x.replace(".","").replace(",",".")
+              try:return Decimal(x)
+              except InvalidOperation:return Decimal("0")
+
+          def normalize_row(item):
+              if isinstance(item,dict) and isinstance(item.get("cell"),list):
+                  names=["codigo","operacao","emissao","vencimento","pagamento","cpfcnpj","credor","descricao","nprocesso","ndocumento","valor","situacao","exercicio","id"]
+                  d={names[i]:v for i,v in enumerate(item["cell"][:len(names)])}
+                  d["_rowid"]=item.get("id")
+                  return d
+              if isinstance(item,dict):
+                  return dict(item)
+              return {}
+
+          yearly=[]
+          by_cnpj=defaultdict(lambda:Decimal("0"))
+          diagnostics=[]
+          all_year_ids=defaultdict(set)
+
+          for year in YEARS:
+              ysum=Decimal("0"); yrows=0
+              y_cnpj=defaultdict(lambda:Decimal("0"))
+              y_cnpj_rows=defaultdict(int)
+              y_class_value=defaultdict(lambda:Decimal("0"))
+              y_class_rows=defaultdict(int)
+              y_duplicate_rows=0
+              seen=set()
+              for list_code,list_name in LISTS.items():
+                  params={
+                    "iIdLink":"1","iInstituicao":"1","iExercicio":str(year),
+                    "iPago":"1","iTipoLista":list_code
+                  }
+                  payload={
+                    "aParametros":json.dumps(params,separators=(",",":")),
+                    "page":"1","rows":"100000","sidx":"op","sord":"asc"
+                  }
+                  r=s.post(BASE+"/ordem_cronologica/getElementos",data=payload,timeout=90)
+                  text=r.text
+                  try:
+                      data=r.json()
+                  except Exception:
+                      diagnostics.append({
+                        "year":year,"list_code":list_code,"list_name":list_name,
+                        "http_status":r.status_code,"bytes":len(r.content),
+                        "parse_status":"NON_JSON","prefix":text[:240]
+                      })
+                      continue
+                  rows=data.get("rows",[]) if isinstance(data,dict) else []
+                  diagnostics.append({
+                    "year":year,"list_code":list_code,"list_name":list_name,
+                    "http_status":r.status_code,"bytes":len(r.content),
+                    "parse_status":"JSON","records":data.get("records"),
+                    "total_pages":data.get("total"),"returned_rows":len(rows),
+                    "top_keys":sorted(data.keys()) if isinstance(data,dict) else []
+                  })
+                  for item in rows:
+                      d=normalize_row(item)
+                      rid=str(d.get("_rowid") or d.get("id") or "").strip()
+                      # Include year because backend ids may repeat by exercise.
+                      dedup=(year,rid) if rid else (
+                        year,list_code,str(d.get("operacao","")),str(d.get("ndocumento","")),
+                        str(d.get("valor","")),str(d.get("pagamento","")),digits(d.get("cpfcnpj",""))
+                      )
+                      if dedup in seen:
+                          y_duplicate_rows+=1
+                          continue
+                      seen.add(dedup)
+                      val=money(d.get("valor"))
+                      ysum+=val; yrows+=1
+                      rawdoc=digits(d.get("cpfcnpj"))
+                      cnpj=cnpj_ok(rawdoc); cpf=cpf_ok(rawdoc)
+                      if cnpj:
+                          cls="CNPJ_VALIDO"; y_cnpj[cnpj]+=val; y_cnpj_rows[cnpj]+=1
+                      elif cpf:
+                          cls="CPF_VALIDO"
+                      elif rawdoc:
+                          cls="DOCUMENTO_INVALIDO_OU_SINTETICO"
+                      else:
+                          cls="DOCUMENTO_AUSENTE"
+                      y_class_rows[cls]+=1; y_class_value[cls]+=val
+
+              for cnpj,val in y_cnpj.items():
+                  by_cnpj[(year,cnpj)]+=val
+
+              ref=SICONFI[year]
+              yearly.append({
+                "year":year,
+                "records_paid_order_chronology":yrows,
+                "paid_order_value":str(ysum),
+                "distinct_valid_cnpj":len(y_cnpj),
+                "duplicate_rows_removed":y_duplicate_rows,
+                "siconfi_dca_paid_total":str(ref),
+                "order_to_siconfi_ratio":str(ysum/ref if ref else ""),
+                "order_minus_siconfi":str(ysum-ref),
+                "doc_class_rows":json.dumps(dict(y_class_rows),ensure_ascii=False),
+                "doc_class_value":json.dumps({k:str(v) for k,v in y_class_value.items()},ensure_ascii=False)
+              })
+
+          with (OUT/"yearly_coverage.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(yearly[0].keys()); w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(yearly)
+
+          with (OUT/"cnpj_paid_aggregate.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["year","cnpj","paid_order_value"])
+              for (year,cnpj),val in sorted(by_cnpj.items()):
+                  w.writerow([year,cnpj,str(val)])
+
+          (OUT/"endpoint_diagnostics.json").write_text(json.dumps(diagnostics,ensure_ascii=False,indent=2),encoding="utf-8")
+          (OUT/"privacy_control.json").write_text(json.dumps({
+            "row_level_records_persisted":False,
+            "creditor_names_persisted":False,
+            "cpf_values_persisted":False,
+            "cnpj_annual_aggregates_persisted":True,
+            "source_universe":"Portal PMSB — Ordem Cronológica, paid records, lists Recursos Vinculados / Pequeno Valor / Dispensa",
+            "not_equivalent_to_siapc":True,
+            "not_equivalent_to_total_dca_paid_expense":True
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+
+          print(json.dumps(yearly,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Validate and persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,json
+          from pathlib import Path
+          OUT=Path("artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025")
+          rows=list(csv.DictReader((OUT/"yearly_coverage.csv").open(encoding="utf-8-sig")))
+          if len(rows)!=7:
+              raise SystemExit(f"EXPECTED_7_YEARS_GOT_{len(rows)}")
+          diag=json.loads((OUT/"endpoint_diagnostics.json").read_text(encoding="utf-8"))
+          bad=[x for x in diag if x.get("parse_status")!="JSON"]
+          if bad:
+              raise SystemExit(f"NON_JSON_ENDPOINT_RESPONSES={len(bad)}")
+          if not any(int(r["records_paid_order_chronology"])>0 for r in rows):
+              raise SystemExit("NO_HISTORICAL_ORDER_ROWS")
+          PY
+          DEST="docs/data_sources/sao_borja_ordem_cronologica_paid_history_2019_2025"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025/yearly_coverage.csv "$DEST/"
+          cp artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025/cnpj_paid_aggregate.csv "$DEST/"
+          cp artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025/endpoint_diagnostics.json "$DEST/"
+          cp artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025/privacy_control.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal PMSB — Ordem Cronológica — pagamentos históricos — 2019–2025
+
+          **Fonte observada:** Portal da Transparência da Prefeitura Municipal de São Borja — módulo Ordem Cronológica.
+
+          **Instituição:** PREFEITURA MUNICIPAL DE SÃO BORJA.
+
+          **Período:** 2019–2025.
+
+          **Recorte:** registros marcados como pagos (`iPago=1`) nas listas publicadas pelo módulo: Recursos Vinculados, Pequeno Valor e Dispensa.
+
+          **Unidade:** R$ correntes/nominais.
+
+          Esta base é uma rota administrativa alternativa para estudar credores históricos, mas **não é SIAPC** e **não deve ser presumida equivalente ao universo integral da despesa paga**. O arquivo `yearly_coverage.csv` compara o valor recuperado com a despesa paga anual do SICONFI/DCA apenas para medir cobertura, não para exigir igualdade.
+
+          A camada persistida não contém nomes de credores, CPFs ou linhas individuais. CNPJ é preservado somente como agregado anual quando o documento valida pelos dígitos verificadores.
+
+          **Não interpretar credor como fornecedor mercantil** e não classificar esta rota como compras públicas sem inspeção adicional de objeto/natureza.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract PMSB historical paid order chronology 2019 2025"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-ordem-cronologica-paid-history-2019-2025
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_ordem_cronologica_paid_history_2019_2025/

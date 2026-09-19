@@ -1,0 +1,246 @@
+name: territorial-circulation-benchmarks
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/territorial-circulation-benchmarks.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Discover MIP-RS and LicitaCon official resources
+        run: |
+          cat > /tmp/circulation_benchmarks.py <<'PY'
+          import csv
+          import io
+          import json
+          import re
+          import ssl
+          import urllib.parse
+          import urllib.request
+          import zipfile
+          from pathlib import Path
+          from xml.etree import ElementTree as ET
+
+          OUT = Path("artifacts/territorial_circulation_benchmarks")
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          UA = {"User-Agent": "SBMI exploratory audit/1.0"}
+
+          def get(url, timeout=120):
+              req = urllib.request.Request(url, headers=UA)
+              with urllib.request.urlopen(req, timeout=timeout, context=ssl.create_default_context()) as r:
+                  return r.status, r.headers, r.read()
+
+          def save_json(name, obj):
+              (OUT/name).write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
+
+          # ---------------- MIP-RS 2019 ----------------
+          mip_url = "https://dee.rs.gov.br/upload/arquivos/202409/11100149-20240906162755mip-rs-2019-117-52-v2-1.xlsx"
+          mip = {"source": mip_url, "status": None, "bytes": None, "sheets": [], "hits": []}
+          try:
+              status, headers, raw = get(mip_url)
+              mip["status"] = status
+              mip["bytes"] = len(raw)
+              (OUT/"mip_rs_2019_117_52.xlsx").write_bytes(raw)
+              with zipfile.ZipFile(io.BytesIO(raw)) as z:
+                  ns = {"m":"http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+                        "r":"http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+                        "p":"http://schemas.openxmlformats.org/package/2006/relationships"}
+                  shared=[]
+                  if "xl/sharedStrings.xml" in z.namelist():
+                      root=ET.fromstring(z.read("xl/sharedStrings.xml"))
+                      for si in root.findall("m:si",ns):
+                          parts=[t.text or "" for t in si.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t")]
+                          shared.append("".join(parts))
+                  wb=ET.fromstring(z.read("xl/workbook.xml"))
+                  relroot=ET.fromstring(z.read("xl/_rels/workbook.xml.rels"))
+                  rels={r.attrib["Id"]:r.attrib["Target"] for r in relroot}
+                  sheet_defs=[]
+                  for sh in wb.find("m:sheets",ns):
+                      name=sh.attrib["name"]
+                      rid=sh.attrib["{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"]
+                      target=rels[rid]
+                      if not target.startswith("xl/"):
+                          target="xl/"+target.lstrip("/")
+                      sheet_defs.append((name,target))
+
+                  def cell_value(c):
+                      t=c.attrib.get("t")
+                      v=c.find("m:v",ns)
+                      if v is None:
+                          inline=c.find("m:is",ns)
+                          if inline is not None:
+                              return "".join(x.text or "" for x in inline.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t"))
+                          return ""
+                      val=v.text or ""
+                      if t=="s":
+                          try: return shared[int(val)]
+                          except Exception: return val
+                      return val
+
+                  keywords=[
+                      "valor adicionado","valor da produção","consumo intermediário","remunera",
+                      "excedente operacional","rendimento misto","agricultura","pecuária",
+                      "comércio","administração pública","serviços financeiros"
+                  ]
+                  for name,target in sheet_defs:
+                      entry={"name":name,"path":target,"rows_scanned":0,"matched_rows":0}
+                      try:
+                          root=ET.fromstring(z.read(target))
+                          rows=root.findall(".//m:sheetData/m:row",ns)
+                          entry["rows_scanned"]=len(rows)
+                          for row in rows:
+                              vals=[cell_value(c) for c in row.findall("m:c",ns)]
+                              joined=" | ".join(vals)
+                              low=joined.lower()
+                              if any(k in low for k in keywords):
+                                  mip["hits"].append({
+                                      "sheet":name,
+                                      "row":int(row.attrib.get("r","0") or 0),
+                                      "values":vals[:140],
+                                      "matched_keywords":[k for k in keywords if k in low]
+                                  })
+                                  entry["matched_rows"]+=1
+                          mip["sheets"].append(entry)
+                      except Exception as exc:
+                          entry["error"]=repr(exc)
+                          mip["sheets"].append(entry)
+          except Exception as exc:
+              mip["error"]=repr(exc)
+          save_json("mip_rs_inventory.json",mip)
+
+          # ---------------- CKAN / LicitaCon ----------------
+          ckan_base="https://dados.tce.rs.gov.br/api/3/action"
+          lic={"queries":[],"selected_package":None,"resource":None,"zip":None,"headers":{},"sample_rows":{}}
+          search_q="Contratos PM DE SAO BORJA"
+          try:
+              url=ckan_base+"/package_search?"+urllib.parse.urlencode({"q":search_q,"rows":50})
+              status, headers, raw=get(url)
+              payload=json.loads(raw.decode("utf-8"))
+              lic["queries"].append({"url":url,"status":status,"count":payload.get("result",{}).get("count")})
+              results=payload.get("result",{}).get("results",[])
+              compact=[]
+              for p in results:
+                  compact.append({"name":p.get("name"),"title":p.get("title"),"id":p.get("id"),
+                                  "resources":[{"id":r.get("id"),"format":r.get("format"),"url":r.get("url"),
+                                                "name":r.get("name"),"size":r.get("size")} for r in p.get("resources",[])]})
+              save_json("licitacon_package_search.json",compact)
+
+              def score(p):
+                  title=(p.get("title") or "").upper()
+                  name=(p.get("name") or "").upper()
+                  s=0
+                  if "CONTRATOS" in title: s+=5
+                  if "SAO BORJA" in title or "SÃO BORJA" in title: s+=10
+                  if "PM DE" in title: s+=3
+                  if "SAO-BORJA" in name or "SAO_BORJA" in name: s+=5
+                  return s
+              candidates=sorted(results,key=score,reverse=True)
+              if candidates and score(candidates[0])>=10:
+                  p=candidates[0]
+                  lic["selected_package"]={"name":p.get("name"),"title":p.get("title"),"id":p.get("id")}
+                  resources=p.get("resources",[])
+                  zips=[r for r in resources if (r.get("format") or "").upper()=="ZIP" or (r.get("url") or "").lower().endswith(".zip")]
+                  if zips:
+                      r=zips[0]
+                      lic["resource"]={k:r.get(k) for k in ("id","name","format","url","size","last_modified")}
+                      st,hd,zraw=get(r["url"],timeout=180)
+                      lic["zip"]={"status":st,"bytes":len(zraw)}
+                      (OUT/"licitacon_contratos_pm_sao_borja.zip").write_bytes(zraw)
+                      with zipfile.ZipFile(io.BytesIO(zraw)) as z:
+                          names=z.namelist()
+                          lic["zip"]["members"]=names
+                          for n in names:
+                              if n.endswith("/") or not n.lower().endswith((".csv",".txt")):
+                                  continue
+                              data=z.read(n)
+                              text=None
+                              enc_used=None
+                              for enc in ("utf-8-sig","latin1","cp1252"):
+                                  try:
+                                      text=data.decode(enc); enc_used=enc; break
+                                  except Exception: pass
+                              if text is None: continue
+                              first_lines=text.splitlines()[:8]
+                              if not first_lines: continue
+                              sample="\n".join(first_lines)
+                              try:
+                                  dialect=csv.Sniffer().sniff(sample,delimiters=";,|\t")
+                                  delim=dialect.delimiter
+                              except Exception:
+                                  delim=";"
+                              rows=list(csv.reader(first_lines,delimiter=delim))
+                              lic["headers"][n]={"encoding":enc_used,"delimiter":delim,"header":rows[0] if rows else [],
+                                                 "bytes":len(data)}
+                              lic["sample_rows"][n]=rows[:5]
+              save_json("licitacon_discovery.json",lic)
+          except Exception as exc:
+              lic["error"]=repr(exc)
+              save_json("licitacon_discovery.json",lic)
+
+          print(json.dumps({
+              "mip_status":mip.get("status"),
+              "mip_bytes":mip.get("bytes"),
+              "mip_sheets":len(mip.get("sheets",[])),
+              "mip_hits":len(mip.get("hits",[])),
+              "licitacon_package":lic.get("selected_package"),
+              "licitacon_zip":lic.get("zip"),
+              "licitacon_files":len(lic.get("headers",{}))
+          },ensure_ascii=False,indent=2))
+          PY
+          python /tmp/circulation_benchmarks.py
+
+      - name: Persist exploratory benchmark discovery
+        run: |
+          mkdir -p docs/data_sources/territorial_circulation_benchmarks
+          cp artifacts/territorial_circulation_benchmarks/mip_rs_inventory.json docs/data_sources/territorial_circulation_benchmarks/
+          cp artifacts/territorial_circulation_benchmarks/licitacon_package_search.json docs/data_sources/territorial_circulation_benchmarks/ || true
+          cp artifacts/territorial_circulation_benchmarks/licitacon_discovery.json docs/data_sources/territorial_circulation_benchmarks/
+          cat > docs/data_sources/territorial_circulation_benchmarks/README.md <<'EOF'
+          # Circulação territorial — descoberta de benchmarks oficiais
+
+          Camada exploratória, não canônica.
+
+          Fontes:
+          - DEE/SPGG-RS — MIP-RS 2019, tabela 117 produtos x 52 atividades.
+          - TCE-RS / LicitaCon — Dados Abertos de contratos da PM de São Borja.
+
+          Objetivo: calibrar conceitualmente geração de valor, consumo intermediário,
+          remunerações/excedente e testar a retenção/vazamento de compras públicas
+          por localização do fornecedor.
+
+          Nenhum coeficiente estadual deve ser tratado como coeficiente municipal sem
+          marcação explícita de benchmark/estimativa.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/territorial_circulation_benchmarks
+          if git diff --cached --quiet; then
+            echo "No discovery changes."
+          else
+            git commit -m "data: discover MIP RS and LicitaCon circulation benchmarks"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload exploratory artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: territorial-circulation-benchmarks
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/territorial_circulation_benchmarks/

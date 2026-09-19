@@ -1,0 +1,118 @@
+name: sao-borja-transparencia-creditor-hierarchy
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-transparencia-creditor-hierarchy.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Discover drill-down after creditor selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_transparencia_creditor_hierarchy"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+          from datetime import datetime
+
+          OUT=Path("artifacts/sao_borja_transparencia_creditor_hierarchy")
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+          h=s.get(BASE+"/despesas",timeout=60);h.raise_for_status()
+          dt_import=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",h.text).group(1)
+          dt_end=datetime.strptime(dt_import,"%Y-%m-%d").strftime("%d/%m")
+          menu_data=[
+            ("iExercicio","2026"),("dtDataImportacao",dt_import),("sViewAtual",""),("iNivel","3"),
+            ("dtInicio","01/01"),("dtFim",dt_end),
+            ("aHistorico[0][descricao]","Descrição"),("aHistorico[0][valor_empenhado]","Valor Empenhado"),
+            ("aHistorico[0][valor_anulado]","Valor Anulado"),("aHistorico[0][valor_liquidado]","Valor Liquidado"),
+            ("aHistorico[0][valor_pago]","Valor Pago")
+          ]
+          q=s.post(BASE+"/despesas/loadLink/3",data=menu_data,timeout=120);q.raise_for_status()
+          mo=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);",q.text,re.S)
+          params=json.loads(mo.group(1).replace("\\'","'"))
+
+          z=s.post(BASE+"/despesas/getCredores",data={
+            "aParametros":json.dumps(params,ensure_ascii=False,separators=(",",":")),
+            "page":1,"rows":2500,"sidx":"nome","sord":"asc","_search":"false"
+          },timeout=120);z.raise_for_status()
+          rows=z.json()["rows"]
+          def normrow(o):
+              c=o.get("cell",[])
+              return {"id":str(o.get("id","")),"cpfcnpj":str(c[0]),"nome":str(c[1]),
+                      "valor_empenhado":c[2],"valor_anulado":c[3],"valor_liquidado":c[4],"valor_pago":c[5]}
+          rr=[normrow(x) for x in rows]
+          targets=["06136424000164","96488598000189","00394460005887"]
+          out={}
+          for cnpj in targets:
+              x=next((a for a in rr if re.sub(r"\D","",a["cpfcnpj"])==cnpj),None)
+              if not x: continue
+              p=json.loads(json.dumps(params))
+              desc=f'{x["cpfcnpj"]} - {x["nome"]}'
+              p["aHistorico"].append({"cpfcnpj":x["cpfcnpj"],"nome":x["nome"],
+                                     "valor_empenhado":x["valor_empenhado"],"valor_anulado":x["valor_anulado"],
+                                     "valor_liquidado":x["valor_liquidado"],"valor_pago":x["valor_pago"],
+                                     "descricao":desc})
+              p["iCredor"]=x["id"];p["iNivel"]=int(p.get("iNivel",3))+1
+              resp=s.post(BASE+"/despesas/loadLink/3",data=p,timeout=120);resp.raise_for_status()
+              fn=OUT/f'{cnpj}_level4.html';fn.write_text(resp.text,encoding="utf-8")
+              endpoints=sorted(set(re.findall(r'["\']([^"\']*(?:despesas|get[A-Za-z]+|empenh|liquid|pagament|element|orgao|unidade)[^"\']*)["\']',resp.text,re.I)))
+              grid_urls=re.findall(r'url\s*:\s*["\']([^"\']+)["\']',resp.text,re.I)
+              decoded=re.findall(r"\$\.JSON\.decode\('(.+?)'\)",resp.text,re.S)
+              out[cnpj]={"creditor":x,"status":resp.status_code,"bytes":len(resp.content),
+                         "endpoint_mentions":endpoints,"grid_urls":grid_urls,
+                         "decoded_params":decoded[:3],
+                         "title_matches":re.findall(r'<h2[^>]*>(.*?)</h2>',resp.text,re.I|re.S)}
+          (OUT/"hierarchy_discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist discovery
+        if: success()
+        run: |
+          DEST="docs/data_sources/sao_borja_transparencia_creditor_hierarchy"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_transparencia_creditor_hierarchy/hierarchy_discovery.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal PMSB — hierarquia após seleção do credor
+
+          Camada exploratória, não canônica.
+
+          Objetivo: identificar a próxima camada pública de detalhamento após selecionar
+          um credor na consulta de despesas. Foram usados três CNPJs de naturezas
+          distintas somente para descoberta de schema/endpoints; nenhum caso individual
+          é usado como inferência territorial.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: discover creditor expense drill-down hierarchy"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-transparencia-creditor-hierarchy
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_transparencia_creditor_hierarchy/

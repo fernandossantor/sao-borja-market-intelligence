@@ -1,0 +1,700 @@
+{
+  "url": "https://dee.rs.gov.br/upload/arquivos/202409/11095935-20240906160547tru-rs-2019-v3-1.xlsx",
+  "http_status": 200,
+  "bytes": 275478,
+  "sheets": [
+    {
+      "sheet": "Apresentação",
+      "rows": 18
+    },
+    {
+      "sheet": "Índice",
+      "rows": 24
+    },
+    {
+      "sheet": "12x12",
+      "rows": 0
+    },
+    {
+      "sheet": "oferta_12",
+      "rows": 33
+    },
+    {
+      "sheet": "produção_12",
+      "rows": 34
+    },
+    {
+      "sheet": "importações_12",
+      "rows": 33
+    },
+    {
+      "sheet": "CI_12",
+      "rows": 33
+    },
+    {
+      "sheet": "demanda_12",
+      "rows": 33
+    },
+    {
+      "sheet": "VA_12",
+      "rows": 50
+    },
+    {
+      "sheet": "16x16",
+      "rows": 0
+    },
+    {
+      "sheet": "oferta_16",
+      "rows": 37
+    },
+    {
+      "sheet": "produção_16",
+      "rows": 38
+    },
+    {
+      "sheet": "importações_16",
+      "rows": 37
+    },
+    {
+      "sheet": "CI_16",
+      "rows": 38
+    },
+    {
+      "sheet": "demanda_16",
+      "rows": 37
+    },
+    {
+      "sheet": "VA_16",
+      "rows": 33
+    },
+    {
+      "sheet": "124x65",
+      "rows": 0
+    },
+    {
+      "sheet": "oferta",
+      "rows": 133
+    },
+    {
+      "sheet": "producao",
+      "rows": 133
+    },
+    {
+      "sheet": "importações",
+      "rows": 132
+    },
+    {
+      "sheet": "CI",
+      "rows": 133
+    },
+    {
+      "sheet": "demanda",
+      "rows": 132
+    }
+  ],
+  "diagnostic": [
+    {
+      "sheet": "Índice",
+      "header_candidates": [],
+      "component_rows": [
+        {
+          "row": 9,
+          "component": "Consumo intermediário",
+          "label_col": 2,
+          "cells": {
+            "1": "",
+            "2": "Consumo Intermediário"
+          }
+        },
+        {
+          "row": 17,
+          "component": "Consumo intermediário",
+          "label_col": 2,
+          "cells": {
+            "1": "",
+            "2": "Consumo Intermediário"
+          }
+        },
+        {
+          "row": 25,
+          "component": "Consumo intermediário",
+          "label_col": 2,
+          "cells": {
+            "1": "",
+            "2": "Consumo Intermediário"
+          }
+        }
+      ]
+    },
+    {
+      "sheet": "VA_12",
+      "header_candidates": [],
+      "component_rows": [
+        {
+          "row": 6,
+          "component": "Valor Adicionado Bruto",
+          "label_col": 0,
+          "cells": {
+            "0": "Valor Adicionado Bruto ",
+            "1": "36264.071572581226",
+            "2": "464.51668153051958",
+            "3": "66179.928073642775",
+            "4": "10682.079606445026",
+            "5": "17314.391142907411",
+            "6": "54913.941605050139",
+            "7": "17380.345059080733",
+            "8": "12954.145679859554",
+            "9": "24413.345771026863",
+            "10": "37616.114095131707",
+            "11": "79804.138299813363",
+            "12": "62161.083725182893",
+            "13": "420148.1013122524"
+          }
+        },
+        {
+          "row": 7,
+          "component": "Remunerações",
+          "label_col": 0,
+          "cells": {
+            "0": "Remunerações",
+            "1": "4624.7032927458349",
+            "2": "275.26363928895205",
+            "3": "35964.438618813976",
+            "4": "2821.0472208927085",
+            "5": "6519.4999677613332",
+            "6": "27549.538245885538",
+            "7": "9284.1924431072748",
+            "8": "4961.9789071435807",
+            "9": "9982.1092005223963",
+            "10": "659.57135124366323",
+            "11": "39479.390142779761",
+            "12": "55650.386404034674",
+            "13": "197772.11943421967"
+          }
+        },
+        {
+          "row": 8,
+          "component": "Salários",
+          "label_col": 0,
+          "cells": {
+            "0": "   Salários",
+            "1": "4000.1013062556231",
+            "2": "215.72418177321859",
+            "3": "28289.475953706089",
+            "4": "2073.102340709926",
+            "5": "5368.9682349943823",
+            "6": "21692.997120026845",
+            "7": "7465.4459968440251",
+            "8": "3893.5238441126439",
+            "9": "7669.0089522766693",
+            "10": "506.67486760918086",
+            "11": "33262.774207255883",
+            "12": "41743.746885105931",
+            "13": "156181.54389067041"
+          }
+        },
+        {
+          "row": 11,
+          "component": "Excedente operacional bruto e rendimento misto bruto",
+          "label_col": 0,
+          "cells": {
+            "0": "Excedente operacional bruto e rendimento misto bruto",
+            "1": "32606.152099763662",
+            "2": "179.97234711334627",
+            "3": "27694.838923600735",
+            "4": "7615.9280988618575",
+            "5": "10558.108147780975",
+            "6": "26400.16612536828",
+            "7": "7691.9688432668399",
+            "8": "7574.7570259897557",
+            "9": "13967.478084886881",
+            "10": "36925.763647470056",
+            "11": "39013.912558117278",
+            "12": "6501.4173334247998",
+            "13": "216730.46323564445"
+          }
+        },
+        {
+          "row": 18,
+          "component": "Valor da produção",
+          "label_col": 0,
+          "cells": {
+            "0": "Valor da produção",
+            "1": "64349.958919002478",
+            "2": "1199.3490278403999",
+            "3": "298790.54847034998",
+            "4": "24534.672341456",
+            "5": "40735.924488575998",
+            "6": "93198.720903117995",
+            "7": "45653.630025742998",
+            "8": "22670.690763295999",
+            "9": "37598.164243751999",
+            "10": "41114.425019923998",
+            "11": "127668.46488689299",
+            "12": "83044.165111144001",
+            "13": "880558.71420109482"
+          }
+        }
+      ]
+    },
+    {
+      "sheet": "produção_16",
+      "header_candidates": [
+        {
+          "row": 5,
+          "count": 4,
+          "cells": {
+            "0": "",
+            "1": "",
+            "2": "Agropecuária",
+            "3": "Indústria extrativa",
+            "4": "Indústrias de transformação",
+            "5": "Eletricidade e gás, água, esgoto, atividades de gestão de resíduos e descontaminação",
+            "6": "Construção",
+            "7": "Comércio, manutenção e reparação de veículos automotores e motocicletas",
+            "8": "Transporte, armazenagem e correio",
+            "9": "Serviços de alojamento e alimentação",
+            "10": "Serviços de informação e comunicação",
+            "11": "Atividades financeiras, de seguros e serviços relacionados",
+            "12": "Atividades imobiliárias",
+            "13": "Atividades profissionais, científicas e técnicas, administrativas e serviços complementares",
+            "14": "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social",
+            "15": "Educação e saúde mercantis",
+            "16": "Artes, cultura, esporte e recreação e outras atividades de serviços",
+            "17": "Serviços domésticos",
+            "18": ""
+          }
+        }
+      ],
+      "component_rows": []
+    },
+    {
+      "sheet": "CI_16",
+      "header_candidates": [
+        {
+          "row": 5,
+          "count": 4,
+          "cells": {
+            "0": "",
+            "1": "",
+            "2": "Agropecuária",
+            "3": "Indústria extrativa",
+            "4": "Indústrias de transformação",
+            "5": "Eletricidade e gás, água, esgoto, atividades de gestão de resíduos e descontaminação",
+            "6": "Construção",
+            "7": "Comércio, manutenção e reparação de veículos automotores e motocicletas",
+            "8": "Transporte, armazenagem e correio",
+            "9": "Serviços de alojamento e alimentação",
+            "10": "Serviços de informação e comunicação",
+            "11": "Atividades financeiras, de seguros e serviços relacionados",
+            "12": "Atividades imobiliárias",
+            "13": "Atividades profissionais, científicas e técnicas, administrativas e serviços complementares",
+            "14": "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social",
+            "15": "Educação e saúde mercantis",
+            "16": "Artes, cultura, esporte e recreação e outras atividades de serviços",
+            "17": "Serviços domésticos",
+            "18": ""
+          }
+        }
+      ],
+      "component_rows": []
+    },
+    {
+      "sheet": "VA_16",
+      "header_candidates": [
+        {
+          "row": 4,
+          "count": 4,
+          "cells": {
+            "0": "",
+            "1": "Agropecuária",
+            "2": "Indústria extrativa",
+            "3": "Indústrias de transformação",
+            "4": "Eletricidade e gás, água, esgoto, atividades de gestão de resíduos e descontaminação",
+            "5": "Construção",
+            "6": "Comércio, manutenção e reparação de veículos automotores e motocicletas",
+            "7": "Transporte, armazenagem e correio",
+            "8": "Serviços de alojamento e alimentação",
+            "9": "Serviços de informação e comunicação",
+            "10": "Atividades financeiras, de seguros e serviços relacionados",
+            "11": "Atividades imobiliárias",
+            "12": "Atividades profissionais, científicas e técnicas, administrativas e serviços complementares",
+            "13": "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social",
+            "14": "Educação e saúde mercantis",
+            "15": "Artes, cultura, esporte e recreação e outras atividades de serviços",
+            "16": "Serviços domésticos",
+            "17": "Total\ndo produto"
+          }
+        }
+      ],
+      "component_rows": [
+        {
+          "row": 6,
+          "component": "Valor Adicionado Bruto",
+          "label_col": 0,
+          "cells": {
+            "0": "Valor Adicionado Bruto ",
+            "1": "36264.071572581226",
+            "2": "464.51668153051958",
+            "3": "66179.928073642775",
+            "4": "10682.079606445026",
+            "5": "17314.391142907411",
+            "6": "54913.941605050139",
+            "7": "17380.345059080733",
+            "8": "9216.9443640826175",
+            "9": "12954.145679859554",
+            "10": "24413.345771026863",
+            "11": "37616.114095131707",
+            "12": "31133.378405426531",
+            "13": "62161.083725182893",
+            "14": "28689.71689696789",
+            "15": "6126.0986333363289",
+            "16": "4638",
+            "17": "420148.1013122524",
+            "18": ""
+          }
+        },
+        {
+          "row": 7,
+          "component": "Remunerações",
+          "label_col": 0,
+          "cells": {
+            "0": "Remunerações",
+            "1": "4624.7032927458349",
+            "2": "275.26363928895205",
+            "3": "35964.438618813976",
+            "4": "2821.0472208927085",
+            "5": "6519.4999677613332",
+            "6": "27549.538245885538",
+            "7": "9284.1924431072748",
+            "8": "4481.3080696323168",
+            "9": "4961.9789071435807",
+            "10": "9982.1092005223963",
+            "11": "659.57135124366323",
+            "12": "12888.156430300292",
+            "13": "55650.386404034674",
+            "14": "14452.205658723204",
+            "15": "2963.5803207588542",
+            "16": "4694.1396633650993",
+            "17": "197772.11943421967",
+            "18": ""
+          }
+        },
+        {
+          "row": 8,
+          "component": "Salários",
+          "label_col": 0,
+          "cells": {
+            "0": "   Salários",
+            "1": "4000.1013062556231",
+            "2": "215.72418177321859",
+            "3": "28289.475953706089",
+            "4": "2073.102340709926",
+            "5": "5368.9682349943823",
+            "6": "21692.997120026845",
+            "7": "7465.4459968440251",
+            "8": "3735.902225456422",
+            "9": "3893.5238441126439",
+            "10": "7669.0089522766693",
+            "11": "506.67486760918086",
+            "12": "10294.980071419022",
+            "13": "41743.746885105931",
+            "14": "12104.594033609628",
+            "15": "2552.1213233777357",
+            "16": "4575.1765533930729",
+            "17": "156181.54389067041",
+            "18": ""
+          }
+        },
+        {
+          "row": 11,
+          "component": "Excedente operacional bruto e rendimento misto bruto",
+          "label_col": 0,
+          "cells": {
+            "0": "Excedente operacional bruto e rendimento misto bruto",
+            "1": "32606.152099763662",
+            "2": "179.97234711334627",
+            "3": "27694.838923600735",
+            "4": "7615.9280988618575",
+            "5": "10558.108147780975",
+            "6": "26400.16612536828",
+            "7": "7691.9688432668399",
+            "8": "4603.1001601337612",
+            "9": "7574.7570259897557",
+            "10": "13967.478084886881",
+            "11": "36925.763647470056",
+            "12": "17720.158839487467",
+            "13": "6501.4173334247998",
+            "14": "13666.487566500065",
+            "15": "3080.3056553609827",
+            "16": "-56.139663364999997",
+            "17": "216730.46323564445",
+            "18": ""
+          }
+        },
+        {
+          "row": 18,
+          "component": "Valor da produção",
+          "label_col": 0,
+          "cells": {
+            "0": "Valor da produção",
+            "1": "64349.958919002478",
+            "2": "1199.3490278403999",
+            "3": "298790.54847034998",
+            "4": "24534.672341456",
+            "5": "40735.924488575998",
+            "6": "93198.720903117995",
+            "7": "45653.630025742998",
+            "8": "19384.066196694999",
+            "9": "22670.690763295999",
+            "10": "37598.164243751999",
+            "11": "41114.425019923998",
+            "12": "47060.465679367997",
+            "13": "83044.165111144001",
+            "14": "44754.654207672997",
+            "15": "11831.278803157",
+            "16": "4638",
+            "17": "880558.71420109482",
+            "18": ""
+          }
+        }
+      ]
+    },
+    {
+      "sheet": "producao",
+      "header_candidates": [
+        {
+          "row": 5,
+          "count": 11,
+          "cells": {
+            "0": "",
+            "1": "",
+            "2": "Cultivo de cereais",
+            "3": "Cultivo de Fumo",
+            "4": "Cultivo de Soja",
+            "5": "Cultivo de outros das lavouras temp, n.e. e serviços rel. a agricultura",
+            "6": "Cultivo de outros produtos da lavoura permanente",
+            "7": "Pecuária, inclusive o apoio à pecuária",
+            "8": "Silvicultura, extração vegetal e serviços relacionados; Pesca e aquicultura",
+            "9": "Extração de petróleo e gás, inclusive as atividades de apoio",
+            "10": "Extração de outros produtos minerais",
+            "11": "Abate e produtos de carne, inclusive os produtos do laticínio e da pesca",
+            "12": "Laticínios",
+            "13": "Fabricação de óleos e gorduras vegetais e animais",
+            "14": "Moagem, fabricação de produtos amiláceos e de alimentos para animais",
+            "15": "Fabricação de outros produtos alimentares",
+            "16": "Fabricação de bebidas",
+            "17": "Fabricação de produtos do fumo",
+            "18": "Fabricação de produtos têxteis",
+            "19": "Confecção de artefatos do vestuário e acessórios",
+            "20": "Fabricação de calçados e de artefatos de couro",
+            "21": "Fabricação de produtos da madeira",
+            "22": "Fabricação de celulose, papel e produtos de papel",
+            "23": "Impressão e reprodução de gravações",
+            "24": "Refino de petróleo e coquerias",
+            "25": "Fabricação de biocombustíveis",
+            "26": "Fabricação de químicos inorgânicos",
+            "27": "Fabricação de químicos orgânicos",
+            "28": "Resinas e elastômeros",
+            "29": "Fabricação de outros produtos químicos",
+            "30": "Fabricação de produtos farmoquímicos e farmacêuticos",
+            "31": "Fabricação de produtos de borracha e de material plástico",
+            "32": "Fabricação de produtos de minerais não-metálicos",
+            "33": "Metalurgia",
+            "34": "Fabricação de produtos de metal, exceto máquinas e equipamentos",
+            "35": "Fabricação de equipamentos de informática, produtos eletrônicos e ópticos",
+            "36": "Fabricação de máquinas e equipamentos elétricos",
+            "37": "Máquinas agrícolas",
+            "38": "Outras máquinas e equipamentos",
+            "39": "Fabricação de automóveis, camionetas e utilitários",
+            "40": "Fabr. de caminhões, ônibus, carrocerias e reboques",
+            "41": "Fab. de peças e acess. para veículos automotores",
+            "42": "Fabricação de outros equipamentos de transporte, exceto veículos automotores",
+            "43": "Fabricação de móveis",
+            "44": "Fabricação de produtos diversos",
+            "45": "Manutenção, reparação e instalação de máquinas e equipamentos",
+            "46": "Energia elétrica, gás natural e outras utilidades",
+            "47": "Água, esgoto e gestão de resíduos",
+            "48": "Construção",
+            "49": "Comércio e reparação de veículos automotores e motocicletas",
+            "50": "Comércio por atacado e a varejo, exceto veículos automotores",
+            "51": "Transporte terrestre",
+            "52": "Transporte aquaviário",
+            "53": "Transporte aéreo",
+            "54": "Armazenamento, atividades auxiliares dos transportes e correio",
+            "55": "Alojamento",
+            "56": "Alimentação",
+            "57": "Serviços de telecomunicações",
+            "58": "Outros serviços de informação",
+            "59": "Intermediação financeira, seguros e previdência complementar",
+            "60": "Atividades imobiliárias",
+            "61": "Atividades profissionais, científicas e técnicas",
+            "62": "Atividades administrativas e serviços complementares",
+            "63": "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social",
+            "64": "Educação e saúde privada",
+            "65": "Atividades artísticas, criativas e de espetáculos",
+            "66": "Serviços domésticos",
+            "67": ""
+          }
+        }
+      ],
+      "component_rows": []
+    },
+    {
+      "sheet": "CI",
+      "header_candidates": [
+        {
+          "row": 5,
+          "count": 11,
+          "cells": {
+            "0": "",
+            "1": "",
+            "2": "Cultivo de cereais",
+            "3": "Cultivo de Fumo",
+            "4": "Cultivo de Soja",
+            "5": "Cultivo de outros das lavouras temp, n.e. e serviços rel. a agricultura",
+            "6": "Cultivo de outros produtos da lavoura permanente",
+            "7": "Pecuária, inclusive o apoio à pecuária",
+            "8": "Silvicultura, extração vegetal e serviços relacionados; Pesca e aquicultura",
+            "9": "Extração de petróleo e gás, inclusive as atividades de apoio",
+            "10": "Extração de outros produtos minerais",
+            "11": "Abate e produtos de carne, inclusive os produtos do laticínio e da pesca",
+            "12": "Laticínios",
+            "13": "Fabricação de óleos e gorduras vegetais e animais",
+            "14": "Moagem, fabricação de produtos amiláceos e de alimentos para animais",
+            "15": "Fabricação de outros produtos alimentares",
+            "16": "Fabricação de bebidas",
+            "17": "Fabricação de produtos do fumo",
+            "18": "Fabricação de produtos têxteis",
+            "19": "Confecção de artefatos do vestuário e acessórios",
+            "20": "Fabricação de calçados e de artefatos de couro",
+            "21": "Fabricação de produtos da madeira",
+            "22": "Fabricação de celulose, papel e produtos de papel",
+            "23": "Impressão e reprodução de gravações",
+            "24": "Refino de petróleo e coquerias",
+            "25": "Fabricação de biocombustíveis",
+            "26": "Fabricação de químicos inorgânicos",
+            "27": "Fabricação de químicos orgânicos",
+            "28": "Resinas e elastômeros",
+            "29": "Fabricação de outros produtos químicos",
+            "30": "Fabricação de produtos farmoquímicos e farmacêuticos",
+            "31": "Fabricação de produtos de borracha e de material plástico",
+            "32": "Fabricação de produtos de minerais não-metálicos",
+            "33": "Metalurgia",
+            "34": "Fabricação de produtos de metal, exceto máquinas e equipamentos",
+            "35": "Fabricação de equipamentos de informática, produtos eletrônicos e ópticos",
+            "36": "Fabricação de máquinas e equipamentos elétricos",
+            "37": "Máquinas agrícolas",
+            "38": "Outras máquinas e equipamentos",
+            "39": "Fabricação de automóveis, camionetas e utilitários",
+            "40": "Fabr. de caminhões, ônibus, carrocerias e reboques",
+            "41": "Fab. de peças e acess. para veículos automotores",
+            "42": "Fabricação de outros equipamentos de transporte, exceto veículos automotores",
+            "43": "Fabricação de móveis",
+            "44": "Fabricação de produtos diversos",
+            "45": "Manutenção, reparação e instalação de máquinas e equipamentos",
+            "46": "Energia elétrica, gás natural e outras utilidades",
+            "47": "Água, esgoto e gestão de resíduos",
+            "48": "Construção",
+            "49": "Comércio e reparação de veículos automotores e motocicletas",
+            "50": "Comércio por atacado e a varejo, exceto veículos automotores",
+            "51": "Transporte terrestre",
+            "52": "Transporte aquaviário",
+            "53": "Transporte aéreo",
+            "54": "Armazenamento, atividades auxiliares dos transportes e correio",
+            "55": "Alojamento",
+            "56": "Alimentação",
+            "57": "Serviços de telecomunicações",
+            "58": "Outros serviços de informação",
+            "59": "Intermediação financeira, seguros e previdência complementar",
+            "60": "Atividades imobiliárias",
+            "61": "Atividades profissionais, científicas e técnicas",
+            "62": "Atividades administrativas e serviços complementares",
+            "63": "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social",
+            "64": "Educação e saúde privada",
+            "65": "Atividades artísticas, criativas e de espetáculos",
+            "66": "Serviços domésticos",
+            "67": ""
+          }
+        }
+      ],
+      "component_rows": [
+        {
+          "row": 3,
+          "component": "Consumo intermediário",
+          "label_col": 2,
+          "cells": {
+            "0": "Código\ndo\nproduto",
+            "1": "Descrição do produto",
+            "2": "Consumo intermediário das atividades  (valores correntes em 1 000 000 R$)",
+            "3": "",
+            "4": "",
+            "5": "",
+            "6": "",
+            "7": "",
+            "8": "",
+            "9": "",
+            "10": "",
+            "11": "",
+            "12": "",
+            "13": "",
+            "14": "",
+            "15": "",
+            "16": "",
+            "17": "",
+            "18": "",
+            "19": "",
+            "20": "",
+            "21": "",
+            "22": "",
+            "23": "",
+            "24": "",
+            "25": "",
+            "26": "",
+            "27": "",
+            "28": "",
+            "29": "",
+            "30": "",
+            "31": "",
+            "32": "",
+            "33": "",
+            "34": "",
+            "35": "",
+            "36": "",
+            "37": "",
+            "38": "",
+            "39": "",
+            "40": "",
+            "41": "",
+            "42": "",
+            "43": "",
+            "44": "",
+            "45": "",
+            "46": "",
+            "47": "",
+            "48": "",
+            "49": "",
+            "50": "",
+            "51": "",
+            "52": "",
+            "53": "",
+            "54": "",
+            "55": "",
+            "56": "",
+            "57": "",
+            "58": "",
+            "59": "",
+            "60": "",
+            "61": "",
+            "62": "",
+            "63": "",
+            "64": "",
+            "65": "",
+            "66": "",
+            "67": ""
+          }
+        }
+      ]
+    }
+  ]
+}

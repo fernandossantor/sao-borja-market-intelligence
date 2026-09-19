@@ -1,0 +1,57 @@
+[
+  {
+    "sheet": "VA_16",
+    "header_row": 4,
+    "component_row": 6,
+    "component": "Valor Adicionado Bruto",
+    "Construção": 17314.39114290741,
+    "Alojamento": 9216.944364082618,
+    "Alimentação": 9216.944364082618,
+    "Atividades profissionais, científicas e técnicas": 31133.37840542653,
+    "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social": 62161.08372518289
+  },
+  {
+    "sheet": "VA_16",
+    "header_row": 4,
+    "component_row": 7,
+    "component": "Remunerações",
+    "Construção": 6519.499967761333,
+    "Alojamento": 4481.308069632317,
+    "Alimentação": 4481.308069632317,
+    "Atividades profissionais, científicas e técnicas": 12888.156430300292,
+    "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social": 55650.386404034674
+  },
+  {
+    "sheet": "VA_16",
+    "header_row": 4,
+    "component_row": 8,
+    "component": "Salários",
+    "Construção": 5368.968234994382,
+    "Alojamento": 3735.902225456422,
+    "Alimentação": 3735.902225456422,
+    "Atividades profissionais, científicas e técnicas": 10294.980071419022,
+    "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social": 41743.74688510593
+  },
+  {
+    "sheet": "VA_16",
+    "header_row": 4,
+    "component_row": 11,
+    "component": "Excedente operacional bruto e rendimento misto bruto",
+    "Construção": 10558.108147780975,
+    "Alojamento": 4603.100160133761,
+    "Alimentação": 4603.100160133761,
+    "Atividades profissionais, científicas e técnicas": 17720.158839487467,
+    "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social": 6501.4173334248
+  },
+  {
+    "sheet": "VA_16",
+    "header_row": 4,
+    "component_row": 18,
+    "component": "Valor da produção",
+    "Construção": 40735.924488576,
+    "Alojamento": 19384.066196695,
+    "Alimentação": 19384.066196695,
+    "Atividades profissionais, científicas e técnicas": 47060.465679368,
+    "Administração, educação, saúde, pesquisa e desenvolvimento públicas, defesa, seguridade social": 83044.165111144
+  }
+]

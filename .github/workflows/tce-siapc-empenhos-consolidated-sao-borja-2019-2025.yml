@@ -1,0 +1,392 @@
+name: tce-siapc-empenhos-consolidated-sao-borja-2019-2025
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/tce-siapc-empenhos-consolidated-sao-borja-2019-2025.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq p7zip-full
+          python -m pip install --quiet pandas
+
+      - name: Prepare streaming filter
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .data/tmp/tce_empenhos_stream artifacts/tce_siapc_empenhos_sao_borja_2019_2025_v2
+          cat > .data/tmp/tce_empenhos_stream/filter_year.py <<'PY'
+          import csv
+          import json
+          import re
+          import sys
+          import unicodedata
+          from collections import Counter, defaultdict
+          from decimal import Decimal, InvalidOperation
+          from pathlib import Path
+
+          year = int(sys.argv[1])
+          outdir = Path(sys.argv[2])
+          outdir.mkdir(parents=True, exist_ok=True)
+
+          def norm(v):
+              s = unicodedata.normalize("NFKD", str(v))
+              s = "".join(ch for ch in s if not unicodedata.combining(ch)).upper()
+              return re.sub(r"[^A-Z0-9]+", "_", s).strip("_")
+
+          def pick(header, aliases):
+              lookup = {norm(c): i for i, c in enumerate(header)}
+              hits = [(k, lookup[k]) for k in aliases if k in lookup]
+              return hits[0][1] if len(hits) == 1 else None
+
+          def dec(v):
+              s = str(v).strip().replace("R$", "").replace(" ", "")
+              if not s:
+                  return None
+              if "," in s:
+                  s = s.replace(".", "").replace(",", ".")
+              try:
+                  return Decimal(s)
+              except InvalidOperation:
+                  return None
+
+          def only_digits(v):
+              return re.sub(r"\D", "", str(v or ""))
+
+          def cpf_ok(s):
+              s = only_digits(s).zfill(11)
+              if len(s) != 11 or len(set(s)) == 1:
+                  return None
+              nums = [int(x) for x in s]
+              d1 = (sum(nums[i] * (10-i) for i in range(9)) * 10) % 11
+              d1 = 0 if d1 == 10 else d1
+              d2 = (sum(nums[i] * (11-i) for i in range(10)) * 10) % 11
+              d2 = 0 if d2 == 10 else d2
+              return s if nums[9] == d1 and nums[10] == d2 else None
+
+          def cnpj_ok(s):
+              s = only_digits(s).zfill(14)
+              if len(s) != 14 or len(set(s)) == 1:
+                  return None
+              nums = [int(x) for x in s]
+              w1 = [5,4,3,2,9,8,7,6,5,4,3,2]
+              w2 = [6,5,4,3,2,9,8,7,6,5,4,3,2]
+              r = sum(nums[i]*w1[i] for i in range(12)) % 11
+              d1 = 0 if r < 2 else 11-r
+              r = sum(nums[i]*w2[i] for i in range(13)) % 11
+              d2 = 0 if r < 2 else 11-r
+              return s if nums[12] == d1 and nums[13] == d2 else None
+
+          raw = sys.stdin.buffer
+          text = (line.decode("latin1", errors="replace") for line in raw)
+          reader = csv.reader(text, delimiter=";", quotechar='"')
+          try:
+              header = next(reader)
+          except StopIteration:
+              raise SystemExit("EMPTY_CSV")
+
+          org_i = pick(header, {"CD_ORGAO","COD_ORGAO","CODIGO_ORGAO"})
+          op_i = pick(header, {"TP_OPERACAO","TIPO_OPERACAO","TP_OP"})
+          pay_i = pick(header, {"VL_PAGAMENTO","VALOR_PAGAMENTO","VL_PAGO","VALOR_PAGO"})
+          emp_i = pick(header, {"VL_EMPENHO","VALOR_EMPENHO","VL_EMPENHADO","VALOR_EMPENHADO"})
+          liq_i = pick(header, {"VL_LIQUIDACAO","VALOR_LIQUIDACAO","VL_LIQUIDADO","VALOR_LIQUIDADO"})
+          doc_i = pick(header, {"CGC_CPF_CREDOR","CPF_CNPJ_CREDOR","CNPJ_CPF_CREDOR","NR_CPF_CNPJ_CREDOR"})
+          cred_i = pick(header, {"CD_CREDOR","COD_CREDOR","CODIGO_CREDOR"})
+
+          required = {"org":org_i, "payment":pay_i, "document":doc_i}
+          if any(v is None for v in required.values()):
+              (outdir/f"schema_{year}.json").write_text(json.dumps({
+                  "year":year,"status":"SCHEMA_UNMAPPED","header":header,
+                  "mapped":{"org":org_i,"operation":op_i,"payment":pay_i,"empenho":emp_i,"liquidacao":liq_i,"document":doc_i,"creditor":cred_i}
+              }, ensure_ascii=False, indent=2), encoding="utf-8")
+              raise SystemExit(f"SCHEMA_UNMAPPED {required}")
+
+          n_rows = 0
+          n_target = 0
+          op_counts = Counter()
+          sums = {"empenho":Decimal("0"),"liquidacao":Decimal("0"),"pagamento":Decimal("0")}
+          nonnull = {"empenho":0,"liquidacao":0,"pagamento":0}
+          class_rows = Counter()
+          class_payment = defaultdict(lambda: Decimal("0"))
+          cnpj_payment = defaultdict(lambda: Decimal("0"))
+          cnpj_rows = Counter()
+          distinct_cpf = set()
+          invalid_docs = 0
+
+          max_i = max(i for i in [org_i,op_i,pay_i,emp_i,liq_i,doc_i,cred_i] if i is not None)
+          for row in reader:
+              n_rows += 1
+              if len(row) <= max_i:
+                  continue
+              if str(row[org_i]).strip() != "58000":
+                  continue
+              n_target += 1
+              op = norm(row[op_i]) if op_i is not None else ""
+              if op:
+                  op_counts[op] += 1
+
+              for key, idx in (("empenho",emp_i),("liquidacao",liq_i),("pagamento",pay_i)):
+                  if idx is None:
+                      continue
+                  value = dec(row[idx])
+                  if value is not None:
+                      sums[key] += value
+                      nonnull[key] += 1
+
+              p = dec(row[pay_i])
+              if p is None or p == 0:
+                  continue
+
+              rawdoc = only_digits(row[doc_i])
+              cnpj = cnpj_ok(rawdoc)
+              cpf = cpf_ok(rawdoc)
+              if cnpj and not cpf:
+                  cls = "CNPJ_VALIDO"
+                  cnpj_payment[cnpj] += p
+                  cnpj_rows[cnpj] += 1
+              elif cpf and not cnpj:
+                  cls = "CPF_VALIDO"
+                  distinct_cpf.add(cpf)
+              elif cnpj and cpf:
+                  cls = "DOCUMENTO_AMBIGUO"
+              elif rawdoc:
+                  cls = "DOCUMENTO_INVALIDO_OU_SINTETICO"
+                  invalid_docs += 1
+              else:
+                  cls = "DOCUMENTO_AUSENTE"
+              class_rows[cls] += 1
+              class_payment[cls] += p
+
+          schema = {
+              "year":year,
+              "status":"READ_OK",
+              "header":header,
+              "mapped":{"org":org_i,"operation":op_i,"payment":pay_i,"empenho":emp_i,"liquidacao":liq_i,"document":doc_i,"creditor":cred_i},
+              "rows_scanned":n_rows,
+              "rows_org_58000":n_target,
+              "operation_values":dict(op_counts),
+          }
+          (outdir/f"schema_{year}.json").write_text(json.dumps(schema, ensure_ascii=False, indent=2), encoding="utf-8")
+
+          summary = {
+              "year":year,
+              "rows_org_58000":n_target,
+              "empenho_sum":str(sums["empenho"]),
+              "liquidacao_sum":str(sums["liquidacao"]),
+              "pagamento_sum":str(sums["pagamento"]),
+              "empenho_nonnull_rows":nonnull["empenho"],
+              "liquidacao_nonnull_rows":nonnull["liquidacao"],
+              "pagamento_nonnull_rows":nonnull["pagamento"],
+              "payment_doc_class_rows":dict(class_rows),
+              "payment_doc_class_value":{k:str(v) for k,v in class_payment.items()},
+              "distinct_valid_cnpj":len(cnpj_payment),
+              "distinct_valid_cpf":len(distinct_cpf),
+              "invalid_or_synthetic_payment_rows":invalid_docs,
+          }
+          (outdir/f"summary_{year}.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+          with (outdir/f"cnpj_payments_{year}.csv").open("w", newline="", encoding="utf-8") as f:
+              w=csv.writer(f)
+              w.writerow(["year","cnpj","payment_total","payment_rows"])
+              for cnpj in sorted(cnpj_payment):
+                  w.writerow([year,cnpj,str(cnpj_payment[cnpj]),cnpj_rows[cnpj]])
+
+          print(json.dumps(summary, ensure_ascii=False))
+          PY
+
+      - name: Download consolidated official SIAPC files and filter São Borja
+        shell: bash
+        run: |
+          set -euo pipefail
+          TMP=".data/tmp/tce_empenhos_stream"
+          OUT="artifacts/tce_siapc_empenhos_sao_borja_2019_2025_v2"
+          printf 'year\tformat\turl\tbytes\tsha256\tstatus\n' > "$OUT/source_manifest.tsv"
+          for year in {2019..2025}; do
+            archive="$TMP/empenhos_${year}"
+            ok=0
+            for ext in csv.7z csv.zip; do
+              url="https://dados.tce.rs.gov.br/dados/municipal/empenhos/${year}.${ext}"
+              file="${archive}.${ext}"
+              rm -f "$file"
+              echo "Downloading $url"
+              if curl --fail --location --retry 5 --retry-all-errors --retry-delay 10 \
+                --connect-timeout 45 --max-time 5400 --output "$file" "$url"; then
+                bytes="$(stat -c%s "$file")"
+                sha="$(sha256sum "$file" | awk '{print $1}')"
+                if [[ "$ext" == "csv.7z" ]]; then
+                  if 7z t "$file" >/dev/null; then
+                    7z x -so "$file" | python "$TMP/filter_year.py" "$year" "$OUT"
+                    ok=1
+                  fi
+                else
+                  if unzip -tq "$file"; then
+                    unzip -p "$file" | python "$TMP/filter_year.py" "$year" "$OUT"
+                    ok=1
+                  fi
+                fi
+                if [[ "$ok" == "1" ]]; then
+                  printf '%s\t%s\t%s\t%s\t%s\tOK\n' "$year" "$ext" "$url" "$bytes" "$sha" >> "$OUT/source_manifest.tsv"
+                  rm -f "$file"
+                  break
+                fi
+              fi
+              rm -f "$file"
+            done
+            if [[ "$ok" != "1" ]]; then
+              printf '%s\t\t\t0\t\tFAILED\n' "$year" >> "$OUT/source_manifest.tsv"
+            fi
+          done
+
+      - name: Consolidate annual summaries and compare with SICONFI
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from decimal import Decimal
+          from pathlib import Path
+          import pandas as pd
+
+          OUT=Path("artifacts/tce_siapc_empenhos_sao_borja_2019_2025_v2")
+          SICONFI={
+            2019:Decimal("191651936.23"),
+            2020:Decimal("204996862.35"),
+            2021:Decimal("226187346.98"),
+            2022:Decimal("280509051.03"),
+            2023:Decimal("313794938.68"),
+            2024:Decimal("350893671.81"),
+            2025:Decimal("367749323.89"),
+          }
+          rows=[]
+          privacy={
+            "row_level_creditor_data_persisted":False,
+            "cpf_values_persisted":False,
+            "creditor_names_persisted":False,
+            "cnpj_aggregates_persisted":True,
+            "document_classification":"CPF/CNPJ classified only when check digits validate after left-zero restoration; invalid/synthetic/missing kept aggregated.",
+          }
+          for year in range(2019,2026):
+              p=OUT/f"summary_{year}.json"
+              if not p.exists():
+                  rows.append({"year":year,"status":"NO_SUMMARY"})
+                  continue
+              s=json.loads(p.read_text(encoding="utf-8"))
+              t=Decimal(s["pagamento_sum"])
+              ref=SICONFI[year]
+              rows.append({
+                "year":year,
+                "status":"READ_OK",
+                "rows_org_58000":s["rows_org_58000"],
+                "empenho_sum":s["empenho_sum"],
+                "liquidacao_sum":s["liquidacao_sum"],
+                "pagamento_sum":s["pagamento_sum"],
+                "distinct_valid_cnpj":s["distinct_valid_cnpj"],
+                "distinct_valid_cpf":s["distinct_valid_cpf"],
+                "siconfi_dca_paid_total":str(ref),
+                "tce_minus_siconfi":str(t-ref),
+                "tce_to_siconfi_ratio":str(t/ref if ref else ""),
+                "payment_doc_class_rows":json.dumps(s["payment_doc_class_rows"],ensure_ascii=False),
+                "payment_doc_class_value":json.dumps(s["payment_doc_class_value"],ensure_ascii=False),
+              })
+          pd.DataFrame(rows).to_csv(OUT/"yearly_payment_aggregate.csv",index=False,encoding="utf-8-sig")
+
+          frames=[]
+          for year in range(2019,2026):
+              p=OUT/f"cnpj_payments_{year}.csv"
+              if p.exists():
+                  frames.append(pd.read_csv(p,dtype={"cnpj":str}))
+          if frames:
+              pd.concat(frames,ignore_index=True).to_csv(OUT/"cnpj_payments_2019_2025.csv",index=False,encoding="utf-8-sig")
+          else:
+              pd.DataFrame(columns=["year","cnpj","payment_total","payment_rows"]).to_csv(
+                  OUT/"cnpj_payments_2019_2025.csv",index=False,encoding="utf-8-sig"
+              )
+
+          schemas=[]
+          for year in range(2019,2026):
+              p=OUT/f"schema_{year}.json"
+              if p.exists():
+                  d=json.loads(p.read_text(encoding="utf-8"))
+                  schemas.append({
+                    "year":year,
+                    "status":d.get("status"),
+                    "rows_scanned":d.get("rows_scanned"),
+                    "rows_org_58000":d.get("rows_org_58000"),
+                    "mapped":json.dumps(d.get("mapped"),ensure_ascii=False),
+                    "operation_values":json.dumps(d.get("operation_values"),ensure_ascii=False),
+                    "header":" | ".join(d.get("header",[])),
+                  })
+          pd.DataFrame(schemas).to_csv(OUT/"schema_inventory.csv",index=False,encoding="utf-8-sig")
+          (OUT/"privacy_control.json").write_text(json.dumps(privacy,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(pd.DataFrame(rows).to_string(index=False))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/tce_siapc_empenhos_sao_borja_2019_2025_v2"
+          DEST="docs/data_sources/tce_siapc_empenhos_sao_borja_2019_2025_v2"
+          mkdir -p "$DEST"
+          cp "$SRC/source_manifest.tsv" "$DEST/"
+          cp "$SRC/yearly_payment_aggregate.csv" "$DEST/"
+          cp "$SRC/cnpj_payments_2019_2025.csv" "$DEST/"
+          cp "$SRC/schema_inventory.csv" "$DEST/"
+          cp "$SRC/privacy_control.json" "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # TCE-RS/SIAPC — despesa orçamentária por empenhos — São Borja — 2019–2025 — v2
+
+          **Fonte observada:** Tribunal de Contas do Estado do Rio Grande do Sul — Dados Abertos SIAPC — conjunto anual consolidado “Despesa orçamentária por empenhos”.
+          **Órgão filtrado:** PM DE SÃO BORJA, código TCE-RS 58000.
+          **Período:** 2019–2025.
+          **Unidade:** R$ correntes/nominais.
+          **Rota oficial:** arquivos anuais consolidados `empenhos/<ano>.csv.7z` (fallback ZIP), processados em streaming e filtrados por órgão.
+
+          O TCE-RS descreve essa base como contendo empenhos do exercício, liquidações e pagamentos, inclusive liquidações/pagamentos relacionados a empenhos de exercícios anteriores. Os dados são oriundos do SIAPC e, segundo o próprio TCE-RS, não foram analisados pelo Tribunal, sendo de responsabilidade das entidades remetentes.
+
+          A camada persistida NÃO contém linhas de credores pessoa física, nomes de credores ou CPFs. Para CNPJ, persiste apenas agregado anual por documento empresarial válido, necessário para análises territoriais futuras.
+
+          CPF/CNPJ são classificados somente quando os dígitos verificadores validam após restauração de zeros à esquerda. Documentos inválidos, sintéticos, ausentes ou ambíguos permanecem em agregado separado.
+
+          A comparação com SICONFI/DCA é controle conceitual, não teste de igualdade. A base de empenhos do TCE inclui operações relacionadas a empenhos de exercícios anteriores; o DCA possui escopo contábil próprio. Diferenças devem ser explicadas antes de qualquer fusão.
+
+          **Não interpretar credor como fornecedor mercantil**, nem todo pagamento a CNPJ como compra/contratação.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract SIAPC creditor history from consolidated empenhos"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tce-siapc-empenhos-sao-borja-2019-2025-v2
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/tce_siapc_empenhos_sao_borja_2019_2025_v2/

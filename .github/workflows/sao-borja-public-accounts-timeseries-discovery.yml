@@ -1,0 +1,211 @@
+name: sao-borja-public-accounts-timeseries-discovery
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-public-accounts-timeseries-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Discover historical expense coverage in official municipal transparency portal
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_public_accounts_timeseries"
+          mkdir -p "$OUT"
+
+          python - <<'PY'
+          import csv,json,re,requests,time
+          from datetime import datetime
+          from pathlib import Path
+
+          OUT=Path("artifacts/sao_borja_public_accounts_timeseries")
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          YEARS=list(range(2019,2027))
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+
+          home=s.get(BASE+"/despesas",timeout=60)
+          home.raise_for_status()
+          m=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",home.text)
+          if not m: raise RuntimeError("dtDataImportacao not found")
+          dt_import=m.group(1)
+          imp=datetime.strptime(dt_import,"%Y-%m-%d")
+
+          def money(v):
+              if v is None:return 0.0
+              if isinstance(v,(int,float)):return float(v)
+              x=str(v).strip().replace("R$","").strip()
+              if not x:return 0.0
+              if "," in x:x=x.replace(".","").replace(",",".")
+              try:return float(x)
+              except:return 0.0
+
+          def extract_year(year):
+              end=(imp.strftime("%d/%m") if year==imp.year else "31/12")
+              data=[
+                ("iExercicio",str(year)),("dtDataImportacao",dt_import),("sViewAtual",""),
+                ("iNivel","3"),("dtInicio","01/01"),("dtFim",end),
+                ("aHistorico[0][descricao]","Descrição"),
+                ("aHistorico[0][valor_empenhado]","Valor Empenhado"),
+                ("aHistorico[0][valor_anulado]","Valor Anulado"),
+                ("aHistorico[0][valor_liquidado]","Valor Liquidado"),
+                ("aHistorico[0][valor_pago]","Valor Pago"),
+              ]
+              q=s.post(BASE+"/despesas/loadLink/3",data=data,timeout=120)
+              q.raise_for_status()
+              mo=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);",q.text,re.S)
+              if not mo:
+                  return {"year":year,"status":"NO_PARAMS","response_bytes":len(q.content)}
+              params=json.loads(mo.group(1).replace("\\'","'"))
+              page=1; rows_per=2500; allrows=[]; record_count=None; total_pages=None
+              while True:
+                  z=s.post(BASE+"/despesas/getCredores",data={
+                    "aParametros":json.dumps(params,ensure_ascii=False,separators=(",",":")),
+                    "page":page,"rows":rows_per,"sidx":"nome","sord":"asc","_search":"false"
+                  },timeout=120)
+                  z.raise_for_status()
+                  jd=z.json()
+                  rr=jd.get("rows",[])
+                  allrows.extend(rr)
+                  record_count=int(jd.get("records",len(allrows)) or len(allrows))
+                  total_pages=int(jd.get("total",1) or 1)
+                  if page>=total_pages or not rr:break
+                  page+=1
+                  if page>100:raise RuntimeError("pagination guard")
+                  time.sleep(0.1)
+
+              cats={"CNPJ":{"count":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0},
+                    "CPF":{"count":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0},
+                    "OUTRO":{"count":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0}}
+              cnpj_rows=[]
+              for row in allrows:
+                  c=row.get("cell",[])
+                  if len(c)<6:continue
+                  doc=re.sub(r"\D","",str(c[0] or ""))
+                  typ="CNPJ" if len(doc)==14 else ("CPF" if len(doc)==11 else "OUTRO")
+                  cat=cats[typ];cat["count"]+=1
+                  vals={"empenhado":money(c[2]),"anulado":money(c[3]),"liquidado":money(c[4]),"pago":money(c[5])}
+                  for k,v in vals.items():cat[k]+=v
+                  if typ=="CNPJ":
+                      cnpj_rows.append({
+                        "year":year,"id_credor":str(row.get("id","")),"cnpj":doc,
+                        "nome_credor":str(c[1] or "").strip(),
+                        "empenhado_R$":round(vals["empenhado"],2),
+                        "anulado_R$":round(vals["anulado"],2),
+                        "liquidado_R$":round(vals["liquidado"],2),
+                        "pago_R$":round(vals["pago"],2)
+                      })
+              totals={k:round(sum(v[k] for v in cats.values()),2) for k in ("empenhado","anulado","liquidado","pago")}
+              return {
+                "year":year,"status":"OK","period_end":end,"records":record_count,
+                "categories":{k:{kk:(round(vv,2) if kk!="count" else vv) for kk,vv in v.items()} for k,v in cats.items()},
+                "totals":totals,"cnpj_rows":cnpj_rows
+              }
+
+          results=[]
+          all_cnpj=[]
+          for y in YEARS:
+              try:
+                  res=extract_year(y)
+              except Exception as e:
+                  res={"year":y,"status":"ERROR","error":repr(e)}
+              results.append(res)
+              all_cnpj.extend(res.pop("cnpj_rows",[]) if "cnpj_rows" in res else [])
+              print(json.dumps(res,ensure_ascii=False))
+              time.sleep(0.2)
+
+          with (OUT/"public_accounts_coverage_2019_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["year","status","period_end","records","cnpj_count","cpf_count","outro_count",
+                      "empenhado_R$","anulado_R$","liquidado_R$","pago_R$","pago_cnpj_R$","pago_cpf_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
+              for r in results:
+                  cats=r.get("categories",{})
+                  w.writerow({
+                    "year":r["year"],"status":r["status"],"period_end":r.get("period_end",""),
+                    "records":r.get("records",""),
+                    "cnpj_count":cats.get("CNPJ",{}).get("count",""),
+                    "cpf_count":cats.get("CPF",{}).get("count",""),
+                    "outro_count":cats.get("OUTRO",{}).get("count",""),
+                    "empenhado_R$":r.get("totals",{}).get("empenhado",""),
+                    "anulado_R$":r.get("totals",{}).get("anulado",""),
+                    "liquidado_R$":r.get("totals",{}).get("liquidado",""),
+                    "pago_R$":r.get("totals",{}).get("pago",""),
+                    "pago_cnpj_R$":cats.get("CNPJ",{}).get("pago",""),
+                    "pago_cpf_R$":cats.get("CPF",{}).get("pago","")
+                  })
+
+          with (OUT/"corporate_creditors_2019_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["year","id_credor","cnpj","nome_credor","empenhado_R$","anulado_R$","liquidado_R$","pago_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(all_cnpj)
+
+          (OUT/"coverage_summary.json").write_text(json.dumps({
+             "source":BASE+"/despesas",
+             "data_importacao":dt_import,
+             "years":results,
+             "privacy_rule":"CPF details are not persisted; only annual aggregate counts/values. CNPJ rows are retained for later procurement/rubric analysis.",
+             "purpose":"Test historical comparability before building a longer public-accounts/procurement series.",
+             "limitations":[
+               "Portal coverage rules may change over time; each year must be checked against metadata/origin documentation.",
+               "Annual creditor totals are not procurement totals until rubrics/instruments are classified.",
+               "2026 is partial through the portal update date."
+             ]
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+
+      - name: Persist discovery evidence
+        if: success()
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_public_accounts_timeseries_2019_2026"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_public_accounts_timeseries/public_accounts_coverage_2019_2026.csv "$DEST/"
+          cp artifacts/sao_borja_public_accounts_timeseries/corporate_creditors_2019_2026.csv "$DEST/"
+          cp artifacts/sao_borja_public_accounts_timeseries/coverage_summary.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — contas públicas / credores — cobertura temporal 2019–2026
+
+          Camada exploratória, não canônica.
+
+          Fonte: Portal da Transparência da Prefeitura de São Borja, consulta pública
+          de despesas por credor.
+
+          Objetivo desta etapa: verificar se a mesma rota reproduz séries anuais
+          comparáveis de empenhado/anulado/liquidado/pago e preservar somente CNPJ em
+          detalhe. CPF permanece agregado por minimização de dados pessoais.
+
+          A série de credores NÃO é ainda série de compras públicas. Antes disso devem
+          ser auditadas rubricas, instrumentos e comparabilidade entre exercícios.
+
+          2026 é parcial até a data de atualização do portal.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: discover public accounts coverage 2019 2026"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-public-accounts-timeseries-2019-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_public_accounts_timeseries/

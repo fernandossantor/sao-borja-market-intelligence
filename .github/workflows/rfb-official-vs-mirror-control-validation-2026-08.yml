@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     env:
-      RFB_ROOT: "https://arquivos.receitafederal.gov.br/"
+      RFB_REFERENCE_WORKFLOW: ".github/workflows/bens-essenciais-operadores-rfb-join.yml"
       RFB_PERIOD: "2026-08"
       MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
       SAO_BORJA_TOM: "8863"
@@ -39,21 +39,22 @@ jobs:
           OUT="artifacts/rfb_official_vs_mirror_control_validation_2026_08"
           mkdir -p "$OUT/raw/official" "$OUT/raw/mirror"
 
-          official_share="$(curl -4 -fsSL -o /dev/null -w '%{url_effective}' "$RFB_ROOT" || true)"
-          official_token="$(printf '%s' "$official_share" | sed -n 's#.*index.php/s/\([^/?]*\).*#\1#p')"
-          if [[ -z "$official_token" ]]; then
-            landing="$(curl -4 -fsSL "$RFB_ROOT" || true)"
-            official_token="$(printf '%s' "$landing" | grep -oE 'index.php/s/[A-Za-z0-9]+' | head -1 | sed 's#^.*/##')"
-          fi
-          if [[ -z "$official_token" ]]; then
-            echo "Could not discover current public RFB share token from official host" >&2
-            exit 2
-          fi
-          echo "Official RFB public share discovered from official host."
+          RFB_FILE_BASE="$(python - <<'PY'
+from pathlib import Path
+import re
+text = Path(".github/workflows/bens-essenciais-operadores-rfb-join.yml").read_text(encoding="utf-8")
+m = re.search(r"^\\s*RFB_FILE_BASE:\\s*['\"]([^'\"]+)['\"]\\s*$", text, re.M)
+if not m:
+    raise SystemExit("RFB_FILE_BASE not found in reference workflow")
+print(m.group(1))
+PY
+)"
+          test -n "$RFB_FILE_BASE"
+          echo "Official RFB public DAV base reused from validated repository workflow."
 
           for source in official mirror; do
             if [[ "$source" == "official" ]]; then
-              base="https://arquivos.receitafederal.gov.br/public.php/dav/files/${official_token}/${RFB_PERIOD}"
+              base="${RFB_FILE_BASE}/${RFB_PERIOD}"
             else
               base="$MIRROR"
             fi
@@ -249,7 +250,7 @@ jobs:
               "competence": "2026-08",
               "territory": {"municipality": "São Borja/RS", "tom": TOM},
               "substantive_source": "Receita Federal do Brasil — Dados Abertos CNPJ",
-              "official_transport": "dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/2026-08",
+              "official_transport": "Receita Federal — compartilhamento público oficial Nextcloud/DAV, base reutilizada do workflow bens-essenciais-operadores-rfb-join",
               "mirror_transport": "Casa dos Dados snapshot 2026-08-09",
               "canonical_expected": EXPECTED,
               "file_comparison": file_comparison,

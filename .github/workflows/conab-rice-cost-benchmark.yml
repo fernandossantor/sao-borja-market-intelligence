@@ -1,0 +1,109 @@
+name: conab-rice-cost-benchmark
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/conab-rice-cost-benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Install readers
+        run: python -m pip install --quiet pandas xlrd requests
+
+      - name: Extract Uruguaiana/Itaqui cost structures
+        run: |
+          cat > /tmp/conab_cost.py <<'PY'
+          import json, re
+          from pathlib import Path
+          import pandas as pd
+          import requests
+
+          OUT=Path("artifacts/conab_rice_cost_benchmark")
+          OUT.mkdir(parents=True,exist_ok=True)
+          URL="https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/arroz/arroz_irrigado_serie_historica_2002-2025.xls/@@download/file"
+          r=requests.get(URL,timeout=120,headers={"User-Agent":"Mozilla/5.0"})
+          r.raise_for_status()
+          raw=r.content
+          (OUT/"arroz_irrigado_serie_historica_2002_2025.xls").write_bytes(raw)
+
+          xls=pd.ExcelFile(OUT/"arroz_irrigado_serie_historica_2002_2025.xls",engine="xlrd")
+          inventory=[]
+          matches=[]
+          for sh in xls.sheet_names:
+              df=pd.read_excel(xls,sheet_name=sh,header=None,engine="xlrd")
+              inventory.append({"sheet":sh,"rows":len(df),"cols":len(df.columns)})
+              mask=df.astype(str).apply(lambda col: col.str.contains("URUGUAIANA|ITAQUI",case=False,na=False)).any(axis=1)
+              if mask.any():
+                  idxs=list(df.index[mask])
+                  for idx in idxs:
+                      lo=max(0,idx-8); hi=min(len(df),idx+80)
+                      block=df.iloc[lo:hi].copy()
+                      block.to_csv(OUT/f"{re.sub('[^A-Za-z0-9]+','_',sh)}_around_{idx}.csv",index=False,header=False,encoding="utf-8-sig")
+                      matches.append({
+                          "sheet":sh,"row_index":int(idx),
+                          "row_values":[None if pd.isna(x) else str(x) for x in df.iloc[idx].tolist()],
+                          "context_file":f"{re.sub('[^A-Za-z0-9]+','_',sh)}_around_{idx}.csv"
+                      })
+
+          (OUT/"inventory.json").write_text(json.dumps({
+              "source":URL,"bytes":len(raw),"sheets":inventory,"matches":matches,
+              "nature":"BENCHMARK CONAB; não é custo observado de São Borja"
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"bytes":len(raw),"sheets":len(xls.sheet_names),"matches":len(matches)},ensure_ascii=False))
+          PY
+          python /tmp/conab_cost.py
+
+      - name: Persist exploratory evidence
+        run: |
+          mkdir -p docs/data_sources/conab_rice_cost_benchmark
+          cp artifacts/conab_rice_cost_benchmark/inventory.json docs/data_sources/conab_rice_cost_benchmark/
+          for f in artifacts/conab_rice_cost_benchmark/*_around_*.csv; do
+            [ -f "$f" ] && cp "$f" docs/data_sources/conab_rice_cost_benchmark/
+          done
+          cat > docs/data_sources/conab_rice_cost_benchmark/README.md <<'EOF'
+          # Conab — custo de produção do arroz irrigado — benchmark
+
+          Camada exploratória, não canônica.
+
+          Fonte primária: Conab, série histórica do custo de produção do arroz
+          irrigado 2002–2025, atualizada em 24/07/2025.
+
+          Objetivo: localizar estruturas recentes de Uruguaiana/Itaqui como benchmark
+          regional para insumos, máquinas e demais componentes do custo.
+
+          Regra: custo regional não é vazamento territorial e não deve ser aplicado
+          como coeficiente observado de São Borja sem informação sobre origem dos
+          fornecedores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/conab_rice_cost_benchmark
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: extract current Conab rice cost benchmark"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conab-rice-cost-benchmark
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/conab_rice_cost_benchmark/

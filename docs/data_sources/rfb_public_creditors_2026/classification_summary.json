@@ -1,0 +1,42 @@
+{
+  "substantive_source": "Receita Federal do Brasil — Dados Abertos CNPJ",
+  "competence": "2026-08",
+  "transport_by_file": {
+    "Municipios.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos0.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos1.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos2.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos3.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos4.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos5.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos6.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos7.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos8.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos9.zip": "MIRROR_CASA_DOS_DADOS"
+  },
+  "transport_mirror_used": true,
+  "municipality_tom_sao_borja": "8863",
+  "creditors": 740,
+  "establishment_matches": 38428,
+  "classification": {
+    "LOCAL_EXACT": {
+      "cnpjs": 212,
+      "pago_R$": 82942882.76
+    },
+    "EXTERNAL_NO_LOCAL_FOOTPRINT": {
+      "cnpjs": 502,
+      "pago_R$": 36682122.54
+    },
+    "ROOT_WITH_LOCAL_FOOTPRINT": {
+      "cnpjs": 26,
+      "pago_R$": 12521075.4
+    }
+  },
+  "rules": {
+    "LOCAL_EXACT": "CNPJ credor ativo e município TOM 8863",
+    "ROOT_WITH_LOCAL_FOOTPRINT": "CNPJ credor não é estabelecimento ativo local, mas mesma raiz possui estabelecimento ativo TOM 8863",
+    "EXTERNAL_NO_LOCAL_FOOTPRINT": "CNPJ exato encontrado, sem estabelecimento ativo da raiz em São Borja",
+    "RFB_NOT_FOUND": "CNPJ exato ausente na competência; não inferir localidade"
+  },
+  "limitation": "Se qualquer arquivo tiver sido obtido pelo espelho de transporte, a classificação permanece exploratória até reconciliação de hash com o host oficial ou reexecução integral pela fonte oficial."
+}

@@ -1,0 +1,362 @@
+/ordem_cronologica/getInstit
+
+
+===== ROUTE =====
+
+/ordem_cronologica/getExercicio/
+:&quot;1&quot;}"
+)</pre><pre class="stack-trace">include - APP/views/ordem_cronologica/ordem_empenhos.ctp, line 68
+View::_render() - CORE/cake/libs/view/view.php, line 736
+View::render() - CORE/cake/libs/view/view.php, line 431
+Controller::render() - CORE/cake/libs/controller/controller.php, line 909
+OrdemCronologicaController::loadLink() - APP/controllers/ordem_cronologica_controller.php, line 104
+Dispatcher::_invoke() - CORE/cake/dispatcher.php, line 204
+Dispatcher::dispatch() - CORE/cake/dispatcher.php, line 171
+[main] - APP/webroot/index.php, line 83</pre></div></pre><div id='data_atualizacao'>		  Dados atualizados até : 19/09/2026</div><script type="text/javascript">
+
+  var oParametros;
+  oParametros = $.JSON.decode('{"iIdLink":"1"}');
+  ajax1 = false;
+  ajax2 = false;
+
+  $(document).ready(
+    function(){
+      $.ajax({
+        type: "POST",
+        evalScripts: true,
+        url:'/ordem_cronologica/getExercicio/',
+        data:{aParametros:$.JSON.encode(oParametros)},
+        success: function (data){
+          dados =  JSON.parse(data);
+          $.each(dados.Exercicio, function (i, item) {
+            $('#FiltroAno').append($('<option>', {
+              value: item,
+              text : item
+            }));
+          });
+          ajax1 = true;
+          VerificaAjax();
+        },
+        error: function(xhr, desc, err){
+          console.log('Erro!!!');
+        }
+      });
+
+      $.ajax({
+        type: "POST",
+        evalScripts: true,
+        url:'/ordem_cronologica/getLista/',
+        data:{aParametros:$.JSON.encode(oParametros)},
+        success: function (data){
+          dados =  JSON.parse(data);
+          $.each(dados.ListaCredores, function (i, item) {
+            $('#FiltroLista').append($('<option>', {
+              value: item.codigo,
+              text : item.descricao
+            }));
+          });
+
+          ajax2 = true;
+          VerificaAjax();
+        },
+        error: function(xhr, desc, err){
+          console.log('Erro!!!');
+        }
+      });
+
+    }
+  );
+
+  function ajaxForm(){
+
+    oParametros.iExercicio = $('#FiltroAno').val();
+    oParametros.iPago      = $('#FiltroPago').val();
+    oParametros.iTipoLista = $('#FiltroLista').val();
+    sTitulo                = $('#FiltroLista option:selected').text()
+
+    var oValida = true;
+
+    if($('#periodoInicio').val() != ''){
+
+      if($('#periodoInicio').val() != '') {
+
+        oValida = ComparaData('periodoInicio','periodoFim');
+      } else {
+
+        alert('Periodo final não
+
+===== ROUTE =====
+
+/ordem_cronologica/getElementos
+;
+
+        if(oParametros.iTipoLista){
+
+          CriaTabela(oParametros, sTitulo);
+        } else {
+           $.each($('#FiltroLista option'), function (i, item) {
+
+            if($(this).val()){
+              sTitulo = $(this).text();
+              oParametros.iTipoLista = $(this).val();
+
+              CriaTabela(oParametros, sTitulo);
+            }
+          });
+        }
+
+      } else {
+
+        alert('Periodo Inicial superior ao Periodo Final.')
+      }
+    }
+  }
+
+  function CriaTabela(oParametros, sTitulo){
+
+    if($('#gbox_list_'+oParametros.iTipoLista)){
+
+      $('#gbox_list_'+oParametros.iTipoLista).next('br').remove();
+      $('#gbox_list_'+oParametros.iTipoLista).remove();
+    }
+
+    $("#resultadotabela").append('<table id="list_'+oParametros.iTipoLista+'" class="list"></table><div id="pager_'+oParametros.iTipoLista+'"></div><br>');
+
+
+    jQuery(".list").jqGrid({
+      url: '/ordem_cronologica/getElementos',
+      datatype: "json",
+      mtype: "POST",
+      postData:{
+        aParametros:$.JSON.encode(oParametros)
+      },
+      colNames:[
+        'Código',
+        'Nº O.P.',
+        'Recebimento',
+        'Vencimento',
+        'Pagamento',
+        'CPF/CNPJ',
+        'Credor',
+        'Descrição',
+        'Número Contrato',
+        'Documento Fiscal',
+        'Valor',
+        'Situação',
+        'exercicio',
+        'id'
+      ],
+      colModel:[
+        {name:'codigo'          ,index:'codigo'          ,align:'center' ,width:'100px'},
+        {name:'operacao'        ,index:'op'              ,align:'center' ,width:'100px'},
+        {name:'emissao'         ,index:'emissao'         ,align:'center' ,width:'80px' ,formatter:'date', search:false},
+        {name:'vencimento'      ,index:'vencimento'      ,align:'center' ,width:'70px' ,formatter:'date', search:false},
+        {name:'pagamento'       ,index:'pagamento'       ,align:'center' ,width:'70px' ,formatter:'date', search:false},
+        {name:'cpfcnpj'         ,index:'cpfcnpj'         ,align:'right'  ,width:'120px',formatter:formatarCpfCnpj, search:false},
+        {name:'credor'          ,index:'credor'          ,width:'300px'  ,align:'left'},
+        {name:'descricao'       ,index:'descricao'       ,width:'300px'  ,align:'right', search:false},
+        {name:'nprocesso'       ,index:'nprocesso'       ,width:'100px'  ,align:'right', search:false},
+        {name:'ndocumento'      ,index:'ndocumento'      ,width:'100px'  ,align:'center',search:false},
+        {name:'valor'           ,index:'val
+
+===== ROUTE =====
+
+/ordem_cronologica/getLista/
+='data_atualizacao'>		  Dados atualizados até : 19/09/2026</div><script type="text/javascript">
+
+  var oParametros;
+  oParametros = $.JSON.decode('{"iIdLink":"1"}');
+  ajax1 = false;
+  ajax2 = false;
+
+  $(document).ready(
+    function(){
+      $.ajax({
+        type: "POST",
+        evalScripts: true,
+        url:'/ordem_cronologica/getExercicio/',
+        data:{aParametros:$.JSON.encode(oParametros)},
+        success: function (data){
+          dados =  JSON.parse(data);
+          $.each(dados.Exercicio, function (i, item) {
+            $('#FiltroAno').append($('<option>', {
+              value: item,
+              text : item
+            }));
+          });
+          ajax1 = true;
+          VerificaAjax();
+        },
+        error: function(xhr, desc, err){
+          console.log('Erro!!!');
+        }
+      });
+
+      $.ajax({
+        type: "POST",
+        evalScripts: true,
+        url:'/ordem_cronologica/getLista/',
+        data:{aParametros:$.JSON.encode(oParametros)},
+        success: function (data){
+          dados =  JSON.parse(data);
+          $.each(dados.ListaCredores, function (i, item) {
+            $('#FiltroLista').append($('<option>', {
+              value: item.codigo,
+              text : item.descricao
+            }));
+          });
+
+          ajax2 = true;
+          VerificaAjax();
+        },
+        error: function(xhr, desc, err){
+          console.log('Erro!!!');
+        }
+      });
+
+    }
+  );
+
+  function ajaxForm(){
+
+    oParametros.iExercicio = $('#FiltroAno').val();
+    oParametros.iPago      = $('#FiltroPago').val();
+    oParametros.iTipoLista = $('#FiltroLista').val();
+    sTitulo                = $('#FiltroLista option:selected').text()
+
+    var oValida = true;
+
+    if($('#periodoInicio').val() != ''){
+
+      if($('#periodoInicio').val() != '') {
+
+        oValida = ComparaData('periodoInicio','periodoFim');
+      } else {
+
+        alert('Periodo final não preenchido');
+      }
+    } else {
+
+      if($('#periodoInicio').val() != '') {
+
+        alert('Periodo inicial não preenchido');
+      }
+    }
+
+    if(oValida){
+
+      if(ComparaDiaMes($('#periodoInicio').val(),$('#periodoFim').val())){
+
+        oParametros.dtInicio         = oValida.inicio;
+        oParametros.dtFim            = oValida.fim;
+
+        $("#resultadotabela").empty();
+
+        if(oParametros.iTipoLista){
+
+          CriaTabela(oParametros, sTitulo);
+        } else {
+           $.each($('#FiltroLista option'), function (i, item) {
+
+            if($(this).val()){
+  
+
+===== ROUTE =====
+
+/ordem_cronologica/getRelatorio
+ength == 6){
+
+        // insere configuracoes da respectiva grid
+        $.each($('#FiltroLista option'), function (i, item) {
+
+          if($(this).val() == value.substring(5,6)){
+
+            tabelas.push({
+              'lista'  : $(this).val(),
+              'tipo'   : 'lista',
+              'titulo' : $(this).text(),
+              'sort'   : $('#'+value).jqGrid('getGridParam','sortname'),
+              'filters': $('#'+value).getGridParam("postData").filters,
+              'order'  : $('#'+value).jqGrid('getGridParam','sortorder')
+            });
+          }
+        });
+
+        sTemp = $('#FiltroLista option:selected').text();
+
+        sTitulo = 'Resultados para a consulta ';
+
+        if(sTemp == 'Todas'){
+
+          sTitulo += 'de Todas Listas de Credores';
+        } else {
+
+          sTitulo += 'da Lista de Credores: ' + sTemp + ' ';
+        }
+
+      }
+    });
+
+    var url    = '/ordem_cronologica/getRelatorio';
+    var dados  = {
+      aParametros : $.JSON.encode(oParametros),
+      'tipo'      : tipo,
+      'consultas' : tabelas,
+      'cabecalho' : [
+        {
+          'tipo'    : 'h2',
+          'conteudo': sTitulo
+        }
+      ],
+      'tabelas'   : [
+        {
+          'titulo':'',
+          'colunas' :[
+            {
+              'titulo' : 'Código',
+              'tipo'   : 'centro',
+              'size'   : 15
+            },
+            {
+              'titulo' : 'Nº O.P.',
+              'tipo'   : 'centro',
+              'size'   : 11
+            },
+            {
+              'titulo' : 'Recebimento',
+              'tipo'   : 'data',
+              'size'   : 19
+            },
+            {
+              'titulo' : 'Vencimento',
+              'tipo'   : 'data',
+              'size'   : 18
+            },
+            {
+              'titulo' : 'Pagamento',
+              'tipo'   : 'data',
+              'size'   : 18
+            },
+            {
+              'titulo' : 'CPF/CNPJ',
+              'tipo'   : 'cpfcnpj',
+              'size'   : 23
+            },
+            {
+              'titulo' : 'Credor',
+              'tipo'   : 'esquerda',
+              'size'   : 35
+            },
+            {
+              'titulo' : 'Descrição',
+              'tipo'   : 'justificado',
+              'size'   : 55
+            },
+            {
+              'titulo' : 'Nº Contrato',
+              'tipo'   : 'centro',
+              'size'   : 18
+            },
+            {
+              'titulo' : 'Doc. Fiscal',
+              'tipo'   : 'centro',

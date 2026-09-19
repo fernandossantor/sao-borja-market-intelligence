@@ -1,0 +1,338 @@
+{
+  "source": "https://transparencia.saoborja.rs.gov.br/despesas",
+  "dtDataImportacao": "2026-09-18",
+  "territory": "São Borja/RS",
+  "years": {
+    "2019": {
+      "iExercicio": "2019",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2020": {
+      "iExercicio": "2020",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2021": {
+      "iExercicio": "2021",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2022": {
+      "iExercicio": "2022",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2023": {
+      "iExercicio": "2023",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2024": {
+      "iExercicio": "2024",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2025": {
+      "iExercicio": "2025",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "31/12",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    },
+    "2026": {
+      "iExercicio": "2026",
+      "dtDataImportacao": "2026-09-18",
+      "sViewAtual": "credores",
+      "iNivel": "3",
+      "dtInicio": "01/01",
+      "dtFim": "18/09",
+      "aHistorico": [
+        {
+          "descricao": "Descrição",
+          "valor_empenhado": "Valor Empenhado",
+          "valor_anulado": "Valor Anulado",
+          "valor_liquidado": "Valor Liquidado",
+          "valor_pago": "Valor Pago"
+        }
+      ],
+      "iIdLink": "3"
+    }
+  },
+  "comparison": [
+    {
+      "key": "aHistorico",
+      "values": {
+        "2019": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2020": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2021": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2022": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2023": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2024": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2025": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ],
+        "2026": [
+          {
+            "descricao": "Descrição",
+            "valor_empenhado": "Valor Empenhado",
+            "valor_anulado": "Valor Anulado",
+            "valor_liquidado": "Valor Liquidado",
+            "valor_pago": "Valor Pago"
+          }
+        ]
+      },
+      "all_same": true,
+      "blank_years": []
+    },
+    {
+      "key": "dtDataImportacao",
+      "values": {
+        "2019": "2026-09-18",
+        "2020": "2026-09-18",
+        "2021": "2026-09-18",
+        "2022": "2026-09-18",
+        "2023": "2026-09-18",
+        "2024": "2026-09-18",
+        "2025": "2026-09-18",
+        "2026": "2026-09-18"
+      },
+      "all_same": true,
+      "blank_years": []
+    },
+    {
+      "key": "dtFim",
+      "values": {
+        "2019": "31/12",
+        "2020": "31/12",
+        "2021": "31/12",
+        "2022": "31/12",
+        "2023": "31/12",
+        "2024": "31/12",
+        "2025": "31/12",
+        "2026": "18/09"
+      },
+      "all_same": false,
+      "blank_years": []
+    },
+    {
+      "key": "dtInicio",
+      "values": {
+        "2019": "01/01",
+        "2020": "01/01",
+        "2021": "01/01",
+        "2022": "01/01",
+        "2023": "01/01",
+        "2024": "01/01",
+        "2025": "01/01",
+        "2026": "01/01"
+      },
+      "all_same": true,
+      "blank_years": []
+    },
+    {
+      "key": "iExercicio",
+      "values": {
+        "2019": "2019",
+        "2020": "2020",
+        "2021": "2021",
+        "2022": "2022",
+        "2023": "2023",
+        "2024": "2024",
+        "2025": "2025",
+        "2026": "2026"
+      },
+      "all_same": false,
+      "blank_years": []
+    },
+    {
+      "key": "iIdLink",
+      "values": {
+        "2019": "3",
+        "2020": "3",
+        "2021": "3",
+        "2022": "3",
+        "2023": "3",
+        "2024": "3",
+        "2025": "3",
+        "2026": "3"
+      },
+      "all_same": true,
+      "blank_years": []
+    },
+    {
+      "key": "iNivel",
+      "values": {
+        "2019": "3",
+        "2020": "3",
+        "2021": "3",
+        "2022": "3",
+        "2023": "3",
+        "2024": "3",
+        "2025": "3",
+        "2026": "3"
+      },
+      "all_same": true,
+      "blank_years": []
+    },
+    {
+      "key": "sViewAtual",
+      "values": {
+        "2019": "credores",
+        "2020": "credores",
+        "2021": "credores",
+        "2022": "credores",
+        "2023": "credores",
+        "2024": "credores",
+        "2025": "credores",
+        "2026": "credores"
+      },
+      "all_same": true,
+      "blank_years": []
+    }
+  ],
+  "note": "Potential personal identifier filter parameters are redacted; blank state is preserved."
+}

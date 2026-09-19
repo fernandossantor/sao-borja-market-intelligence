@@ -1,0 +1,121 @@
+name: fundacao-ivan-goulart-payment-profile-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/fundacao-ivan-goulart-payment-profile-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Extract budget function/action profile for Fundação Ivan Goulart
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/fundacao_ivan_goulart_payment_profile_2026"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json,re,requests
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          CNPJ="96488598000189"
+          OUT=Path("artifacts/fundacao_ivan_goulart_payment_profile_2026")
+          creditors=Path("docs/data_sources/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv")
+          rules=Path("docs/data_sources/public_procurement_eligibility_rubric_20260919_v001.csv")
+          rule={}
+          with rules.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):rule[r["rubrica"]]=r["classificacao"]
+          info=None
+          with creditors.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  if r["cnpj"]==CNPJ:info=r;break
+          if not info:raise RuntimeError("Fundação creditor not found")
+
+          s=requests.Session();s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+          h=s.get(BASE+"/despesas",timeout=60);h.raise_for_status()
+          dt_import=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",h.text).group(1)
+          dt_end=datetime.strptime(dt_import,"%Y-%m-%d").strftime("%d/%m")
+          base={"iExercicio":"2026","dtDataImportacao":dt_import,"sViewAtual":"instituicoes","iNivel":"4",
+                "dtInicio":"01/01","dtFim":dt_end,"aHistorico":"descricao","iIdLink":"3","iCredor":info["id_credor"]}
+          inst=s.post(BASE+"/despesas/getInstit",data={"aParametros":json.dumps(base,separators=(",",":")),
+                     "page":1,"rows":100,"sidx":"descricao","sord":"asc","_search":"false"},timeout=120)
+          inst.raise_for_status();inst=inst.json()
+
+          rows=[];fun=defaultdict(float);action=defaultdict(float);rub=defaultdict(float);total=0.0;core=0.0
+          for ir in inst.get("rows",[]):
+              iid=str(ir["id"]);iname=str(ir.get("cell",[""])[0])
+              p=base.copy();p.update({"iInstituicao":iid,"iNivel":"5","sViewAtual":"empenhos"})
+              q=s.post(BASE+"/despesas/getEmpenhos",data={"aParametros":json.dumps(p,separators=(",",":")),
+                       "page":1,"rows":5000,"sidx":"data","sord":"asc","_search":"false"},timeout=120)
+              q.raise_for_status()
+              for e in q.json().get("rows",[]):
+                  c=e.get("cell",[])
+                  if len(c)<12:continue
+                  paid=float(c[11] or 0);total+=paid
+                  cls=rule.get(str(c[5]).strip(),"UNCLASSIFIED")
+                  if cls=="CORE_PROCUREMENT":core+=paid
+                  fun[str(c[1])]+=paid;action[str(c[4])]+=paid;rub[str(c[5])]+=paid
+                  rows.append({"instituicao":iname,"empenho":c[0],"funcao":c[1],"subfuncao":c[2],"programa":c[3],
+                               "acao":c[4],"rubrica":c[5],"recurso":c[6],"data":c[7],
+                               "empenhado_R$":c[8],"anulado_R$":c[9],"liquidado_R$":c[10],"pago_R$":c[11],
+                               "eligibility":cls})
+
+          with (OUT/"commitments.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(rows[0].keys());w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(rows)
+          report={
+              "cnpj":CNPJ,"name":info["nome_credor"],"period":{"start":"01/01/2026","end":dt_end+"/2026"},
+              "paid_all_R$":round(total,2),"paid_core_R$":round(core,2),
+              "functions":sorted([{"name":k,"paid_R$":round(v,2),"share_all":v/total if total else None} for k,v in fun.items()],key=lambda x:-x["paid_R$"]),
+              "actions":sorted([{"name":k,"paid_R$":round(v,2),"share_all":v/total if total else None} for k,v in action.items()],key=lambda x:-x["paid_R$"]),
+              "rubrics":sorted([{"name":k,"paid_R$":round(v,2),"share_all":v/total if total else None} for k,v in rub.items()],key=lambda x:-x["paid_R$"]),
+              "limitations":["Budget function/action describe administrative purpose and do not reveal the downstream supplier chain of the foundation."]
+          }
+          (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist evidence
+        if: success()
+        run: |
+          DEST="docs/data_sources/fundacao_ivan_goulart_payment_profile_2026"
+          mkdir -p "$DEST"
+          cp artifacts/fundacao_ivan_goulart_payment_profile_2026/* "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Fundação Ivan Goulart — perfil orçamentário dos pagamentos PMSB — 2026
+
+          Camada exploratória, não canônica. O objetivo é interpretar o maior credor do
+          núcleo de rubricas compatíveis com contratação. Função/ação orçamentária não
+          mede a cadeia subsequente de compras, salários ou repasses da entidade.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: profile Fundação Ivan Goulart public payments"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fundacao-ivan-goulart-payment-profile-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/fundacao_ivan_goulart_payment_profile_2026/

@@ -118,3 +118,32 @@ def test_accepts_custom_ncm_basket_beyond_rice(tmp_path: Path):
     assert row["descricao_ncm"] == "Produto teste — cesta multissetorial"
     assert (result.output_path / "ncm_basket.csv").exists()
     assert not (result.output_path / "rice_ncm_matches.csv").exists()
+
+
+def test_maps_official_radar_current_long_schema(tmp_path: Path):
+    source = tmp_path / "source"
+    source.mkdir()
+    pd.DataFrame(
+        {
+            "anomes": ["202608", "202608", "202608"],
+            "cod_ncm": ["10064000", "10064000", "10064000"],
+            "ncm_descr": ["Arroz quebrado"] * 3,
+            "emit_uf": ["RS", "SC", "EX"],
+            "tipo_operacao": ["INT", "OUF", "EXT"],
+            "vlr_nominal": [80, 15, 5],
+            "corte_sigilo": [0, 0, 0],
+        }
+    ).to_csv(source / "Composicao_de_Mercado_08_2026.csv", index=False)
+
+    result = audit_radar_open_data(
+        source_dir=source,
+        output_root=tmp_path / "out",
+        execution_id="run-current-schema",
+    )
+
+    row = result.composition_summary.iloc[0]
+    assert row["ncm"] == "10064000"
+    assert row["int_rs"] == 80
+    assert row["ouf"] == 15
+    assert row["ext"] == 5
+    assert row["part_rs"] == 0.8

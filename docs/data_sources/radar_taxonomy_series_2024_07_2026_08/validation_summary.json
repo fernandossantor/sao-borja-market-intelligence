@@ -1,0 +1,11 @@
+{
+  "months": 26,
+  "affinity_groups_observed": 109,
+  "portfolio_sectors_observed": 48,
+  "affinity_min_ncm_coverage_pct": 97.9192303389641,
+  "affinity_min_value_coverage_pct": 99.99873949809052,
+  "affinity_max_value_coverage_pct": 100.0,
+  "taxonomy_snapshot": "2026-08",
+  "portfolio_additive_across_sectors": false,
+  "canonical_rows_promoted": 0
+}

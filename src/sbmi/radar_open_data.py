@@ -131,6 +131,9 @@ def _clean_ncm(series: pd.Series) -> pd.Series:
 
 def _to_number(series: pd.Series) -> pd.Series:
     values = series.astype("string").str.strip()
+
+    # Brazilian formatted values may arrive as 72.507.234 or 1.234,56.
+    # Dots are removed only when they unambiguously form thousand groups.
     both = (
         values.str.contains(",", regex=False, na=False)
         & values.str.contains(".", regex=False, na=False)
@@ -139,11 +142,19 @@ def _to_number(series: pd.Series) -> pd.Series:
         ~both,
         values.str.replace(".", "", regex=False).str.replace(",", ".", regex=False),
     )
+
     comma_only = (
         values.str.contains(",", regex=False, na=False)
         & ~values.str.contains(".", regex=False, na=False)
     )
     values = values.where(~comma_only, values.str.replace(",", ".", regex=False))
+
+    dot_thousands = values.str.fullmatch(r"[+-]?\d{1,3}(?:\.\d{3})+", na=False)
+    values = values.where(
+        ~dot_thousands,
+        values.str.replace(".", "", regex=False),
+    )
+
     values = values.str.replace(r"[^0-9eE+\-.]", "", regex=True)
     return pd.to_numeric(values, errors="coerce")
 

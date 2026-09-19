@@ -1,0 +1,23 @@
+{
+  "source": "Tesouro Nacional — SICONFI/DCA",
+  "territory": "São Borja/RS",
+  "period": "2019-2025",
+  "unit": "R$ correntes de cada exercício; percentuais nominais quando indicados",
+  "transfer_checkpoint_rounded_all_match": true,
+  "revenue_2025_checkpoint_rounded_match": true,
+  "mean_gross_current_transfers_share_pct_calculated": 74.63611753879518,
+  "formulas": {
+    "receita_corrente_liquida_calculada": "receita_corrente_bruta - deducao_fundeb - outras_deducoes",
+    "transferencias_correntes_liquidas_calculadas": "transferencias_correntes_brutas - deducao_fundeb - outras_deducoes",
+    "participacao_transferencias_brutas": "transferencias_correntes_brutas / receita_corrente_bruta * 100",
+    "variacao_nominal_yoy": "(valor_t / valor_t-1 - 1) * 100",
+    "fpm_liquido_calculado": "soma componentes FPM brutos - deducoes FUNDEB - outras deducoes"
+  },
+  "limitations": [
+    "Valores são nominais; não foram deflacionados.",
+    "Rubricas econômicas de despesa não equivalem ao universo jurídico de licitações/contratos.",
+    "DCA é anual; 2026 permanece separado como execução parcial corrente.",
+    "FPM é calculado como soma dos componentes cuja conta menciona Fundo de Participação dos Municípios; os componentes são preservados em arquivo de auditoria.",
+    "FUNDEB recebido usa a conta dedicada menos específica entre as candidatas, preservando todas as candidatas para auditoria."
+  ]
+}

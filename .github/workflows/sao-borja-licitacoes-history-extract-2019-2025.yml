@@ -1,0 +1,196 @@
+name: sao-borja-licitacoes-history-extract-2019-2025
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-licitacoes-history-extract-2019-2025.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - run: python -m pip install --quiet requests beautifulsoup4
+
+      - name: Extract historical procurement-process register
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv,json
+          from collections import Counter
+          from pathlib import Path
+          import requests
+          from bs4 import BeautifulSoup
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("artifacts/sao_borja_licitacoes_history_2019_2025")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI territorial audit/1.0"})
+
+          all_rows=[]
+          annual=[]
+          diagnostics=[]
+          sample_details=[]
+
+          for year in range(2019,2026):
+              page=1
+              seen={}
+              declared_records=None
+              total_pages=None
+              while True:
+                  payload={
+                    "instituicao":"1",
+                    "exercicio":str(year),
+                    "mes":"",
+                    "modalidade":"",
+                    "situacao":"",
+                    "page":str(page),
+                    "rows":"1000",
+                    "sidx":"numero",
+                    "sord":"asc",
+                  }
+                  r=s.post(BASE+"/licitacoes/pesquisarLicitacoes",data=payload,timeout=60)
+                  r.raise_for_status()
+                  data=r.json()
+                  declared_records=int(data.get("records") or 0)
+                  total_pages=int(data.get("total") or 0)
+                  rows=data.get("rows") or []
+                  diagnostics.append({
+                    "year":year,"page":page,"status":r.status_code,
+                    "bytes":len(r.content),"declared_records":declared_records,
+                    "declared_pages":total_pages,"returned_rows":len(rows)
+                  })
+                  for item in rows:
+                      rid=str(item.get("id") or "").strip()
+                      cell=item.get("cell") or []
+                      if not rid:
+                          continue
+                      rec={
+                        "year":year,
+                        "licitacao_id":rid,
+                        "modalidade":str(cell[0]) if len(cell)>0 else "",
+                        "numero":str(cell[1]) if len(cell)>1 else "",
+                        "codigo":str(cell[2]) if len(cell)>2 else "",
+                        "objeto":str(cell[3]) if len(cell)>3 else "",
+                        "situacao":str(cell[4]) if len(cell)>4 else "",
+                      }
+                      seen[rid]=rec
+                  if page>=total_pages or not rows:
+                      break
+                  page+=1
+
+              vals=list(seen.values())
+              all_rows.extend(vals)
+              modalities=Counter(x["modalidade"] for x in vals)
+              statuses=Counter(x["situacao"] for x in vals)
+              annual.append({
+                "year":year,
+                "declared_records":declared_records or 0,
+                "unique_records_extracted":len(vals),
+                "declared_pages":total_pages or 0,
+                "modalidades_distintas":len(modalities),
+                "situacoes_distintas":len(statuses),
+                "declared_minus_extracted":(declared_records or 0)-len(vals),
+              })
+
+              # Read one public detail page only to discover schema. Persist metadata/text labels, not personal IDs.
+              if vals:
+                  rid=vals[0]["licitacao_id"]
+                  try:
+                      q=s.get(BASE+f"/licitacoes/consulta/{rid}",timeout=45)
+                      soup=BeautifulSoup(q.text,"html.parser")
+                      labels=[x.get_text(" ",strip=True) for x in soup.find_all(["th","label","legend","h3","h4"])]
+                      tables=[]
+                      for ti,t in enumerate(soup.find_all("table")):
+                          headers=[x.get_text(" ",strip=True) for x in t.find_all("th")]
+                          tables.append({"index":ti,"headers":headers,"row_count":max(0,len(t.find_all("tr"))-1)})
+                      sample_details.append({
+                        "year":year,"sample_id":rid,"status":q.status_code,"bytes":len(q.content),
+                        "labels":labels[:200],"tables":tables,
+                        "route_markers":sorted(set(
+                          a.get("href") for a in soup.find_all("a") if a.get("href") and "/licitacoes/" in a.get("href")
+                        ))[:100]
+                      })
+                  except Exception as exc:
+                      sample_details.append({"year":year,"sample_id":rid,"error":repr(exc)})
+
+          # Hard validation: every year must reconcile endpoint record count to unique extracted IDs.
+          bad=[x for x in annual if int(x["declared_minus_extracted"])!=0]
+          if bad:
+              raise SystemExit(f"LICITACOES_COUNT_RECONCILIATION_FAILED={bad}")
+
+          with (OUT/"licitacoes_processos_2019_2025.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["year","licitacao_id","modalidade","numero","codigo","objeto","situacao"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(all_rows)
+
+          with (OUT/"annual_summary.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(annual[0].keys())
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(annual)
+
+          ag=Counter((x["year"],x["modalidade"],x["situacao"]) for x in all_rows)
+          with (OUT/"modalidade_situacao_aggregate.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["year","modalidade","situacao","n_processos"])
+              for (year,mod,stat),n in sorted(ag.items()):
+                  w.writerow([year,mod,stat,n])
+
+          (OUT/"endpoint_diagnostics.json").write_text(json.dumps(diagnostics,ensure_ascii=False,indent=2),encoding="utf-8")
+          (OUT/"detail_schema_samples.json").write_text(json.dumps(sample_details,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"annual":annual,"rows_total":len(all_rows)},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/sao_borja_licitacoes_history_2019_2025"
+          DEST="docs/data_sources/sao_borja_licitacoes_history_2019_2025"
+          mkdir -p "$DEST"
+          cp "$SRC/licitacoes_processos_2019_2025.csv" "$DEST/"
+          cp "$SRC/annual_summary.csv" "$DEST/"
+          cp "$SRC/modalidade_situacao_aggregate.csv" "$DEST/"
+          cp "$SRC/endpoint_diagnostics.json" "$DEST/"
+          cp "$SRC/detail_schema_samples.json" "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal PMSB — licitações — histórico 2019–2025
+
+          **Fonte observada:** Portal da Transparência da Prefeitura Municipal de São Borja — módulo Licitações.
+
+          **Instituição usada:** código 1 no portal, correspondente à Prefeitura Municipal de São Borja nas rotas administrativas já auditadas.
+
+          **Período:** 2019–2025.
+
+          **Unidade principal:** processos de licitação publicados pelo endpoint dinâmico `/licitacoes/pesquisarLicitacoes`.
+
+          A extração reconcilia, para cada exercício, a contagem `records` declarada pelo endpoint com os IDs únicos extraídos.
+
+          O arquivo de processos preserva somente campos públicos do cadastro do procedimento: exercício, ID, modalidade, número, código, objeto e situação. Não contém pagamentos.
+
+          **Limitação central:** processo licitatório ≠ contrato ≠ empenho ≠ pagamento. Esta fonte serve para estrutura de demanda pública, objetos e instrumentos de contratação. Não deve ser somada à despesa paga do SICONFI nem interpretada como valor monetário realizado sem outra evidência.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract PMSB licitacoes history 2019 2025"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-licitacoes-history-2019-2025
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_licitacoes_history_2019_2025/

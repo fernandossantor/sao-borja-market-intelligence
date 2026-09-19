@@ -403,6 +403,7 @@ jobs:
             echo "No changes."
           else
             git commit -m "data: reproduce SINAC SIMEI São Borja queries"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
             git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
           fi
 

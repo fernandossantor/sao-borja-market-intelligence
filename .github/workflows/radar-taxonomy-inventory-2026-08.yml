@@ -98,9 +98,9 @@ jobs:
             "portfolio_setores":int(port["emit_setor"].nunique(dropna=True)),
             "portfolio_atividades":int(port["emit_atividade"].nunique(dropna=True)),
             "portfolio_classes":int(port["emit_classe"].nunique(dropna=True)),
-            "ncm_in_both":int((cw["_merge"]=="both").sum()),
-            "ncm_only_categorias":int((cw["_merge"]=="left_only").sum()),
-            "ncm_only_portfolio":int((cw["_merge"]=="right_only").sum()),
+            "ncm_in_both":int(cw.loc[cw["_merge"]=="both","ncm"].nunique()),
+            "ncm_only_categorias":int(cw.loc[cw["_merge"]=="left_only","ncm"].nunique()),
+            "ncm_only_portfolio":int(cw.loc[cw["_merge"]=="right_only","ncm"].nunique()),
             "canonical_rows_promoted":0
           }
           (OUT/"validation_summary.json").write_text(json.dumps(coverage,ensure_ascii=False,indent=2),encoding="utf-8")

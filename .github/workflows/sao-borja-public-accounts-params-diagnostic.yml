@@ -1,0 +1,120 @@
+name: sao-borja-public-accounts-params-diagnostic
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-public-accounts-params-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Compare loadLink parameters across exercises
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_public_accounts_params_diagnostic"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/sao_borja_public_accounts_params_diagnostic")
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit/1.0"})
+          home=s.get(BASE+"/despesas",timeout=60); home.raise_for_status()
+          current=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",home.text).group(1)
+
+          def safe_params(year):
+              data=[
+                ("iExercicio",str(year)),("dtDataImportacao",current),("sViewAtual",""),
+                ("iNivel","3"),("dtInicio","01/01"),("dtFim","18/09" if year==2026 else "31/12"),
+                ("aHistorico[0][descricao]","Descrição"),
+                ("aHistorico[0][valor_empenhado]","Valor Empenhado"),
+                ("aHistorico[0][valor_anulado]","Valor Anulado"),
+                ("aHistorico[0][valor_liquidado]","Valor Liquidado"),
+                ("aHistorico[0][valor_pago]","Valor Pago"),
+              ]
+              r=s.post(BASE+"/despesas/loadLink/3",data=data,timeout=120); r.raise_for_status()
+              mo=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);",r.text,re.S)
+              if not mo: raise RuntimeError(f"params not found for {year}")
+              p=json.loads(mo.group(1).replace("\\'","'"))
+              safe={}
+              for k,v in p.items():
+                  kl=str(k).lower()
+                  if any(term in kl for term in ("cpf","cnpj","credor","nome","email","telefone")):
+                      safe[k]="[REDACTED]" if v not in ("",None,[],{}) else v
+                  else:
+                      safe[k]=v
+              return safe
+
+          years={str(y):safe_params(y) for y in range(2019,2027)}
+          keys=sorted(set().union(*(set(p) for p in years.values())))
+          comparison=[]
+          for key in keys:
+              vals={year:years[year].get(key,"[MISSING]") for year in years}
+              serialized={year:json.dumps(v,ensure_ascii=False,sort_keys=True) for year,v in vals.items()}
+              comparison.append({
+                  "key":key,
+                  "values":vals,
+                  "all_same":len(set(serialized.values()))==1,
+                  "blank_years":[year for year,v in vals.items() if v in ("",None,[],{})],
+              })
+          report={
+            "source":BASE+"/despesas",
+            "dtDataImportacao":current,
+            "territory":"São Borja/RS",
+            "years":years,
+            "comparison":comparison,
+            "note":"Potential personal identifier filter parameters are redacted; blank state is preserved."
+          }
+          (OUT/"params_comparison.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+
+      - name: Persist evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_public_accounts_params_diagnostic"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_public_accounts_params_diagnostic/params_comparison.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal PMSB — comparação de parâmetros de despesas por exercício
+
+          Auditoria técnica da estrutura `oParametros` produzida por `/despesas/loadLink/3`
+          para 2019–2026. O objetivo é localizar parâmetros vazios ou diferenças de
+          exercício que expliquem a falha SQL da rota histórica de credores.
+
+          Parâmetros cujo nome sugere identificador pessoal/credor são redigidos quando
+          não vazios. Esta camada não contém linhas de credores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: compare public accounts route parameters"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-public-accounts-params-diagnostic
+          retention-days: 30
+          path: artifacts/sao_borja_public_accounts_params_diagnostic/

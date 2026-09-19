@@ -1,0 +1,233 @@
+name: sao-borja-public-accounts-history-diagnostic
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-public-accounts-history-diagnostic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Diagnose historical creditor route without persisting creditor-level personal data
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_public_accounts_history_diagnostic"
+          mkdir -p "$OUT"
+
+          python - <<'PY'
+          import csv
+          import hashlib
+          import html
+          import json
+          import re
+          from datetime import datetime
+          from pathlib import Path
+
+          import requests
+
+          OUT = Path("artifacts/sao_borja_public_accounts_history_diagnostic")
+          BASE = "https://transparencia.saoborja.rs.gov.br"
+          YEARS = list(range(2019, 2027))
+
+          s = requests.Session()
+          s.headers.update({"User-Agent": "Mozilla/5.0 SBMI audit/1.0"})
+
+          home = s.get(BASE + "/despesas", timeout=60)
+          home.raise_for_status()
+          match = re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'", home.text)
+          if not match:
+              raise RuntimeError("dtDataImportacao not found")
+          current_import = match.group(1)
+          import_dt = datetime.strptime(current_import, "%Y-%m-%d")
+
+          def redact(text: str) -> str:
+              text = html.unescape(text)
+              text = re.sub(r"\b[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}\b", "[EMAIL]", text)
+              text = re.sub(r"\d", "#", text)
+              return re.sub(r"\s+", " ", text).strip()[:600]
+
+          def parse_params(text: str):
+              mo = re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);", text, re.S)
+              if not mo:
+                  return None
+              return json.loads(mo.group(1).replace("\\'", "'"))
+
+          def inspect_response(resp):
+              record = {
+                  "http_status": resp.status_code,
+                  "content_type": resp.headers.get("content-type", ""),
+                  "bytes": len(resp.content),
+                  "sha256": hashlib.sha256(resp.content).hexdigest(),
+                  "json_ok": False,
+                  "json_top_keys": "",
+                  "records": "",
+                  "total_pages": "",
+                  "rows_returned": "",
+                  "redacted_prefix": "",
+              }
+              try:
+                  payload = resp.json()
+                  record["json_ok"] = True
+                  if isinstance(payload, dict):
+                      record["json_top_keys"] = "|".join(sorted(str(k) for k in payload.keys()))
+                      record["records"] = payload.get("records", "")
+                      record["total_pages"] = payload.get("total", "")
+                      rows = payload.get("rows", [])
+                      record["rows_returned"] = len(rows) if isinstance(rows, list) else ""
+                  else:
+                      record["json_top_keys"] = type(payload).__name__
+              except Exception:
+                  record["redacted_prefix"] = redact(resp.text)
+              return record
+
+          diagnostics = []
+          for year in YEARS:
+              end = import_dt.strftime("%d/%m") if year == import_dt.year else "31/12"
+              candidates = [
+                  ("CURRENT_IMPORT_DATE", current_import),
+                  ("YEAR_END", f"{year}-12-31"),
+                  ("YEAR_START", f"{year}-01-01"),
+                  ("EMPTY_IMPORT_DATE", ""),
+              ]
+              for variant, import_value in candidates:
+                  row = {
+                      "year": year,
+                      "variant": variant,
+                      "dtDataImportacao_sent": import_value,
+                      "period_end": end,
+                  }
+                  data = [
+                      ("iExercicio", str(year)),
+                      ("dtDataImportacao", import_value),
+                      ("sViewAtual", ""),
+                      ("iNivel", "3"),
+                      ("dtInicio", "01/01"),
+                      ("dtFim", end),
+                      ("aHistorico[0][descricao]", "Descrição"),
+                      ("aHistorico[0][valor_empenhado]", "Valor Empenhado"),
+                      ("aHistorico[0][valor_anulado]", "Valor Anulado"),
+                      ("aHistorico[0][valor_liquidado]", "Valor Liquidado"),
+                      ("aHistorico[0][valor_pago]", "Valor Pago"),
+                  ]
+                  try:
+                      link = s.post(BASE + "/despesas/loadLink/3", data=data, timeout=120)
+                      row["loadlink_http_status"] = link.status_code
+                      row["loadlink_content_type"] = link.headers.get("content-type", "")
+                      row["loadlink_bytes"] = len(link.content)
+                      params = parse_params(link.text)
+                      row["params_found"] = bool(params)
+                      if not params:
+                          row["loadlink_redacted_prefix"] = redact(link.text)
+                          row["creditors_http_status"] = ""
+                          row["creditors_json_ok"] = False
+                          diagnostics.append(row)
+                          continue
+
+                      # Only a tiny page is requested for route diagnostics. No row-level
+                      # creditor payload is persisted.
+                      creditors = s.post(
+                          BASE + "/despesas/getCredores",
+                          data={
+                              "aParametros": json.dumps(
+                                  params, ensure_ascii=False, separators=(",", ":")
+                              ),
+                              "page": 1,
+                              "rows": 5,
+                              "sidx": "nome",
+                              "sord": "asc",
+                              "_search": "false",
+                          },
+                          timeout=120,
+                      )
+                      inspected = inspect_response(creditors)
+                      row.update({f"creditors_{k}": v for k, v in inspected.items()})
+                  except Exception as exc:
+                      row["exception"] = repr(exc)
+                  diagnostics.append(row)
+
+          fields = sorted({key for row in diagnostics for key in row})
+          with (OUT / "historical_route_diagnostics.csv").open(
+              "w", newline="", encoding="utf-8-sig"
+          ) as fh:
+              writer = csv.DictWriter(fh, fieldnames=fields)
+              writer.writeheader()
+              writer.writerows(diagnostics)
+
+          report = {
+              "source": BASE + "/despesas",
+              "retrieved_current_import_date": current_import,
+              "territory": "São Borja/RS",
+              "period_tested": "2019-2026",
+              "nature": "technical route diagnostic",
+              "privacy_control": (
+                  "No creditor-level rows, names, CPFs or CNPJs are persisted by this "
+                  "diagnostic. Non-JSON response snippets are digit- and email-redacted."
+              ),
+              "tests": diagnostics,
+              "interpretation_rule": (
+                  "A failed HTTP/JSON route is a technical access result and must not be "
+                  "interpreted as absence of historical fiscal data."
+              ),
+          }
+          (OUT / "historical_route_diagnostics.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          PY
+
+      - name: Persist diagnostic evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_public_accounts_history_diagnostic_2019_2026"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_public_accounts_history_diagnostic/historical_route_diagnostics.csv "$DEST/"
+          cp artifacts/sao_borja_public_accounts_history_diagnostic/historical_route_diagnostics.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — diagnóstico técnico da rota histórica de despesas — 2019–2026
+
+          **Fonte:** Portal da Transparência da Prefeitura de São Borja.
+          **Abrangência geográfica:** município de São Borja/RS.
+          **Período testado:** exercícios de 2019 a 2026.
+          **Natureza:** auditoria técnica da rota, não série fiscal substantiva.
+
+          O teste compara quatro variantes de `dtDataImportacao` para cada exercício:
+          data corrente de importação informada pelo portal, fim do próprio exercício,
+          início do próprio exercício e parâmetro vazio.
+
+          O objetivo é distinguir falha de parametrização/endpoint de ausência de dados.
+          Nenhum detalhe de CPF/CNPJ/credor é persistido nesta camada; respostas não JSON
+          têm números e e-mails redigidos antes do registro.
+
+          **Regra:** falha de endpoint não equivale a ausência de dados históricos.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: diagnose historical public accounts route"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-public-accounts-history-diagnostic-2019-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_public_accounts_history_diagnostic/

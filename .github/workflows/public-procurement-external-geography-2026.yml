@@ -1,0 +1,123 @@
+name: public-procurement-external-geography-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/public-procurement-external-geography-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Aggregate external procurement-compatible payments by geography
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/public_procurement_external_geography_2026"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json
+          from collections import defaultdict
+          from pathlib import Path
+
+          SRC=Path("docs/data_sources/public_procurement_territorial_exposure_2026/core_vendor_territorial_2026.csv")
+          OUT=Path("artifacts/public_procurement_external_geography_2026")
+          ext_classes={"EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT","EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT"}
+
+          uf=defaultdict(lambda:{"vendors":set(),"paid":0.0})
+          mun=defaultdict(lambda:{"vendors":set(),"paid":0.0,"uf":""})
+          root=defaultdict(lambda:{"vendors":set(),"paid":0.0})
+          total_core=0.0; ext_total=0.0; ext_rs=0.0; ext_other=0.0
+          allrows=[]
+          with SRC.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  paid=float(r["pago_core_R$"] or 0);total_core+=paid;allrows.append(r)
+                  cls=r["territorial_class"]
+                  if cls=="ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT":
+                      z=root[r.get("exact_uf") or ""];z["vendors"].add(r["cnpj"]);z["paid"]+=paid
+                  if cls not in ext_classes:continue
+                  ext_total+=paid
+                  u=(r.get("exact_uf") or "INDETERMINADO").strip() or "INDETERMINADO"
+                  m=(r.get("exact_municipio_nome") or "INDETERMINADO").strip() or "INDETERMINADO"
+                  z=uf[u];z["vendors"].add(r["cnpj"]);z["paid"]+=paid
+                  k=(u,m);z=mun[k];z["vendors"].add(r["cnpj"]);z["paid"]+=paid;z["uf"]=u
+                  if u=="RS":ext_rs+=paid
+                  else:ext_other+=paid
+
+          with (OUT/"external_by_uf_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["uf","vendors","pago_R$","share_external","share_core"])
+              for k,v in sorted(uf.items(),key=lambda kv:kv[1]["paid"],reverse=True):
+                  w.writerow([k,len(v["vendors"]),round(v["paid"],2),v["paid"]/ext_total if ext_total else None,v["paid"]/total_core if total_core else None])
+
+          with (OUT/"external_by_municipality_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["uf","municipio","vendors","pago_R$","share_external","share_core"])
+              for (u,m),v in sorted(mun.items(),key=lambda kv:kv[1]["paid"],reverse=True):
+                  w.writerow([u,m,len(v["vendors"]),round(v["paid"],2),v["paid"]/ext_total if ext_total else None,v["paid"]/total_core if total_core else None])
+
+          report={
+              "core_total_R$":round(total_core,2),
+              "external_no_local_footprint_R$":round(ext_total,2),
+              "external_share_core":ext_total/total_core if total_core else None,
+              "external_within_RS_R$":round(ext_rs,2),
+              "external_within_RS_share_external":ext_rs/ext_total if ext_total else None,
+              "external_outside_RS_R$":round(ext_other,2),
+              "external_outside_RS_share_external":ext_other/ext_total if ext_total else None,
+              "top_ufs":[{"uf":k,"vendors":len(v["vendors"]),"pago_R$":round(v["paid"],2),"share_external":v["paid"]/ext_total} for k,v in sorted(uf.items(),key=lambda kv:kv[1]["paid"],reverse=True)[:10]],
+              "top_municipalities":[{"uf":u,"municipio":m,"vendors":len(v["vendors"]),"pago_R$":round(v["paid"],2),"share_external":v["paid"]/ext_total} for (u,m),v in sorted(mun.items(),key=lambda kv:kv[1]["paid"],reverse=True)[:20]],
+              "limitations":[
+                  "Geography is the exact creditor CNPJ registration in the RFB snapshot, not the physical place from which goods/services were delivered.",
+                  "Only creditors with no active local footprint are in the external denominator.",
+                  "RFB bytes were transported through a mirror in this exploratory run."
+              ]
+          }
+          (OUT/"external_geography_summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist evidence
+        if: success()
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_external_geography_2026"
+          mkdir -p "$DEST"
+          cp artifacts/public_procurement_external_geography_2026/* "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # PMSB — geografia dos credores externos no core de compras/contratações — 2026
+
+          Camada exploratória, não canônica.
+
+          O denominador externo contém apenas CNPJs sem estabelecimento ativo da mesma
+          raiz em São Borja. A geografia é a sede cadastral do CNPJ exato no snapshot
+          RFB 2026-08, não necessariamente o ponto físico de entrega ou produção.
+
+          Resultados permanecem exploratórios porque os bytes RFB foram transportados
+          por espelho após timeout do host oficial.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: map external public procurement creditor geography"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-procurement-external-geography-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/public_procurement_external_geography_2026/

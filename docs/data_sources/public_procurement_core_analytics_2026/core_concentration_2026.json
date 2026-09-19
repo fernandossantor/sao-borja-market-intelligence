@@ -1,0 +1,33 @@
+{
+  "period": "2026-01-01 to 2026-09-18",
+  "source": "Portal da Transparência da Prefeitura de São Borja",
+  "classification_nature": "rubric-based procurement-compatible core; not final legal procurement eligibility",
+  "all_cnpj_paid_R$": 132146080.7,
+  "core_paid_R$": 72039491.18,
+  "ambiguous_paid_R$": 960295.65,
+  "excluded_paid_R$": 59146293.87,
+  "core_vendors": 618,
+  "core_rubrics": 9,
+  "concentration": {
+    "top1_R$": 28342657.23,
+    "top1_share": 0.39343222398923067,
+    "top5_R$": 37917963.15,
+    "top5_share": 0.5263496802782381,
+    "top10_R$": 43402318.34,
+    "top10_share": 0.6024795237872189,
+    "top20_R$": 49542594.82,
+    "top20_share": 0.687714391210945,
+    "hhi_0_10000": 1626.1031778703566
+  },
+  "dominant_vendor": {
+    "cnpj": "96488598000189",
+    "name": "FUNDACAO IVAN GOULART",
+    "paid_R$": 28342657.23,
+    "share_core": 0.39343222398923067
+  },
+  "limitations": [
+    "CORE_PROCUREMENT is a rubric-compatible analytical universe, not a final legal/procurement classification.",
+    "Other services to legal entities may contain institutional service arrangements or pass-through structures; entity/legal-instrument screening remains necessary.",
+    "Territorial locality is not inferred in this workflow."
+  ]
+}

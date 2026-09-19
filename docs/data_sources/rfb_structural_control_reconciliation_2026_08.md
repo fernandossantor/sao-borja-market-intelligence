@@ -35,6 +35,25 @@ Portanto, o vetor estrutural efetivamente canônico do universo geral de estabel
 
 `7.306 = 6.881 + 102 + 323`.
 
+
+### Evidência canônica adicional recuperada no Drive
+
+A planilha histórica `caderno_base_territorial_v005_controle_cadastral_cnpj_20260906` registra a execução canônica `cnpj-territorial-control-202608-manual-v002`, competência 2026-08, fonte primária Receita Federal — Dados Abertos CNPJ, e o mesmo vetor estrutural 7.306 / 6.881 / 102 / 323.
+
+A aba de validação dessa versão informa:
+
+- v001 = 7.306 linhas e v002 = 7.306 linhas;
+- zero CNPJs exclusivos entre v001 e v002;
+- classes territoriais idênticas;
+- matriz/filial idêntico;
+- zero células diferentes nas 22 colunas comuns;
+- agregados CNAE e porte idênticos;
+- manifestos dos **21 insumos oficiais** idênticos;
+- validação v002 sem FAIL;
+- status `V001_V002_EQUIVALENCE_OK`.
+
+A aba Metadados registra ainda o commit validado `ab85c6895d34d78b041fd4949e2d867eb511a827` e explicita que os 21 ZIPs oficiais pertencem à mesma competência. Isso torna a linhagem do vetor canônico mais forte do que uma simples referência a checkpoint: trata-se de resultado já produzido sobre a fonte oficial e submetido a equivalência v001 × v002.
+
 ## 3. Diagnóstico da divergência
 
 ### Dado observado
@@ -86,7 +105,7 @@ O workflow `.github/workflows/rfb-official-vs-mirror-control-validation-2026-08.
 
 A correção resolve o **controle estrutural** e a falsa divergência de categorias.
 
-Permanece separadamente uma limitação de **transporte/proveniência de bytes**: nas execuções recentes, o host oficial da RFB apresentou reset/time-out e não permitiu nova comparação byte a byte com SHA-256.
+Permanece separadamente uma limitação de **revalidação de transporte no ambiente atual**: nas execuções recentes, o host oficial da RFB apresentou reset/time-out e não permitiu repetir agora a comparação byte a byte com SHA-256. Isso não apaga a proveniência histórica já registrada na execução canônica v002, baseada em 21 ZIPs oficiais da mesma competência com manifestos equivalentes entre v001 e v002.
 
 Assim:
 

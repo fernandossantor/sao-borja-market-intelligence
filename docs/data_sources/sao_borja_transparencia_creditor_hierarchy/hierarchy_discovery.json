@@ -1,0 +1,176 @@
+{
+  "06136424000164": {
+    "creditor": {
+      "id": "57556",
+      "cpfcnpj": "06136424000164",
+      "nome": "ECO VERDE PRESTAÇÃO DE SERVIÇO DE COLETA",
+      "valor_empenhado": "6712078.15",
+      "valor_anulado": "1717430.77",
+      "valor_liquidado": "3835552.81",
+      "valor_pago": "3835552.81"
+    },
+    "status": 200,
+    "bytes": 28093,
+    "endpoint_mentions": [
+      "#numero2 #irparadespesas",
+      "#numero2 #irparadespesas a",
+      "#numero5 #irparafolhapagamento",
+      "#numero5 #irparafolhapagamento a",
+      ").getGridParam(",
+      "/despesas/getInstit",
+      "/despesas/getRelatorio",
+      "/despesas/loadLink/",
+      "/despesas/loadView/credores",
+      ";\n    document.getElementById(",
+      ">\n            <small>Ir Para</small>\n            <strong>Despesas</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+      ">\n            <small>Ir Para</small>\n            <strong>Folha de Pagamento</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+      ">\n  var parentURL = window != window.parent ? true : false;\n\n  if (parentURL == true){\n\n    document.getElementById(",
+      ">Despesas por Instituição\n  01/01/2026 a 18/09/2026</h2>\n<br>\n<div>\n  <span style=",
+      ">Despesas</a>  >  <a href=",
+      ">Despesas</option>\n<option value=",
+      ">Folha de Pagamento</option>\n<option value=",
+      "Empenhado",
+      "Liquidado",
+      "Valor Empenhado",
+      "Valor Liquidado",
+      "despesas",
+      "despesas/loadDiarias",
+      "folha_pagamentos",
+      "getGridParam",
+      "getInstit",
+      "getRowData",
+      "http://transparencia.saoborja.rs.gov.br/despesas",
+      "irparadespesas",
+      "irparafolhapagamento",
+      "valor_empenhado",
+      "valor_liquidado"
+    ],
+    "grid_urls": [
+      "/despesas/loadView/credores",
+      "/despesas/getInstit",
+      "/despesas/loadLink/"
+    ],
+    "decoded_params": [
+      "{\"iExercicio\":\"2026\",\"dtDataImportacao\":\"2026-09-18\",\"sViewAtual\":\"instituicoes\",\"iNivel\":\"4\",\"dtInicio\":\"01\\/01\",\"dtFim\":\"18\\/09\",\"aHistorico\":\"descricao\",\"iIdLink\":\"3\",\"iCredor\":\"57556\"}"
+    ],
+    "title_matches": [
+      "Despesas por Instituição\n  01/01/2026 a 18/09/2026"
+    ]
+  },
+  "96488598000189": {
+    "creditor": {
+      "id": "7276",
+      "cpfcnpj": "96488598000189",
+      "nome": "FUNDACAO IVAN GOULART",
+      "valor_empenhado": "42563148.13",
+      "valor_anulado": "938618.98",
+      "valor_liquidado": "32784190.10",
+      "valor_pago": "30769932.49"
+    },
+    "status": 200,
+    "bytes": 28092,
+    "endpoint_mentions": [
+      "#numero2 #irparadespesas",
+      "#numero2 #irparadespesas a",
+      "#numero5 #irparafolhapagamento",
+      "#numero5 #irparafolhapagamento a",
+      ").getGridParam(",
+      "/despesas/getInstit",
+      "/despesas/getRelatorio",
+      "/despesas/loadLink/",
+      "/despesas/loadView/credores",
+      ";\n    document.getElementById(",
+      ">\n            <small>Ir Para</small>\n            <strong>Despesas</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+      ">\n            <small>Ir Para</small>\n            <strong>Folha de Pagamento</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+      ">\n  var parentURL = window != window.parent ? true : false;\n\n  if (parentURL == true){\n\n    document.getElementById(",
+      ">Despesas por Instituição\n  01/01/2026 a 18/09/2026</h2>\n<br>\n<div>\n  <span style=",
+      ">Despesas</a>  >  <a href=",
+      ">Despesas</option>\n<option value=",
+      ">Folha de Pagamento</option>\n<option value=",
+      "Empenhado",
+      "Liquidado",
+      "Valor Empenhado",
+      "Valor Liquidado",
+      "despesas",
+      "despesas/loadDiarias",
+      "folha_pagamentos",
+      "getGridParam",
+      "getInstit",
+      "getRowData",
+      "http://transparencia.saoborja.rs.gov.br/despesas",
+      "irparadespesas",
+      "irparafolhapagamento",
+      "valor_empenhado",
+      "valor_liquidado"
+    ],
+    "grid_urls": [
+      "/despesas/loadView/credores",
+      "/despesas/getInstit",
+      "/despesas/loadLink/"
+    ],
+    "decoded_params": [
+      "{\"iExercicio\":\"2026\",\"dtDataImportacao\":\"2026-09-18\",\"sViewAtual\":\"instituicoes\",\"iNivel\":\"4\",\"dtInicio\":\"01\\/01\",\"dtFim\":\"18\\/09\",\"aHistorico\":\"descricao\",\"iIdLink\":\"3\",\"iCredor\":\"7276\"}"
+    ],
+    "title_matches": [
+      "Despesas por Instituição\n  01/01/2026 a 18/09/2026"
+    ]
+  },
+  "00394460005887": {
+    "creditor": {
+      "id": "70435",
+      "cpfcnpj": "00394460005887",
+      "nome": "MINISTERIO DA FAZENDA",
+      "valor_empenhado": "8189812.08",
+      "valor_anulado": "329420.71",
+      "valor_liquidado": "7860391.37",
+      "valor_pago": "6989477.78"
+    },
+    "status": 200,
+    "bytes": 28095,
+    "endpoint_mentions": [
+      "#numero2 #irparadespesas",
+      "#numero2 #irparadespesas a",
+      "#numero5 #irparafolhapagamento",
+      "#numero5 #irparafolhapagamento a",
+      ").getGridParam(",
+      "/despesas/getInstit",
+      "/despesas/getRelatorio",
+      "/despesas/loadLink/",
+      "/despesas/loadView/credores",
+      ";\n    document.getElementById(",
+      ">\n            <small>Ir Para</small>\n            <strong>Despesas</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+      ">\n            <small>Ir Para</small>\n            <strong>Folha de Pagamento</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+      ">\n  var parentURL = window != window.parent ? true : false;\n\n  if (parentURL == true){\n\n    document.getElementById(",
+      ">Despesas por Instituição\n  01/01/2026 a 18/09/2026</h2>\n<br>\n<div>\n  <span style=",
+      ">Despesas</a>  >  <a href=",
+      ">Despesas</option>\n<option value=",
+      ">Folha de Pagamento</option>\n<option value=",
+      "Empenhado",
+      "Liquidado",
+      "Valor Empenhado",
+      "Valor Liquidado",
+      "despesas",
+      "despesas/loadDiarias",
+      "folha_pagamentos",
+      "getGridParam",
+      "getInstit",
+      "getRowData",
+      "http://transparencia.saoborja.rs.gov.br/despesas",
+      "irparadespesas",
+      "irparafolhapagamento",
+      "valor_empenhado",
+      "valor_liquidado"
+    ],
+    "grid_urls": [
+      "/despesas/loadView/credores",
+      "/despesas/getInstit",
+      "/despesas/loadLink/"
+    ],
+    "decoded_params": [
+      "{\"iExercicio\":\"2026\",\"dtDataImportacao\":\"2026-09-18\",\"sViewAtual\":\"instituicoes\",\"iNivel\":\"4\",\"dtInicio\":\"01\\/01\",\"dtFim\":\"18\\/09\",\"aHistorico\":\"descricao\",\"iIdLink\":\"3\",\"iCredor\":\"70435\"}"
+    ],
+    "title_matches": [
+      "Despesas por Instituição\n  01/01/2026 a 18/09/2026"
+    ]
+  }
+}

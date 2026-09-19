@@ -1,0 +1,144 @@
+name: sao-borja-transparencia-expense-discovery
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-transparencia-expense-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Discover official municipal transparency expense endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_transparencia_expense_discovery"
+          mkdir -p "$OUT/assets"
+          BASE="https://transparencia.saoborja.rs.gov.br"
+
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 --max-time 120 \
+            -A "Mozilla/5.0 SBMI exploratory audit/1.0" \
+            "$BASE/despesas" -o "$OUT/despesas.html"
+
+          curl -fL --retry 4 --retry-all-errors --connect-timeout 20 --max-time 120 \
+            -A "Mozilla/5.0 SBMI exploratory audit/1.0" \
+            "$BASE/cms/menus/getContent/4" -o "$OUT/origem_dados.html" || true
+
+          python - <<'PY'
+          import json,re,urllib.parse,urllib.request,ssl
+          from pathlib import Path
+
+          OUT=Path("artifacts/sao_borja_transparencia_expense_discovery")
+          base="https://transparencia.saoborja.rs.gov.br"
+          html=(OUT/"despesas.html").read_text(encoding="utf-8",errors="replace")
+
+          scripts=re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',html,re.I)
+          links=re.findall(r'(?:href|action)=["\']([^"\']+)["\']',html,re.I)
+          forms=[]
+          for m in re.finditer(r'<form\b([^>]*)>',html,re.I|re.S):
+              attrs=m.group(1)
+              action=re.search(r'action=["\']([^"\']*)["\']',attrs,re.I)
+              method=re.search(r'method=["\']([^"\']*)["\']',attrs,re.I)
+              forms.append({"action":action.group(1) if action else "","method":method.group(1) if method else ""})
+
+          fetched=[]
+          for i,s in enumerate(scripts):
+              u=urllib.parse.urljoin(base+"/despesas",s)
+              if not u.startswith(base): continue
+              try:
+                  req=urllib.request.Request(u,headers={"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+                  with urllib.request.urlopen(req,timeout=45,context=ssl.create_default_context()) as r:
+                      raw=r.read()
+                  p=OUT/"assets"/f"script_{i:02d}.js"
+                  p.write_bytes(raw)
+                  fetched.append({"url":u,"file":str(p.relative_to(OUT)),"bytes":len(raw)})
+              except Exception as e:
+                  fetched.append({"url":u,"error":repr(e)})
+
+          candidates=[]
+          patterns=[
+              r'["\']([^"\']*(?:despes|credor|empenh|liquid|pagament)[^"\']*)["\']',
+              r'url\s*:\s*["\']([^"\']+)["\']',
+              r'ajax\s*\([^)]{0,500}'
+          ]
+          for p in [OUT/"despesas.html",*sorted((OUT/"assets").glob("*.js"))]:
+              txt=p.read_text(encoding="utf-8",errors="replace")
+              for pat in patterns:
+                  for m in re.finditer(pat,txt,re.I|re.S):
+                      val=m.group(1) if m.lastindex else m.group(0)
+                      if len(val)<1000:
+                          candidates.append({"file":str(p.relative_to(OUT)),"match":val.strip()})
+
+          # dedupe while retaining order
+          seen=set(); uniq=[]
+          for x in candidates:
+              key=(x["file"],x["match"])
+              if key not in seen:
+                  seen.add(key);uniq.append(x)
+
+          result={
+              "base":base,
+              "html_bytes":len(html.encode("utf-8")),
+              "scripts":scripts,
+              "scripts_fetched":fetched,
+              "links_actions":links,
+              "forms":forms,
+              "candidate_endpoint_mentions":uniq[:1000]
+          }
+          (OUT/"discovery.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"scripts":len(scripts),"fetched":sum("file" in x for x in fetched),"forms":forms,"candidates":uniq[:80]},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist discovery evidence
+        if: success()
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_transparencia_expense_discovery"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_transparencia_expense_discovery/discovery.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal da Transparência de São Borja — descoberta da rota de despesas
+
+          Camada exploratória, não canônica.
+
+          Fonte oficial municipal:
+          https://transparencia.saoborja.rs.gov.br/despesas
+
+          Objetivo: identificar endpoints e parâmetros públicos usados pela interface
+          de consulta de despesas por credor, para obter empenhado/liquidado/pago sem
+          depender do host binário do TCE-RS.
+
+          A descoberta preserva somente estrutura de página, scripts públicos e menções
+          a endpoints. Nenhum valor é inferido. Uma etapa posterior deverá reproduzir
+          a consulta de 2026, validar schema e conciliar totais antes da classificação
+          territorial de credores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: discover São Borja transparency expense endpoints"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-transparencia-expense-discovery
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_transparencia_expense_discovery/

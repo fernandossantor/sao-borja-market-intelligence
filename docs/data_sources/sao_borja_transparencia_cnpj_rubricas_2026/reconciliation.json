@@ -1,0 +1,19 @@
+{
+  "source": "Portal da Transparência PMSB",
+  "period": {
+    "start": "01/01/2026",
+    "end": "18/09/2026",
+    "data_importacao": "2026-09-18"
+  },
+  "cnpj_creditors_positive_paid": 669,
+  "cnpj_creditors_processed": 669,
+  "errors": [],
+  "source_cnpj_paid_total": 132146080.7,
+  "empenho_grid_paid_total": 132146080.7,
+  "difference": 0.0,
+  "creditors_reconciled_cent": 669,
+  "creditors_not_reconciled_cent": 0,
+  "rubrics": 33,
+  "institutions": 4,
+  "control": "Rubric aggregation is descriptive. Procurement eligibility is not assigned in this workflow."
+}

@@ -1,0 +1,1444 @@
+{
+  "source": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/arroz/arroz_irrigado_serie_historica_2002-2025.xls/@@download/file",
+  "bytes": 2450432,
+  "sheets": [
+    {
+      "sheet": "Índice",
+      "rows": 41,
+      "cols": 7
+    },
+    {
+      "sheet": "Pendedo-AL-2019",
+      "rows": 72,
+      "cols": 4
+    },
+    {
+      "sheet": "Pendedo-AL-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Dourados-MS-2015",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Dourados-MS-2016",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Dourados-MS-2017",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Dourados-MS-2018",
+      "rows": 52,
+      "cols": 6
+    },
+    {
+      "sheet": "Dourados-MS-2019",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Dourados-MS-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Dourados-MS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Dourados-MS-2022",
+      "rows": 63,
+      "cols": 7
+    },
+    {
+      "sheet": "Querência do Norte-PR-2007",
+      "rows": 49,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2008",
+      "rows": 47,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2009",
+      "rows": 47,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2010",
+      "rows": 47,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2011",
+      "rows": 56,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2012",
+      "rows": 57,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2013",
+      "rows": 57,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2014",
+      "rows": 57,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2015",
+      "rows": 57,
+      "cols": 4
+    },
+    {
+      "sheet": "Querência do Norte-PR-2016",
+      "rows": 57,
+      "cols": 6
+    },
+    {
+      "sheet": "Boa Vista-RR-2016",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Boa Vista-RR-2017",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Boa Vista-RR-2018",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Boa Vista-RR-2019",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "Boa Vista-RR-2020",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Boa Vista-RR-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Boa Vista-RR-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2002",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2003",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2004",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2005",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2006",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2007",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2008",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2009",
+      "rows": 51,
+      "cols": 6
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2010",
+      "rows": 51,
+      "cols": 6
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2011",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2012",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2013",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2014",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2015",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2016",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2017",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2018",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2019",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Cachoeira do Sul-RS-2025",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Camaquã-RS-2010",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Camaquã-RS-2011",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Camaquã-RS-2012",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Camaquã-RS-2013",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Camaquã-RS-2014",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Camaquã-RS-2015",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Camaquã-RS-2016",
+      "rows": 54,
+      "cols": 6
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2017",
+      "rows": 56,
+      "cols": 4
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2018",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2019",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Eldorado do Sul-RS-2024",
+      "rows": 63,
+      "cols": 7
+    },
+    {
+      "sheet": "Itaqui-RS-2002",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2003",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2004",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2005",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2006",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2007",
+      "rows": 54,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2008",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2009",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2010",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Itaqui-RS-2011",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "Itaqui-RS-2012",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "Itaqui-RS-2013",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "Itaqui-RS-2014",
+      "rows": 74,
+      "cols": 16
+    },
+    {
+      "sheet": "Pelotas-RS-2004",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2005",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2006",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2007",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2008",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2009",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2010",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2011",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2012",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2013",
+      "rows": 53,
+      "cols": 4
+    },
+    {
+      "sheet": "Pelotas-RS-2014",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2015",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2016",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2017",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2018",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2019",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Pelotas-RS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Pelotas-RS-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Pelotas-RS-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Pelotas-RS-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Pelotas-RS-2025",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Restinga Seca-RS-2010",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2011",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2012",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2013",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2014",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2015",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2016",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2017",
+      "rows": 56,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2018",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2019",
+      "rows": 55,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2020",
+      "rows": 63,
+      "cols": 4
+    },
+    {
+      "sheet": "Restinga Seca-RS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Restinga Seca-RS-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Restinga Seca-RS-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Restinga Seca-RS-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Restinga Seca-RS-2025",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2015",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2016",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2017",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2018",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2019",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "S. A. da Patrulha-RS-2025",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2005",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2006",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2007",
+      "rows": 51,
+      "cols": 4
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2008",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2009",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2010",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2011",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2012",
+      "rows": 80,
+      "cols": 15
+    },
+    {
+      "sheet": "S. V. do Palmar-RS-2013",
+      "rows": 80,
+      "cols": 21
+    },
+    {
+      "sheet": "Uruguaiana-RS-2014",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2015",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2016",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2017",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2018",
+      "rows": 74,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2019",
+      "rows": 73,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Uruguaiana-RS-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Uruguaiana-RS-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Uruguaiana-RS-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Uruguaiana-RS-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Uruguaiana-RS-2025",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Massaranduba-SC-2007",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2008",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2009",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2010",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2011",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2012",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2013",
+      "rows": 600,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2014",
+      "rows": 48,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2015",
+      "rows": 48,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2016",
+      "rows": 48,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2017",
+      "rows": 48,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2018",
+      "rows": 48,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2019",
+      "rows": 72,
+      "cols": 4
+    },
+    {
+      "sheet": "Massaranduba-SC-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Massaranduba-SC-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Massaranduba-SC-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Massaranduba-SC-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Massaranduba-SC-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Massaranduba-SC-2025",
+      "rows": 72,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2007",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2008",
+      "rows": 60,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2009",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2010",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2011",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2012",
+      "rows": 52,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2013",
+      "rows": 867,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2014",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2015",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2016",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2017",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2018",
+      "rows": 50,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2019",
+      "rows": 72,
+      "cols": 4
+    },
+    {
+      "sheet": "Meleiro-SC-2020",
+      "rows": 64,
+      "cols": 13
+    },
+    {
+      "sheet": "Meleiro-SC-2021",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Meleiro-SC-2022",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Meleiro-SC-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Meleiro-SC-2024",
+      "rows": 63,
+      "cols": 7
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2007",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2008",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2009",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2010",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2011",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2012",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2013",
+      "rows": 45,
+      "cols": 4
+    },
+    {
+      "sheet": "Pouso Redondo-SC-2014",
+      "rows": 45,
+      "cols": 6
+    },
+    {
+      "sheet": "Propriá-SE-2023",
+      "rows": 72,
+      "cols": 4
+    },
+    {
+      "sheet": "Propriá-SE-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Propriá-SE-2025",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Lagoa da Confusão-TO-2023",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Lagoa da Confusão-TO-2024",
+      "rows": 63,
+      "cols": 5
+    },
+    {
+      "sheet": "Lagoa da Confusão-TO-2025",
+      "rows": 63,
+      "cols": 5
+    }
+  ],
+  "matches": [
+    {
+      "sheet": "Índice",
+      "row_index": 18,
+      "row_values": [
+        null,
+        null,
+        "Agricultura Familiar",
+        "Itaqui",
+        null,
+        "RS",
+        "2002 a 2014"
+      ],
+      "context_file": "_ndice_around_18.csv"
+    },
+    {
+      "sheet": "Índice",
+      "row_index": 23,
+      "row_values": [
+        null,
+        null,
+        "Agricultura Empresarial",
+        "Uruguaiana",
+        null,
+        "RS",
+        "2014 a 2025"
+      ],
+      "context_file": "_ndice_around_23.csv"
+    },
+    {
+      "sheet": "Índice",
+      "row_index": 34,
+      "row_values": [
+        null,
+        null,
+        "5) A partir de 2015 o custo de Itaqui/RS foi inativado.",
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "_ndice_around_34.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2002",
+      "row_index": 5,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2002_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2003",
+      "row_index": 5,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2003_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2004",
+      "row_index": 5,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2004_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2005",
+      "row_index": 5,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2005_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2006",
+      "row_index": 5,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2006_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2007",
+      "row_index": 5,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2007_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2008",
+      "row_index": 4,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2008_around_4.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2009",
+      "row_index": 4,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2009_around_4.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2010",
+      "row_index": 4,
+      "row_values": [
+        "LOCAL:  ITAQUI/MAÇAMBARÁ - RS",
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2010_around_4.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2011",
+      "row_index": 5,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2011/12 - Itaqui - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2011_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2012",
+      "row_index": 5,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2012/13 - Itaqui - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2012_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2013",
+      "row_index": 5,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2013/14 - Itaqui - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2013_around_5.csv"
+    },
+    {
+      "sheet": "Itaqui-RS-2014",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2014/15 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Itaqui_RS_2014_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2014",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2014/15 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2014_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2015",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2015/16 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2015_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2016",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2016/17 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2016_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2017",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "SAFRA DE VERÃO - 2017/18 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2017_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2018",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "1ª SAFRA - 2018/19 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2018_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2019",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "1ª SAFRA - 2019/20 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2019_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2020",
+      "row_index": 3,
+      "row_values": [
+        null,
+        null,
+        null,
+        null,
+        "1ª SAFRA - 2020/21 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2020_around_3.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2021",
+      "row_index": 2,
+      "row_values": [
+        "                                       1ª SAFRA - 2021/22 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2021_around_2.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2022",
+      "row_index": 2,
+      "row_values": [
+        "                                       1ª SAFRA - 2022/23 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2022_around_2.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2023",
+      "row_index": 2,
+      "row_values": [
+        "                                       1ª SAFRA - 2023/24 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2023_around_2.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2024",
+      "row_index": 2,
+      "row_values": [
+        "                                       1ª SAFRA - 2024/25 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2024_around_2.csv"
+    },
+    {
+      "sheet": "Uruguaiana-RS-2025",
+      "row_index": 2,
+      "row_values": [
+        "                                       1ª SAFRA - 2025/26 - Uruguaiana - RS",
+        null,
+        null,
+        null,
+        null
+      ],
+      "context_file": "Uruguaiana_RS_2025_around_2.csv"
+    }
+  ],
+  "nature": "BENCHMARK CONAB; não é custo observado de São Borja"
+}

@@ -1,0 +1,447 @@
+/licitacoes/pesquisarLicitacoes
+umero4 div").css('background-color','#000');
+        $("#numero4 div center strong").css('color','#fff');
+        $("#numero4 #irparadiarias").css('background-color','#fff');
+        $("#numero4 #irparadiarias a").css('color','#000');
+
+        $("#numero5 div").css('background-color','#000');
+        $("#numero5 div center strong").css('color','#fff');
+        $("#numero5 #irparafolhapagamento").css('background-color','#fff');
+        $("#numero5 #irparafolhapagamento a").css('color','#000');
+
+        $("#numero6 div").css('background-color','#000');
+        $("#numero6 div center strong").css('color','#fff');
+        $("#numero6 #irparacontratos").css('background-color','#fff');
+        $("#numero6 #irparacontratos a").css('color','#000');
+
+        $("#numero7 div").css('background-color','#000');
+        $("#numero7 div center strong").css('color','#fff');
+        $("#numero7 #irparalicitacoes").css('background-color','#fff');
+        $("#numero7 #irparalicitacoes a").css('color','#000');
+
+        $("#numero8 div").css('background-color','#000');
+        $("#numero8 div center strong").css('color','#fff');
+        $("#numero8 #cororiginal").css('background-color','#fff');
+
+        $("#numero9 div").css('background-color','#000');
+        $("#numero9 div center strong").css('color','#fff');
+        $("#numero9 #comcontraste").css('background-color','#fff');
+      });
+
+      $(".main").css('float','left');
+      $(".main").css('width','100%');
+      $("#conteudo").removeAttr('style');
+
+    });
+  
+
+
+
+  $('#btnRetornar').click(
+    function () {
+      history.back(-1);
+    }
+  );
+
+  var oParametro = {
+    "instituicao": '1',
+    "exercicio"  : '2025',
+    "mes"        : '',
+    "modalidade" : '',
+    "situacao"   : ''
+  };
+
+
+  $("#tableGridLicitacao").jqGrid({
+
+    url: '/licitacoes/pesquisarLicitacoes',
+    datatype: "json",
+    mtype: "POST",
+    postData: oParametro,
+    colNames:['Modalidade', 'Numeração', 'Edital', 'Objeto', 'Situação'],
+    colModel:[
+      {name:'modalidade' ,index:'tipocompra' ,width:'20', align:'left'},
+      {name:'numeracao'  ,index:'numero'  ,width:'15', align:'center'},
+      {name:'edital'     ,index:'edital'     ,width:'15', align:'center'},
+      {name:'objeto'     ,index:'objeto'     ,width:'50', align:'left'},
+      {name:'situacao'   ,index:'situacao'   ,width:'15', align:'left'}
+    ],
+    rowNum:15,
+    pager: '#pager',
+    gridview: true,
+    autowidth: true,
+    sortname: 'situacao',
+    viewrecords: true,
+    sortorder: "desc",
+
+
+    altRows:   true,
+    autowidth: true,
+    height:    '350px',
+    onCellSelect: function (id) {
+      location.href = '/licitacoes/consulta/'+id;
+    },
+    loadComplete: function (oResult) {
+      if (oResult.total == 0) {
+        $("#gview_tableGridLicitacao > .ui-jqgrid-bdiv").html('<h4 class="no-records">Nenhum Registro Encontrado.</h4>')
+      }
+    }
+  });
+
+  function imprime(tipo){
+
+    var div       = $('#conteudo').html();
+
+    var url   = '/licitacoes/getRelatorio';
+    var dados = {
+      aParametros : oParametro,
+      'filters'   : $("#tableGridLicitacao").getGridParam("postData").filters,
+      'tipo'      : tipo,
+      'sort'      : $("#tableGridLicitacao").jqGrid('getGridParam','sortname'),
+      'order'     : $("#tableGridLicitacao").jqGrid('getGridParam','sortorder'),
+      'function'  : 'pesquisarRelatorios',
+      'cabecalho' : [
+        {
+          'tipo'    : 'div',
+          'conteudo': div
+        }
+      ],
+      'tabelas'   : [
+        {
+          'titulo':'',
+          'colunas' :[
+            {
+              'titulo' : 'Modalidade',
+              'size'   : 35
+            },
+            {
+              'titulo' : 'Numeração',
+              'tipo'   : 'centro',
+              'size'   : 20
+            },
+            {
+              'titulo' : 'Edital',
+              'tipo'   : 'centro',
+              'size'   : 20
+            },
+            {
+              'titulo' : 'Objeto',
+              'tipo'   : 'justificado',
+              'size'   : 75
+            },
+            {
+              'titulo' : 'Situação',
+              'tipo'   : 'centro',
+              'size'   : 30
+            }
+          ]
+        }
+      ]
+    };
+    arquivos(url, dados);
+  }
+
+
+
+  var parentURL = window != window.parent ? true : false;
+
+  if (parentURL == true){
+
+    document.getElementById("main_header").style.display = "none";
+    document.getElementById("main_footer").style.display = "none";
+    document.getElementById("acessibilidademin").style.display = "none";
+    document.getElementById("breadcrumb").style.display = "none";
+    document.getElementById("buscar").style.display = "none";
+    $('html').css('background-color','#fff');
+
+  }
+
+
+
+
+=====
+
+/licitacoes/getRelatorio
+round-color','#fff');
+
+        $("#numero9 div").css('background-color','#000');
+        $("#numero9 div center strong").css('color','#fff');
+        $("#numero9 #comcontraste").css('background-color','#fff');
+      });
+
+      $(".main").css('float','left');
+      $(".main").css('width','100%');
+      $("#conteudo").removeAttr('style');
+
+    });
+  
+
+
+
+  $('#btnRetornar').click(
+    function () {
+      history.back(-1);
+    }
+  );
+
+  var oParametro = {
+    "instituicao": '1',
+    "exercicio"  : '2025',
+    "mes"        : '',
+    "modalidade" : '',
+    "situacao"   : ''
+  };
+
+
+  $("#tableGridLicitacao").jqGrid({
+
+    url: '/licitacoes/pesquisarLicitacoes',
+    datatype: "json",
+    mtype: "POST",
+    postData: oParametro,
+    colNames:['Modalidade', 'Numeração', 'Edital', 'Objeto', 'Situação'],
+    colModel:[
+      {name:'modalidade' ,index:'tipocompra' ,width:'20', align:'left'},
+      {name:'numeracao'  ,index:'numero'  ,width:'15', align:'center'},
+      {name:'edital'     ,index:'edital'     ,width:'15', align:'center'},
+      {name:'objeto'     ,index:'objeto'     ,width:'50', align:'left'},
+      {name:'situacao'   ,index:'situacao'   ,width:'15', align:'left'}
+    ],
+    rowNum:15,
+    pager: '#pager',
+    gridview: true,
+    autowidth: true,
+    sortname: 'situacao',
+    viewrecords: true,
+    sortorder: "desc",
+
+
+    altRows:   true,
+    autowidth: true,
+    height:    '350px',
+    onCellSelect: function (id) {
+      location.href = '/licitacoes/consulta/'+id;
+    },
+    loadComplete: function (oResult) {
+      if (oResult.total == 0) {
+        $("#gview_tableGridLicitacao > .ui-jqgrid-bdiv").html('<h4 class="no-records">Nenhum Registro Encontrado.</h4>')
+      }
+    }
+  });
+
+  function imprime(tipo){
+
+    var div       = $('#conteudo').html();
+
+    var url   = '/licitacoes/getRelatorio';
+    var dados = {
+      aParametros : oParametro,
+      'filters'   : $("#tableGridLicitacao").getGridParam("postData").filters,
+      'tipo'      : tipo,
+      'sort'      : $("#tableGridLicitacao").jqGrid('getGridParam','sortname'),
+      'order'     : $("#tableGridLicitacao").jqGrid('getGridParam','sortorder'),
+      'function'  : 'pesquisarRelatorios',
+      'cabecalho' : [
+        {
+          'tipo'    : 'div',
+          'conteudo': div
+        }
+      ],
+      'tabelas'   : [
+        {
+          'titulo':'',
+          'colunas' :[
+            {
+              'titulo' : 'Modalidade',
+              'size'   : 35
+            },
+            {
+              'titulo' : 'Numeração',
+              'tipo'   : 'centro',
+              'size'   : 20
+            },
+            {
+              'titulo' : 'Edital',
+              'tipo'   : 'centro',
+              'size'   : 20
+            },
+            {
+              'titulo' : 'Objeto',
+              'tipo'   : 'justificado',
+              'size'   : 75
+            },
+            {
+              'titulo' : 'Situação',
+              'tipo'   : 'centro',
+              'size'   : 30
+            }
+          ]
+        }
+      ]
+    };
+    arquivos(url, dados);
+  }
+
+
+
+  var parentURL = window != window.parent ? true : false;
+
+  if (parentURL == true){
+
+    document.getElementById("main_header").style.display = "none";
+    document.getElementById("main_footer").style.display = "none";
+    document.getElementById("acessibilidademin").style.display = "none";
+    document.getElementById("breadcrumb").style.display = "none";
+    document.getElementById("buscar").style.display = "none";
+    $('html').css('background-color','#fff');
+
+  }
+
+
+
+
+=====
+
+/licitacoes/consulta/
+nter strong").css('color','#fff');
+        $("#numero7 #irparalicitacoes").css('background-color','#fff');
+        $("#numero7 #irparalicitacoes a").css('color','#000');
+
+        $("#numero8 div").css('background-color','#000');
+        $("#numero8 div center strong").css('color','#fff');
+        $("#numero8 #cororiginal").css('background-color','#fff');
+
+        $("#numero9 div").css('background-color','#000');
+        $("#numero9 div center strong").css('color','#fff');
+        $("#numero9 #comcontraste").css('background-color','#fff');
+      });
+
+      $(".main").css('float','left');
+      $(".main").css('width','100%');
+      $("#conteudo").removeAttr('style');
+
+    });
+  
+
+
+
+  $('#btnRetornar').click(
+    function () {
+      history.back(-1);
+    }
+  );
+
+  var oParametro = {
+    "instituicao": '1',
+    "exercicio"  : '2025',
+    "mes"        : '',
+    "modalidade" : '',
+    "situacao"   : ''
+  };
+
+
+  $("#tableGridLicitacao").jqGrid({
+
+    url: '/licitacoes/pesquisarLicitacoes',
+    datatype: "json",
+    mtype: "POST",
+    postData: oParametro,
+    colNames:['Modalidade', 'Numeração', 'Edital', 'Objeto', 'Situação'],
+    colModel:[
+      {name:'modalidade' ,index:'tipocompra' ,width:'20', align:'left'},
+      {name:'numeracao'  ,index:'numero'  ,width:'15', align:'center'},
+      {name:'edital'     ,index:'edital'     ,width:'15', align:'center'},
+      {name:'objeto'     ,index:'objeto'     ,width:'50', align:'left'},
+      {name:'situacao'   ,index:'situacao'   ,width:'15', align:'left'}
+    ],
+    rowNum:15,
+    pager: '#pager',
+    gridview: true,
+    autowidth: true,
+    sortname: 'situacao',
+    viewrecords: true,
+    sortorder: "desc",
+
+
+    altRows:   true,
+    autowidth: true,
+    height:    '350px',
+    onCellSelect: function (id) {
+      location.href = '/licitacoes/consulta/'+id;
+    },
+    loadComplete: function (oResult) {
+      if (oResult.total == 0) {
+        $("#gview_tableGridLicitacao > .ui-jqgrid-bdiv").html('<h4 class="no-records">Nenhum Registro Encontrado.</h4>')
+      }
+    }
+  });
+
+  function imprime(tipo){
+
+    var div       = $('#conteudo').html();
+
+    var url   = '/licitacoes/getRelatorio';
+    var dados = {
+      aParametros : oParametro,
+      'filters'   : $("#tableGridLicitacao").getGridParam("postData").filters,
+      'tipo'      : tipo,
+      'sort'      : $("#tableGridLicitacao").jqGrid('getGridParam','sortname'),
+      'order'     : $("#tableGridLicitacao").jqGrid('getGridParam','sortorder'),
+      'function'  : 'pesquisarRelatorios',
+      'cabecalho' : [
+        {
+          'tipo'    : 'div',
+          'conteudo': div
+        }
+      ],
+      'tabelas'   : [
+        {
+          'titulo':'',
+          'colunas' :[
+            {
+              'titulo' : 'Modalidade',
+              'size'   : 35
+            },
+            {
+              'titulo' : 'Numeração',
+              'tipo'   : 'centro',
+              'size'   : 20
+            },
+            {
+              'titulo' : 'Edital',
+              'tipo'   : 'centro',
+              'size'   : 20
+            },
+            {
+              'titulo' : 'Objeto',
+              'tipo'   : 'justificado',
+              'size'   : 75
+            },
+            {
+              'titulo' : 'Situação',
+              'tipo'   : 'centro',
+              'size'   : 30
+            }
+          ]
+        }
+      ]
+    };
+    arquivos(url, dados);
+  }
+
+
+
+  var parentURL = window != window.parent ? true : false;
+
+  if (parentURL == true){
+
+    document.getElementById("main_header").style.display = "none";
+    document.getElementById("main_footer").style.display = "none";
+    document.getElementById("acessibilidademin").style.display = "none";
+    document.getElementById("breadcrumb").style.display = "none";
+    document.getElementById("buscar").style.display = "none";
+    $('html').css('background-color','#fff');
+
+  }
+
+

@@ -1,0 +1,74 @@
+{
+  "search_status": 200,
+  "search_bytes": 25073,
+  "snippets_count": {
+    "/licitacoes/pesquisarLicitacoes": 1,
+    "/licitacoes/getRelatorio": 1,
+    "/licitacoes/consulta/": 1
+  },
+  "candidate_tokens": [
+    "Modalidade",
+    "aParametros",
+    "exercicio",
+    "filters",
+    "instituicao",
+    "mes",
+    "modalidade",
+    "page",
+    "situacao"
+  ],
+  "route_markers": [
+    "/licitacoes/consulta/",
+    "/licitacoes/getRelatorio",
+    "/licitacoes/pesquisarLicitacoes"
+  ],
+  "endpoint_probes": [
+    {
+      "payload": {
+        "instituicao": "1",
+        "exercicio": "2025",
+        "mes": "",
+        "modalidade": "",
+        "situacao": "",
+        "page": "1",
+        "rows": "10",
+        "sidx": "",
+        "sord": "asc"
+      },
+      "status": 200,
+      "bytes": 7661,
+      "content_type": "text/html; charset=UTF-8",
+      "prefix": "<pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-trace').style.display = (document.getElementById('cakeErr1-trace').style.display == 'none' ? '' : 'none');\"><b>Warning</b> (2)</a>: pg_query() [<a href='http://php.net/function.pg-query'>function.pg-query</a>]: Query failed: ERROR:  syntax error at or near &quot;asc&quot;\nLINE 1: ...icitacoes.anousu = 2025                 order by  asc       ...\n                                                       ",
+      "json": false,
+      "parse_error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "payload": {
+        "instituicao": "1",
+        "exercicio": "2025",
+        "mes": "",
+        "modalidade": "",
+        "situacao": "",
+        "page": "1",
+        "rows": "10",
+        "sidx": "numero",
+        "sord": "asc"
+      },
+      "status": 200,
+      "bytes": 4772,
+      "content_type": "text/html; charset=UTF-8",
+      "prefix": "{\"total\":\"26\",\"records\":\"253\",\"page\":\"1\",\"rows\":[{\"id\":\"21291\",\"cell\":[\"CHAMADA P\\u00daBLICA\\/PNAE\",\"1\\/2025\",\"44\",\"Chamada P\\u00fablica n\\u00b0 01\\/2025 para a aquisi\\u00e7\\u00e3o de g\\u00eaneros aliment\\u00edcios a serem distribu\\u00eddos nas Escolas Municipais de Ensino Fundamental, Educa\\u00e7\\u00e3o Infantil, EJA.\",\"Homologada\"]},{\"id\":\"21269\",\"cell\":[\"PRD DISPENSA EXCETO PEQUENO VALOR\",\"1\\/2025\",\"22\",\"Contrata\\u00e7\\u00e3o de empresa para fornecer cursos do Projeto Qualifica\\u00e7\\u00e3o P",
+      "json": true,
+      "top_keys": [
+        "total",
+        "records",
+        "page",
+        "rows",
+        "sort"
+      ],
+      "records": "253",
+      "total": "26",
+      "returned_rows": 10
+    }
+  ]
+}

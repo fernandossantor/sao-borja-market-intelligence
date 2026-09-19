@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 180
     env:
       COMPETENCE: "2026-08"
-      RFB_BASE: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj"
+      RFB_BASE: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj"\n      RFB_MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
       SAO_BORJA_TOM: "8863"
     steps:
       - uses: actions/checkout@v4
@@ -154,7 +154,7 @@ jobs:
           for r in rows:
               x=summary[r["classificacao"]];x["cnpjs"]+=1;x["pago_R$"]+=float(r["pago_R$"] or 0)
           report={
-              "source":"Receita Federal do Brasil — Dados Abertos CNPJ",
+              "source":"Receita Federal do Brasil — Dados Abertos CNPJ (snapshot 2026-08; transporte oficial ou espelho conforme log)",
               "competence":"2026-08",
               "municipality_tom_sao_borja":"8863",
               "creditors":len(rows),
@@ -166,7 +166,7 @@ jobs:
                   "EXTERNAL_NO_LOCAL_FOOTPRINT":"CNPJ exato encontrado, sem estabelecimento ativo da raiz em São Borja",
                   "RFB_NOT_FOUND":"CNPJ exato ausente na competência; não inferir localidade"
               },
-              "limitation":"Classificação cadastral RFB da competência 2026-08. Ainda não é classificação de compra pública elegível nem taxa final de retenção."
+              "limitation":"Classificação cadastral referente ao snapshot 2026-08. Se houver uso do espelho de transporte, resultados permanecem exploratórios até reconciliação de hash ou reexecução no host oficial. Ainda não é classificação de compra pública elegível nem taxa final de retenção."
           }
           (OUT/"classification_summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
           print(json.dumps(report,ensure_ascii=False,indent=2))

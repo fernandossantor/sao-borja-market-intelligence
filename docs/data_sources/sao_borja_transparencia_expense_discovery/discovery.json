@@ -1,0 +1,230 @@
+{
+  "base": "https://transparencia.saoborja.rs.gov.br",
+  "html_bytes": 24826,
+  "scripts": [
+    "/js/jquery.js",
+    "/js/jquery.json.js",
+    "/js/grid.locale-pt-br.js",
+    "/js/jqGrid.js",
+    "/js/arquivos.js",
+    "/js/consulta.js",
+    "https://www.google.com/recaptcha/api.js?hl=pt-BR",
+    "/js/mascara.js"
+  ],
+  "scripts_fetched": [
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/jquery.js",
+      "file": "assets/script_00.js",
+      "bytes": 163855
+    },
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/jquery.json.js",
+      "file": "assets/script_01.js",
+      "bytes": 1800
+    },
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/grid.locale-pt-br.js",
+      "file": "assets/script_02.js",
+      "bytes": 3159
+    },
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/jqGrid.js",
+      "file": "assets/script_03.js",
+      "bytes": 226129
+    },
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/arquivos.js",
+      "file": "assets/script_04.js",
+      "bytes": 1974
+    },
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/consulta.js",
+      "file": "assets/script_05.js",
+      "bytes": 3730
+    },
+    {
+      "url": "https://transparencia.saoborja.rs.gov.br/js/mascara.js",
+      "file": "assets/script_07.js",
+      "bytes": 5773
+    }
+  ],
+  "links_actions": [
+    "/css/style.min.css",
+    "/css/jquery-ui.css",
+    "/css/ui.jqgrid.css",
+    "/cms/dashboard",
+    "/",
+    "#",
+    "#",
+    "despesas",
+    "receitas",
+    "despesas/loadDiarias",
+    "folha_pagamentos",
+    "acordos",
+    "licitacoes",
+    "/consultas/pesquisar",
+    "#",
+    "http://transparencia.saoborja.rs.gov.br/main",
+    "http://transparencia.saoborja.rs.gov.br/main/consulta_dados",
+    "#",
+    "#",
+    "#",
+    "http://www.dbseller.com.br"
+  ],
+  "forms": [
+    {
+      "action": "/consultas/pesquisar",
+      "method": "get"
+    }
+  ],
+  "candidate_endpoint_mentions": [
+    {
+      "file": "despesas.html",
+      "match": "#numero2 #irparadespesas"
+    },
+    {
+      "file": "despesas.html",
+      "match": "#numero2 #irparadespesas a"
+    },
+    {
+      "file": "despesas.html",
+      "match": "#numero5 #irparafolhapagamento"
+    },
+    {
+      "file": "despesas.html",
+      "match": "#numero5 #irparafolhapagamento a"
+    },
+    {
+      "file": "despesas.html",
+      "match": "irparadespesas"
+    },
+    {
+      "file": "despesas.html",
+      "match": "despesas"
+    },
+    {
+      "file": "despesas.html",
+      "match": ">\n            <small>Ir Para</small>\n            <strong>Despesas</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id="
+    },
+    {
+      "file": "despesas.html",
+      "match": "despesas/loadDiarias"
+    },
+    {
+      "file": "despesas.html",
+      "match": "irparafolhapagamento"
+    },
+    {
+      "file": "despesas.html",
+      "match": "folha_pagamentos"
+    },
+    {
+      "file": "despesas.html",
+      "match": ">\n            <small>Ir Para</small>\n            <strong>Folha de Pagamento</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id="
+    },
+    {
+      "file": "despesas.html",
+      "match": ">Despesas</span></div>\n<br>\n<div>\n  <label>Exercício a ser consultado :</label>\n  <select id="
+    },
+    {
+      "file": "despesas.html",
+      "match": ">Despesas por Instituição / Orgão </a></li>\n        <li><a href="
+    },
+    {
+      "file": "despesas.html",
+      "match": ">Despesas por Credor / Instituição</a></li>\n\t\t\t\t<li><a href="
+    },
+    {
+      "file": "despesas.html",
+      "match": ">Tipos de Despesas ( Elementos )  </a></li>\n\t\t\t</ul>\n\t\t</div>\n\t</fieldset>\n\t</div>\n</div>\n<br>\n<script type="
+    },
+    {
+      "file": "despesas.html",
+      "match": ";\n            aHistorico.valor_empenhado  ="
+    },
+    {
+      "file": "despesas.html",
+      "match": ";\n            aHistorico.valor_liquidado  ="
+    },
+    {
+      "file": "despesas.html",
+      "match": "/despesas/loadLink/"
+    },
+    {
+      "file": "despesas.html",
+      "match": "ajax( { async:true,\n    \t            type:'post',\n                  dataType: 'json',\n                  data: oParametros,\n    \t            beforeSend:function(request"
+    },
+    {
+      "file": "assets/script_00.js",
+      "match": "ajax({\n\t\t\turl: elem.src,\n\t\t\tasync: false,\n\t\t\tdataType: \"script\"\n\t\t}"
+    },
+    {
+      "file": "assets/script_00.js",
+      "match": "ajax({\n\t\t\turl: url,\n\t\t\ttype: type,\n\t\t\tdataType: \"html\",\n\t\t\tdata: params,\n\t\t\tcomplete: function( res, status"
+    },
+    {
+      "file": "assets/script_00.js",
+      "match": "ajax({\n\t\t\ttype: \"GET\",\n\t\t\turl: url,\n\t\t\tdata: data,\n\t\t\tsuccess: callback,\n\t\t\tdataType: type\n\t\t}"
+    },
+    {
+      "file": "assets/script_00.js",
+      "match": "ajax({\n\t\t\ttype: \"POST\",\n\t\t\turl: url,\n\t\t\tdata: data,\n\t\t\tsuccess: callback,\n\t\t\tdataType: type\n\t\t}"
+    },
+    {
+      "file": "assets/script_02.js",
+      "match": "não é uma URL válida. Prefixo obrigatório ("
+    },
+    {
+      "file": "assets/script_02.js",
+      "match": "Nenhuma URL defenida"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(b.extend({url:a.p.url,type:a.p.mtype,dataType:q,data:b.isFunction(a.p.serializeGridData"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(a.extend({url:g,dataType:\"html\",complete:function(p"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(jQuery.extend({url:b.dataUrl,type:\"GET\",dataType:\"html\",success:function(k,m"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(r"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(Q"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(jQuery.extend({url:this.dataUrl,complete:function(h"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(a.extend({url:i,data:a.isFunction(c.p.serializeRowData"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(b.extend({url:a.p.cellurl,data:b.isFunction(a.p.serializeCellData"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(b.extend({type:a.p.mtype,url:a.p.subGridUrl,dataType:a.p.subgridtype,data:b.isFunction(a.p.serializeSubGridData"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(b.extend({url:a.impurl,type:a.mtype,data:a.impData,dataType:\"xml\",\ncomplete:function(e,g"
+    },
+    {
+      "file": "assets/script_03.js",
+      "match": "ajax(b.extend({url:a.impurl,type:a.mtype,data:a.impData,dataType:\"json\",complete:function(e,g"
+    },
+    {
+      "file": "assets/script_04.js",
+      "match": "ajax({\n    type: \"POST\",\n    evalScripts: true,\n    url: sUrl,\n    data: aDados,\n    success: function (arquivo"
+    }
+  ]
+}

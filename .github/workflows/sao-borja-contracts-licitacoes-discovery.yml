@@ -18,6 +18,9 @@ jobs:
         with:
           ref: explore/receita-estadual-rs-market-intel-v1
 
+      - name: Install parser dependency
+        run: python -m pip install --quiet beautifulsoup4 requests
+
       - name: Discover municipal contract and procurement routes
         shell: bash
         run: |

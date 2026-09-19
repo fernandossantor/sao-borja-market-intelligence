@@ -1,0 +1,136 @@
+{
+  "years_inst_1": {
+    "status": 200,
+    "bytes": 127,
+    "content_type": "text/html; charset=UTF-8",
+    "json": {
+      "2018": "2018",
+      "2019": "2019",
+      "2020": "2020",
+      "2021": "2021",
+      "2022": "2022",
+      "2023": "2023",
+      "2024": "2024",
+      "2025": "2025",
+      "2026": "2026"
+    }
+  },
+  "years_inst_2": {
+    "status": 200,
+    "bytes": 2,
+    "content_type": "text/html; charset=UTF-8",
+    "json": []
+  },
+  "years_inst_3": {
+    "status": 200,
+    "bytes": 15,
+    "content_type": "text/html; charset=UTF-8",
+    "json": {
+      "2021": "2021"
+    }
+  },
+  "years_inst_4": {
+    "status": 200,
+    "bytes": 2,
+    "content_type": "text/html; charset=UTF-8",
+    "json": []
+  },
+  "search_2019": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2019&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "search_2020": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2020&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "search_2021": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2021&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "search_2022": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2022&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "search_2023": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2023&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "search_2024": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2024&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "search_2025": {
+    "status": 200,
+    "bytes": 23912,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2025&mes=",
+    "tables": [
+      {
+        "index": 0,
+        "headers": [],
+        "row_count": 0
+      }
+    ],
+    "contains_sem_result": false,
+    "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  }
+}

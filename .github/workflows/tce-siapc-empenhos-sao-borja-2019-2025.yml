@@ -1,0 +1,217 @@
+name: tce-siapc-empenhos-sao-borja-2019-2025
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/tce-siapc-empenhos-sao-borja-2019-2025.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          python -m pip install --quiet pandas
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq p7zip-full
+
+      - name: Download per-organ SIAPC empenhos
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://dados.tce.rs.gov.br/dados/municipal/empenhos"
+          ORGAO="58000"
+          RAW=".data/tmp/tce_siapc_empenhos_58000"
+          mkdir -p "$RAW"
+          printf 'year\torgan_code\ttransport\turl\tbytes\tsha256\n' > "$RAW/source_manifest.tsv"
+          for year in {2019..2025}; do
+            mkdir -p "$RAW/$year/extracted"
+            ok=0
+            for ext in csv.7z csv.zip; do
+              url="$BASE/$year/$ORGAO.$ext"
+              out="$RAW/$year/$ORGAO.$ext"
+              rm -f "$out"
+              if curl --fail --location --retry 3 --retry-all-errors --retry-delay 4 --connect-timeout 30 --max-time 1800 --output "$out" "$url"; then
+                if [[ "$ext" == "csv.7z" ]]; then
+                  if 7z t "$out" >/dev/null; then
+                    7z x -y -o"$RAW/$year/extracted" "$out" >/dev/null
+                    ok=1
+                  fi
+                else
+                  if unzip -tq "$out"; then
+                    unzip -oq "$out" -d "$RAW/$year/extracted"
+                    ok=1
+                  fi
+                fi
+                if [[ "$ok" == "1" ]]; then
+                  bytes="$(stat -c%s "$out")"
+                  sha="$(sha256sum "$out" | awk '{print $1}')"
+                  printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$year" "$ORGAO" "$ext" "$url" "$bytes" "$sha" >> "$RAW/source_manifest.tsv"
+                  break
+                fi
+              fi
+            done
+            if [[ "$ok" != "1" ]]; then
+              echo "No valid per-organ archive found for $year" >&2
+              printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$year" "$ORGAO" "FAILED" "" "0" "" >> "$RAW/source_manifest.tsv"
+            fi
+          done
+          cat "$RAW/source_manifest.tsv"
+
+      - name: Audit schemas and aggregate payments without CPF persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv, hashlib, json, re, unicodedata
+          from pathlib import Path
+          import pandas as pd
+
+          ROOT=Path('.data/tmp/tce_siapc_empenhos_58000')
+          OUT=Path('artifacts/tce_siapc_empenhos_sao_borja_2019_2025')
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          def norm(v):
+              s=unicodedata.normalize('NFKD', str(v))
+              s=''.join(ch for ch in s if not unicodedata.combining(ch)).upper()
+              return re.sub(r'[^A-Z0-9]+','_',s).strip('_')
+
+          def read_frame(path):
+              raw=path.read_bytes()[:65536]
+              enc='utf-8-sig'
+              try: raw.decode(enc)
+              except UnicodeDecodeError: enc='latin1'
+              sample=raw.decode(enc, errors='replace')
+              try: sep=csv.Sniffer().sniff(sample, delimiters=';,|\t').delimiter
+              except Exception: sep=';'
+              return pd.read_csv(path, sep=sep, encoding=enc, dtype=str, low_memory=False), enc, sep
+
+          def pick(cols, aliases):
+              nm={norm(c):c for c in cols}
+              hits=[]
+              for k,c in nm.items():
+                  if k in aliases: hits.append(c)
+              return hits[0] if len(hits)==1 else None
+
+          schemas=[]; yearly=[]; cpf_rows_total=0
+          for year in range(2019,2026):
+              files=[p for p in (ROOT/str(year)/'extracted').rglob('*') if p.is_file() and (p.suffix.lower()=='.csv' or 'csv' in p.name.lower())]
+              if not files:
+                  yearly.append({'year':year,'status':'NO_EXTRACTED_CSV'})
+                  continue
+              frames=[]
+              for p in files:
+                  try:
+                      df,enc,sep=read_frame(p)
+                  except Exception as exc:
+                      schemas.append({'year':year,'file':p.name,'status':'READ_ERROR','error':repr(exc)})
+                      continue
+                  schemas.append({'year':year,'file':p.name,'status':'READ_OK','rows':len(df),'columns':len(df.columns),'encoding':enc,'separator':repr(sep),'raw_columns':' | '.join(map(str,df.columns))})
+                  frames.append(df)
+              if not frames:
+                  yearly.append({'year':year,'status':'READ_ERROR'})
+                  continue
+              df=pd.concat(frames, ignore_index=True)
+              cols=list(df.columns)
+              op=pick(cols, {'TP_OPERACAO','TIPO_OPERACAO','TP_OP'})
+              value=pick(cols, {'VL_PAGAMENTO','VALOR_PAGAMENTO','VL_PAGO','VALOR_PAGO'})
+              doc=pick(cols, {'CGC_CPF_CREDOR','CPF_CNPJ_CREDOR','NR_CPF_CNPJ_CREDOR','CNPJ_CPF_CREDOR'})
+              cred=pick(cols, {'CD_CREDOR','COD_CREDOR','CODIGO_CREDOR'})
+              op_values=[]
+              if op:
+                  op_values=sorted(df[op].dropna().astype(str).str.strip().value_counts().head(20).to_dict().items())
+              status='SCHEMA_MAPPED' if value and doc else 'SCHEMA_PARTIAL'
+              rec={'year':year,'status':status,'rows':len(df),'operation_column':op or '', 'payment_value_column':value or '', 'creditor_document_column':doc or '', 'creditor_code_column':cred or '', 'operation_values_top20':json.dumps(op_values,ensure_ascii=False)}
+              if value and doc:
+                  work=df.copy()
+                  if op:
+                      n=work[op].astype(str).map(norm)
+                      mask=n.isin({'P','PAGAMENTO','PAGO'}) | n.str.contains('PAGAM', na=False)
+                      if mask.any(): work=work[mask].copy()
+                  vals=pd.to_numeric(work[value].astype(str).str.replace('.','',regex=False).str.replace(',','.',regex=False), errors='coerce')
+                  # If decimal point was already used without comma, retry simple numeric where the conversion above is implausibly null.
+                  simple=pd.to_numeric(work[value], errors='coerce')
+                  vals=vals.where(vals.notna(), simple)
+                  docs=work[doc].fillna('').astype(str).str.replace(r'\D','',regex=True)
+                  cnpj=docs.str.len()==14
+                  cpf=docs.str.len()==11
+                  other=~(cnpj|cpf)
+                  rec.update({
+                    'payment_rows':len(work),
+                    'payment_total':float(vals.sum(min_count=1)) if vals.notna().any() else None,
+                    'cnpj_rows':int(cnpj.sum()),
+                    'cpf_rows':int(cpf.sum()),
+                    'other_document_rows':int(other.sum()),
+                    'distinct_cnpj':int(docs[cnpj].nunique()),
+                    'distinct_cpf':int(docs[cpf].nunique()),
+                  })
+                  cpf_rows_total += int(cpf.sum())
+              yearly.append(rec)
+
+          pd.DataFrame(schemas).to_csv(OUT/'schema_inventory.csv',index=False,encoding='utf-8-sig')
+          pd.DataFrame(yearly).to_csv(OUT/'yearly_payment_aggregate.csv',index=False,encoding='utf-8-sig')
+          (OUT/'privacy_control.json').write_text(json.dumps({
+            'row_level_creditor_data_persisted':False,
+            'cpf_values_persisted':False,
+            'cpf_rows_processed_only_for_aggregate_counts':cpf_rows_total
+          },ensure_ascii=False,indent=2),encoding='utf-8')
+          print(pd.DataFrame(yearly).to_string(index=False))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/tce_siapc_empenhos_sao_borja_2019_2025"
+          mkdir -p "$DEST"
+          cp .data/tmp/tce_siapc_empenhos_58000/source_manifest.tsv "$DEST/"
+          cp artifacts/tce_siapc_empenhos_sao_borja_2019_2025/schema_inventory.csv "$DEST/"
+          cp artifacts/tce_siapc_empenhos_sao_borja_2019_2025/yearly_payment_aggregate.csv "$DEST/"
+          cp artifacts/tce_siapc_empenhos_sao_borja_2019_2025/privacy_control.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # TCE-RS/SIAPC — empenhos por credor — Prefeitura de São Borja — 2019–2025
+
+          **Fonte observada:** Tribunal de Contas do Estado do Rio Grande do Sul — Dados Abertos SIAPC.
+          **Órgão:** PM DE SÃO BORJA, código TCE-RS 58000.
+          **Período:** exercícios 2019–2025.
+          **Unidade:** R$ correntes quando a coluna de pagamento é mapeada sem ambiguidade.
+
+          A rota oficial de Despesa Orçamentária por Empenhos inclui operações de empenho, liquidação e pagamento e campos de credor, inclusive CPF/CNPJ, conforme a documentação do TCE-RS. O workflow usa exclusivamente os arquivos por órgão para evitar o download dos arquivos estaduais anuais de grande volume.
+
+          Os arquivos brutos e dados pessoais de credores pessoa física não são persistidos no Git. A camada persistida contém apenas manifesto de fonte/hashes, inventário de schema e agregados anuais. Qualquer classificação territorial futura de fornecedores deve usar apenas CNPJs e permanecer separada de CPF.
+
+          **Limitação:** SIAPC é fonte administrativa remetida pelos jurisdicionados; o próprio TCE-RS informa que esses dados de origem não foram analisados pelo Tribunal. Comparações com SICONFI exigem conciliação conceitual e temporal antes de uso analítico.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: audit TCE SIAPC creditor payments 2019 2025"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tce-siapc-empenhos-sao-borja-2019-2025
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/tce_siapc_empenhos_sao_borja_2019_2025/

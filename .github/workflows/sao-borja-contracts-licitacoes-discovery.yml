@@ -64,7 +64,10 @@ jobs:
                       if q.status_code!=200: continue
                       candidates=sorted(set(re.findall(r'''["'](/[^"']{1,160})["']''',q.text)))
                       hits=[x for x in candidates if any(k in x.lower() for k in ('acord','licit','contrat','pesquis','get','load'))]
-                      if hits: jsout.append({'url':u,'bytes':len(q.content),'candidates':hits[:200]})
+                      if hits:
+                          jsout.append({'url':u,'bytes':len(q.content),'candidates':hits[:200]})
+                          safe=re.sub(r'[^A-Za-z0-9_.-]+','_',urlparse(u).path.strip('/'))
+                          (OUT/(safe or 'script.js')).write_text(q.text,encoding='utf-8')
                   except Exception as e:
                       jsout.append({'url':u,'error':repr(e)})
               result[path]['js_route_candidates']=jsout
@@ -80,6 +83,8 @@ jobs:
           DEST=docs/data_sources/sao_borja_contracts_licitacoes_discovery
           mkdir -p "$DEST"
           cp artifacts/sao_borja_contracts_licitacoes_discovery/discovery.json "$DEST/"
+          cp artifacts/sao_borja_contracts_licitacoes_discovery/js_acordos_index.js "$DEST/" 2>/dev/null || true
+          cp artifacts/sao_borja_contracts_licitacoes_discovery/js_licitacoes.js "$DEST/" 2>/dev/null || true
           cat > "$DEST/README.md" <<'EOF'
           # São Borja — descoberta de rotas históricas de contratos e licitações
 

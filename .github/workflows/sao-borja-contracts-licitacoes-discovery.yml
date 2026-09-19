@@ -1,0 +1,99 @@
+name: sao-borja-contracts-licitacoes-discovery
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-contracts-licitacoes-discovery.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Discover municipal contract and procurement routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re,requests
+          from bs4 import BeautifulSoup
+          from pathlib import Path
+          from urllib.parse import urljoin,urlparse
+
+          BASE='https://transparencia.saoborja.rs.gov.br'
+          OUT=Path('artifacts/sao_borja_contracts_licitacoes_discovery'); OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 SBMI route audit/1.0'})
+          result={}
+          for path in ['/acordos','/licitacoes']:
+              r=s.get(BASE+path,timeout=60); r.raise_for_status()
+              soup=BeautifulSoup(r.text,'html.parser')
+              scripts=[urljoin(BASE,x.get('src')) for x in soup.find_all('script') if x.get('src')]
+              forms=[]
+              for f in soup.find_all('form'):
+                  forms.append({
+                    'action':urljoin(BASE,f.get('action') or path),
+                    'method':(f.get('method') or 'GET').upper(),
+                    'fields':[{'name':x.get('name'),'id':x.get('id'),'type':x.name,'value':x.get('value')} for x in f.find_all(['input','select','button']) if x.get('name') or x.get('id')]
+                  })
+              options={}
+              for sel in soup.find_all('select'):
+                  key=sel.get('name') or sel.get('id') or 'unnamed'
+                  vals=[{'value':o.get('value'),'text':' '.join(o.stripped_strings)} for o in sel.find_all('option')]
+                  options[key]=vals[:500]
+              ajax=sorted(set(re.findall(r'''(?:url\s*:\s*|(?:get|post)\s*\()\s*["']([^"']+)["']''',r.text,re.I)))
+              result[path]={'status':r.status_code,'bytes':len(r.content),'forms':forms,'options':options,'scripts':scripts,'inline_route_candidates':ajax}
+              (OUT/(path.strip('/')+'_html_prefix.txt')).write_text(r.text[:20000],encoding='utf-8')
+
+              # fetch same-origin JS only and scan route-like strings
+              jsout=[]
+              for u in scripts:
+                  if urlparse(u).netloc != urlparse(BASE).netloc: continue
+                  try:
+                      q=s.get(u,timeout=30);
+                      if q.status_code!=200: continue
+                      candidates=sorted(set(re.findall(r'''["'](/[^"']{1,160})["']''',q.text)))
+                      hits=[x for x in candidates if any(k in x.lower() for k in ('acord','licit','contrat','pesquis','get','load'))]
+                      if hits: jsout.append({'url':u,'bytes':len(q.content),'candidates':hits[:200]})
+                  except Exception as e:
+                      jsout.append({'url':u,'error':repr(e)})
+              result[path]['js_route_candidates']=jsout
+
+          (OUT/'discovery.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist discovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST=docs/data_sources/sao_borja_contracts_licitacoes_discovery
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_contracts_licitacoes_discovery/discovery.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — descoberta de rotas históricas de contratos e licitações
+
+          Fonte: Portal da Transparência da Prefeitura de São Borja.
+
+          Objetivo: identificar rotas e parâmetros reproduzíveis para contratos/licitações que possam complementar a lacuna histórica de credores do SIAPC. Esta etapa registra somente estrutura de interface e rotas, sem dados pessoais.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: discover São Borja contract procurement routes"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sao-borja-contracts-licitacoes-discovery
+          path: artifacts/sao_borja_contracts_licitacoes_discovery/

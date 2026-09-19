@@ -17,8 +17,10 @@ jobs:
     timeout-minutes: 180
     env:
       COMPETENCE: "2026-08"
-      RFB_BASE: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj"\n      RFB_MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
+      RFB_BASE: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj"
+      RFB_MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
       SAO_BORJA_TOM: "8863"
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +33,7 @@ jobs:
       - name: Install parser
         run: python -m pip install --quiet pandas
 
-      - name: Scan official RFB establishment shards for creditor roots
+      - name: Scan RFB establishment shards for creditor roots
         shell: bash
         run: |
           set -euo pipefail
@@ -39,96 +41,135 @@ jobs:
           mkdir -p "$OUT/raw"
           SRC="docs/data_sources/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv"
           test -s "$SRC"
+          : > "$OUT/transport_sources.txt"
 
-          curl -fL --retry 5 --retry-delay 5 --connect-timeout 30 --max-time 600 \
-            "${RFB_BASE}/${COMPETENCE}/Municipios.zip" -o "$OUT/raw/Municipios.zip"
+          download_rfb() {
+            local file="$1"
+            local out="$2"
+            echo "Trying official RFB: $file"
+            if curl -4 -fL --retry 1 --retry-delay 2 --connect-timeout 8 --max-time 120 \
+              "${RFB_BASE}/${COMPETENCE}/$file" -o "$out"; then
+              echo "$file|OFFICIAL_RFB" >> "$OUT/transport_sources.txt"
+            else
+              echo "Official RFB unavailable; using August-2026 transport mirror: $file"
+              rm -f "$out"
+              curl -fL --retry 4 --retry-all-errors --retry-delay 5 --connect-timeout 20 --max-time 1800 \
+                "${RFB_MIRROR}/$file" -o "$out"
+              echo "$file|MIRROR_CASA_DOS_DADOS" >> "$OUT/transport_sources.txt"
+            fi
+            test -s "$out"
+            unzip -tq "$out"
+          }
+
+          download_rfb "Municipios.zip" "$OUT/raw/Municipios.zip"
 
           python - <<'PY'
-          import csv,json,zipfile
+          import csv, io, json, zipfile
           from pathlib import Path
+
           OUT=Path("artifacts/rfb_public_creditors_2026")
           z=zipfile.ZipFile(OUT/"raw/Municipios.zip")
-          name=z.namelist()[0]
+          name=next(n for n in z.namelist() if not n.endswith("/"))
           mapping={}
           with z.open(name) as fh:
-              import io
               txt=io.TextIOWrapper(fh,encoding="latin1")
               for row in csv.reader(txt,delimiter=";"):
-                  if len(row)>=2:mapping[row[0]]=row[1]
-          (OUT/"municipios.json").write_text(json.dumps(mapping,ensure_ascii=False),encoding="utf-8")
+                  if len(row)>=2:
+                      mapping[row[0]]=row[1]
+          (OUT/"municipios.json").write_text(
+              json.dumps(mapping,ensure_ascii=False),encoding="utf-8"
+          )
           print("municipios",len(mapping))
           PY
 
           for i in {0..9}; do
             echo "=== Estabelecimentos${i}.zip ==="
-            curl -fL --retry 5 --retry-delay 8 --connect-timeout 30 --max-time 1800 \
-              "${RFB_BASE}/${COMPETENCE}/Estabelecimentos${i}.zip" \
-              -o "$OUT/raw/Estabelecimentos${i}.zip"
-            test -s "$OUT/raw/Estabelecimentos${i}.zip"
+            download_rfb "Estabelecimentos${i}.zip" "$OUT/raw/Estabelecimentos${i}.zip"
             SHARD="$i" python - <<'PY'
-          import csv,json,os,zipfile
+          import csv, json, os, zipfile
           from pathlib import Path
           import pandas as pd
 
           OUT=Path("artifacts/rfb_public_creditors_2026")
           SRC=Path("docs/data_sources/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv")
           shard=os.environ["SHARD"]
+
           targets=[]
           with SRC.open(encoding="utf-8-sig",newline="") as f:
               for r in csv.DictReader(f):
-                  c=''.join(ch for ch in r["cnpj"] if ch.isdigit()).zfill(14)
+                  c="".join(ch for ch in r["cnpj"] if ch.isdigit()).zfill(14)
                   targets.append(c)
           roots=set(c[:8] for c in targets)
+
           zpath=OUT/"raw"/f"Estabelecimentos{shard}.zip"
           z=zipfile.ZipFile(zpath)
           csvname=next(n for n in z.namelist() if not n.endswith("/"))
           found=[]
           with z.open(csvname) as fh:
               for chunk in pd.read_csv(
-                  fh,sep=";",header=None,dtype=str,encoding="latin1",
-                  usecols=[0,1,2,5,19,20],chunksize=400000,
-                  na_filter=False,low_memory=False
+                  fh,
+                  sep=";",
+                  header=None,
+                  dtype=str,
+                  encoding="latin1",
+                  usecols=[0,1,2,5,19,20],
+                  chunksize=400000,
+                  na_filter=False,
+                  low_memory=False,
               ):
-                  m=chunk[0].isin(roots)
-                  if not m.any():continue
-                  for row in chunk.loc[m].itertuples(index=False,name=None):
+                  mask=chunk[0].isin(roots)
+                  if not mask.any():
+                      continue
+                  for row in chunk.loc[mask].itertuples(index=False,name=None):
                       basic,order,dv,status,uf,mun=row
                       found.append({
-                          "cnpj_basico":basic,"ordem":order,"dv":dv,
-                          "cnpj":basic+order+dv,"situacao":status,
-                          "uf":uf,"municipio_tom":mun,
-                          "shard":int(shard)
+                          "cnpj_basico":basic,
+                          "ordem":order,
+                          "dv":dv,
+                          "cnpj":basic+order+dv,
+                          "situacao":status,
+                          "uf":uf,
+                          "municipio_tom":mun,
+                          "shard":int(shard),
                       })
-          p=OUT/f"matches_{shard}.json"
-          p.write_text(json.dumps(found,ensure_ascii=False),encoding="utf-8")
+
+          (OUT/f"matches_{shard}.json").write_text(
+              json.dumps(found,ensure_ascii=False),encoding="utf-8"
+          )
           print("matches",len(found))
           PY
             rm -f "$OUT/raw/Estabelecimentos${i}.zip"
           done
 
           python - <<'PY'
-          import csv,json
+          import csv, json
           from collections import defaultdict
           from pathlib import Path
 
           OUT=Path("artifacts/rfb_public_creditors_2026")
           SRC=Path("docs/data_sources/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv")
           SAO="8863"
-          mun=json.loads((OUT/"municipios.json").read_text(encoding="utf-8"))
+
+          municipalities=json.loads((OUT/"municipios.json").read_text(encoding="utf-8"))
           matches=[]
           for p in sorted(OUT.glob("matches_*.json")):
               matches.extend(json.loads(p.read_text(encoding="utf-8")))
 
           by_exact={x["cnpj"]:x for x in matches}
           by_root=defaultdict(list)
-          for x in matches:by_root[x["cnpj_basico"]].append(x)
+          for x in matches:
+              by_root[x["cnpj_basico"]].append(x)
 
           rows=[]
           with SRC.open(encoding="utf-8-sig",newline="") as f:
               for r in csv.DictReader(f):
-                  c=''.join(ch for ch in r["cnpj"] if ch.isdigit()).zfill(14)
-                  root=c[:8];exact=by_exact.get(c)
-                  local_active=[x for x in by_root.get(root,[]) if x["situacao"]=="02" and x["municipio_tom"]==SAO]
+                  c="".join(ch for ch in r["cnpj"] if ch.isdigit()).zfill(14)
+                  root=c[:8]
+                  exact=by_exact.get(c)
+                  local_active=[
+                      x for x in by_root.get(root,[])
+                      if x["situacao"]=="02" and x["municipio_tom"]==SAO
+                  ]
                   if exact and exact["situacao"]=="02" and exact["municipio_tom"]==SAO:
                       cls="LOCAL_EXACT"
                   elif local_active:
@@ -137,38 +178,63 @@ jobs:
                       cls="EXTERNAL_NO_LOCAL_FOOTPRINT"
                   else:
                       cls="RFB_NOT_FOUND"
+
                   rows.append({
-                      "id_credor":r["id_credor"],"cnpj":c,"nome_credor":r["nome_credor"],
-                      "pago_R$":r["pago_R$"],"classificacao":cls,
+                      "id_credor":r["id_credor"],
+                      "cnpj":c,
+                      "nome_credor":r["nome_credor"],
+                      "pago_R$":r["pago_R$"],
+                      "classificacao":cls,
                       "exact_situacao":exact["situacao"] if exact else "",
                       "exact_uf":exact["uf"] if exact else "",
                       "exact_municipio_tom":exact["municipio_tom"] if exact else "",
-                      "exact_municipio_nome":mun.get(exact["municipio_tom"],"") if exact else "",
-                      "root_local_active_count":len(local_active)
+                      "exact_municipio_nome":municipalities.get(exact["municipio_tom"],"") if exact else "",
+                      "root_local_active_count":len(local_active),
                   })
 
-          with (OUT/"creditors_rfb_classification.csv").open("w",newline="",encoding="utf-8-sig") as f:
-              fields=list(rows[0].keys());w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(rows)
+          with (OUT/"creditors_rfb_classification.csv").open(
+              "w",newline="",encoding="utf-8-sig"
+          ) as f:
+              fields=list(rows[0].keys())
+              w=csv.DictWriter(f,fieldnames=fields)
+              w.writeheader()
+              w.writerows(rows)
 
           summary=defaultdict(lambda:{"cnpjs":0,"pago_R$":0.0})
           for r in rows:
-              x=summary[r["classificacao"]];x["cnpjs"]+=1;x["pago_R$"]+=float(r["pago_R$"] or 0)
+              s=summary[r["classificacao"]]
+              s["cnpjs"]+=1
+              s["pago_R$"]+=float(r["pago_R$"] or 0)
+
+          transports={}
+          for line in (OUT/"transport_sources.txt").read_text(encoding="utf-8").splitlines():
+              if "|" in line:
+                  file,src=line.split("|",1)
+                  transports[file]=src
+
           report={
-              "source":"Receita Federal do Brasil — Dados Abertos CNPJ (snapshot 2026-08; transporte oficial ou espelho conforme log)",
+              "substantive_source":"Receita Federal do Brasil — Dados Abertos CNPJ",
               "competence":"2026-08",
+              "transport_by_file":transports,
+              "transport_mirror_used":any(v!="OFFICIAL_RFB" for v in transports.values()),
               "municipality_tom_sao_borja":"8863",
               "creditors":len(rows),
               "establishment_matches":len(matches),
-              "classification":{k:{"cnpjs":v["cnpjs"],"pago_R$":round(v["pago_R$"],2)} for k,v in summary.items()},
+              "classification":{
+                  k:{"cnpjs":v["cnpjs"],"pago_R$":round(v["pago_R$"],2)}
+                  for k,v in summary.items()
+              },
               "rules":{
                   "LOCAL_EXACT":"CNPJ credor ativo e município TOM 8863",
                   "ROOT_WITH_LOCAL_FOOTPRINT":"CNPJ credor não é estabelecimento ativo local, mas mesma raiz possui estabelecimento ativo TOM 8863",
                   "EXTERNAL_NO_LOCAL_FOOTPRINT":"CNPJ exato encontrado, sem estabelecimento ativo da raiz em São Borja",
-                  "RFB_NOT_FOUND":"CNPJ exato ausente na competência; não inferir localidade"
+                  "RFB_NOT_FOUND":"CNPJ exato ausente na competência; não inferir localidade",
               },
-              "limitation":"Classificação cadastral referente ao snapshot 2026-08. Se houver uso do espelho de transporte, resultados permanecem exploratórios até reconciliação de hash ou reexecução no host oficial. Ainda não é classificação de compra pública elegível nem taxa final de retenção."
+              "limitation":"Se qualquer arquivo tiver sido obtido pelo espelho de transporte, a classificação permanece exploratória até reconciliação de hash com o host oficial ou reexecução integral pela fonte oficial.",
           }
-          (OUT/"classification_summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          (OUT/"classification_summary.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8"
+          )
           print(json.dumps(report,ensure_ascii=False,indent=2))
           PY
 
@@ -181,13 +247,22 @@ jobs:
           mkdir -p "$DEST"
           cp artifacts/rfb_public_creditors_2026/creditors_rfb_classification.csv "$DEST/"
           cp artifacts/rfb_public_creditors_2026/classification_summary.json "$DEST/"
+          cp artifacts/rfb_public_creditors_2026/transport_sources.txt "$DEST/"
           cat > "$DEST/README.md" <<'EOF'
           # RFB — enriquecimento territorial de credores CNPJ — PMSB 2026
 
           Camada exploratória, não canônica.
 
-          Fonte primária: Receita Federal do Brasil — Dados Abertos CNPJ,
+          Fonte substantiva: Receita Federal do Brasil — Dados Abertos CNPJ,
           competência 2026-08, arquivos Estabelecimentos0..9 e Municípios.
+
+          Regra de transporte:
+          1. tentar o host oficial da RFB;
+          2. se houver timeout, usar o espelho Casa dos Dados do snapshot agosto/2026;
+          3. registrar a origem de transporte arquivo a arquivo.
+
+          Se o espelho for usado, a classificação não deve ser promovida ao canônico
+          antes de reconciliação de hash com o host oficial ou reexecução oficial.
 
           Universo: CNPJs presentes na consulta de credores do Portal da Transparência
           de São Borja para 01/01/2026 até a data corrente da extração.
@@ -200,9 +275,10 @@ jobs:
             local na raiz;
           - RFB_NOT_FOUND: não localizado na competência; manter indeterminado.
 
-          A classificação é cadastral. Ainda não separa fornecedores elegíveis de
-          transferências, tributos, dívida, associações, previdência ou outros fluxos.
+          A classificação é cadastral e não substitui a classificação de elegibilidade
+          das rubricas de compra.
           EOF
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$DEST"
@@ -222,5 +298,6 @@ jobs:
           path: |
             artifacts/rfb_public_creditors_2026/creditors_rfb_classification.csv
             artifacts/rfb_public_creditors_2026/classification_summary.json
+            artifacts/rfb_public_creditors_2026/transport_sources.txt
             artifacts/rfb_public_creditors_2026/matches_*.json
             artifacts/rfb_public_creditors_2026/municipios.json

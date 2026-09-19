@@ -1,0 +1,83 @@
+{
+  "source": "https://transparencia.saoborja.rs.gov.br/despesas",
+  "data_importacao": "2026-09-18",
+  "years": [
+    {
+      "year": 2019,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2020,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2021,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2022,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2023,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2024,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2025,
+      "status": "ERROR",
+      "error": "JSONDecodeError('Expecting value: line 1 column 1 (char 0)')"
+    },
+    {
+      "year": 2026,
+      "status": "OK",
+      "period_end": "18/09",
+      "records": 1930,
+      "categories": {
+        "CNPJ": {
+          "count": 740,
+          "empenhado": 174649687.5,
+          "anulado": 7207431.84,
+          "liquidado": 138188930.39,
+          "pago": 132146080.7
+        },
+        "CPF": {
+          "count": 1190,
+          "empenhado": 168490565.37,
+          "anulado": 24130218.51,
+          "liquidado": 143622180.85,
+          "pago": 143503654.08
+        },
+        "OUTRO": {
+          "count": 0,
+          "empenhado": 0.0,
+          "anulado": 0.0,
+          "liquidado": 0.0,
+          "pago": 0.0
+        }
+      },
+      "totals": {
+        "empenhado": 343140252.87,
+        "anulado": 31337650.35,
+        "liquidado": 281811111.24,
+        "pago": 275649734.78
+      }
+    }
+  ],
+  "privacy_rule": "CPF details are not persisted; only annual aggregate counts/values. CNPJ rows are retained for later procurement/rubric analysis.",
+  "purpose": "Test historical comparability before building a longer public-accounts/procurement series.",
+  "limitations": [
+    "Portal coverage rules may change over time; each year must be checked against metadata/origin documentation.",
+    "Annual creditor totals are not procurement totals until rubrics/instruments are classified.",
+    "2026 is partial through the portal update date."
+  ]
+}

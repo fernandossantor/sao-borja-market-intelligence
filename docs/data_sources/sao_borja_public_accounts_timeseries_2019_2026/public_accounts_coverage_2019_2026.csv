@@ -1,0 +1,9 @@
+﻿year,status,period_end,records,cnpj_count,cpf_count,outro_count,empenhado_R$,anulado_R$,liquidado_R$,pago_R$,pago_cnpj_R$,pago_cpf_R$
+2019,ERROR,,,,,,,,,,,
+2020,ERROR,,,,,,,,,,,
+2021,ERROR,,,,,,,,,,,
+2022,ERROR,,,,,,,,,,,
+2023,ERROR,,,,,,,,,,,
+2024,ERROR,,,,,,,,,,,
+2025,ERROR,,,,,,,,,,,
+2026,OK,18/09,1930,740,1190,0,343140252.87,31337650.35,281811111.24,275649734.78,132146080.7,143503654.08

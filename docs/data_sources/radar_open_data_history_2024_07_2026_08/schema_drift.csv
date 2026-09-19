@@ -1,1 +1,2 @@
 ﻿raw_columns,column_mapping,months,first_period,last_period
+anomes | cod_ncm | ncm_descr | emit_uf | tipo_operacao | vlr_nominal | corte_sigilo,ncm=cod_ncm | origin_type=tipo_operacao | period=anomes | value=vlr_nominal,26,2024-07,2026-08

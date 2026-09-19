@@ -1,27 +1,27 @@
-﻿period,status,ncm_codes_with_composition,error
-2024-07,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2024-08,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2024-09,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2024-10,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2024-11,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2024-12,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-01,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-02,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-03,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-04,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-05,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-06,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-07,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-08,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-09,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-10,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-11,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2025-12,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-01,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-02,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-03,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-04,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-05,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-06,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-07,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
-2026-08,AUDIT_ERROR,0,"AttributeError(""'RadarOpenDataAuditResult' object has no attribute 'schema'"")"
+﻿period,status,ncm_codes_with_composition,composition_rows
+2024-07,AUDIT_OK,7,7
+2024-08,AUDIT_OK,7,7
+2024-09,AUDIT_OK,7,7
+2024-10,AUDIT_OK,7,7
+2024-11,AUDIT_OK,7,7
+2024-12,AUDIT_OK,7,7
+2025-01,AUDIT_OK,7,7
+2025-02,AUDIT_OK,7,7
+2025-03,AUDIT_OK,7,7
+2025-04,AUDIT_OK,7,7
+2025-05,AUDIT_OK,7,7
+2025-06,AUDIT_OK,7,7
+2025-07,AUDIT_OK,7,7
+2025-08,AUDIT_OK,7,7
+2025-09,AUDIT_OK,7,7
+2025-10,AUDIT_OK,7,7
+2025-11,AUDIT_OK,7,7
+2025-12,AUDIT_OK,7,7
+2026-01,AUDIT_OK,7,7
+2026-02,AUDIT_OK,7,7
+2026-03,AUDIT_OK,7,7
+2026-04,AUDIT_OK,7,7
+2026-05,AUDIT_OK,7,7
+2026-06,AUDIT_OK,7,7
+2026-07,AUDIT_OK,7,7
+2026-08,AUDIT_OK,7,7

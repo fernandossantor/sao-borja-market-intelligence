@@ -1,0 +1,77 @@
+name: tce-siapc-connectivity-probe
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/tce-siapc-connectivity-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Probe official TCE-RS routes over IPv4
+        shell: bash
+        run: |
+          set -u
+          OUT="docs/data_sources/tce_siapc_connectivity_probe"
+          mkdir -p "$OUT"
+          : > "$OUT/probe.tsv"
+          printf 'label\turl\thttp_code\tremote_ip\tcontent_type\tsize_download\texit_code\n' >> "$OUT/probe.tsv"
+
+          probe () {
+            label="$1"; url="$2"
+            tmp="$(mktemp)"
+            meta="$(mktemp)"
+            curl -4 -L -sS --connect-timeout 12 --max-time 40 \
+              -o "$tmp" -w '%{http_code}\t%{remote_ip}\t%{content_type}\t%{size_download}' \
+              "$url" > "$meta"
+            ec=$?
+            vals="$(cat "$meta" 2>/dev/null || true)"
+            printf '%s\t%s\t%s\t%s\n' "$label" "$url" "$vals" "$ec" >> "$OUT/probe.tsv"
+            rm -f "$tmp" "$meta"
+          }
+
+          probe https_home "https://dados.tce.rs.gov.br/"
+          probe http_home "http://dados.tce.rs.gov.br/"
+          probe https_ckan "https://dados.tce.rs.gov.br/api/3/action/status_show"
+          probe http_ckan "http://dados.tce.rs.gov.br/api/3/action/status_show"
+          probe https_per_org_2025_7z "https://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.7z"
+          probe http_per_org_2025_7z "http://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.7z"
+          probe https_per_org_2025_zip "https://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.zip"
+          probe http_per_org_2025_zip "http://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.zip"
+
+          cat "$OUT/probe.tsv"
+
+      - name: Persist probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="docs/data_sources/tce_siapc_connectivity_probe"
+          cat > "$OUT/README.md" <<'EOF'
+          # TCE-RS/SIAPC — teste de conectividade do runner
+
+          Diagnóstico técnico para separar indisponibilidade dos dados de bloqueio de transporte entre GitHub Actions e `dados.tce.rs.gov.br`.
+
+          Foram testados HTTPS/HTTP, CKAN e a rota oficial por órgão `empenhos/2025/58000.csv.{7z,zip}`, forçando IPv4.
+
+          Este teste não contém dados de credores.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$OUT"
+          if ! git diff --cached --quiet; then
+            git commit -m "audit: probe TCE SIAPC connectivity over IPv4"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi

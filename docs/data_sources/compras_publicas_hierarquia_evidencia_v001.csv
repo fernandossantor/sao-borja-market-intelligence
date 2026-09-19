@@ -1,0 +1,6 @@
+camada,fonte,unidade_observada,uso_principal,forca_para_retencao,limitacao,regra
+Contrato,TCE-RS LicitaCon,VL_CONTRATO por contrato/fornecedor/objeto,"Mapear compromisso contratual, objeto, fornecedor e estrutura da contratação","MÉDIA","Contrato pode não ser integralmente executado ou pago","Não usar como saída financeira efetiva"
+Empenho,TCE-RS SIAPC,Valor do empenho por credor,"Mapear reserva/comprometimento orçamentário","MÉDIA-ALTA","Pode ser anulado, liquidado parcialmente ou não pago","Separar de liquidação e pagamento"
+Liquidação,TCE-RS SIAPC,Valor liquidado por credor,"Mapear obrigação reconhecida após entrega/execução","ALTA","Ainda pode não estar paga no período","Não tratar como caixa efetivamente transferido"
+Pagamento,TCE-RS SIAPC,Valor pago por credor,"Medir saída financeira administrativa de primeira rodada","MUITO ALTA","Não informa retenção posterior do fornecedor; pode incluir empenhos de anos anteriores","Preferir para indicador de compras públicas locais"
+Cadastro fornecedor,RFB CNPJ,CNPJ estabelecimento/raiz/município,"Classificar localidade jurídica e presença operacional","ESSENCIAL","Competência cadastral pode diferir da data do pagamento; CPF exige tratamento separado","Usar competência explicitada e categorias LOCAL_EXACT/ROOT_WITH_LOCAL_FOOTPRINT/EXTERNAL_NO_LOCAL_FOOTPRINT"

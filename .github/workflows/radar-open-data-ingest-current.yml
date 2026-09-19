@@ -1,0 +1,131 @@
+name: radar-open-data-ingest-current
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/radar-open-data-ingest-current.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Download official Radar CSVs
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC=".data/tmp/radar_open_data_current"
+          mkdir -p "$SRC"
+          base="https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos"
+          files=(
+            "Categorias_Produtos.csv"
+            "Portfolio_NCMs_Setor.csv"
+            "Composicao_de_Mercado_08_2026.csv"
+          )
+          printf 'file\turl\tbytes\tsha256\n' > "$SRC/source_manifest.tsv"
+          for file in "${files[@]}"; do
+            url="$base/$file"
+            curl --fail --location --retry 5 --retry-all-errors --retry-delay 5 \
+              --connect-timeout 30 --max-time 1800 \
+              --output "$SRC/$file" "$url"
+            bytes="$(stat -c%s "$SRC/$file")"
+            sha="$(sha256sum "$SRC/$file" | awk '{print $1}')"
+            printf '%s\t%s\t%s\t%s\n' "$file" "$url" "$bytes" "$sha" >> "$SRC/source_manifest.tsv"
+          done
+          cat "$SRC/source_manifest.tsv"
+
+      - name: Run auditable ingestion
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXECUTION_ID="radar-open-data-current-2026-08"
+          python -m sbmi.radar_open_data_cli \
+            --source-dir ".data/tmp/radar_open_data_current" \
+            --execution-id "$EXECUTION_ID"
+          echo "EXECUTION_ID=$EXECUTION_ID" >> "$GITHUB_ENV"
+          echo '--- schema ---'
+          cat ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/schema_inventory.csv"
+          echo '--- validation ---'
+          cat ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/validation.csv"
+          echo '--- composition ---'
+          cat ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/composition_summary.csv"
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/radar_open_data_current_2026_08"
+          mkdir -p "$DEST"
+          cp ".data/tmp/radar_open_data_current/source_manifest.tsv" "$DEST/"
+          cp ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/schema_inventory.csv" "$DEST/"
+          cp ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/ncm_basket.csv" "$DEST/"
+          cp ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/ncm_matches.csv" "$DEST/"
+          cp ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/composition_summary.csv" "$DEST/"
+          cp ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/validation.csv" "$DEST/"
+          cp ".data/audit/receita_rs/radar_open_data/$EXECUTION_ID/limitations.csv" "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Radar do Mercado — Dados Abertos — ingestão corrente ago/2026
+
+          **Fonte observada:** Receita Estadual/SEFAZ-RS — Radar do Mercado — Dados Abertos.
+          **Data de atualização exibida no painel:** 11/09/2026 para os arquivos correntes localizados.
+          **Período principal:** agosto/2026 para Composição de Mercado.
+          **Abrangência:** Rio Grande do Sul e fluxos INT/OUF/EXT conforme a Nota Técnica CIET 05/2026.
+          **Natureza:** arquivos oficiais observados; Part.RS e classificação de dependência são cálculos do SBMI sobre os campos oficiais quando o schema permite.
+
+          Arquivos baixados diretamente da infraestrutura oficial:
+          - Categorias_Produtos.csv;
+          - Portfolio_NCMs_Setor.csv;
+          - Composicao_de_Mercado_08_2026.csv.
+
+          source_manifest.tsv preserva URL, tamanho e SHA-256. Os CSVs brutos não são adicionados ao Git; os resultados compactos de auditoria e o inventário de schema são persistidos.
+
+          Fórmula permitida: Part.RS = INT / (INT + OUF + EXT).
+
+          Faixas expressamente documentadas na NT CIET 05/2026:
+          - crítica: Part.RS < 5%;
+          - alta: 5% <= Part.RS < 15%;
+          - média: 15% <= Part.RS < 30%.
+
+          Valores acima de 30% são marcados pelo pipeline como FORA_DAS_FAIXAS_NT; este marcador não constitui categoria oficial adicional.
+
+          **Limitação:** esta execução usa a cesta-piloto auditada de sete NCMs do arroz apenas para validar schema e cálculo. Não define o escopo setorial do projeto nem transforma indicador estadual em demanda municipal.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: ingest current Radar open data for Aug 2026"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-open-data-current-2026-08
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            .data/tmp/radar_open_data_current/source_manifest.tsv
+            .data/audit/receita_rs/radar_open_data/radar-open-data-current-2026-08/

@@ -1,0 +1,147 @@
+name: licitacon-sao-borja-procurement-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/licitacon-sao-borja-procurement-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Extract PM São Borja records from LicitaCon contracts 2026
+        run: |
+          cat > /tmp/licita_sb.py <<'PY'
+          import csv, io, json, re, ssl, urllib.request, zipfile
+          from pathlib import Path
+
+          OUT=Path("artifacts/licitacon_sao_borja_2026")
+          OUT.mkdir(parents=True,exist_ok=True)
+          URL="https://dados.tce.rs.gov.br/dados/licitacon/contrato/ano/2026.csv.zip"
+          req=urllib.request.Request(URL,headers={"User-Agent":"SBMI exploratory audit/1.0"})
+          with urllib.request.urlopen(req,timeout=180,context=ssl.create_default_context()) as r:
+              raw=r.read(); status=r.status
+          (OUT/"source_manifest.json").write_text(json.dumps({
+              "source":"TCE-RS / LicitaCon — Contratos Consolidado 2026",
+              "url":URL,"http_status":status,"bytes":len(raw),
+              "target_orgao":"58000 — PM DE SAO BORJA",
+              "nature":"DADO OBSERVADO EM FONTE ADMINISTRATIVA; ainda não convertido em pagamento/retencao"
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+
+          def decode(data):
+              for enc in ("utf-8-sig","latin1","cp1252"):
+                  try: return data.decode(enc),enc
+                  except Exception: pass
+              raise UnicodeDecodeError("unknown",b"",0,1,"no encoding")
+
+          def sniff(text):
+              try:return csv.Sniffer().sniff(text[:8000],delimiters=";,|\t").delimiter
+              except Exception:return ";"
+
+          inventory=[]
+          filtered={}
+          with zipfile.ZipFile(io.BytesIO(raw)) as z:
+              for name in z.namelist():
+                  if name.endswith("/") or not name.lower().endswith(".csv"): continue
+                  data=z.read(name)
+                  text,enc=decode(data)
+                  delim=sniff(text)
+                  reader=csv.DictReader(io.StringIO(text),delimiter=delim)
+                  fields=reader.fieldnames or []
+                  org_cols=[c for c in fields if c.upper()=="CD_ORGAO" or "ORGAO" in c.upper()]
+                  org_col="CD_ORGAO" if "CD_ORGAO" in fields else (org_cols[0] if org_cols else None)
+                  rows=[]
+                  total=0; matched=0
+                  for row in reader:
+                      total+=1
+                      if org_col and str(row.get(org_col,"")).strip()=="58000":
+                          rows.append(row); matched+=1
+                  key=Path(name).stem.upper()
+                  inventory.append({"file":name,"encoding":enc,"delimiter":delim,"rows":total,"matched":matched,
+                                    "org_col":org_col,"fields":fields})
+                  if matched:
+                      filtered[key]={"name":name,"fields":fields,"rows":rows}
+                      out=OUT/(Path(name).stem+"_sao_borja.csv")
+                      with out.open("w",newline="",encoding="utf-8-sig") as f:
+                          w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(rows)
+
+          (OUT/"inventory.json").write_text(json.dumps(inventory,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Candidate schema analysis for supplier, geography and value joins.
+          schema={}
+          for key,obj in filtered.items():
+              fields=obj["fields"]
+              schema[key]={
+                  "rows":len(obj["rows"]),
+                  "id_candidates":[c for c in fields if any(k in c.upper() for k in ("PESSOA","CNPJ","CPF","DOCUMENT","CONTRAT","LICIT","SEQ","ID_"))],
+                  "geo_candidates":[c for c in fields if any(k in c.upper() for k in ("MUNIC","CIDADE","UF","ENDERE","CEP"))],
+                  "value_candidates":[c for c in fields if any(k in c.upper() for k in ("VALOR","VL_","PRECO","TOTAL"))],
+                  "date_candidates":[c for c in fields if any(k in c.upper() for k in ("DATA","DT_"))],
+                  "sample":obj["rows"][:3],
+              }
+          (OUT/"schema_candidates.json").write_text(json.dumps(schema,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Long inventory summary.
+          with (OUT/"inventory.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["file","rows_total","rows_sao_borja","org_col","fields_count"])
+              for x in inventory:w.writerow([x["file"],x["rows"],x["matched"],x["org_col"],len(x["fields"])])
+
+          print(json.dumps({
+              "http_status":status,"bytes":len(raw),
+              "files":len(inventory),
+              "matched_files":{k:len(v["rows"]) for k,v in filtered.items()}
+          },ensure_ascii=False,indent=2))
+          PY
+          python /tmp/licita_sb.py
+
+      - name: Persist exploratory evidence
+        run: |
+          mkdir -p docs/data_sources/licitacon_sao_borja_2026
+          cp artifacts/licitacon_sao_borja_2026/source_manifest.json docs/data_sources/licitacon_sao_borja_2026/
+          cp artifacts/licitacon_sao_borja_2026/inventory.json docs/data_sources/licitacon_sao_borja_2026/
+          cp artifacts/licitacon_sao_borja_2026/inventory.csv docs/data_sources/licitacon_sao_borja_2026/
+          cp artifacts/licitacon_sao_borja_2026/schema_candidates.json docs/data_sources/licitacon_sao_borja_2026/
+          cat > docs/data_sources/licitacon_sao_borja_2026/README.md <<'EOF'
+          # LicitaCon — PM São Borja — contratos 2026
+
+          Camada exploratória, não canônica.
+
+          Fonte oficial: TCE-RS / LicitaCon, Contratos Consolidado 2026.
+
+          Objetivo: identificar estrutura, fornecedor, domicílio e valor contratual
+          para testar a hipótese de retenção/vazamento das compras públicas.
+
+          Nesta primeira etapa, os arquivos são filtrados pelo CD_ORGAO 58000 e o
+          schema é auditado. Contrato/valor não deve ser tratado como pagamento
+          efetivo sem verificar o campo e sua natureza.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/licitacon_sao_borja_2026
+          if git diff --cached --quiet; then
+            echo "No changes."
+          else
+            git commit -m "data: audit LicitaCon São Borja contracts 2026"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: licitacon-sao-borja-2026
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/licitacon_sao_borja_2026/

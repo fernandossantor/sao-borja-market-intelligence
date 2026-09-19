@@ -1,0 +1,45 @@
+name: sao-borja-ordem-cronologica-inline-script
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-ordem-cronologica-inline-script.yml"]
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - name: Extract inline scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import re,requests
+          from pathlib import Path
+          BASE='https://transparencia.saoborja.rs.gov.br'
+          OUT=Path('docs/data_sources/sao_borja_ordem_cronologica_inline_script'); OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 SBMI audit/1.0'})
+          for name,url in [('index',BASE+'/ordem_cronologica'),('link1',BASE+'/ordem_cronologica/loadLink/1')]:
+              r=s.get(url,timeout=30);r.raise_for_status()
+              scripts=re.findall(r'<script[^>]*>(.*?)</script>',r.text,re.I|re.S)
+              relevant=[x for x in scripts if 'ordem_cronologica' in x or 'getInstit' in x or 'getExercicio' in x or 'getRelatorio' in x or 'getElementos' in x or 'getLista' in x]
+              (OUT/f'{name}_inline.js').write_text('\n\n/* NEXT INLINE BLOCK */\n\n'.join(relevant),encoding='utf-8')
+          PY
+          cat > docs/data_sources/sao_borja_ordem_cronologica_inline_script/README.md <<'EOF'
+          # Ordem Cronológica — scripts inline da interface oficial
+
+          Fonte: Portal da Transparência de São Borja. Persistência técnica dos blocos JavaScript relacionados às rotas públicas da própria interface, para reproduzir parâmetros sem inferência.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/sao_borja_ordem_cronologica_inline_script
+          git commit -m "data: persist chronological payment inline routes" || exit 0
+          git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+          git push origin HEAD:explore/receita-estadual-rs-market-intel-v1

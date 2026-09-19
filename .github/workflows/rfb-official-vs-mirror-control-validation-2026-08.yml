@@ -56,12 +56,14 @@ jobs:
           download_official() {
             local file="$1"
             local out="$2"
+            # Prefer the official public DAV transport already used by the
+            # canonical CNPJ workflow; keep the clean and legacy hosts as fallbacks.
             local bases=(
+              "$RFB_DAV_BASE"
               "$RFB_CLEAN_BASE"
               "$RFB_LEGACY_BASE"
-              "$RFB_DAV_BASE"
             )
-            local labels=("clean_official_path" "legacy_official_path" "public_dav_path")
+            local labels=("public_dav_path" "clean_official_path" "legacy_official_path")
             local idx
             for idx in 0 1 2; do
               local url="${bases[$idx]}/${RFB_PERIOD}/$file"

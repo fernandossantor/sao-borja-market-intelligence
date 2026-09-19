@@ -1,0 +1,44 @@
+{
+  "cnpj": "96488598000189",
+  "name": "FUNDACAO IVAN GOULART",
+  "period": {
+    "start": "01/01/2026",
+    "end": "18/09/2026"
+  },
+  "paid_all_R$": 30769932.49,
+  "paid_core_R$": 28342657.23,
+  "functions": [
+    {
+      "name": "SAUDE",
+      "paid_R$": 30769932.49,
+      "share_all": 1.0
+    }
+  ],
+  "actions": [
+    {
+      "name": "ASSISTÊNCIA À SAÚDE - MÉDIA E ALTA COMPL",
+      "paid_R$": 30693954.01,
+      "share_all": 0.9975307557134
+    },
+    {
+      "name": "MANUTENÇÃO DO CAPS AD E AÇÕES PARA RECUP",
+      "paid_R$": 75978.48,
+      "share_all": 0.002469244286599993
+    }
+  ],
+  "rubrics": [
+    {
+      "name": "OUTROS SERVIÇOS DE TERCEIROS - PESSOA JURÍDICA",
+      "paid_R$": 28342657.23,
+      "share_all": 0.9211153530873413
+    },
+    {
+      "name": "SUBVENÇÕES SOCIAIS",
+      "paid_R$": 2427275.26,
+      "share_all": 0.07888464691265885
+    }
+  ],
+  "limitations": [
+    "Budget function/action describe administrative purpose and do not reveal the downstream supplier chain of the foundation."
+  ]
+}

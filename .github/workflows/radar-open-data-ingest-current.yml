@@ -1,5 +1,5 @@
 name: radar-open-data-ingest-current
-# schema aliases refreshed
+# schema aliases and Brazilian numeric parsing refreshed
 
 on:
   push:

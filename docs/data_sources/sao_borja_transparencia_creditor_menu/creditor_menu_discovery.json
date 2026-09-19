@@ -1,0 +1,74 @@
+{
+  "source_page": "https://transparencia.saoborja.rs.gov.br/despesas",
+  "request_url": "https://transparencia.saoborja.rs.gov.br/despesas/loadLink/3",
+  "method": "POST",
+  "period": {
+    "year": 2026,
+    "start": "01/01",
+    "end": "18/09",
+    "data_importacao": "2026-09-18"
+  },
+  "http_status": 200,
+  "content_type": "text/html; charset=UTF-8",
+  "response_bytes": 31698,
+  "response_prefix": "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <link href=\"\" id=\"base\"><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/style.min.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/jquery-ui.css\" /><link rel=\"stylesheet\" type=\"text/css\" href=\"/css/ui.jqgrid.css\" /><script type=\"text/javascript\" src=\"/js/jquery.js\"></script><script type=\"text/javascript\" src=\"/js/jquery.json.js\"></script><script type=\"text/javascript\" src=\"/js/grid.locale-pt-br.js\"></script><script type=\"text/javascript\" src=\"/js/jqGrid.js\"></script><script type=\"text/javascript\" src=\"/js/arquivos.js\"></script><script type=\"text/javascript\" src=\"/js/consulta.js\"></script>  <title>Portal da Transpar&ecirc;ncia</title>\n\n  <script type=\"text/javascript\">\n    $(document).ready(function(){\n\n      $(\"#cororiginalid\").attr('checked',true);\n\n      $(\"#acessibilidademin\").click(function(){\n        if($(this).css('margin-left') == '0px'){\n\n          $(this).animate({\"margin-left\": \"-500px\"}, 500);\n          $(\"#acessibilidademax\").animate({\"margin-left\": \"0px\"}, 500);\n        }else{\n\n          $(this).animate({\"margin-left\": \"0px\"}, 500);\n          $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n        }\n\n      });\n\n      $(\"#fecharacessibilidade\").click(function(){\n        $(\"#acessibilidademin\").animate({\"margin-left\": \"0px\"}, 500);\n        $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n      });\n\n      $('#fechaacessibilidadex').click(function(){\n        $(\"#acessibilidademin\").animate({\"margin-left\": \"0px\"}, 500);\n        $(\"#acessibilidademax\").animate({\"margin-left\": \"-500px\"}, 500);\n      });\n\n      $(\"#irparabusca\").click(function(){\n        $(\"#search\").focus();\n      });\n\n      $(\"#aumentarfonte\").click(function(){\n        var fonteatual = $('#main_content').css('font-size').replace('px','');\n        var numerico = new Number(fonteatual);\n        numerico = parseInt(numerico);\n\n        if(numerico < 17){\n          numerico += 1;\n          $('#main_content').css('font-size',numerico+'px');\n        }\n\n\n\n      });\n\n      $(\"#diminuirfonte\").click(function(){\n        var fonteatual = $('#main_content').css('font-size').replace('px','');\n        var numerico = new Number(fonteatual);\n        numerico = parseInt(numerico);\n\n        if(numerico > 7){\n          numerico -= 1;\n          $('#main_content').css('font-size',numerico+'px');\n        }\n\n      });\n\n      $(\"#fontepadrao\").click(function(){\n        $('#main_content').css('font-size','11px');\n      });\n\n      $(\"#cororiginalid\").click(function(){\n        $('#general_content').css('background','none repeat scroll 0 0 #fff');\n        $('#buscar h3').css('background-color','#eee');\n        $('#navbar ul li a').css('color','#000');\n        $('#content').css('background','none repeat scroll 0 0 #ededed');\n        $('#consulta_dados fieldset').css('background-color','#fff');\n        $('#consulta_dados fieldset').css('color','#333');\n        $('table tbody tr td').css('background','none repeat scroll 0 0 #fff');\n        $('table tbody tr td').css('color','#000');\n        $('table tbody tr th').css('background','none repeat scroll 0 0 #fff');\n        $('table tbody tr th').css('color','#000');\n        $('.ui-jqgrid-bdiv').css('background-color','#fff');\n        $('#breadcrumb').css('color','#333');\n        $('#main_content').css('color','#333');\n        $('#main_footer').css('background-color','#ededed');\n        $('#consulta_dados fieldset legend').css('color','#000');\n        $('html').css('background-color','#ededed');\n        $('#footer').css('color','#888');\n        $('#footer a').css('color','#888');\n\n        $(\"#acessibilidademin img\").attr('src','img/acessibilidade.jpg');\n        $(\"#acessibilidademin\").css('color','rgb(16, 78, 139)');\n\n        $(\"#teclasatalho\").css('background-color','#e6efff');\n        $(\"#teclasatalho\").css('color','#000');\n        $(\"#letraatalho\").css('background-color','#e6efff');\n        $(\"#letraatalho\").css('color','#000');\n\n        $(\"#numero1 div\").css('background-color','rgb(230, 239, 255)');\n        $(\"#numero1 div center strong\").css('color','#6d6b6b');\n        $(\"#numero1 #irparabusca\").css('background-color','#fff');\n        $(\"#numero1 #irparabusca a\").css('color','#345076');\n\n        $(\"#numero2 div\").css('background-color','rgb(230, 239, 255)');\n        $(\"#numero2 div center strong\").css('color','#6d6b6b');\n        $(\"#numero2 #irparadespesas\").css('background-color','#fff');\n        $(\"#numero2 #irparadespesas a\").css('color','#345076');\n\n        $(\"#numero3 div\").css('background-color','rgb(230, 239, 255)');\n        $(\"#numero3 div center strong\").css('color','#6d6b6b');\n        $(\"#numero3 #irparareceitas\").css('background-color','#fff');\n        $(\"#numero3 #irparareceitas a\").css('color','#345076');\n\n        $(\"#numero4 div\").css('background-color','rgb(230, 239, 255)');\n        $(\"#",
+  "endpoint_mentions": [
+    "#numero2 #irparadespesas",
+    "#numero2 #irparadespesas a",
+    "#numero5 #irparafolhapagamento",
+    "#numero5 #irparafolhapagamento a",
+    "+oDados.nome;\n          if(oParametros.iIdLink == 4) {\n            oDados.descricao = oDados.nome;\n          }\n          oParametros.aHistorico.push(oDados)\n\t        oParametros.iCredor = id;\n          oParametros.iNivel++;\n\n\t        $.ajax( { async:true,\n            type:",
+    "/despesas/getCredores",
+    "/despesas/getRelatorio",
+    "/despesas/loadLink/",
+    ">\n            <small>Ir Para</small>\n            <strong>Despesas</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+    ">\n            <small>Ir Para</small>\n            <strong>Folha de Pagamento</strong>\n          </a>\n        </div>\n\n      </div>\n\n      <div id=",
+    ">Credores</span></div>\n<br>\n<h2 align=",
+    ">Despesas por Credor\n  01/01/2026 a 18/09/2026</h2>\n<br>\n<div>\n  <span style=",
+    ">Despesas</a>  >  <span class=",
+    ">Despesas</option>\n<option value=",
+    ">Folha de Pagamento</option>\n<option value=",
+    "Credor",
+    "Empenhado",
+    "Liquidado",
+    "Valor Empenhado",
+    "Valor Liquidado",
+    "credores",
+    "despesas",
+    "despesas/loadDiarias",
+    "folha_pagamentos",
+    "getCredores",
+    "http://transparencia.saoborja.rs.gov.br/despesas",
+    "irparadespesas",
+    "irparafolhapagamento",
+    "valor_empenhado",
+    "valor_liquidado"
+  ],
+  "scripts": [
+    "/js/arquivos.js",
+    "/js/consulta.js",
+    "/js/grid.locale-pt-br.js",
+    "/js/jqGrid.js",
+    "/js/jquery.js",
+    "/js/jquery.json.js",
+    "https://www.google.com/recaptcha/api.js?hl=pt-BR"
+  ],
+  "forms": [
+    {
+      "action": "/consultas/pesquisar",
+      "method": "get"
+    },
+    {
+      "action": "/consultas/pesquisar",
+      "method": "get"
+    }
+  ],
+  "input_names_or_ids": [
+    "contraste",
+    "parametros",
+    "tipobusca"
+  ],
+  "ajax_fragments": [
+    "$.ajax( { async:true,\n            type:'post',\n            dataType: 'json',\n            data: oParametros,\n            beforeSend:function(request"
+  ]
+}

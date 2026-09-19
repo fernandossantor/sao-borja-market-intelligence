@@ -1,0 +1,287 @@
+{
+  "/acordos": {
+    "status": 200,
+    "bytes": 23148,
+    "forms": [
+      {
+        "action": "https://transparencia.saoborja.rs.gov.br/consultas/pesquisar",
+        "method": "GET",
+        "fields": [
+          {
+            "name": "parametros",
+            "id": "search",
+            "type": "input",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "action": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+        "method": "GET",
+        "fields": [
+          {
+            "name": "instituicao",
+            "id": "FiltroInstituicao",
+            "type": "select",
+            "value": null
+          },
+          {
+            "name": "exercicio",
+            "id": "FiltroExercicio",
+            "type": "select",
+            "value": null
+          },
+          {
+            "name": "mes",
+            "id": "FiltroMes",
+            "type": "select",
+            "value": null
+          }
+        ]
+      }
+    ],
+    "options": {
+      "instituicao": [
+        {
+          "value": "",
+          "text": "Selecione..."
+        }
+      ],
+      "exercicio": [
+        {
+          "value": "",
+          "text": "Selecione..."
+        }
+      ],
+      "mes": [
+        {
+          "value": "",
+          "text": "Todos"
+        },
+        {
+          "value": "01",
+          "text": "Janeiro"
+        },
+        {
+          "value": "02",
+          "text": "Fevereiro"
+        },
+        {
+          "value": "03",
+          "text": "Março"
+        },
+        {
+          "value": "04",
+          "text": "Abril"
+        },
+        {
+          "value": "05",
+          "text": "Maio"
+        },
+        {
+          "value": "06",
+          "text": "Junho"
+        },
+        {
+          "value": "07",
+          "text": "Julho"
+        },
+        {
+          "value": "08",
+          "text": "Agosto"
+        },
+        {
+          "value": "09",
+          "text": "Setembro"
+        },
+        {
+          "value": "10",
+          "text": "Outubro"
+        },
+        {
+          "value": "11",
+          "text": "Novembro"
+        },
+        {
+          "value": "12",
+          "text": "Dezembro"
+        }
+      ]
+    },
+    "scripts": [
+      "https://transparencia.saoborja.rs.gov.br/js/jquery.js",
+      "https://transparencia.saoborja.rs.gov.br/js/jquery.json.js",
+      "https://transparencia.saoborja.rs.gov.br/js/grid.locale-pt-br.js",
+      "https://transparencia.saoborja.rs.gov.br/js/jqGrid.js",
+      "https://transparencia.saoborja.rs.gov.br/js/arquivos.js",
+      "https://transparencia.saoborja.rs.gov.br/js/consulta.js",
+      "https://www.google.com/recaptcha/api.js?hl=pt-BR",
+      "https://transparencia.saoborja.rs.gov.br/js/acordos/index.js"
+    ],
+    "inline_route_candidates": [],
+    "js_route_candidates": [
+      {
+        "url": "https://transparencia.saoborja.rs.gov.br/js/acordos/index.js",
+        "bytes": 1282,
+        "candidates": [
+          "/acordos/buscarExercicios/"
+        ]
+      }
+    ]
+  },
+  "/licitacoes": {
+    "status": 200,
+    "bytes": 23566,
+    "forms": [
+      {
+        "action": "https://transparencia.saoborja.rs.gov.br/consultas/pesquisar",
+        "method": "GET",
+        "fields": [
+          {
+            "name": "parametros",
+            "id": "search",
+            "type": "input",
+            "value": ""
+          }
+        ]
+      },
+      {
+        "action": "https://transparencia.saoborja.rs.gov.br/licitacoes/pesquisar",
+        "method": "GET",
+        "fields": [
+          {
+            "name": "instituicao",
+            "id": "LicitacoesInstituicao",
+            "type": "select",
+            "value": null
+          },
+          {
+            "name": "exercicio",
+            "id": "LicitacoesExercicio",
+            "type": "select",
+            "value": null
+          },
+          {
+            "name": "mes",
+            "id": "LicitacoesMes",
+            "type": "select",
+            "value": null
+          },
+          {
+            "name": "modalidade",
+            "id": "LicitacoesModalidade",
+            "type": "select",
+            "value": null
+          },
+          {
+            "name": "situacao",
+            "id": "LicitacoesSituacao",
+            "type": "select",
+            "value": null
+          }
+        ]
+      }
+    ],
+    "options": {
+      "instituicao": [
+        {
+          "value": "",
+          "text": "SELECIONE..."
+        }
+      ],
+      "exercicio": [
+        {
+          "value": "",
+          "text": "Selecione..."
+        }
+      ],
+      "mes": [
+        {
+          "value": "",
+          "text": "SELECIONE..."
+        },
+        {
+          "value": "1",
+          "text": "Janeiro"
+        },
+        {
+          "value": "2",
+          "text": "Fevereiro"
+        },
+        {
+          "value": "3",
+          "text": "Março"
+        },
+        {
+          "value": "4",
+          "text": "Abril"
+        },
+        {
+          "value": "5",
+          "text": "Maio"
+        },
+        {
+          "value": "6",
+          "text": "Junho"
+        },
+        {
+          "value": "7",
+          "text": "Julho"
+        },
+        {
+          "value": "8",
+          "text": "Agosto"
+        },
+        {
+          "value": "9",
+          "text": "Setembro"
+        },
+        {
+          "value": "10",
+          "text": "Outubro"
+        },
+        {
+          "value": "11",
+          "text": "Novembro"
+        },
+        {
+          "value": "12",
+          "text": "Dezembro"
+        }
+      ],
+      "modalidade": [
+        {
+          "value": "",
+          "text": "SELECIONE..."
+        }
+      ],
+      "situacao": [
+        {
+          "value": "",
+          "text": "SELECIONE..."
+        }
+      ]
+    },
+    "scripts": [
+      "https://transparencia.saoborja.rs.gov.br/js/jquery.js",
+      "https://transparencia.saoborja.rs.gov.br/js/jquery.json.js",
+      "https://transparencia.saoborja.rs.gov.br/js/grid.locale-pt-br.js",
+      "https://transparencia.saoborja.rs.gov.br/js/jqGrid.js",
+      "https://transparencia.saoborja.rs.gov.br/js/arquivos.js",
+      "https://transparencia.saoborja.rs.gov.br/js/consulta.js",
+      "https://www.google.com/recaptcha/api.js?hl=pt-BR",
+      "https://transparencia.saoborja.rs.gov.br/js/licitacoes.js"
+    ],
+    "inline_route_candidates": [],
+    "js_route_candidates": [
+      {
+        "url": "https://transparencia.saoborja.rs.gov.br/js/licitacoes.js",
+        "bytes": 22210,
+        "candidates": [
+          "/consultas/pesquisar",
+          "/img/loader.gif"
+        ]
+      }
+    ]
+  }
+}

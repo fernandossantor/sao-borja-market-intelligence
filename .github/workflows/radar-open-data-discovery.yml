@@ -153,7 +153,20 @@ jobs:
                               click_log.append({"frame":i,"selector":selector,"error":repr(exc)})
                       if clicked: break
 
-                  await page.wait_for_timeout(20000)
+                  # Power BI sometimes paints navigation labels on canvas-like
+                  # surfaces that are not exposed to normal text locators. Use a
+                  # deterministic viewport-coordinate fallback for the documented
+                  # top-right "Dados Abertos" navigation button.
+                  if not clicked:
+                      try:
+                          await page.mouse.click(1765, 140)
+                          click_log.append({"frame": 0, "selector": "viewport-coordinate-fallback", "x": 1765, "y": 140, "result": "clicked"})
+                          await page.wait_for_timeout(12000)
+                      except Exception as exc:
+                          click_log.append({"frame": 0, "selector": "viewport-coordinate-fallback", "error": repr(exc)})
+
+                  await page.wait_for_timeout(8000)
+                  await page.screenshot(path=str(OUT/"radar_after_dados_abertos.png"), full_page=True)
                   await snapshot("after_dados_abertos")
 
                   # Attempt public download controls only when the label clearly identifies one of the six documented files.

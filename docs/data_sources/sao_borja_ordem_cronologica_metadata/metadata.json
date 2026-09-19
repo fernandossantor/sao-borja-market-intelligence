@@ -1,0 +1,152 @@
+{
+  "source": "https://transparencia.saoborja.rs.gov.br/ordem_cronologica",
+  "initial_params": {
+    "dtDataImportacao": "2026-09-19",
+    "page": 1,
+    "rows": 1000,
+    "sidx": "descricao",
+    "sord": "asc",
+    "aHistorico": [],
+    "iNivel": 1
+  },
+  "institution_payload_meta": {
+    "records": 4,
+    "total": 1,
+    "row_count": 4
+  },
+  "institutions": [
+    {
+      "id": "1",
+      "descricao": "PREFEITURA MUNICIPAL DE SÃO BORJA"
+    },
+    {
+      "id": "3",
+      "descricao": "CAMARA DE VEREADORES DE SAO BORJA"
+    },
+    {
+      "id": "4",
+      "descricao": "AG MUN DE REG DOS SERV PUB DELEGADOS DE SÃO BORJA"
+    },
+    {
+      "id": "2",
+      "descricao": "RPPS PREFEITURA MUNICIPAL DE SÃO BORJA"
+    }
+  ],
+  "chosen": {
+    "id": "1",
+    "descricao": "PREFEITURA MUNICIPAL DE SÃO BORJA"
+  },
+  "metadata_variants": [
+    {
+      "params": {
+        "iIdLink": "1"
+      },
+      "years": {
+        "status": 200,
+        "bytes": 1868,
+        "prefix": "<pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-trace').style.display = (document.getElementById('cakeErr1-trace').style.display == 'none' ? '' : 'none');\"><b>Notice</b> (8)</a>: Undefined property: stdClass::$iInstituicao [<b>APP/controllers/ordem_cronologica_controller.php</b>, line <b>134</b>]<div id=\"cakeErr1-trace\" class=\"cake-stack-trace\" style=\"display: none;\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-code').style.display = (document.getElementById('cakeErr1-code').style.display == 'none' ? '' : 'none')\">Code</a> | <a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-context').style.display = (document.getElementById('cakeErr1-context').style.display == 'none' ? '' : 'none')\">Context</a><div id=\"cakeErr1-code\" class=\"cake-code-dump\" style=\"display: none;\"><pre><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)));</span></co"
+      },
+      "lists": {
+        "status": 200,
+        "bytes": 1935,
+        "prefix": "<pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-trace').style.display = (document.getElementById('cakeErr1-trace').style.display == 'none' ? '' : 'none');\"><b>Notice</b> (8)</a>: Undefined property: stdClass::$iInstituicao [<b>APP/controllers/ordem_cronologica_controller.php</b>, line <b>153</b>]<div id=\"cakeErr1-trace\" class=\"cake-stack-trace\" style=\"display: none;\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-code').style.display = (document.getElementById('cakeErr1-code').style.display == 'none' ? '' : 'none')\">Code</a> | <a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-context').style.display = (document.getElementById('cakeErr1-context').style.display == 'none' ? '' : 'none')\">Context</a><div id=\"cakeErr1-code\" class=\"cake-code-dump\" style=\"display: none;\"><pre><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)));</span></co"
+      }
+    },
+    {
+      "params": {
+        "iIdLink": "1",
+        "iInstituicao": "1"
+      },
+      "years": {
+        "status": 200,
+        "bytes": 78,
+        "prefix": "{\"Exercicio\":[\"2026\",\"2025\",\"2024\",\"2023\",\"2022\",\"2021\",\"2020\",\"2019\",\"2018\"]}",
+        "json": {
+          "Exercicio": [
+            "2026",
+            "2025",
+            "2024",
+            "2023",
+            "2022",
+            "2021",
+            "2020",
+            "2019",
+            "2018"
+          ]
+        }
+      },
+      "lists": {
+        "status": 200,
+        "bytes": 149,
+        "prefix": "{\"ListaCredores\":[{\"codigo\":\"1\",\"descricao\":\"RECURSOS VINCULADOS\"},{\"codigo\":\"2\",\"descricao\":\"PEQUENO VALOR\"},{\"codigo\":\"4\",\"descricao\":\"DISPENSA\"}]}",
+        "json": {
+          "ListaCredores": [
+            {
+              "codigo": "1",
+              "descricao": "RECURSOS VINCULADOS"
+            },
+            {
+              "codigo": "2",
+              "descricao": "PEQUENO VALOR"
+            },
+            {
+              "codigo": "4",
+              "descricao": "DISPENSA"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "params": {
+        "dtDataImportacao": "2026-09-19",
+        "page": 1,
+        "rows": 1000,
+        "sidx": "descricao",
+        "sord": "asc",
+        "aHistorico": [],
+        "iNivel": 2,
+        "iInstituicao": "1"
+      },
+      "years": {
+        "status": 200,
+        "bytes": 78,
+        "prefix": "{\"Exercicio\":[\"2026\",\"2025\",\"2024\",\"2023\",\"2022\",\"2021\",\"2020\",\"2019\",\"2018\"]}",
+        "json": {
+          "Exercicio": [
+            "2026",
+            "2025",
+            "2024",
+            "2023",
+            "2022",
+            "2021",
+            "2020",
+            "2019",
+            "2018"
+          ]
+        }
+      },
+      "lists": {
+        "status": 200,
+        "bytes": 149,
+        "prefix": "{\"ListaCredores\":[{\"codigo\":\"1\",\"descricao\":\"RECURSOS VINCULADOS\"},{\"codigo\":\"2\",\"descricao\":\"PEQUENO VALOR\"},{\"codigo\":\"4\",\"descricao\":\"DISPENSA\"}]}",
+        "json": {
+          "ListaCredores": [
+            {
+              "codigo": "1",
+              "descricao": "RECURSOS VINCULADOS"
+            },
+            {
+              "codigo": "2",
+              "descricao": "PEQUENO VALOR"
+            },
+            {
+              "codigo": "4",
+              "descricao": "DISPENSA"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

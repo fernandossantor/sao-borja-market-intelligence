@@ -1,0 +1,56 @@
+name: tce-host-network-diagnostic
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/tce-host-network-diagnostic.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+      - name: Network diagnostics
+        shell: bash
+        run: |
+          set +e
+          OUT=artifacts/tce_host_network
+          mkdir -p "$OUT"
+          {
+            echo '=== date ==='; date -u
+            echo '=== getent ==='; getent ahosts dados.tce.rs.gov.br
+            echo '=== A ==='; dig +short A dados.tce.rs.gov.br
+            echo '=== AAAA ==='; dig +short AAAA dados.tce.rs.gov.br
+            echo '=== curl IPv4 HEAD root ==='; curl -4 -v -I --connect-timeout 8 --max-time 15 https://dados.tce.rs.gov.br/ 2>&1
+            echo '=== curl IPv6 HEAD root ==='; curl -6 -v -I --connect-timeout 8 --max-time 15 https://dados.tce.rs.gov.br/ 2>&1
+            echo '=== curl IPv4 HEAD per-organ ==='; curl -4 -v -I --connect-timeout 8 --max-time 15 https://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.7z 2>&1
+            echo '=== curl HTTP IPv4 HEAD per-organ ==='; curl -4 -v -I --connect-timeout 8 --max-time 15 http://dados.tce.rs.gov.br/dados/municipal/empenhos/2025/58000.csv.7z 2>&1
+          } > "$OUT/network.txt"
+          cat "$OUT/network.txt"
+      - name: Persist diagnostic
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST=docs/data_sources/tce_host_network_diagnostic
+          mkdir -p "$DEST"
+          cp artifacts/tce_host_network/network.txt "$DEST/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST/network.txt"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: diagnose TCE host network from Actions"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tce-host-network-diagnostic
+          path: artifacts/tce_host_network/

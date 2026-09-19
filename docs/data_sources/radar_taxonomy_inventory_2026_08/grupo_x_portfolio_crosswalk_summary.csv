@@ -1,0 +1,474 @@
+﻿grupo_afinidade_final,emit_setor,emit_atividade,emit_classe,_merge,n_ncm
+Químicos Orgânicos,,,,left_only,2279
+Máquinas e Equipamentos Industriais,,,,left_only,893
+Pescados e Frutos do Mar,,,,left_only,507
+Químicos Inorgânicos,,,,left_only,484
+Produtos Químicos Diversos,,,,left_only,451
+Componentes Elétricos e Eletrônicos,,,,left_only,401
+"Têxteis Naturais (Algodão, Lã, Seda e Afins)",,,,left_only,365
+Eletrônicos de Consumo – Informática/TIC,,,,left_only,343
+Plásticos e Suas Obras,,,,left_only,321
+Medicamentos,,,,left_only,315
+"Óptica, Instrumentos e Aparelhos de Precisão",,,,left_only,304
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",,,,left_only,266
+Papel e Papelão,,,,left_only,232
+Frutas e Hortícolas,,,,left_only,210
+Madeira e Cortiça - Produtos e Obras,,,,left_only,200
+Fibras Sintéticas/Descontínuas – Têxteis,,,,left_only,167
+Couros e Suas Obras,,,,left_only,162
+Siderurgia – Ferro e Aço,,,,left_only,160
+"Joias, Bijuterias, Metais Preciosos e Relógios",,,,left_only,149
+Instrumentos Médicos,,,,left_only,139
+Aparelhos Telefônicos,,,,left_only,134
+Eletrônicos de Consumo – Comunicação/Imagem,,,,left_only,133
+Obras de Ferro ou Aço,,,,left_only,128
+Vacinas e Soros,,,,left_only,119
+"Brinquedos, Jogos e Artigos de Lazer",,,,left_only,114
+Vestuário de Malha,,,,left_only,114
+Peças e Acessórios Automotivos,,,,left_only,111
+Filamentos Sintéticos – Têxteis Técnicos,,,,left_only,107
+Máquinas e Equipamentos Industriais,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,106
+Vidro e Suas Obras,,,,left_only,104
+Minerais e Materiais de Mineração (Não Metálicos),,,,left_only,101
+Vestuário Tecido (Plano),,,,left_only,100
+Tecidos Sintéticos (Inclusive Malhas),,,,left_only,98
+Mobiliário e Iluminação,,,,left_only,96
+Eletrodomésticos (Linha Branca + Portáteis),,,,left_only,94
+Combustíveis e Derivados de Petróleo,,,,left_only,93
+Borracha e Suas Obras (Exceto Pneumáticos),,,,left_only,93
+"Produtos Minerais: Pedra, Cimento, Gesso, Amianto e Abrasivos",,,,left_only,91
+Óleos e Gorduras Vegetais/animais,,,,left_only,84
+"Tintas, Pigmentos e Corantes",,,,left_only,83
+Eletrônicos de Consumo – Áudio/Vídeo,,,,left_only,79
+Produtos Fotográficos,,,,left_only,74
+Acessórios Pessoais e Artigos de Uso Pessoal,,,,left_only,70
+Produtos Farmacêuticos,,,,left_only,67
+"Feltros, Passamanarias, Têxteis Técnicos",,,,left_only,67
+Animais Vivos e Genética,,,,left_only,67
+"Produtos Cerâmicos, Porcelana e Refratários",,,,left_only,64
+"Soja, Oleaginosas e Sementes",,,,left_only,62
+Minérios e Subprodutos da Metalurgia (NCMs do Cap. 26),,,,left_only,59
+Cereais e Grãos (exceto soja),,,,left_only,58
+Chás e Especiarias,,,,left_only,58
+Ferramentas e Cutelaria (Metais Comuns),,,,left_only,55
+Plásticos e Suas Obras,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,52
+Veículos Comerciais (Caminhões e Carga) e Ônibus,,,,left_only,51
+Siderurgia – Ferro e Aço,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,50
+Outras Fibras Têxteis Vegetais,,,,left_only,50
+Perfumaria e Cosméticos,,,,left_only,49
+Conservas de Frutas e Hortícolas,,,,left_only,48
+"Sabões e Preparações de Limpeza, Ceras e Pastas",,,,left_only,48
+Vestuário de Malha,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,47
+Alumínio e Suas Obras,,,,left_only,46
+"Produtos Editoriais, Impressos e Materiais Gráficos",,,,left_only,44
+Aeronaves e Espaço,,,,left_only,44
+"Pneumáticos, Câmaras e Protetores",,,,left_only,43
+Plantas Vivas e Floricultura,,,,left_only,42
+"Farinha, Malte e Preparações de Cereais",,,,left_only,39
+Pescados e Frutos do Mar - Preparações e Conservas,,,,left_only,39
+Vestuário Tecido (Plano),VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,37
+Calçados,,,,left_only,37
+Embarcações e Estruturas Flutuantes,,,,left_only,37
+Obras de Ferro ou Aço,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,37
+Resíduos para Alimentação Animal,,,,left_only,36
+Laticínios,,,,left_only,36
+Produtos de Origem Animal (Não Alimentares),,,,left_only,34
+Adubos e Fertilizantes,,,,left_only,33
+Siderurgia – Ferro e Aço,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,31
+Material Ferroviário e Contêineres,,,,left_only,30
+Ferramentas e Cutelaria (Metais Comuns),ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,30
+Produtos Químicos Diversos,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,29
+Máquinas e Equipamentos Industriais,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,29
+Componentes Elétricos e Eletrônicos,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,29
+Armas e Munições,,,,left_only,28
+Objetos de Arte e Coleções,,,,left_only,28
+Madeira e Cortiça - Produtos e Obras,MADEIRAS,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,28
+"Preparações, Suplementos e Complementos alimentares",,,,left_only,27
+Máquinas e Equipamentos Industriais,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,26
+Artefatos de Metal Diversos,,,,left_only,26
+Tabaco e Sucedâneos,,,,left_only,25
+Instrumentos Musicais,,,,left_only,25
+"Açúcares, Sacarídeos e Produtos de Confeitaria (sem cacau)",,,,left_only,25
+Sucos e Bebidas à Base de Frutas/Vegetais,,,,left_only,24
+Máquinas e Implementos Agrícolas,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,24
+Outros,,,,left_only,23
+"Têxteis Naturais (Algodão, Lã, Seda e Afins)",TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,23
+Papel e Papelão,OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,22
+Químicos Inorgânicos,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,22
+Peças e Acessórios Automotivos,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,22
+Obras de Ferro ou Aço,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,22
+Pasta Química e Pasta Mecânica,,,,left_only,21
+Máquinas e Implementos Agrícolas,,,,left_only,21
+"Tintas, Pigmentos e Corantes",OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,20
+"Feltros, Passamanarias, Têxteis Técnicos",TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,20
+Veículos Leves e de Passageiros,,,,left_only,20
+Bebidas Alcoólicas,,,,left_only,20
+Tecidos Impregnados/Revestidos/Laminados,,,,left_only,19
+"Preparações Alimentícias Diversas (Molhos, Condimentos, etc)",,,,left_only,19
+Explosivos e Pirotecnia,,,,left_only,19
+Vestuário de Malha,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,18
+Carnes de Outras Aves (Exceto Frango),,,,left_only,18
+Máquinas e Equipamentos Industriais,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,18
+"Tintas, Pigmentos e Corantes",TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,17
+Obras de Ferro ou Aço,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,17
+"Óptica, Instrumentos e Aparelhos de Precisão",ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,17
+Componentes Elétricos e Eletrônicos,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,17
+Mobiliário e Iluminação,MÓVEIS,INDÚSTRIA,MÓVEIS,both,16
+Máquinas e Equipamentos Industriais,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,16
+Eletrodomésticos (Linha Branca + Portáteis),ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,15
+Tratores,,,,left_only,15
+Couros e Suas Obras,CURTIMENTO DE COURO,INDÚSTRIA,COUREIRO-CALÇADISTA,both,15
+Obras de Espartaria e Cestaria,,,,left_only,15
+Carnes de Frango,,,,left_only,14
+Plásticos e Suas Obras,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,14
+Máquinas e Equipamentos Industriais,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,14
+Cabos e Fios,,,,left_only,14
+Fibras Sintéticas/Descontínuas – Têxteis,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,14
+"Sabões e Preparações de Limpeza, Ceras e Pastas",OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,13
+Peças e Acessórios Automotivos,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,13
+Filamentos Sintéticos – Têxteis Técnicos,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,13
+Químicos Orgânicos,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,13
+Carnes de Ovinos e Caprinos,,,,left_only,13
+Tecidos Sintéticos (Inclusive Malhas),VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,13
+Tecidos Sintéticos (Inclusive Malhas),TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,12
+Carnes de Frango,AVES,INDÚSTRIA,AGRO,both,12
+Plásticos e Suas Obras,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,12
+Carnes de Espécies Exóticas/Diversas e Subprodutos,,,,left_only,12
+Calçados,CALÇADOS E ARTEFATOS,INDÚSTRIA,COUREIRO-CALÇADISTA,both,12
+Massas e Panificação,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,12
+Artefatos de Metal Diversos,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,12
+Laticínios,LEITE,INDÚSTRIA,AGRO,both,12
+Vidro e Suas Obras,VIDRO,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,11
+Perfumaria e Cosméticos,COSMÉTICOS,INDÚSTRIA,QUÍMICO,both,11
+Plásticos e Suas Obras,EMBALAGENS,INDÚSTRIA,PLÁSTICO,both,11
+Borracha e Suas Obras (Exceto Pneumáticos),PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,11
+Toucinho e Gorduras Não Fundidas,,,,left_only,10
+Armas e Munições,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,10
+Tecidos Impregnados/Revestidos/Laminados,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,10
+Medicamentos,MEDICAMENTOS,INDÚSTRIA,QUÍMICO,both,10
+Massas e Panificação,,,,left_only,10
+Café,,,,left_only,10
+Carnes de Bovinos,,,,left_only,10
+Peças e Acessórios Automotivos,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,10
+Preparações de Carne,,,,left_only,10
+Alumínio e Suas Obras,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,9
+Vestuário Tecido (Plano),TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,9
+Adubos e Fertilizantes,FERTILIZANTES,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,9
+Máquinas e Equipamentos Industriais,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,9
+Químicos Orgânicos,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,9
+Sucos e Bebidas à Base de Frutas/Vegetais,SUCOS E REFRESCOS,INDÚSTRIA,BEBIDAS,both,8
+"Sabões e Preparações de Limpeza, Ceras e Pastas",PRODUTOS DE LIMPEZA,INDÚSTRIA,QUÍMICO,both,8
+Produtos Químicos Diversos,TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,8
+Carnes Preparadas (Defumadas/Salgadas),,,,left_only,8
+Plásticos e Suas Obras,TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,8
+Conservas de Frutas e Hortícolas,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,8
+Ovos,,,,left_only,8
+Peças e Acessórios Automotivos,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,8
+Combustíveis e Derivados de Petróleo,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,8
+Cacau e Preparações,,,,left_only,8
+Motocicletas,,,,left_only,8
+Eletrodomésticos (Linha Branca + Portáteis),MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,8
+Mobiliário e Iluminação,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,8
+Bebidas Alcoólicas,DESTILADOS,INDÚSTRIA,BEBIDAS,both,7
+Artefatos de Metal Diversos,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,7
+Papel e Papelão,EMBALAGENS,INDÚSTRIA,PAPEL,both,7
+Plásticos e Suas Obras,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,7
+Produtos Químicos Diversos,PRODUTOS DE LIMPEZA,INDÚSTRIA,QUÍMICO,both,7
+Óleos e Gorduras Vegetais/animais,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,7
+"Joias, Bijuterias, Metais Preciosos e Relógios",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,6
+Instrumentos Médicos,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,6
+"Açúcares, Sacarídeos e Produtos de Confeitaria (sem cacau)",ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,6
+Papel e Papelão,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,6
+Frutas e Hortícolas,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,6
+Mobiliário e Iluminação,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,6
+Mobiliário e Iluminação,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,6
+Calçados,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,6
+Couros e Suas Obras,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,6
+Carnes de Suínos,SUINOS,INDÚSTRIA,AGRO,both,6
+Carnes de Bovinos,BOVINOS,INDÚSTRIA,AGRO,both,6
+Veículos Comerciais (Caminhões e Carga) e Ônibus,VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,6
+Alumínio e Suas Obras,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,6
+Etanol e Álcool Etílico,,,,left_only,6
+Aparelhos Telefônicos,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,6
+Peças e Acessórios Automotivos,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,6
+Plásticos e Suas Obras,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,5
+Carnes de Bovinos,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,5
+Preparações de Carne,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,5
+"Pneumáticos, Câmaras e Protetores",PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,5
+Máquinas e Implementos Agrícolas,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,5
+Alumínio e Suas Obras,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,5
+Adubos e Fertilizantes,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,5
+Plásticos e Suas Obras,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,5
+Ferramentas e Cutelaria (Metais Comuns),MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,5
+Perfumaria e Cosméticos,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,5
+Cacau e Preparações,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,5
+Resíduos para Alimentação Animal,RAÇÃO ANIMAL,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,5
+Mobiliário e Iluminação,MADEIRAS,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,4
+"Farinha, Malte e Preparações de Cereais",OUTROS AGRO,INDÚSTRIA,AGRO,both,4
+"Produtos Minerais: Pedra, Cimento, Gesso, Amianto e Abrasivos",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,4
+"Produtos Minerais: Pedra, Cimento, Gesso, Amianto e Abrasivos",CIMENTO,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,4
+Eletrodomésticos (Linha Branca + Portáteis),ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,4
+Produtos Químicos Diversos,DEFENSIVOS AGRÍCOLAS,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,4
+"Preparações Alimentícias Diversas (Molhos, Condimentos, etc)",ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,4
+Obras de Ferro ou Aço,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,4
+Peças e Acessórios Automotivos,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,4
+Plásticos e Suas Obras,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,4
+"Têxteis Naturais (Algodão, Lã, Seda e Afins)",VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,4
+Bebidas Alcoólicas,VINHO,INDÚSTRIA,BEBIDAS,both,4
+Mel e Outros Produtos Comestíveis de Origem Animal,,,,left_only,4
+Siderurgia – Ferro e Aço,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,4
+Máquinas e Implementos Agrícolas,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,4
+"Sabões e Preparações de Limpeza, Ceras e Pastas",COSMÉTICOS,INDÚSTRIA,QUÍMICO,both,4
+Eletrodomésticos (Linha Branca + Portáteis),OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,4
+Massas e Panificação,TRIGO,INDÚSTRIA,AGRO,both,4
+Carnes de Suínos,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,4
+Combustíveis e Derivados de Petróleo,COMBUSTÍVEIS E DERIVADOS,INDÚSTRIA,COMBUSTÍVEIS,both,4
+Obras de Ferro ou Aço,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,4
+Artefatos de Metal Diversos,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,4
+Tabaco e Sucedâneos,TABACOS,INDÚSTRIA,TABACOS,both,4
+Peças e Acessórios Automotivos,TRATORES,INDÚSTRIA,METAL MECÂNICO,both,3
+Acessórios Pessoais e Artigos de Uso Pessoal,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,3
+Instrumentos Médicos,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,3
+Óleos e Gorduras Vegetais/animais,OUTROS AGRO,INDÚSTRIA,AGRO,both,3
+Cereais e Grãos (exceto soja),ARROZ,INDÚSTRIA,AGRO,both,3
+Carnes de Suínos,,,,left_only,3
+Calçados,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,3
+Tratores,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,3
+Vacinas e Soros,MEDICAMENTOS,INDÚSTRIA,QUÍMICO,both,3
+Veículos Comerciais (Caminhões e Carga) e Ônibus,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,3
+Eletrônicos de Consumo – Áudio/Vídeo,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,3
+Máquinas e Implementos Agrícolas,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,3
+Máquinas e Implementos Agrícolas,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,3
+Perfumaria e Cosméticos,MEDICAMENTOS,INDÚSTRIA,QUÍMICO,both,3
+"Preparações, Suplementos e Complementos alimentares",ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,3
+Eletrodomésticos (Linha Branca + Portáteis),OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,3
+Cabos e Fios,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,3
+Produtos de Origem Animal (Não Alimentares),ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,3
+Resíduos para Alimentação Animal,OUTROS AGRO,INDÚSTRIA,AGRO,both,3
+"Tintas, Pigmentos e Corantes",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,3
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,3
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,3
+Tecidos Impregnados/Revestidos/Laminados,TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,3
+"Tintas, Pigmentos e Corantes",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,3
+Artefatos de Metal Diversos,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,3
+"Produtos Editoriais, Impressos e Materiais Gráficos",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,3
+"Produtos Editoriais, Impressos e Materiais Gráficos",OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,3
+Ovos,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,3
+Madeira e Cortiça - Produtos e Obras,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,2
+Veículos Comerciais (Caminhões e Carga) e Ônibus,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,2
+"Óptica, Instrumentos e Aparelhos de Precisão",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+Ferramentas e Cutelaria (Metais Comuns),METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,2
+Tratores,TRATORES,INDÚSTRIA,METAL MECÂNICO,both,2
+Instrumentos Médicos,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+Químicos Inorgânicos,PRODUTOS DE LIMPEZA,INDÚSTRIA,QUÍMICO,both,2
+Químicos Orgânicos,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,2
+Químicos Inorgânicos,TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,2
+Mobiliário e Iluminação,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+Resíduos para Alimentação Animal,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,2
+Mobiliário e Iluminação,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,2
+"Farinha, Malte e Preparações de Cereais",TRIGO,INDÚSTRIA,AGRO,both,2
+Ferramentas e Cutelaria (Metais Comuns),OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,2
+Filamentos Sintéticos – Têxteis Técnicos,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,2
+Massas e Panificação,OUTROS AGRO,INDÚSTRIA,AGRO,both,2
+Sucos e Bebidas à Base de Frutas/Vegetais,VINHO,INDÚSTRIA,BEBIDAS,both,2
+Óleos e Gorduras Vegetais/animais,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,2
+Siderurgia – Ferro e Aço,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,2
+Borracha e Suas Obras (Exceto Pneumáticos),OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+"Sabões e Preparações de Limpeza, Ceras e Pastas",TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,2
+Mobiliário e Iluminação,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,2
+Erva-mate,CHÁ E MATE,INDÚSTRIA,AGRO,both,2
+Bebidas Não Alcoólicas (Exceto Sucos),SUCOS E REFRESCOS,INDÚSTRIA,BEBIDAS,both,2
+Bebidas Não Alcoólicas (Exceto Sucos),,,,left_only,2
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,2
+Minerais e Materiais de Mineração (Não Metálicos),CIMENTO,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,2
+Minerais e Materiais de Mineração (Não Metálicos),OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+Bebidas Não Alcoólicas (Exceto Sucos),OUTRAS BEBIDAS,INDÚSTRIA,BEBIDAS,both,2
+Eletrônicos de Consumo – Informática/TIC,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,2
+Explosivos e Pirotecnia,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,2
+Máquinas e Implementos Agrícolas,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,2
+Máquinas e Equipamentos Industriais,TRATORES,INDÚSTRIA,METAL MECÂNICO,both,2
+"Farinha, Malte e Preparações de Cereais",ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,2
+Cabos e Fios,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,2
+Calçados,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,2
+Papel e Papelão,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,2
+Obras de Ferro ou Aço,EMBALAGENS,INDÚSTRIA,METAL MECÂNICO,both,2
+Componentes Elétricos e Eletrônicos,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,2
+Componentes Elétricos e Eletrônicos,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,2
+Componentes Elétricos e Eletrônicos,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,2
+Produtos Farmacêuticos,MEDICAMENTOS,INDÚSTRIA,QUÍMICO,both,2
+Máquinas e Implementos Agrícolas,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,2
+"Produtos Cerâmicos, Porcelana e Refratários",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+Preparações de Carne,SUINOS,INDÚSTRIA,AGRO,both,2
+Calçados,PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,2
+Couros e Suas Obras,CALÇADOS E ARTEFATOS,INDÚSTRIA,COUREIRO-CALÇADISTA,both,2
+Couros e Suas Obras,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,2
+Carnes de Suínos,AVES,INDÚSTRIA,AGRO,both,2
+Calçados,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,2
+Combustíveis e Derivados de Petróleo,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,2
+Plásticos e Suas Obras,PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,2
+Plásticos e Suas Obras,MÓVEIS,INDÚSTRIA,MÓVEIS,both,2
+Alumínio e Suas Obras,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,2
+Alumínio e Suas Obras,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,2
+Veículos Comerciais (Caminhões e Carga) e Ônibus,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,2
+Veículos Comerciais (Caminhões e Carga) e Ônibus,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,2
+Veículos Comerciais (Caminhões e Carga) e Ônibus,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,2
+Óleos Brutos de Petróleo,,,,left_only,2
+Alumínio e Suas Obras,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,2
+Acessórios Pessoais e Artigos de Uso Pessoal,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,2
+Adubos e Fertilizantes,DEFENSIVOS AGRÍCOLAS,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,1
+Aeronaves e Espaço,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,1
+Aeronaves e Espaço,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Aeronaves e Espaço,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Veículos Leves e de Passageiros,VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Vidro e Suas Obras,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,1
+Vidro e Suas Obras,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Vidro e Suas Obras,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+Vidro e Suas Obras,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Alumínio e Suas Obras,MADEIRAS,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,1
+Alumínio e Suas Obras,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Animais Vivos e Genética,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,1
+Animais Vivos e Genética,RAÇÃO ANIMAL,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,1
+Animais Vivos e Genética,SUINOS,INDÚSTRIA,AGRO,both,1
+Armas e Munições,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Vestuário Tecido (Plano),PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Acessórios Pessoais e Artigos de Uso Pessoal,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Carnes de Outras Aves (Exceto Frango),AVES,INDÚSTRIA,AGRO,both,1
+Chás e Especiarias,CHÁ E MATE,INDÚSTRIA,AGRO,both,1
+Pescados e Frutos do Mar,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,1
+Peças e Acessórios Automotivos,PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,1
+Peças e Acessórios Automotivos,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Peças e Acessórios Automotivos,VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Peças e Acessórios Automotivos,VIDRO,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,1
+Plásticos e Suas Obras,MADEIRAS,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,1
+Plásticos e Suas Obras,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,1
+Plásticos e Suas Obras,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Plásticos e Suas Obras,OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,1
+Calçados,OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,1
+Calçados,TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,1
+Couros e Suas Obras,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Couros e Suas Obras,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+Papel e Papelão,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Papel e Papelão,TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,1
+Papel e Papelão,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Pasta Química e Pasta Mecânica,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Pasta Química e Pasta Mecânica,OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,1
+Perfumaria e Cosméticos,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,1
+Carnes Preparadas (Defumadas/Salgadas),ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,1
+Carnes Preparadas (Defumadas/Salgadas),SUINOS,INDÚSTRIA,AGRO,both,1
+Plásticos e Suas Obras,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Preparações de Carne,AVES,INDÚSTRIA,AGRO,both,1
+"Preparações, Suplementos e Complementos alimentares",COSMÉTICOS,INDÚSTRIA,QUÍMICO,both,1
+"Preparações, Suplementos e Complementos alimentares",MEDICAMENTOS,INDÚSTRIA,QUÍMICO,both,1
+Objetos de Arte e Coleções,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Obras de Ferro ou Aço,MÓVEIS,INDÚSTRIA,MÓVEIS,both,1
+Obras de Ferro ou Aço,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Obras de Ferro ou Aço,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Obras de Ferro ou Aço,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Ovos,OUTROS AGRO,INDÚSTRIA,AGRO,both,1
+Conservas de Frutas e Hortícolas,SUCOS E REFRESCOS,INDÚSTRIA,BEBIDAS,both,1
+"Produtos Editoriais, Impressos e Materiais Gráficos",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+"Produtos Minerais: Pedra, Cimento, Gesso, Amianto e Abrasivos",METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,1
+"Produtos Minerais: Pedra, Cimento, Gesso, Amianto e Abrasivos",PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+"Produtos Minerais: Pedra, Cimento, Gesso, Amianto e Abrasivos",PRODUTOS DE LIMPEZA,INDÚSTRIA,QUÍMICO,both,1
+Produtos Químicos Diversos,CIMENTO,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,1
+Produtos Químicos Diversos,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,1
+"Brinquedos, Jogos e Artigos de Lazer",MADEIRAS,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,1
+"Brinquedos, Jogos e Artigos de Lazer",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+"Brinquedos, Jogos e Artigos de Lazer",OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+"Brinquedos, Jogos e Artigos de Lazer",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Motocicletas,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+Eletrodomésticos (Linha Branca + Portáteis),PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Eletrônicos de Consumo – Informática/TIC,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Eletrônicos de Consumo – Informática/TIC,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Embarcações e Estruturas Flutuantes,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+Máquinas e Equipamentos Industriais,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Etanol e Álcool Etílico,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+"Farinha, Malte e Preparações de Cereais",CERVEJA E CHOPP,INDÚSTRIA,BEBIDAS,both,1
+"Farinha, Malte e Preparações de Cereais",OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+"Feltros, Passamanarias, Têxteis Técnicos",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Mobiliário e Iluminação,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Mobiliário e Iluminação,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Mobiliário e Iluminação,VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Cabos e Fios,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+Cabos e Fios,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Calçados,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,1
+Calçados,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Produtos Químicos Diversos,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Produtos Químicos Diversos,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Químicos Orgânicos,DEFENSIVOS AGRÍCOLAS,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,1
+Resíduos para Alimentação Animal,ARROZ,INDÚSTRIA,AGRO,both,1
+Resíduos para Alimentação Animal,AVES,INDÚSTRIA,AGRO,both,1
+Resíduos para Alimentação Animal,BIODIESEL,INDÚSTRIA,COMBUSTÍVEIS,both,1
+Resíduos para Alimentação Animal,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+Resíduos para Alimentação Animal,TRIGO,INDÚSTRIA,AGRO,both,1
+Resíduos para Alimentação Animal,ÓLEOS VEGETAIS,INDÚSTRIA,AGRO,both,1
+"Sabões e Preparações de Limpeza, Ceras e Pastas",ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,1
+"Sabões e Preparações de Limpeza, Ceras e Pastas",ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,1
+"Sabões e Preparações de Limpeza, Ceras e Pastas",OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+"Sabões e Preparações de Limpeza, Ceras e Pastas",OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,1
+Bebidas Não Alcoólicas (Exceto Sucos),DESTILADOS,INDÚSTRIA,BEBIDAS,both,1
+Bebidas Não Alcoólicas (Exceto Sucos),LEITE,INDÚSTRIA,AGRO,both,1
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Minerais e Materiais de Mineração (Não Metálicos),OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+Mobiliário e Iluminação,EMBALAGENS,INDÚSTRIA,PLÁSTICO,both,1
+Energia Elétrica,ENERGIA ELÉTRICA,INDÚSTRIA,ENERGIA ELÉTRICA,both,1
+Energia Elétrica,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,1
+Energia Elétrica,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Erva-mate,OUTROS AGRO,INDÚSTRIA,AGRO,both,1
+Bebidas Não Alcoólicas (Exceto Sucos),OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Bebidas Não Alcoólicas (Exceto Sucos),REFRIGERANTE,INDÚSTRIA,BEBIDAS,both,1
+Biodiesel,BIODIESEL,INDÚSTRIA,COMBUSTÍVEIS,both,1
+Biodiesel,ÓLEOS VEGETAIS,INDÚSTRIA,AGRO,both,1
+Borracha e Suas Obras (Exceto Pneumáticos),PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Borracha e Suas Obras (Exceto Pneumáticos),TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,1
+"Brinquedos, Jogos e Artigos de Lazer",ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,1
+"Brinquedos, Jogos e Artigos de Lazer",ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,1
+"Sabões e Preparações de Limpeza, Ceras e Pastas",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+"Sabões e Preparações de Limpeza, Ceras e Pastas",TINTAS E SOLVENTES,INDÚSTRIA,QUÍMICO,both,1
+Siderurgia – Ferro e Aço,EMBALAGENS,INDÚSTRIA,METAL MECÂNICO,both,1
+Fibras Sintéticas/Descontínuas – Têxteis,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+Frutas e Hortícolas,OUTROS AGRO,INDÚSTRIA,AGRO,both,1
+Madeira e Cortiça - Produtos e Obras,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Massas e Panificação,LEITE,INDÚSTRIA,AGRO,both,1
+Massas e Panificação,SUCOS E REFRESCOS,INDÚSTRIA,BEBIDAS,both,1
+Material Ferroviário e Contêineres,METALURGIA,INDÚSTRIA,METAL MECÂNICO,both,1
+Material Ferroviário e Contêineres,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Material Ferroviário e Contêineres,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+Material Ferroviário e Contêineres,PEÇAS E ACESSÓRIOS PARA VEÍCULOS,INDÚSTRIA,METAL MECÂNICO,both,1
+"Metais Não Ferrosos e Suas Obras (NCMs dos Caps. 74, 75, 78, 79, 80, 81)",ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,both,1
+"Soja, Oleaginosas e Sementes",RAÇÃO ANIMAL,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,1
+Sucos e Bebidas à Base de Frutas/Vegetais,OUTROS QUÍMICOS,INDÚSTRIA,QUÍMICO,both,1
+Tecidos Impregnados/Revestidos/Laminados,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Tecidos Impregnados/Revestidos/Laminados,PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,1
+"Tintas, Pigmentos e Corantes",CIMENTO,INDÚSTRIA,"MADEIRA, CIMENTO E VIDRO",both,1
+Artefatos de Metal Diversos,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+Artefatos de Metal Diversos,OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Óleos e Gorduras Vegetais/animais,RAÇÃO ANIMAL,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,1
+Óleos e Gorduras Vegetais/animais,ÓLEOS VEGETAIS,INDÚSTRIA,AGRO,both,1
+Instrumentos Médicos,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Instrumentos Médicos,PNEUMÁTICOS E BORRACHA,INDÚSTRIA,PNEUMÁTICOS E BORRACHA,both,1
+Instrumentos Médicos,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+"Joias, Bijuterias, Metais Preciosos e Relógios",OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,both,1
+Laticínios,ALIMENTOS,INDÚSTRIA,ALIMENTOS,both,1
+"Feltros, Passamanarias, Têxteis Técnicos",PRODUTOS DE LIMPEZA,INDÚSTRIA,QUÍMICO,both,1
+Bebidas Alcoólicas,CERVEJA E CHOPP,INDÚSTRIA,BEBIDAS,both,1
+Bebidas Alcoólicas,REFRIGERANTE,INDÚSTRIA,BEBIDAS,both,1
+Bebidas Alcoólicas,SUCOS E REFRESCOS,INDÚSTRIA,BEBIDAS,both,1
+"Têxteis Naturais (Algodão, Lã, Seda e Afins)",MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,both,1
+"Têxteis Naturais (Algodão, Lã, Seda e Afins)",MÓVEIS,INDÚSTRIA,MÓVEIS,both,1
+"Têxteis Naturais (Algodão, Lã, Seda e Afins)",PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Vacinas e Soros,DEFENSIVOS AGRÍCOLAS,INDÚSTRIA,INSUMOS AGROPECUÁRIOS,both,1
+Vestuário Tecido (Plano),OUTRAS INDÚSTRIAS,INDÚSTRIA,OUTRAS INDÚSTRIAS,both,1
+Alumínio e Suas Obras,EMBALAGENS,INDÚSTRIA,METAL MECÂNICO,both,1
+Veículos Comerciais (Caminhões e Carga) e Ônibus,PLÁSTICOS,INDÚSTRIA,PLÁSTICO,both,1
+Veículos Comerciais (Caminhões e Carga) e Ônibus,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,both,1
+Acessórios Pessoais e Artigos de Uso Pessoal,OUTROS PRODUTOS DE PAPEL,INDÚSTRIA,PAPEL,both,1
+Acessórios Pessoais e Artigos de Uso Pessoal,COSMÉTICOS,INDÚSTRIA,QUÍMICO,both,1
+Acessórios Pessoais e Artigos de Uso Pessoal,ARTEFATOS DOMÉSTICOS E FERRAMENTAS,INDÚSTRIA,METAL MECÂNICO,both,1
+,ELETROELETRÔNICO,INDÚSTRIA,ELETROELETRÔNICO,right_only,1
+,METALURGIA,INDÚSTRIA,METAL MECÂNICO,right_only,1
+,MÁQUINAS E EQUIPAMENTOS,INDÚSTRIA,METAL MECÂNICO,right_only,1
+,OUTROS METAL MECÂN.,INDÚSTRIA,METAL MECÂNICO,right_only,1
+,TÊXTIL,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,right_only,1
+,VESTUÁRIO,INDÚSTRIA,TÊXTEIS E VESTUÁRIO,right_only,1

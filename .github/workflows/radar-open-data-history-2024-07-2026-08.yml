@@ -1,0 +1,211 @@
+name: radar-open-data-history-2024-07-2026-08
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/radar-open-data-history-2024-07-2026-08.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-history:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+          python -m pip install --quiet requests
+
+      - name: Download and audit monthly composition files
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import calendar
+          import csv
+          import hashlib
+          import json
+          from pathlib import Path
+
+          import pandas as pd
+          import requests
+
+          from sbmi.radar_open_data import audit_radar_open_data
+
+          BASE="https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos"
+          TMP=Path(".data/tmp/radar_open_data_history")
+          AUDIT=Path(".data/audit/receita_rs/radar_open_data")
+          OUT=Path("artifacts/radar_open_data_history_2024_07_2026_08")
+          TMP.mkdir(parents=True, exist_ok=True)
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          periods=[]
+          y,m=2024,7
+          while (y,m) <= (2026,8):
+              periods.append((y,m))
+              if m==12:
+                  y,m=y+1,1
+              else:
+                  m+=1
+
+          manifest=[]
+          schema_rows=[]
+          comp_rows=[]
+          month_validation=[]
+
+          sess=requests.Session()
+          sess.headers.update({"User-Agent":"SBMI-audit/1.0"})
+          for year,month in periods:
+              period=f"{year}-{month:02d}"
+              filename=f"Composicao_de_Mercado_{month:02d}_{year}.csv"
+              url=f"{BASE}/{filename}"
+              pdir=TMP/period
+              pdir.mkdir(parents=True, exist_ok=True)
+              path=pdir/filename
+              try:
+                  with sess.get(url,stream=True,timeout=(30,900),allow_redirects=True) as r:
+                      r.raise_for_status()
+                      with path.open("wb") as f:
+                          for chunk in r.iter_content(1024*1024):
+                              if chunk:
+                                  f.write(chunk)
+                  sha=hashlib.sha256(path.read_bytes()).hexdigest()
+                  manifest.append({"period":period,"file":filename,"url":url,"status":"DOWNLOADED","bytes":path.stat().st_size,"sha256":sha})
+              except Exception as exc:
+                  manifest.append({"period":period,"file":filename,"url":url,"status":"DOWNLOAD_ERROR","error":repr(exc)})
+                  month_validation.append({"period":period,"status":"DOWNLOAD_ERROR","ncm_codes_with_composition":0})
+                  continue
+
+              execution_id=f"radar-history-{year}-{month:02d}"
+              try:
+                  result=audit_radar_open_data(
+                      source_dir=pdir,
+                      output_root=AUDIT,
+                      execution_id=execution_id,
+                      basket_name="rice_default",
+                  )
+                  schema=result.schema.copy()
+                  schema.insert(0,"period",period)
+                  schema_rows.extend(schema.to_dict("records"))
+
+                  comp=result.composition.copy()
+                  comp.insert(0,"period",period)
+                  comp_rows.extend(comp.to_dict("records"))
+                  month_validation.append({
+                      "period":period,
+                      "status":"AUDIT_OK",
+                      "ncm_codes_with_composition":int(comp["ncm"].nunique()) if not comp.empty else 0,
+                      "composition_rows":len(comp),
+                  })
+              except Exception as exc:
+                  month_validation.append({"period":period,"status":"AUDIT_ERROR","ncm_codes_with_composition":0,"error":repr(exc)})
+
+          manifest_df=pd.DataFrame(manifest)
+          schema_df=pd.DataFrame(schema_rows)
+          comp_df=pd.DataFrame(comp_rows)
+          validation_df=pd.DataFrame(month_validation)
+
+          manifest_df.to_csv(OUT/"source_manifest.csv",index=False,encoding="utf-8-sig")
+          schema_df.to_csv(OUT/"schema_inventory_by_month.csv",index=False,encoding="utf-8-sig")
+          comp_df.to_csv(OUT/"rice_ncm_monthly_composition.csv",index=False,encoding="utf-8-sig")
+          validation_df.to_csv(OUT/"month_validation.csv",index=False,encoding="utf-8-sig")
+
+          if not comp_df.empty:
+              pilot=(comp_df.groupby("period",as_index=False)[["int_rs","ouf","ext","demanda_rs"]].sum())
+              pilot["part_rs_weighted_pilot"]=pilot["int_rs"]/pilot["demanda_rs"].where(pilot["demanda_rs"]!=0)
+              pilot["natureza"]="DADO_CALCULADO_SOBRE_CESTA_PILOTO_7_NCMS"
+              pilot["formula"]="sum(INT)/sum(INT+OUF+EXT)"
+              pilot.to_csv(OUT/"rice_pilot_monthly_summary.csv",index=False,encoding="utf-8-sig")
+          else:
+              pd.DataFrame(columns=["period","int_rs","ouf","ext","demanda_rs","part_rs_weighted_pilot","natureza","formula"]).to_csv(
+                  OUT/"rice_pilot_monthly_summary.csv",index=False,encoding="utf-8-sig"
+              )
+
+          if not schema_df.empty:
+              drift=(schema_df.groupby(["raw_columns","column_mapping"],dropna=False).agg(
+                  months=("period","nunique"),
+                  first_period=("period","min"),
+                  last_period=("period","max"),
+              ).reset_index())
+              drift.to_csv(OUT/"schema_drift.csv",index=False,encoding="utf-8-sig")
+          else:
+              pd.DataFrame(columns=["raw_columns","column_mapping","months","first_period","last_period"]).to_csv(
+                  OUT/"schema_drift.csv",index=False,encoding="utf-8-sig"
+              )
+
+          summary={
+              "months_expected":len(periods),
+              "months_downloaded_ok":int((manifest_df.get("status")== "DOWNLOADED").sum()) if not manifest_df.empty else 0,
+              "months_audit_ok":int((validation_df.get("status")== "AUDIT_OK").sum()) if not validation_df.empty else 0,
+              "months_with_all_7_pilot_ncms":int((validation_df.get("ncm_codes_with_composition")==7).sum()) if not validation_df.empty else 0,
+              "canonical_rows_promoted":0,
+          }
+          (OUT/"validation_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print(validation_df.to_string(index=False))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/radar_open_data_history_2024_07_2026_08"
+          mkdir -p "$DEST"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/source_manifest.csv "$DEST/"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/schema_inventory_by_month.csv "$DEST/"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/rice_ncm_monthly_composition.csv "$DEST/"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/rice_pilot_monthly_summary.csv "$DEST/"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/month_validation.csv "$DEST/"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/schema_drift.csv "$DEST/"
+          cp artifacts/radar_open_data_history_2024_07_2026_08/validation_summary.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Radar do Mercado — histórico mensal de Composição de Mercado — jul/2024 a ago/2026
+
+          **Fonte observada:** Receita Estadual/SEFAZ-RS — Radar do Mercado — Dados Abertos.
+          **Abrangência:** Rio Grande do Sul; fluxos INT/OUF/EXT conforme a metodologia do Radar.
+          **Período solicitado:** julho/2024 a agosto/2026, 26 competências mensais.
+          **Unidade:** valores nominais publicados nos CSVs oficiais; o pipeline preserva o conteúdo fonte e calcula Part.RS = INT/(INT+OUF+EXT).
+          **Natureza:** arquivos mensais oficiais observados + cálculos SBMI reproduzíveis.
+
+          Esta rodada mantém a cesta-piloto de sete NCMs de arroz para testar continuidade temporal, schema e cálculo. O arquivo rice_pilot_monthly_summary.csv é uma agregação calculada da cesta-piloto, não um indicador oficial do setor arroz nem medida municipal.
+
+          Nenhuma linha é promovida automaticamente a base canônica. O histórico deve ser auditado quanto a completude, mudança de schema e coerência temporal antes de uso narrativo.
+
+          Limitações:
+          - indicador estadual ≠ demanda de São Borja;
+          - cesta de sete NCMs ≠ total de uma cadeia econômica;
+          - valores >30% de Part.RS ficam fora das faixas de dependência explicitadas pela NT e não recebem categoria oficial inventada;
+          - mudanças no catálogo/NCM ou no schema mensal devem ser tratadas explicitamente.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: ingest Radar monthly history Jul 2024 Aug 2026"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-open-data-history-2024-07-2026-08
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/radar_open_data_history_2024_07_2026_08/

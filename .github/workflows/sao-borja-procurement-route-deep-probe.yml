@@ -1,0 +1,112 @@
+name: sao-borja-procurement-route-deep-probe
+
+on:
+  push:
+    branches: [explore/receita-estadual-rs-market-intel-v1]
+    paths: [".github/workflows/sao-borja-procurement-route-deep-probe.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Deep probe accessible PMSB procurement routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+          from urllib.parse import urljoin
+
+          BASE='https://transparencia.saoborja.rs.gov.br'
+          OUT=Path('artifacts/sao_borja_procurement_route_deep_probe'); OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session(); s.headers.update({'User-Agent':'Mozilla/5.0 SBMI route audit/1.0'})
+          report={}
+
+          targets=['/acordos','/licitacoes','/js/consulta.js','/js/acordos/index.js','/js/licitacoes.js','/js/licitacoes/index.js']
+          for target in targets:
+              try:
+                  r=s.get(BASE+target,timeout=45)
+                  rec={'status':r.status_code,'bytes':len(r.content),'content_type':r.headers.get('content-type','')}
+                  text=r.text
+                  rec['route_strings']=sorted(set(re.findall(r'''["'](/[^"']{1,180})["']''',text)))[:500]
+                  rec['institution_snippets']=[m.group(0)[:700] for m in re.finditer(r'.{0,250}(?:instituicao|institui|exercicio|modalidade|situacao).{0,400}',text,re.I|re.S)][:100]
+                  report[target]=rec
+                  safe=re.sub(r'[^A-Za-z0-9_.-]+','_',target.strip('/')) or 'root'
+                  (OUT/f'{safe}.txt').write_text(text,encoding='utf-8')
+              except Exception as e:
+                  report[target]={'error':repr(e)}
+
+          # buscarExercicios is explicitly referenced by the official portal JS.
+          probes=[]
+          for inst in range(1,101):
+              url=f'{BASE}/acordos/buscarExercicios/{inst}'
+              try:
+                  r=s.get(url,timeout=15)
+                  ctype=r.headers.get('content-type','')
+                  body=r.text.strip()
+                  js=None
+                  try: js=r.json()
+                  except Exception: pass
+                  nonempty=bool(js) if isinstance(js,(dict,list)) else bool(body and body not in ('{}','[]','null'))
+                  if nonempty or r.status_code != 200:
+                      probes.append({'institution_candidate':inst,'status':r.status_code,'content_type':ctype,'bytes':len(r.content),'json':js,'prefix':body[:500] if js is None else None})
+              except Exception as e:
+                  probes.append({'institution_candidate':inst,'error':repr(e)})
+          report['buscarExercicios_probe_1_100']=probes
+
+          # Probe search routes without assuming parameter values; preserve only metadata and redacted text prefix.
+          for target in ['/acordos/pesquisar','/licitacoes/pesquisar']:
+              try:
+                  r=s.get(BASE+target,timeout=45)
+                  body=re.sub(r'\b\d{11,14}\b','[DOC]',r.text[:4000])
+                  report[target]={'status':r.status_code,'bytes':len(r.content),'url':r.url,'prefix':body}
+              except Exception as e:
+                  report[target]={'error':repr(e)}
+
+          (OUT/'deep_probe.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps({k:v for k,v in report.items() if k=='buscarExercicios_probe_1_100' or k.endswith('/pesquisar')},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST=docs/data_sources/sao_borja_procurement_route_deep_probe
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_procurement_route_deep_probe/deep_probe.json "$DEST/"
+          cp artifacts/sao_borja_procurement_route_deep_probe/js_consulta.js.txt "$DEST/" 2>/dev/null || true
+          cp artifacts/sao_borja_procurement_route_deep_probe/js_acordos_index.js.txt "$DEST/" 2>/dev/null || true
+          cp artifacts/sao_borja_procurement_route_deep_probe/js_licitacoes.js.txt "$DEST/" 2>/dev/null || true
+          cp artifacts/sao_borja_procurement_route_deep_probe/js_licitacoes_index.js.txt "$DEST/" 2>/dev/null || true
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal da Transparência de São Borja — deep probe contratos/licitações
+
+          Fonte: Portal da Transparência da Prefeitura de São Borja.
+
+          Objetivo: identificar rotas e parâmetros públicos reproduzíveis para histórico de contratos/licitações, sem inferir que contrato equivale a pagamento.
+
+          O teste de `/acordos/buscarExercicios/<id>` usa somente IDs candidatos e registra apenas respostas não vazias/metadados. Nenhum CPF/nome de pessoa física é persistido.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: deep probe municipal procurement routes"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sao-borja-procurement-route-deep-probe
+          path: artifacts/sao_borja_procurement_route_deep_probe/

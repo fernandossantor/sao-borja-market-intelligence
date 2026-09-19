@@ -1,0 +1,5 @@
+{
+  "request_error": "ReadTimeout(ReadTimeoutError(\"HTTPSConnectionPool(host='transparencia.saoborja.rs.gov.br', port=443): Read timed out. (read timeout=30)\"))",
+  "status": null,
+  "bytes": 0
+}

@@ -1,0 +1,194 @@
+{
+  "source": "https://transparencia.saoborja.rs.gov.br/despesas",
+  "period": {
+    "start": "01/01",
+    "end": "18/09",
+    "data_importacao": "2026-09-18"
+  },
+  "sample_cnpj": "06136424000164",
+  "trace": [
+    {
+      "step": 1,
+      "iNivel": "4",
+      "sViewAtual": "instituicoes",
+      "title": "Despesas por Instituição\n  01/01/2026 a 18/09/2026",
+      "grid_endpoint": "/despesas/getInstit",
+      "columns": "'Instituição','Empenhado','Anulado','Liquidado','Pago'",
+      "select_param": "iInstituicao",
+      "params_keys": [
+        "aHistorico",
+        "dtDataImportacao",
+        "dtFim",
+        "dtInicio",
+        "iCredor",
+        "iExercicio",
+        "iIdLink",
+        "iNivel",
+        "sViewAtual"
+      ],
+      "grid_records": 1,
+      "sample_rows": [
+        {
+          "id": "1",
+          "cell": [
+            "PREFEITURA MUNICIPAL DE SÃO BORJA",
+            "6712078.15",
+            "1717430.77",
+            "3835552.81",
+            "3835552.81"
+          ]
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "iNivel": "5",
+      "sViewAtual": "empenhos",
+      "title": "Despesas por Empenho\n  01/01/2026 a 18/09/2026",
+      "grid_endpoint": "/despesas/getEmpenhos",
+      "columns": "'Empenho','Função','Sub-Função','Programa','Ação','Rubrica','Recurso','Data','Empenhado','Anulado','Liquidado','Pago'",
+      "select_param": "iEmpenho",
+      "params_keys": [
+        "aHistorico",
+        "dtDataImportacao",
+        "dtFim",
+        "dtInicio",
+        "iCredor",
+        "iExercicio",
+        "iIdLink",
+        "iInstituicao",
+        "iNivel",
+        "sViewAtual"
+      ],
+      "grid_records": 21,
+      "sample_rows": [
+        {
+          "id": "308687",
+          "cell": [
+            "512 / 2026",
+            "ADMINISTRAÇÃO",
+            "ADMINISTRAÇÃO GERAL",
+            "APOIO ADMINISTRATIVO",
+            "MANUTENÇÃO DAS ATIVIDADES DA SECRETARIA",
+            "DESPESAS DE EXERCÍCIOS ANTERIORES",
+            "RECURSO LIVRE",
+            "2026-01-16",
+            "26524.10",
+            "0",
+            "26524.10",
+            "26524.10"
+          ]
+        },
+        {
+          "id": "308688",
+          "cell": [
+            "513 / 2026",
+            "ADMINISTRAÇÃO",
+            "ADMINISTRAÇÃO GERAL",
+            "APOIO ADMINISTRATIVO",
+            "MANUTENÇÃO DAS ATIVIDADES DA SECRETARIA",
+            "DESPESAS DE EXERCÍCIOS ANTERIORES",
+            "RECURSO LIVRE",
+            "2026-01-16",
+            "12025.69",
+            "0",
+            "12025.69",
+            "12025.69"
+          ]
+        },
+        {
+          "id": "309967",
+          "cell": [
+            "1746 / 2026",
+            "URBANISMO",
+            "SERVIÇOS URBANOS",
+            "CIDADE MELHOR",
+            "MANUT. DAS ATIV. DOS SERV. URBANOS",
+            "OUTROS SERVIÇOS DE TERCEIROS - PESSOA JURÍDICA",
+            "Outros Recursos não Vinculados",
+            "2026-01-29",
+            "226224.00",
+            "4726.20",
+            "221497.80",
+            "221497.80"
+          ]
+        }
+      ]
+    },
+    {
+      "step": 3,
+      "iNivel": "6",
+      "sViewAtual": "empenhos_movimentacoes",
+      "title": "Movimentações do Empenho",
+      "grid_endpoint": "/despesas/getMovimentacoesEmpenhos",
+      "columns": "'Data','Tipo','Valor','Codigo Tipo'",
+      "select_param": "iMovimentacaoEmpenho",
+      "params_keys": [
+        "aHistorico",
+        "dtDataImportacao",
+        "dtFim",
+        "dtInicio",
+        "iCredor",
+        "iEmpenho",
+        "iExercicio",
+        "iIdLink",
+        "iInstituicao",
+        "iNivel",
+        "sViewAtual"
+      ],
+      "grid_records": 11,
+      "sample_rows": [
+        {
+          "id": "1061569",
+          "cell": [
+            "2026-01-16",
+            "REGISTRO DO CONTRATO",
+            "26524.10",
+            "900"
+          ]
+        },
+        {
+          "id": "1061569",
+          "cell": [
+            "2026-01-16",
+            "REGISTRO DO CONTRATO",
+            "26524.10",
+            "900"
+          ]
+        },
+        {
+          "id": "505852",
+          "cell": [
+            "2026-01-16",
+            "EMPENHO",
+            "26524.10",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "step": 4,
+      "iNivel": 7,
+      "sViewAtual": "empenhos_movimentacoes",
+      "title": "Missing View",
+      "grid_endpoint": null,
+      "columns": null,
+      "select_param": null,
+      "params_keys": [
+        "aHistorico",
+        "dtDataImportacao",
+        "dtFim",
+        "dtInicio",
+        "iCredor",
+        "iEmpenho",
+        "iExercicio",
+        "iIdLink",
+        "iInstituicao",
+        "iMovimentacaoEmpenho",
+        "iNivel",
+        "sViewAtual"
+      ]
+    }
+  ]
+}

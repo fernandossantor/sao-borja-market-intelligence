@@ -171,3 +171,77 @@ Essas hipóteses exigem dados locais de fornecedores, compras, estoque, frete ou
 - `docs/data_sources/radar_taxonomy_series_2024_07_2026_08/`
 - `docs/data_sources/radar_open_data_history_2024_07_2026_08/`
 - `docs/data_sources/radar_open_data_current_2026_08/`
+
+
+## 9. Avanço temporal comparável — jan–ago/2025 × jan–ago/2026
+
+Para evitar comparar 2026 parcial com 2025 anual, foi calculada uma comparação de **mesmo período** usando as agregações mensais já auditadas. O valor comparado é a soma nominal `INT + OUF + EXT`; portanto, sua variação mistura preço, quantidade e composição e **não deve ser lida como crescimento real de demanda física**.
+
+### 9.1 Grupos de afinidade — saúde, higiene e cuidados pessoais
+
+| Grupo | Part.RS jan–ago/2025 | Part.RS jan–ago/2026 | Δ p.p. | Variação nominal INT+OUF+EXT |
+|---|---:|---:|---:|---:|
+| Medicamentos | 0,69% | 0,66% | -0,03 | +19,34% |
+| Vacinas e Soros | 0,00% | 0,07% | +0,06 | +13,83% |
+| Instrumentos Médicos | 5,19% | 5,01% | -0,18 | +8,58% |
+| Produtos Farmacêuticos | 1,71% | 1,13% | -0,58 | +20,81% |
+| Perfumaria e Cosméticos | 5,25% | 5,31% | +0,06 | +7,21% |
+
+**Interpretação:** os principais núcleos de saúde permanecem em patamares muito baixos de participação interna do RS no período comparável. A mudança entre 2025 e 2026 é pequena para medicamentos, instrumentos e cosméticos e não indica redução estrutural da exposição externa.
+
+### 9.2 Grupos de afinidade — bens não essenciais
+
+| Grupo | Part.RS jan–ago/2025 | Part.RS jan–ago/2026 | Δ p.p. | Variação nominal INT+OUF+EXT |
+|---|---:|---:|---:|---:|
+| Aparelhos Telefônicos | 0,53% | 0,58% | +0,05 | +7,92% |
+| Eletrônicos – Informática/TIC | 2,38% | 1,36% | -1,02 | -0,91% |
+| Eletrônicos – Comunicação/Imagem | 0,96% | 0,93% | -0,03 | +9,11% |
+| Eletrônicos – Áudio/Vídeo | 2,67% | 2,50% | -0,17 | -2,71% |
+| Brinquedos/Jogos/Lazer | 6,59% | 4,59% | -1,99 | +15,27% |
+| Motocicletas | 0,00% | 0,00% | 0,00 | +20,19% |
+| Vestuário Tecido (Plano) | 11,91% | 11,66% | -0,26 | +1,54% |
+| Vestuário de Malha | 13,08% | 15,66% | +2,59 | -13,34% |
+
+**Interpretação:** a exposição externa permanece elevada na maior parte dos grupos. Vestuário de malha mostra aumento da Part.RS no agregado jan–ago, enquanto brinquedos e informática/TIC recuam. A classificação também depende do período: vestuário de malha fica em **MÉDIA** no agregado jan–ago/2026 (15,66%), embora a fotografia de ago/2026 isoladamente esteja em **ALTA** (13,93%).
+
+### 9.3 Grupos de afinidade — bens essenciais e alimentos
+
+| Grupo | Part.RS jan–ago/2025 | Part.RS jan–ago/2026 | Δ p.p. | Variação nominal INT+OUF+EXT |
+|---|---:|---:|---:|---:|
+| Café | 0,67% | 0,46% | -0,21 | +7,25% |
+| Frutas e Hortícolas | 6,89% | 7,51% | +0,62 | +2,44% |
+| Preparações Alimentícias Diversas | 10,45% | 10,91% | +0,46 | +0,27% |
+| Cereais e Grãos (exceto soja) | 30,58% | 29,27% | -1,31 | -18,10% |
+| Massas e Panificação | 44,44% | 45,93% | +1,48 | +9,29% |
+| Laticínios | 64,70% | 64,03% | -0,67 | -0,91% |
+
+**Interpretação:** permanece confirmada a heterogeneidade entre famílias. Cereais/Grãos cruza o limite de 30% entre os agregados de mesmo período, mostrando que a classificação pode mudar conforme a janela temporal; por isso, não se deve substituir a série por uma única competência.
+
+### 9.4 Grupos de afinidade — agro
+
+| Grupo | Part.RS jan–ago/2025 | Part.RS jan–ago/2026 | Δ p.p. | Variação nominal INT+OUF+EXT |
+|---|---:|---:|---:|---:|
+| Máquinas e Implementos Agrícolas | 54,71% | 49,95% | -4,76 | -18,90% |
+| Adubos e Fertilizantes | 36,97% | 39,29% | +2,32 | -17,99% |
+| Tratores | 0,76% | 0,88% | +0,12 | +0,45% |
+
+### 9.5 Portfólio setorial — mesmo período
+
+| Setor | Part.RS jan–ago/2025 | Part.RS jan–ago/2026 | Δ p.p. | Variação nominal INT+OUF+EXT |
+|---|---:|---:|---:|---:|
+| MEDICAMENTOS | 2,90% | 3,02% | +0,11 | +12,19% |
+| COSMÉTICOS | 9,89% | 10,28% | +0,38 | +8,43% |
+| DEFENSIVOS AGRÍCOLAS | 6,86% | 8,63% | +1,77 | -16,05% |
+| FERTILIZANTES | 36,65% | 38,94% | +2,29 | -17,86% |
+| TRATORES | 35,01% | 39,38% | +4,37 | -10,43% |
+| ARROZ | 78,93% | 80,03% | +1,10 | -20,08% |
+| PRODUTOS DE LIMPEZA | 32,40% | 33,41% | +1,01 | +7,13% |
+| VESTUÁRIO | 29,92% | 28,60% | -1,32 | +1,14% |
+| ELETROELETRÔNICO | 31,77% | 31,59% | -0,18 | -0,17% |
+| ALIMENTOS | 54,10% | 54,43% | +0,33 | +6,22% |
+
+**Achado adicional de sensibilidade:** no mesmo período jan–ago/2026, `Tratores` permanece em **0,88%** no grupo de afinidade, enquanto o Portfólio `TRATORES` registra **39,38%**. A diferença continua sendo explicada pelo universo NCM, não por inconsistência do Radar.
+
+### 9.6 Consequência para a etapa seguinte
+
+A etapa de tendência está **parcialmente fechada** para grupos oficiais e setores do Portfólio. Ainda falta definir as **cestas finais de cada caderno** quando a pergunta analítica exigir um recorte próprio do SBMI. A regra de promoção permanece: mesma janela temporal para comparação, cesta documentada, taxonomia explícita e nenhuma conversão de Part.RS estadual em vazamento municipal.

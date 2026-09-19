@@ -1,0 +1,205 @@
+name: sao-borja-transparencia-creditors-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-transparencia-creditors-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Extract corporate creditors from official municipal transparency
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_transparencia_creditors_2026"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json,re,requests,time
+          from pathlib import Path
+          from datetime import datetime
+
+          OUT=Path("artifacts/sao_borja_transparencia_creditors_2026")
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+
+          r=s.get(BASE+"/despesas",timeout=60); r.raise_for_status()
+          html=r.text
+          m=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",html)
+          if not m: raise RuntimeError("dtDataImportacao not found")
+          dt_import=m.group(1)
+          imp=datetime.strptime(dt_import,"%Y-%m-%d")
+          dt_end=imp.strftime("%d/%m")
+
+          menu_data=[
+            ("iExercicio","2026"),("dtDataImportacao",dt_import),("sViewAtual",""),
+            ("iNivel","3"),("dtInicio","01/01"),("dtFim",dt_end),
+            ("aHistorico[0][descricao]","Descrição"),
+            ("aHistorico[0][valor_empenhado]","Valor Empenhado"),
+            ("aHistorico[0][valor_anulado]","Valor Anulado"),
+            ("aHistorico[0][valor_liquidado]","Valor Liquidado"),
+            ("aHistorico[0][valor_pago]","Valor Pago"),
+          ]
+          q=s.post(BASE+"/despesas/loadLink/3",data=menu_data,timeout=120); q.raise_for_status()
+          txt=q.text
+          mo=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);",txt,re.S)
+          if not mo: raise RuntimeError("encoded aParametros not found")
+          encoded=mo.group(1)
+          # JS single-quoted string contains escaped slashes but JSON escapes are otherwise valid.
+          encoded=encoded.replace("\\'","'")
+          params=json.loads(encoded)
+
+          def num(v):
+              if v is None:return 0.0
+              if isinstance(v,(int,float)):return float(v)
+              x=str(v).strip().replace("\u00a0"," ").replace("R$","").strip()
+              if not x:return 0.0
+              if "," in x:
+                  x=x.replace(".","").replace(",",".")
+              try:return float(x)
+              except:return 0.0
+
+          def normalize_row(obj):
+              rid=str(obj.get("id","")).strip()
+              if isinstance(obj.get("cell"),list):
+                  cell=obj["cell"]
+                  vals=(cell+[None]*6)[:6]
+                  return {"id":rid,"cpfcnpj":vals[0],"nome":vals[1],
+                          "valor_empenhado":vals[2],"valor_anulado":vals[3],
+                          "valor_liquidado":vals[4],"valor_pago":vals[5]}
+              out={"id":rid}
+              for k in ["cpfcnpj","nome","valor_empenhado","valor_anulado","valor_liquidado","valor_pago"]:
+                  out[k]=obj.get(k)
+              return out
+
+          page=1; per_page=500; all_rows=[]; raw_pages=[]
+          while True:
+              payload={
+                  "aParametros":json.dumps(params,ensure_ascii=False,separators=(",",":")),
+                  "page":page,"rows":per_page,"sidx":"nome","sord":"asc","_search":"false"
+              }
+              z=s.post(BASE+"/despesas/getCredores",data=payload,timeout=120)
+              z.raise_for_status()
+              try:data=z.json()
+              except Exception:
+                  (OUT/f"page_{page}_nonjson.txt").write_bytes(z.content)
+                  raise
+              raw_pages.append({"page":page,"status":z.status_code,"bytes":len(z.content),
+                                "keys":list(data.keys()) if isinstance(data,dict) else None})
+              rows=data.get("rows",[]) if isinstance(data,dict) else []
+              all_rows.extend(normalize_row(x) for x in rows)
+              total=int(data.get("total",1) or 1) if isinstance(data,dict) else 1
+              records=int(data.get("records",len(all_rows)) or len(all_rows)) if isinstance(data,dict) else len(all_rows)
+              if page>=total or not rows: break
+              page+=1
+              if page>1000: raise RuntimeError("pagination guard")
+              time.sleep(0.1)
+
+          # Deduplicate by creditor id/document/name in case endpoint repeats.
+          dedup={}
+          for x in all_rows:
+              doc=re.sub(r"\D","",str(x.get("cpfcnpj") or ""))
+              key=(x.get("id",""),doc,str(x.get("nome") or "").strip())
+              dedup[key]=x
+          all_rows=list(dedup.values())
+
+          corporate=[]; summary={"CNPJ":{"rows":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0},
+                                "CPF":{"rows":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0},
+                                "OUTRO_SEM_DOCUMENTO":{"rows":0,"empenhado":0.0,"anulado":0.0,"liquidado":0.0,"pago":0.0}}
+          for x in all_rows:
+              doc=re.sub(r"\D","",str(x.get("cpfcnpj") or ""))
+              vals={k:num(x.get("valor_"+k)) for k in ("empenhado","anulado","liquidado","pago")}
+              if len(doc)==14: typ="CNPJ"
+              elif len(doc)==11: typ="CPF"
+              else: typ="OUTRO_SEM_DOCUMENTO"
+              summary[typ]["rows"]+=1
+              for k,v in vals.items():summary[typ][k]+=v
+              if typ=="CNPJ":
+                  corporate.append({"id_credor":x.get("id",""),"cnpj":doc,
+                                    "nome_credor":str(x.get("nome") or "").strip(),
+                                    **{k+"_R$":round(v,2) for k,v in vals.items()}})
+
+          with (OUT/"corporate_creditors_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["id_credor","cnpj","nome_credor","empenhado_R$","anulado_R$","liquidado_R$","pago_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(sorted(corporate,key=lambda x:x["pago_R$"],reverse=True))
+
+          total_summary={"rows":len(all_rows),"categories":summary,
+                         "totals":{k:round(sum(v[k] for v in summary.values()),2) for k in ("empenhado","anulado","liquidado","pago")}}
+          meta={
+              "source":BASE+"/despesas",
+              "endpoint":BASE+"/despesas/getCredores",
+              "period":{"year":2026,"start":"01/01","end":dt_end,"data_importacao":dt_import},
+              "parameters":params,
+              "pagination":raw_pages,
+              "record_count_endpoint":records,
+              "deduplicated_creditors":len(all_rows),
+              "corporate_cnpj_creditors":len(corporate),
+              "privacy_rule":"Detailed persistence restricted to CNPJ creditors. CPF and other documents are retained only as aggregate counts/values.",
+              "summary":total_summary,
+              "limitations":[
+                  "Portal values cover movements in the selected exercise and exclude restos a pagar according to the portal's Origem dos Dados page.",
+                  "Creditor payment is not automatically procurement: payroll, debt, transfers, reimbursements and other non-supplier flows may be present and require eligibility classification.",
+                  "CNPJ locality still requires RFB enrichment; no local/external classification is inferred here."
+              ]
+          }
+          (OUT/"extraction_summary.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_transparencia_creditors_2026"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv "$DEST/"
+          cp artifacts/sao_borja_transparencia_creditors_2026/extraction_summary.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal da Transparência de São Borja — credores — 2026
+
+          Camada exploratória, não canônica.
+
+          Fonte oficial municipal: Portal da Transparência PMSB.
+          Endpoint reproduzido da própria interface: POST /despesas/getCredores.
+
+          Período: 01/01/2026 até a data de atualização indicada pelo portal.
+
+          Por minimização de dados pessoais, o CSV detalhado preserva somente credores
+          com CNPJ. Credores CPF/outros são mantidos apenas em totais agregados no JSON.
+
+          Os valores por credor ainda NÃO representam automaticamente compras públicas
+          elegíveis: podem incluir outras classes de despesa. Também NÃO existe, nesta
+          etapa, classificação local/externa. Isso exige seleção de elegibilidade e
+          enriquecimento cadastral RFB.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract São Borja 2026 corporate creditors"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-transparencia-creditors-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_transparencia_creditors_2026/

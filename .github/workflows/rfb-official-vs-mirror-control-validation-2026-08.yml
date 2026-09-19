@@ -106,11 +106,15 @@ jobs:
 
           OUT = Path("artifacts/rfb_official_vs_mirror_control_validation_2026_08")
           TOM = "8863"
+          # Controle territorial canônico efetivamente registrado em 07/09/2026
+          # para os 7.306 estabelecimentos ativos da RFB 2026-08.
+          # NÃO confundir com o universo analítico de 6.906 "Entidades Empresariais"
+          # e suas 284 unidades de matriz externa, que usam outro denominador.
           EXPECTED = {
               "TOTAL_ATIVOS": 7306,
-              "MATRIZ_LOCAL": 6906,
-              "FILIAL_DE_MATRIZ_LOCAL": 116,
-              "FILIAL_DE_MATRIZ_EXTERNA": 284,
+              "MATRIZ_LOCAL": 6881,
+              "FILIAL_DE_MATRIZ_LOCAL": 102,
+              "FILIAL_DE_MATRIZ_EXTERNA": 323,
               "FILIAL_MATRIZ_NAO_LOCALIZADA": 0,
               "INDETERMINADO": 0,
           }
@@ -338,8 +342,13 @@ jobs:
           usado para o controle territorial: ativos em São Borja, matriz local, filial de
           matriz local, filial de matriz externa e matriz não localizada.
 
-          Referência canônica esperada: 7.306 ativos; 6.906 matrizes locais; 116 filiais
-          de matriz local; 284 filiais de matriz externa; zero não localizadas.
+          Referência canônica estrutural corrigida: 7.306 ativos; 6.881 matrizes locais;
+          102 filiais de matriz local; 323 filiais de matriz externa; zero não localizadas.
+
+          O vetor anterior 6.906/116/284 misturava grandezas de universos diferentes:
+          6.906 é o universo analítico de "Entidades Empresariais" e 284 é o subconjunto
+          empresarial de matriz externa; não são, respectivamente, contagens de matriz
+          local e de filial externa no universo geral de 7.306 estabelecimentos.
 
           **Regra:** enquanto a estrutura canônica não for reproduzida por fonte aceita e
           com proveniência temporal, os indicadores territoriais derivados de credores

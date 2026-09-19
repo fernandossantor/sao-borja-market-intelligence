@@ -1,0 +1,170 @@
+{
+  "source": "Tesouro Nacional — SICONFI / API de Dados Abertos",
+  "endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca",
+  "territory": {
+    "municipality": "São Borja/RS",
+    "ibge": "4318002"
+  },
+  "reference_period": "2019-2025 annual DCA",
+  "unit": "Preserve the unit/column semantics exactly as returned by SICONFI; do not infer unit from labels in this raw layer.",
+  "annexes": [
+    "DCA-Anexo I-C",
+    "DCA-Anexo I-D",
+    "DCA-Anexo I-E"
+  ],
+  "raw_files": [
+    {
+      "year": 2019,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2019_I-C.json",
+      "rows": 178,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2019,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2019_I-D.json",
+      "rows": 231,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2019,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2019_I-E.json",
+      "rows": 269,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2020,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2020_I-C.json",
+      "rows": 185,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2020,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2020_I-D.json",
+      "rows": 248,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2020,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2020_I-E.json",
+      "rows": 251,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2021,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2021_I-C.json",
+      "rows": 193,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2021,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2021_I-D.json",
+      "rows": 236,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2021,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2021_I-E.json",
+      "rows": 261,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2022,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2022_I-C.json",
+      "rows": 204,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2022,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2022_I-D.json",
+      "rows": 241,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2022,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2022_I-E.json",
+      "rows": 266,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2023,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2023_I-C.json",
+      "rows": 207,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2023,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2023_I-D.json",
+      "rows": 261,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2023,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2023_I-E.json",
+      "rows": 283,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2024,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2024_I-C.json",
+      "rows": 205,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2024,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2024_I-D.json",
+      "rows": 266,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2024,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2024_I-E.json",
+      "rows": 280,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2025,
+      "annex": "DCA-Anexo I-C",
+      "file": "dca_2025_I-C.json",
+      "rows": 202,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2025,
+      "annex": "DCA-Anexo I-D",
+      "file": "dca_2025_I-D.json",
+      "rows": 264,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    },
+    {
+      "year": 2025,
+      "annex": "DCA-Anexo I-E",
+      "file": "dca_2025_I-E.json",
+      "rows": 281,
+      "source_endpoint": "https://apidatalake.tesouro.gov.br/ords/siconfi/tt/dca"
+    }
+  ],
+  "nature": "observed official administrative data",
+  "limitations": [
+    "DCA is annual; 2026 is not included as a closed DCA exercise.",
+    "Account names and columns must be reconciled across exercises before constructing a final time series.",
+    "Candidate keyword rows are an audit aid, not a semantic classification."
+  ]
+}

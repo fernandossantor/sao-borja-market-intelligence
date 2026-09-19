@@ -1,0 +1,156 @@
+name: sao-borja-transparencia-drilldown-schema
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-transparencia-drilldown-schema.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Trace one public creditor drill-down path
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_transparencia_drilldown_schema"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import json,re,requests
+          from pathlib import Path
+          from datetime import datetime
+
+          OUT=Path("artifacts/sao_borja_transparencia_drilldown_schema")
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          TARGET_CNPJ="06136424000164"  # sample vendor used only for schema tracing
+          s=requests.Session();s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+
+          h=s.get(BASE+"/despesas",timeout=60);h.raise_for_status()
+          dt_import=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",h.text).group(1)
+          dt_end=datetime.strptime(dt_import,"%Y-%m-%d").strftime("%d/%m")
+          menu=[("iExercicio","2026"),("dtDataImportacao",dt_import),("sViewAtual",""),("iNivel","3"),
+                ("dtInicio","01/01"),("dtFim",dt_end),
+                ("aHistorico[0][descricao]","Descrição"),("aHistorico[0][valor_empenhado]","Valor Empenhado"),
+                ("aHistorico[0][valor_anulado]","Valor Anulado"),("aHistorico[0][valor_liquidado]","Valor Liquidado"),
+                ("aHistorico[0][valor_pago]","Valor Pago")]
+          q=s.post(BASE+"/despesas/loadLink/3",data=menu,timeout=120);q.raise_for_status()
+          raw=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);",q.text,re.S).group(1)
+          params=json.loads(raw.replace("\\'","'"))
+          z=s.post(BASE+"/despesas/getCredores",data={"aParametros":json.dumps(params,ensure_ascii=False,separators=(",",":")),
+                  "page":1,"rows":2500,"sidx":"nome","sord":"asc","_search":"false"},timeout=120);z.raise_for_status()
+          target=None
+          for row in z.json()["rows"]:
+              c=row.get("cell",[])
+              doc=re.sub(r"\D","",str(c[0] if c else ""))
+              if doc==TARGET_CNPJ:
+                  target={"id":str(row["id"]),"cpfcnpj":str(c[0]),"nome":str(c[1]),
+                          "valor_empenhado":c[2],"valor_anulado":c[3],"valor_liquidado":c[4],"valor_pago":c[5]}
+                  break
+          if not target:raise RuntimeError("target creditor missing")
+          target["descricao"]=target["cpfcnpj"]+" - "+target["nome"]
+          params["aHistorico"].append(target)
+          params["iCredor"]=target["id"];params["iNivel"]=4
+
+          trace=[]
+          for step in range(1,10):
+              page=s.post(BASE+"/despesas/loadLink/3",data=params,timeout=120);page.raise_for_status()
+              html=page.text
+              (OUT/f"level_{params.get('iNivel')}.html").write_text(html,encoding="utf-8")
+              dec=re.search(r"oParametros\s*=\s*\$\.JSON\.decode\('(.+?)'\);",html,re.S)
+              if dec:
+                  try:params=json.loads(dec.group(1).replace("\\'","'"))
+                  except Exception:pass
+              grid=re.search(r"url\s*:\s*['\"](/despesas/get[A-Za-z0-9_]+)['\"]",html,re.I)
+              title=re.search(r"<h2[^>]*>(.*?)</h2>",html,re.I|re.S)
+              cols=re.search(r"colNames\s*:\s*\[(.*?)\]",html,re.I|re.S)
+              assign=re.search(r"oParametros\.([A-Za-z0-9_]+)\s*=\s*id\s*;",html,re.I)
+              item={"step":step,"iNivel":params.get("iNivel"),"sViewAtual":params.get("sViewAtual"),
+                    "title":re.sub(r"<[^>]+>"," ",title.group(1)).strip() if title else None,
+                    "grid_endpoint":grid.group(1) if grid else None,
+                    "columns":cols.group(1).strip() if cols else None,
+                    "select_param":assign.group(1) if assign else None,
+                    "params_keys":sorted(params.keys())}
+              trace.append(item)
+              if not grid:break
+
+              gj=s.post(BASE+grid.group(1),data={"aParametros":json.dumps(params,ensure_ascii=False,separators=(",",":")),
+                      "page":1,"rows":50,"sidx":"","sord":"asc","_search":"false"},timeout=120)
+              gj.raise_for_status()
+              try:gdata=gj.json()
+              except Exception:
+                  item["grid_nonjson_prefix"]=gj.text[:2000];break
+              rows=gdata.get("rows",[])
+              item["grid_records"]=gdata.get("records")
+              item["sample_rows"]=rows[:3]
+              if not rows or not assign:break
+
+              sel=rows[0]
+              sid=str(sel.get("id",""))
+              cell=sel.get("cell")
+              hist={}
+              if isinstance(cell,list):
+                  # description plus amount columns if present; enough for breadcrumb payload.
+                  hist={"descricao":str(cell[0]) if cell else ""}
+                  labels=["valor_empenhado","valor_anulado","valor_liquidado","valor_pago"]
+                  for i,k in enumerate(labels,1):
+                      if i<len(cell):hist[k]=cell[i]
+              elif isinstance(sel,dict): hist=sel.copy()
+              else:
+                  hist={"descricao":str(sel)}
+              ah=params.get("aHistorico")
+              if not isinstance(ah,list): ah=[]
+              ah.append(hist);params["aHistorico"]=ah
+              params[assign.group(1)]=sid
+              try:params["iNivel"]=int(params.get("iNivel",0))+1
+              except:pass
+
+          (OUT/"drilldown_schema.json").write_text(json.dumps({
+              "source":BASE+"/despesas","period":{"start":"01/01","end":dt_end,"data_importacao":dt_import},
+              "sample_cnpj":TARGET_CNPJ,"trace":trace
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(trace,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist discovery
+        if: success()
+        run: |
+          DEST="docs/data_sources/sao_borja_transparencia_drilldown_schema"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_transparencia_drilldown_schema/drilldown_schema.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Portal PMSB — schema da hierarquia de despesas por credor
+
+          Camada exploratória, não canônica.
+
+          Rastreamento de uma única rota pública para descobrir níveis, endpoints e
+          campos da interface. O credor-amostra serve somente para descobrir a estrutura
+          do sistema; seus valores não são usados como inferência geral.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: map municipal expense drill-down schema"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-transparencia-drilldown-schema
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_transparencia_drilldown_schema/

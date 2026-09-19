@@ -98,11 +98,11 @@ jobs:
                       execution_id=execution_id,
                       basket_name="rice_default",
                   )
-                  schema=result.schema.copy()
+                  schema=result.schema_inventory.copy()
                   schema.insert(0,"period",period)
                   schema_rows.extend(schema.to_dict("records"))
 
-                  comp=result.composition.copy()
+                  comp=result.composition_summary.copy()
                   comp.insert(0,"period",period)
                   comp_rows.extend(comp.to_dict("records"))
                   month_validation.append({

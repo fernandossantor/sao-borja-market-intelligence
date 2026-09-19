@@ -1,7 +1,7 @@
-# BET — varredura municipal de São Borja — edições 21 a 29
+# BET — varredura municipal de São Borja — edições numéricas 01 a 29
 
 **Fonte observada:** Receita Estadual/SEFAZ-RS — Receita.doc — Boletim Econômico-Tributário.
-**Abrangência:** edições 21 a 29 da listagem oficial, publicadas em 2026.
+**Abrangência:** edições numéricas 01 a 29 disponíveis na listagem oficial (2024–2026; a edição Expointer não possui numeração própria e não entra nesta varredura).
 **Finalidade:** localizar de forma reproduzível ocorrências explícitas de São Borja nos PDFs recentes antes de extrair qualquer série municipal.
 
 O workflow preserva:

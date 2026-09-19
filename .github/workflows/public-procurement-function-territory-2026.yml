@@ -1,0 +1,290 @@
+name: public-procurement-function-territory-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/public-procurement-function-territory-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Aggregate procurement-compatible payments by budget function and territory
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/public_procurement_function_territory_2026"
+          mkdir -p "$OUT"
+
+          python - <<'PY'
+          import csv,json,re,requests,time
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          CORE=Path("docs/data_sources/public_procurement_core_analytics_2026/core_vendor_summary_2026.csv")
+          CREDITORS=Path("docs/data_sources/sao_borja_transparencia_creditors_2026/corporate_creditors_2026.csv")
+          RFB=Path("docs/data_sources/rfb_public_creditors_2026/creditors_rfb_classification.csv")
+          RULE=Path("docs/data_sources/public_procurement_eligibility_rubric_20260919_v001.csv")
+          OUT=Path("artifacts/public_procurement_function_territory_2026")
+          SAO="8863"
+
+          core_cnpjs=set()
+          expected_core={}
+          with CORE.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  core_cnpjs.add(r["cnpj"])
+                  expected_core[r["cnpj"]]=float(r["pago_core_R$"] or 0)
+
+          creditor_id={}
+          with CREDITORS.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  if r["cnpj"] in core_cnpjs:
+                      creditor_id[r["cnpj"]]={"id":r["id_credor"],"nome":r["nome_credor"]}
+
+          rule={}
+          with RULE.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  rule[r["rubrica"]]=r["classificacao"]
+
+          rfb={}
+          with RFB.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):rfb[r["cnpj"]]=r
+
+          def recode(r):
+              if r is None:return "RFB_NOT_FOUND"
+              status=(r.get("exact_situacao") or "").strip()
+              mun=(r.get("exact_municipio_tom") or "").strip()
+              try: root_local=int(float(r.get("root_local_active_count") or 0))
+              except: root_local=0
+              if status=="02" and mun==SAO:return "LOCAL_EXACT_ACTIVE"
+              if mun==SAO and status!="02":return "LOCAL_EXACT_NONACTIVE_SNAPSHOT"
+              if root_local>0:return "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT"
+              if status=="02" and mun and mun!=SAO:return "EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT"
+              if mun and mun!=SAO:return "EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT"
+              return "RFB_NOT_FOUND"
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory audit/1.0"})
+          h=s.get(BASE+"/despesas",timeout=60);h.raise_for_status()
+          dt_import=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",h.text).group(1)
+          dt_end=datetime.strptime(dt_import,"%Y-%m-%d").strftime("%d/%m")
+
+          def post_json(path,data,tries=5):
+              last=None
+              for i in range(tries):
+                  try:
+                      r=s.post(BASE+path,data=data,timeout=120)
+                      r.raise_for_status()
+                      return r.json()
+                  except Exception as e:
+                      last=e;time.sleep(0.8*(i+1))
+              raise last
+
+          function=defaultdict(lambda:defaultdict(lambda:{"paid":0.0,"vendors":set(),"commitments":0}))
+          subfunction=defaultdict(lambda:defaultdict(lambda:{"paid":0.0,"vendors":set(),"commitments":0}))
+          action=defaultdict(lambda:defaultdict(lambda:{"paid":0.0,"vendors":set(),"commitments":0}))
+          vendor_observed=defaultdict(float)
+          detail_rows=[]
+          errors=[]
+
+          for ix,cnpj in enumerate(sorted(core_cnpjs),1):
+              info=creditor_id.get(cnpj)
+              if not info:
+                  errors.append({"cnpj":cnpj,"error":"creditor id missing"})
+                  continue
+              cls=recode(rfb.get(cnpj))
+              base={
+                  "iExercicio":"2026","dtDataImportacao":dt_import,"sViewAtual":"instituicoes",
+                  "iNivel":"4","dtInicio":"01/01","dtFim":dt_end,
+                  "aHistorico":"descricao","iIdLink":"3","iCredor":str(info["id"])
+              }
+              try:
+                  inst=post_json("/despesas/getInstit",{
+                      "aParametros":json.dumps(base,ensure_ascii=False,separators=(",",":")),
+                      "page":1,"rows":100,"sidx":"descricao","sord":"asc","_search":"false"
+                  })
+                  for ir in inst.get("rows",[]):
+                      iid=str(ir.get("id",""))
+                      icell=ir.get("cell",[])
+                      institution=str(icell[0]) if icell else ""
+                      p=base.copy();p.update({"iInstituicao":iid,"iNivel":"5","sViewAtual":"empenhos"})
+                      emp=post_json("/despesas/getEmpenhos",{
+                          "aParametros":json.dumps(p,ensure_ascii=False,separators=(",",":")),
+                          "page":1,"rows":5000,"sidx":"data","sord":"asc","_search":"false"
+                      })
+                      for er in emp.get("rows",[]):
+                          cell=er.get("cell",[])
+                          if len(cell)<12:continue
+                          rub=str(cell[5] or "").strip()
+                          if rule.get(rub)!="CORE_PROCUREMENT":continue
+                          paid=float(cell[11] or 0)
+                          if paid<=0:continue
+                          fun=str(cell[1] or "").strip()
+                          sub=str(cell[2] or "").strip()
+                          prog=str(cell[3] or "").strip()
+                          act=str(cell[4] or "").strip()
+                          resource=str(cell[6] or "").strip()
+                          date=str(cell[7] or "").strip()
+                          commitment=str(cell[0] or "").strip()
+
+                          vendor_observed[cnpj]+=paid
+                          for key,store in [
+                              (fun,function),
+                              (fun+" | "+sub,subfunction),
+                              (fun+" | "+act,action),
+                          ]:
+                              z=store[key][cls];z["paid"]+=paid;z["vendors"].add(cnpj);z["commitments"]+=1
+
+                          detail_rows.append({
+                              "cnpj":cnpj,"nome_credor":info["nome"],"territorial_class":cls,
+                              "instituicao":institution,"empenho":commitment,"funcao":fun,
+                              "subfuncao":sub,"programa":prog,"acao":act,"rubrica":rub,
+                              "recurso":resource,"data":date,"pago_R$":round(paid,2)
+                          })
+              except Exception as e:
+                  errors.append({"cnpj":cnpj,"error":repr(e)})
+              if ix%50==0:print("processed",ix,"of",len(core_cnpjs),"errors",len(errors))
+              time.sleep(0.02)
+
+          classes=[
+              "LOCAL_EXACT_ACTIVE","LOCAL_EXACT_NONACTIVE_SNAPSHOT",
+              "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT",
+              "EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT",
+              "EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT","RFB_NOT_FOUND"
+          ]
+
+          def write_agg(path,store,label):
+              with path.open("w",newline="",encoding="utf-8-sig") as f:
+                  w=csv.writer(f)
+                  w.writerow([label,"territorial_class","vendors","empenhos","pago_R$","share_within_"+label])
+                  for key,d in sorted(store.items(),key=lambda kv:-sum(x["paid"] for x in kv[1].values())):
+                      den=sum(x["paid"] for x in d.values())
+                      for cls in classes:
+                          z=d.get(cls)
+                          if not z or not z["paid"]:continue
+                          w.writerow([key,cls,len(z["vendors"]),z["commitments"],round(z["paid"],2),z["paid"]/den if den else None])
+
+          write_agg(OUT/"function_territorial_2026.csv",function,"funcao")
+          write_agg(OUT/"subfunction_territorial_2026.csv",subfunction,"funcao_subfuncao")
+          write_agg(OUT/"action_territorial_2026.csv",action,"funcao_acao")
+
+          with (OUT/"core_commitment_detail_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["cnpj","nome_credor","territorial_class","instituicao","empenho","funcao","subfuncao",
+                      "programa","acao","rubrica","recurso","data","pago_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(detail_rows)
+
+          expected=sum(expected_core.values())
+          observed=sum(vendor_observed.values())
+          reconcile=[]
+          for c in sorted(core_cnpjs):
+              e=expected_core[c];o=vendor_observed.get(c,0.0)
+              reconcile.append({"cnpj":c,"expected_R$":round(e,2),"observed_R$":round(o,2),"difference_R$":round(o-e,2)})
+          with (OUT/"vendor_reconciliation_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["cnpj","expected_R$","observed_R$","difference_R$"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(reconcile)
+
+          # Summaries by function.
+          func_summary=[]
+          for fun,d in function.items():
+              den=sum(z["paid"] for z in d.values())
+              loc=d["LOCAL_EXACT_ACTIVE"]["paid"]
+              root=d["ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT"]["paid"]
+              local_non=d["LOCAL_EXACT_NONACTIVE_SNAPSHOT"]["paid"]
+              ext=d["EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT"]["paid"]+d["EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT"]["paid"]
+              nf=d["RFB_NOT_FOUND"]["paid"]
+              func_summary.append({
+                  "funcao":fun,"pago_core_R$":round(den,2),
+                  "local_exact_active_R$":round(loc,2),"local_exact_active_share":loc/den if den else None,
+                  "presenca_local_ampliada_R$":round(loc+root,2),"presenca_local_ampliada_share":(loc+root)/den if den else None,
+                  "local_nonactive_snapshot_R$":round(local_non,2),
+                  "external_no_local_footprint_R$":round(ext,2),"external_no_local_footprint_share":ext/den if den else None,
+                  "notfound_R$":round(nf,2)
+              })
+          func_summary.sort(key=lambda x:x["pago_core_R$"],reverse=True)
+          with (OUT/"function_summary_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(func_summary[0].keys())
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(func_summary)
+
+          report={
+              "source":"Portal da Transparência PMSB",
+              "period":{"start":"01/01/2026","end":dt_end+"/2026","data_importacao":dt_import},
+              "core_vendors_expected":len(core_cnpjs),
+              "core_vendors_with_id":len(creditor_id),
+              "errors":errors,
+              "detail_rows":len(detail_rows),
+              "expected_core_R$":round(expected,2),
+              "observed_core_R$":round(observed,2),
+              "difference_R$":round(observed-expected,2),
+              "vendors_reconciled_cent":sum(1 for x in reconcile if abs(x["difference_R$"])<0.02),
+              "functions":len(function),
+              "top_functions":func_summary[:20],
+              "limitations":[
+                  "Budget function is administrative purpose, not a market sector classification.",
+                  "Territorial classification remains exploratory because the RFB bytes were transported via mirror.",
+                  "Payment to a local creditor does not measure downstream local sourcing.",
+                  "Institutional service arrangements remain inside the rubric-compatible core unless separately screened."
+              ]
+          }
+          (OUT/"function_territory_summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_function_territory_2026"
+          mkdir -p "$DEST"
+          cp artifacts/public_procurement_function_territory_2026/function_territorial_2026.csv "$DEST/"
+          cp artifacts/public_procurement_function_territory_2026/subfunction_territorial_2026.csv "$DEST/"
+          cp artifacts/public_procurement_function_territory_2026/action_territorial_2026.csv "$DEST/"
+          cp artifacts/public_procurement_function_territory_2026/function_summary_2026.csv "$DEST/"
+          cp artifacts/public_procurement_function_territory_2026/vendor_reconciliation_2026.csv "$DEST/"
+          cp artifacts/public_procurement_function_territory_2026/function_territory_summary.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # PMSB — função orçamentária × geografia do credor — core de compras/contratações — 2026
+
+          Camada exploratória, não canônica.
+
+          O arquivo agrega somente pagamentos positivos em rubricas CORE_PROCUREMENT.
+          Função/subfunção/programa/ação são classificações administrativas da despesa
+          e não equivalem automaticamente a setores de mercado.
+
+          O objetivo é identificar em quais finalidades públicas a primeira rodada do
+          pagamento está mais ancorada localmente ou mais exposta a credores externos.
+
+          A geografia cadastral usa RFB 2026-08 transportada por espelho nesta execução;
+          portanto os resultados permanecem exploratórios até reconciliação oficial.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: profile public procurement by function and territory"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-procurement-function-territory-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/public_procurement_function_territory_2026/

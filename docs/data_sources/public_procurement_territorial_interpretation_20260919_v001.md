@@ -42,6 +42,8 @@ A diferença entre 74,87% no núcleo integral e 58,57% sem a Fundação mostra q
 
 As duas variantes de “outros serviços de terceiros — pessoa jurídica” somam **R$ 51.040.784,58** e têm presença local ampliada de aproximadamente **91,22%**. Esse bloco é responsável pela maior parte da aparente ancoragem local do núcleo.
 
+Mesmo retirando a Fundação Ivan Goulart apenas do bloco de serviços PJ genéricos, o denominador remanescente é **R$ 22.698.127,35** e a presença local ampliada permanece em **80,27%**. Portanto, a ancoragem dos serviços não desaparece quando se controla o maior caso institucional, embora sua intensidade diminua.
+
 Ao retirar apenas essas rubricas genéricas e manter materiais, bens para distribuição, equipamentos, obras, TIC, consultoria e passagens:
 
 - denominador: **R$ 20.998.706,60**;

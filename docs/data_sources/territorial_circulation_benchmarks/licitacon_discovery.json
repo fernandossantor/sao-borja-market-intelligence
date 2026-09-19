@@ -1,0 +1,9 @@
+{
+  "queries": [],
+  "selected_package": null,
+  "resource": null,
+  "zip": null,
+  "headers": {},
+  "sample_rows": {},
+  "error": "URLError(TimeoutError('timed out'))"
+}

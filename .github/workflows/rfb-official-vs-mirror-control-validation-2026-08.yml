@@ -1,0 +1,341 @@
+name: rfb-official-vs-mirror-control-validation-2026-08
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/rfb-official-vs-mirror-control-validation-2026-08.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    env:
+      OFFICIAL: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/2026-08"
+      MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
+      SAO_BORJA_TOM: "8863"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install parser
+        run: python -m pip install --quiet pandas
+
+      - name: Download official and mirror establishment files
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/rfb_official_vs_mirror_control_validation_2026_08"
+          mkdir -p "$OUT/raw/official" "$OUT/raw/mirror"
+
+          for source in official mirror; do
+            if [[ "$source" == "official" ]]; then base="$OFFICIAL"; else base="$MIRROR"; fi
+            for i in {0..9}; do
+              echo "$source Estabelecimentos${i}.zip"
+              curl -fL --retry 5 --retry-all-errors --retry-delay 5 \
+                --connect-timeout 30 --max-time 1800 \
+                "$base/Estabelecimentos${i}.zip" \
+                -o "$OUT/raw/$source/Estabelecimentos${i}.zip"
+              unzip -tq "$OUT/raw/$source/Estabelecimentos${i}.zip"
+            done
+          done
+
+      - name: Compare bytes and structural classification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          import json
+          import zipfile
+          from collections import Counter
+          from pathlib import Path
+
+          import pandas as pd
+
+          OUT = Path("artifacts/rfb_official_vs_mirror_control_validation_2026_08")
+          TOM = "8863"
+          EXPECTED = {
+              "TOTAL_ATIVOS": 7306,
+              "MATRIZ_LOCAL": 6906,
+              "FILIAL_DE_MATRIZ_LOCAL": 116,
+              "FILIAL_DE_MATRIZ_EXTERNA": 284,
+              "FILIAL_MATRIZ_NAO_LOCALIZADA": 0,
+              "INDETERMINADO": 0,
+          }
+
+          def sha256(path):
+              h = hashlib.sha256()
+              with path.open("rb") as fh:
+                  for block in iter(lambda: fh.read(1024 * 1024), b""):
+                      h.update(block)
+              return h.hexdigest()
+
+          def classify(source):
+              root = OUT / "raw" / source
+              local_active = []
+              branch_roots = set()
+
+              for i in range(10):
+                  with zipfile.ZipFile(root / f"Estabelecimentos{i}.zip") as zf:
+                      name = next(n for n in zf.namelist() if not n.endswith("/"))
+                      with zf.open(name) as fh:
+                          for chunk in pd.read_csv(
+                              fh,
+                              sep=";",
+                              header=None,
+                              dtype=str,
+                              encoding="latin1",
+                              usecols=[0, 1, 2, 3, 5, 19, 20],
+                              chunksize=400000,
+                              na_filter=False,
+                              low_memory=False,
+                          ):
+                              mask = (chunk[5] == "02") & (chunk[20] == TOM)
+                              if not mask.any():
+                                  continue
+                              for row in chunk.loc[mask].itertuples(index=False, name=None):
+                                  basic, order, dv, mf, status, uf, mun = row
+                                  local_active.append(
+                                      {
+                                          "basic": basic,
+                                          "order": order,
+                                          "dv": dv,
+                                          "mf": mf,
+                                          "status": status,
+                                          "uf": uf,
+                                          "mun": mun,
+                                      }
+                                  )
+                                  if mf == "2":
+                                      branch_roots.add(basic)
+
+              matrix_by_root = {}
+              if branch_roots:
+                  for i in range(10):
+                      with zipfile.ZipFile(root / f"Estabelecimentos{i}.zip") as zf:
+                          name = next(n for n in zf.namelist() if not n.endswith("/"))
+                          with zf.open(name) as fh:
+                              for chunk in pd.read_csv(
+                                  fh,
+                                  sep=";",
+                                  header=None,
+                                  dtype=str,
+                                  encoding="latin1",
+                                  usecols=[0, 1, 2, 3, 5, 19, 20],
+                                  chunksize=400000,
+                                  na_filter=False,
+                                  low_memory=False,
+                              ):
+                                  mask = (
+                                      chunk[0].isin(branch_roots)
+                                      & (chunk[3] == "1")
+                                      & (chunk[5] == "02")
+                                  )
+                                  if not mask.any():
+                                      continue
+                                  for row in chunk.loc[mask].itertuples(index=False, name=None):
+                                      basic, order, dv, mf, status, uf, mun = row
+                                      matrix_by_root[basic] = {
+                                          "uf": uf,
+                                          "mun": mun,
+                                          "cnpj": basic + order + dv,
+                                      }
+
+              counts = Counter()
+              unknown = []
+              for rec in local_active:
+                  if rec["mf"] == "1":
+                      counts["MATRIZ_LOCAL"] += 1
+                  elif rec["mf"] == "2":
+                      matrix = matrix_by_root.get(rec["basic"])
+                      if not matrix:
+                          counts["FILIAL_MATRIZ_NAO_LOCALIZADA"] += 1
+                          unknown.append(rec["basic"] + rec["order"] + rec["dv"])
+                      elif matrix["mun"] == TOM:
+                          counts["FILIAL_DE_MATRIZ_LOCAL"] += 1
+                      else:
+                          counts["FILIAL_DE_MATRIZ_EXTERNA"] += 1
+                  else:
+                      counts["INDETERMINADO"] += 1
+
+              observed = {
+                  "TOTAL_ATIVOS": len(local_active),
+                  **{
+                      key: int(counts.get(key, 0))
+                      for key in EXPECTED
+                      if key != "TOTAL_ATIVOS"
+                  },
+              }
+              comparison = {
+                  key: {
+                      "expected": EXPECTED[key],
+                      "observed": observed[key],
+                      "difference": observed[key] - EXPECTED[key],
+                      "match": observed[key] == EXPECTED[key],
+                  }
+                  for key in EXPECTED
+              }
+              return {
+                  "source": source,
+                  "observed": observed,
+                  "comparison_to_canonical": comparison,
+                  "all_exact": all(item["match"] for item in comparison.values()),
+                  "branch_roots": len(branch_roots),
+                  "active_matrices_found_for_branch_roots": len(matrix_by_root),
+                  "unknown_branch_cnpjs": unknown[:100],
+              }
+
+          file_comparison = []
+          for i in range(10):
+              official = OUT / "raw" / "official" / f"Estabelecimentos{i}.zip"
+              mirror = OUT / "raw" / "mirror" / f"Estabelecimentos{i}.zip"
+              official_sha = sha256(official)
+              mirror_sha = sha256(mirror)
+              file_comparison.append(
+                  {
+                      "file": f"Estabelecimentos{i}.zip",
+                      "official_bytes": official.stat().st_size,
+                      "mirror_bytes": mirror.stat().st_size,
+                      "official_sha256": official_sha,
+                      "mirror_sha256": mirror_sha,
+                      "byte_identical": (
+                          official.stat().st_size == mirror.stat().st_size
+                          and official_sha == mirror_sha
+                      ),
+                  }
+              )
+
+          official_result = classify("official")
+          mirror_result = classify("mirror")
+
+          if official_result["all_exact"] and not mirror_result["all_exact"]:
+              diagnosis = "SOURCE_BYTES_OR_SNAPSHOT_DIFFERENCE_RESOLVES_CANONICAL_CONTROL"
+          elif official_result["all_exact"] and mirror_result["all_exact"]:
+              diagnosis = "BOTH_SOURCES_RECONCILE_CANONICAL_CONTROL"
+          elif not official_result["all_exact"] and mirror_result["all_exact"]:
+              diagnosis = "OFFICIAL_CURRENT_BYTES_DIFFER_FROM_CANONICAL_WHILE_MIRROR_RECONCILES"
+          else:
+              diagnosis = "CANONICAL_CONTROL_NOT_REPRODUCED_BY_CURRENT_OFFICIAL_OR_MIRROR"
+
+          report = {
+              "competence": "2026-08",
+              "territory": {"municipality": "São Borja/RS", "tom": TOM},
+              "substantive_source": "Receita Federal do Brasil — Dados Abertos CNPJ",
+              "official_transport": "dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj/2026-08",
+              "mirror_transport": "Casa dos Dados snapshot 2026-08-09",
+              "canonical_expected": EXPECTED,
+              "file_comparison": file_comparison,
+              "official": official_result,
+              "mirror": mirror_result,
+              "diagnosis": diagnosis,
+              "all_files_byte_identical": all(
+                  item["byte_identical"] for item in file_comparison
+              ),
+              "methodological_rule": (
+                  "Supplier-footprint indicators must remain exploratory until the "
+                  "canonical municipal control is reproduced from an accepted source "
+                  "with temporal provenance."
+              ),
+          }
+          (OUT / "validation.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          rows = []
+          for label, result in (("official", official_result), ("mirror", mirror_result)):
+              for category, values in result["comparison_to_canonical"].items():
+                  rows.append(
+                      {
+                          "source": label,
+                          "category": category,
+                          **values,
+                      }
+                  )
+          pd.DataFrame(rows).to_csv(
+              OUT / "structural_comparison.csv", index=False, encoding="utf-8-sig"
+          )
+          pd.DataFrame(file_comparison).to_csv(
+              OUT / "byte_comparison.csv", index=False, encoding="utf-8-sig"
+          )
+
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+
+      - name: Persist validation evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/rfb_official_vs_mirror_control_validation_2026_08"
+          mkdir -p "$DEST"
+          cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/validation.json "$DEST/"
+          cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/structural_comparison.csv "$DEST/"
+          cp artifacts/rfb_official_vs_mirror_control_validation_2026_08/byte_comparison.csv "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # RFB 2026-08 — comparação oficial × espelho × controle canônico de São Borja
+
+          **Fonte substantiva:** Receita Federal do Brasil — Dados Abertos CNPJ.
+          **Competência:** 2026-08.
+          **Território:** São Borja/RS, código TOM 8863.
+
+          Este controle baixa os dez arquivos `Estabelecimentos` por duas rotas de
+          transporte: host oficial RFB da competência 2026-08 e espelho Casa dos Dados
+          de 09/08/2026. Para cada arquivo são comparados tamanho e SHA-256.
+
+          Em seguida, as duas fontes são submetidas ao mesmo algoritmo de classificação
+          usado para o controle territorial: ativos em São Borja, matriz local, filial de
+          matriz local, filial de matriz externa e matriz não localizada.
+
+          Referência canônica esperada: 7.306 ativos; 6.906 matrizes locais; 116 filiais
+          de matriz local; 284 filiais de matriz externa; zero não localizadas.
+
+          **Regra:** enquanto a estrutura canônica não for reproduzida por fonte aceita e
+          com proveniência temporal, os indicadores territoriais derivados de credores
+          públicos permanecem exploratórios e não devem ser promovidos ao Caderno-Base.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: compare official and mirror RFB 2026 08"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Evaluate canonical reconciliation
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(
+              Path(
+                  "artifacts/rfb_official_vs_mirror_control_validation_2026_08/validation.json"
+              ).read_text(encoding="utf-8")
+          )
+          if not report["official"]["all_exact"]:
+              raise SystemExit(
+                  "Official current 2026-08 RFB bytes do not reproduce the canonical structural control"
+              )
+          print("Official RFB 2026-08 reproduces the canonical structural control.")
+          PY
+
+      - name: Upload validation artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rfb-official-vs-mirror-control-validation-2026-08
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/rfb_official_vs_mirror_control_validation_2026_08/

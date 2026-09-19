@@ -1,0 +1,7 @@
+municipio,papel,PIB_pc_2023_R$,renda_media_pc_mes_2022_R$,renda_mediana_pc_mes_2022_R$,media_anualizada_R$,mediana_anualizada_R$,media_anual_PIB_pc_pct,mediana_anual_PIB_pc_pct,natureza,limitacao
+São Borja,Alvo,42737.25,1568.58,1100.00,18822.96,13200.00,44.0435,30.8864,CALCULADO CONTEXTUAL,"Censo/renda 2022 e PIB 2023; não é taxa de retenção"
+São Gabriel,Comparável por escala,45872.18,1526.68,1051.00,18320.16,12612.00,39.9374,27.4938,CALCULADO CONTEXTUAL,"Mesmo controle"
+Alegrete,Comparável por escala,42840.36,1653.21,1183.33,19838.52,14199.96,46.3080,33.1462,CALCULADO CONTEXTUAL,"Mesmo controle"
+Santiago,Comparável por escala,38041.83,2097.02,1342.40,25164.24,16108.80,66.1489,42.3450,CALCULADO CONTEXTUAL,"Mesmo controle"
+Sant'Ana do Livramento,Referência funcional de fronteira,37237.35,1600.16,1084.80,19201.92,13017.60,51.5663,34.9584,CALCULADO CONTEXTUAL,"Referência funcional; não peer de escala"
+Uruguaiana,Referência funcional de fronteira,33406.32,1566.17,1073.14,18794.04,12877.68,56.2589,38.5486,CALCULADO CONTEXTUAL,"Referência funcional; não peer de escala"

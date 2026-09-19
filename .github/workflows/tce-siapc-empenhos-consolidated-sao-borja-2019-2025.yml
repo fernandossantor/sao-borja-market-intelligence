@@ -1,11 +1,6 @@
 name: tce-siapc-empenhos-consolidated-sao-borja-2019-2025
 
 on:
-  push:
-    branches:
-      - explore/receita-estadual-rs-market-intel-v1
-    paths:
-      - ".github/workflows/tce-siapc-empenhos-consolidated-sao-borja-2019-2025.yml"
   workflow_dispatch:
 
 permissions:
@@ -320,6 +315,9 @@ jobs:
                 "payment_doc_class_rows":json.dumps(s["payment_doc_class_rows"],ensure_ascii=False),
                 "payment_doc_class_value":json.dumps(s["payment_doc_class_value"],ensure_ascii=False),
               })
+          missing=[r["year"] for r in rows if r.get("status")!="READ_OK"]
+          if missing:
+              raise SystemExit(f"SIAPC_EXTRACTION_INCOMPLETE_MISSING_YEARS={missing}")
           pd.DataFrame(rows).to_csv(OUT/"yearly_payment_aggregate.csv",index=False,encoding="utf-8-sig")
 
           frames=[]

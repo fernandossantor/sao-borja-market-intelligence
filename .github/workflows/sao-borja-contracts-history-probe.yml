@@ -54,6 +54,22 @@ jobs:
               }
             except Exception as e:
               report[f"search_{year}"]={"error":repr(e)}
+          # Focused January 2025 structural probe
+          try:
+            r=s.get(BASE+"/acordos/pesquisar",params={"instituicao":"1","exercicio":"2025","mes":"01"},timeout=45)
+            soup=BeautifulSoup(r.text,"html.parser")
+            main=soup.select_one(".main")
+            anchors=[{"text":a.get_text(" ",strip=True)[:200],"href":a.get("href")} for a in soup.find_all("a") if a.get("href")]
+            forms=[{"action":f.get("action"),"method":f.get("method"),"fields":[x.get("name") for x in f.find_all(["input","select"]) if x.get("name")]} for f in soup.find_all("form")]
+            report["focused_2025_01"]={
+              "status":r.status_code,"bytes":len(r.content),"url":r.url,
+              "main_text":main.get_text(" ",strip=True)[:5000] if main else None,
+              "anchors":anchors[-80:],
+              "forms":forms,
+              "html_markers":sorted(set(re.findall(r"/acordos/[A-Za-z0-9_/-]+",r.text)))[:100]
+            }
+          except Exception as e:
+            report["focused_2025_01"]={"error":repr(e)}
           (OUT/"probe.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
           print(json.dumps(report,ensure_ascii=False,indent=2))
           PY

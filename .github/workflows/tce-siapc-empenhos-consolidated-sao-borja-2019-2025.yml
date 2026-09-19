@@ -98,19 +98,29 @@ jobs:
               return s if nums[12] == d1 and nums[13] == d2 else None
 
           raw = sys.stdin.buffer
-          text = (line.decode("latin1", errors="replace") for line in raw)
-          reader = csv.reader(text, delimiter=";", quotechar='"')
-          try:
-              header = next(reader)
-          except StopIteration:
+          first_bytes = raw.readline()
+          if not first_bytes:
               raise SystemExit("EMPTY_CSV")
+          try:
+              first = first_bytes.decode("utf-8-sig")
+              encoding_used = "utf-8-sig"
+          except UnicodeDecodeError:
+              first = first_bytes.decode("latin1", errors="replace")
+              encoding_used = "latin1"
+          delimiter = "," if first.count(",") >= first.count(";") else ";"
+          def decoded_lines():
+              yield first
+              for line in raw:
+                  yield line.decode("utf-8" if encoding_used == "utf-8-sig" else "latin1", errors="replace")
+          reader = csv.reader(decoded_lines(), delimiter=delimiter, quotechar='"')
+          header = next(reader)
 
           org_i = pick(header, {"CD_ORGAO","COD_ORGAO","CODIGO_ORGAO"})
           op_i = pick(header, {"TP_OPERACAO","TIPO_OPERACAO","TP_OP"})
           pay_i = pick(header, {"VL_PAGAMENTO","VALOR_PAGAMENTO","VL_PAGO","VALOR_PAGO"})
           emp_i = pick(header, {"VL_EMPENHO","VALOR_EMPENHO","VL_EMPENHADO","VALOR_EMPENHADO"})
           liq_i = pick(header, {"VL_LIQUIDACAO","VALOR_LIQUIDACAO","VL_LIQUIDADO","VALOR_LIQUIDADO"})
-          doc_i = pick(header, {"CGC_CPF_CREDOR","CPF_CNPJ_CREDOR","CNPJ_CPF_CREDOR","NR_CPF_CNPJ_CREDOR"})
+          doc_i = pick(header, {"CNPJ_CPF","CGC_CPF_CREDOR","CPF_CNPJ_CREDOR","CNPJ_CPF_CREDOR","NR_CPF_CNPJ_CREDOR"})
           cred_i = pick(header, {"CD_CREDOR","COD_CREDOR","CODIGO_CREDOR"})
 
           required = {"org":org_i, "payment":pay_i, "document":doc_i}
@@ -185,6 +195,8 @@ jobs:
               "rows_scanned":n_rows,
               "rows_org_58000":n_target,
               "operation_values":dict(op_counts),
+              "encoding":encoding_used,
+              "delimiter":delimiter,
           }
           (outdir/f"schema_{year}.json").write_text(json.dumps(schema, ensure_ascii=False, indent=2), encoding="utf-8")
 

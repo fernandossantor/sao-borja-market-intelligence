@@ -1,0 +1,7 @@
+{
+  "row_level_creditor_data_persisted": false,
+  "cpf_values_persisted": false,
+  "creditor_names_persisted": false,
+  "cnpj_aggregates_persisted": true,
+  "document_classification": "CPF/CNPJ classified only when check digits validate after left-zero restoration; invalid/synthetic/missing kept aggregated."
+}

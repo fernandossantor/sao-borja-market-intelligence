@@ -41,7 +41,7 @@ A base pública atual permite demonstrar a existência e relevância desses cana
 
 ## 2. Identidade institucional e oferta
 
-A Fundação Ivan Goulart é a mantenedora do Hospital Ivan Goulart. O próprio hospital informa que atende **SUS, convênios e particular**, o que já demonstra que o faturamento não é exclusivamente municipal.
+A Fundação Ivan Goulart é a mantenedora do Hospital Ivan Goulart. No Portal da Transparência da União, **Fundação Ivan Goulart** é o nome empresarial e **Hospital Ivan Goulart** o nome de fantasia do mesmo CNPJ 96.488.598/0001-89. Portanto, repasses publicados com essas duas denominações devem ser consolidados pelo CNPJ e **não somados como se fossem dois beneficiários distintos**. O próprio hospital informa que atende **SUS, convênios e particular**, o que já demonstra que o faturamento não é exclusivamente municipal.
 
 Fonte institucional:
 - https://www.hospitalivangoulart.org.br/o-hospital/
@@ -86,7 +86,14 @@ O 26º Aditivo, publicado em 23/12/2025, atualizou a base do programa e incluiu 
 Fonte:
 - https://saoborja.rs.gov.br/images/DOESB/2025/Dezembro/doesb23_12_2025.pdf
 
-### 4.2 Programa Inverno Gaúcho com Saúde
+### 4.2 Repasse estadual extraordinário — Portaria SES nº 301/2024
+
+O 15º Aditivo ao Contrato nº 99/2021 registra **R$ 200.000,00** de recurso estadual, em caráter excepcional e extraordinário, para ações e serviços públicos de saúde dos hospitais que atuaram como retaguarda às vítimas dos desastres de 2024.
+
+Fonte:
+- https://www.saoborja.rs.gov.br/images/DOESB/2024/Junho/doesb07_06_2024.pdf
+
+### 4.3 Programa Inverno Gaúcho com Saúde
 
 O 23º Aditivo registra **R$ 339.249,73**, em parcela única, da Secretaria Estadual de Saúde, com a observação de que os valores já estavam disponíveis no Fundo Municipal de Saúde.
 

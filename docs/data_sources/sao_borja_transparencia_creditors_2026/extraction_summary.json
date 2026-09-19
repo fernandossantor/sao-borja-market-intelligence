@@ -1,0 +1,115 @@
+{
+  "source": "https://transparencia.saoborja.rs.gov.br/despesas",
+  "endpoint": "https://transparencia.saoborja.rs.gov.br/despesas/getCredores",
+  "period": {
+    "year": 2026,
+    "start": "01/01",
+    "end": "18/09",
+    "data_importacao": "2026-09-18"
+  },
+  "parameters": {
+    "iExercicio": "2026",
+    "dtDataImportacao": "2026-09-18",
+    "sViewAtual": "credores",
+    "iNivel": "3",
+    "dtInicio": "01/01",
+    "dtFim": "18/09",
+    "aHistorico": [
+      {
+        "descricao": "Descrição",
+        "valor_empenhado": "Valor Empenhado",
+        "valor_anulado": "Valor Anulado",
+        "valor_liquidado": "Valor Liquidado",
+        "valor_pago": "Valor Pago"
+      }
+    ],
+    "iIdLink": "3"
+  },
+  "pagination": [
+    {
+      "page": 1,
+      "status": 200,
+      "bytes": 52893,
+      "keys": [
+        "total",
+        "records",
+        "page",
+        "rows"
+      ]
+    },
+    {
+      "page": 2,
+      "status": 200,
+      "bytes": 52560,
+      "keys": [
+        "total",
+        "records",
+        "page",
+        "rows"
+      ]
+    },
+    {
+      "page": 3,
+      "status": 200,
+      "bytes": 51710,
+      "keys": [
+        "total",
+        "records",
+        "page",
+        "rows"
+      ]
+    },
+    {
+      "page": 4,
+      "status": 200,
+      "bytes": 45075,
+      "keys": [
+        "total",
+        "records",
+        "page",
+        "rows"
+      ]
+    }
+  ],
+  "record_count_endpoint": 1930,
+  "deduplicated_creditors": 1930,
+  "corporate_cnpj_creditors": 740,
+  "privacy_rule": "Detailed persistence restricted to CNPJ creditors. CPF and other documents are retained only as aggregate counts/values.",
+  "summary": {
+    "rows": 1930,
+    "categories": {
+      "CNPJ": {
+        "rows": 740,
+        "empenhado": 174649687.50000006,
+        "anulado": 7207431.839999999,
+        "liquidado": 138188930.3900001,
+        "pago": 132146080.7000001
+      },
+      "CPF": {
+        "rows": 1190,
+        "empenhado": 168490565.36999977,
+        "anulado": 24130218.510000013,
+        "liquidado": 143622180.84999967,
+        "pago": 143503654.07999977
+      },
+      "OUTRO_SEM_DOCUMENTO": {
+        "rows": 0,
+        "empenhado": 0.0,
+        "anulado": 0.0,
+        "liquidado": 0.0,
+        "pago": 0.0
+      }
+    },
+    "totals": {
+      "empenhado": 343140252.87,
+      "anulado": 31337650.35,
+      "liquidado": 281811111.24,
+      "pago": 275649734.78
+    }
+  },
+  "limitations": [
+    "Portal values cover movements in the selected exercise and exclude restos a pagar according to the portal's Origem dos Dados page.",
+    "Creditor payment is not automatically procurement: payroll, debt, transfers, reimbursements and other non-supplier flows may be present and require eligibility classification.",
+    "CNPJ locality still requires RFB enrichment; no local/external classification is inferred here."
+  ]
+}

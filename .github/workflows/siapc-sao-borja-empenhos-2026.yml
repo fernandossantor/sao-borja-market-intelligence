@@ -1,0 +1,223 @@
+name: siapc-sao-borja-empenhos-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/siapc-sao-borja-empenhos-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Download and profile SIAPC empenhos — PM São Borja
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/siapc_sao_borja_empenhos_2026"
+          mkdir -p "$OUT"
+          URL="https://dados.tce.rs.gov.br/dados/municipal/empenhos/2026/58000.csv.zip"
+          echo '{"source":"TCE-RS/SIAPC","dataset":"Despesa orçamentária por empenhos","year":2026,"org_code":"58000","org_name":"PM DE SÃO BORJA","url":"'"$URL"'","status":"download_pending"}' > "$OUT/source_manifest.json"
+
+          curl -fL --retry 8 --retry-all-errors --retry-delay 8 --connect-timeout 30 --max-time 900 \
+            -A "Mozilla/5.0 SBMI exploratory audit/1.0" \
+            "$URL" -o "$OUT/58000_2026.csv.zip"
+
+          test -s "$OUT/58000_2026.csv.zip"
+          unzip -tq "$OUT/58000_2026.csv.zip"
+          sha256sum "$OUT/58000_2026.csv.zip" > "$OUT/source_sha256.txt"
+
+          python - <<'PY'
+          import csv, io, json, re, zipfile
+          from pathlib import Path
+          from collections import defaultdict
+
+          OUT=Path("artifacts/siapc_sao_borja_empenhos_2026")
+          zpath=OUT/"58000_2026.csv.zip"
+
+          def dec(data):
+              for enc in ("utf-8-sig","latin1","cp1252"):
+                  try:return data.decode(enc),enc
+                  except Exception:pass
+              return data.decode("latin1","replace"),"latin1-replace"
+
+          def norm(s):
+              import unicodedata
+              s="".join(c for c in unicodedata.normalize("NFD",str(s or "").lower()) if unicodedata.category(c)!="Mn")
+              return re.sub(r"[^a-z0-9]+","_",s).strip("_")
+
+          def money(x):
+              s=str(x or "").strip()
+              if not s:return 0.0
+              s=s.replace(".","").replace(",",".") if "," in s else s
+              try:return float(s)
+              except:return 0.0
+
+          inv=[]
+          allrows=[]
+          with zipfile.ZipFile(zpath) as z:
+              for name in z.namelist():
+                  if name.endswith("/") or not name.lower().endswith(".csv"): continue
+                  data=z.read(name); txt,enc=dec(data)
+                  sample=txt[:12000]
+                  try: delim=csv.Sniffer().sniff(sample,delimiters=";|,\t").delimiter
+                  except Exception: delim=";"
+                  reader=csv.DictReader(io.StringIO(txt),delimiter=delim)
+                  fields=reader.fieldnames or []
+                  rows=list(reader)
+                  inv.append({"file":name,"encoding":enc,"delimiter":delim,"rows":len(rows),"fields":fields})
+                  for row in rows:
+                      row["_source_file"]=name
+                      allrows.append(row)
+
+          if not allrows:
+              raise RuntimeError("No CSV rows found")
+
+          fields=list(allrows[0].keys())
+          fmap={norm(f):f for f in fields}
+          def pick(*cands):
+              for c in cands:
+                  n=norm(c)
+                  if n in fmap:return fmap[n]
+              for n,f in fmap.items():
+                  for c in cands:
+                      cn=norm(c)
+                      if cn and (cn in n or n in cn): return f
+              return None
+
+          op_col=pick("tipo_operacao","tp_operacao","operacao")
+          doc_col=pick("cpf_cnpj_credor","cpf_cnpj","nr_documento_credor","documento_credor")
+          cred_col=pick("nome_credor","nm_credor","credor")
+          pessoa_col=pick("tipo_pessoa","tp_pessoa")
+          empenho_val_col=pick("valor_empenho","vl_empenho")
+          liquid_val_col=pick("valor_liquidacao","vl_liquidacao")
+          pago_val_col=pick("valor_pagamento","vl_pagamento")
+          elem_col=pick("codigo_elemento_despesa","cd_elemento_despesa","elemento_despesa")
+          hist_col=pick("historico","ds_historico")
+          dt_col=pick("data_operacao","dt_operacao")
+
+          schema={
+              "files":inv,
+              "selected_columns":{
+                  "operation":op_col,"document":doc_col,"creditor_name":cred_col,"person_type":pessoa_col,
+                  "commitment_value":empenho_val_col,"liquidation_value":liquid_val_col,"payment_value":pago_val_col,
+                  "expense_element":elem_col,"history":hist_col,"operation_date":dt_col
+              },
+              "all_fields":fields
+          }
+          (OUT/"schema_inventory.json").write_text(json.dumps(schema,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          opstats=defaultdict(lambda:{"rows":0,"value":0.0})
+          creditor=defaultdict(lambda:{"name":"","person_type":"","rows":0,"empenhado":0.0,"liquidado":0.0,"pago":0.0})
+          for r in allrows:
+              op=str(r.get(op_col,"") if op_col else "").strip().upper()
+              if "PAG" in op:
+                  kind="PAGAMENTO"; val=money(r.get(pago_val_col,"") if pago_val_col else "")
+              elif "LIQ" in op:
+                  kind="LIQUIDACAO"; val=money(r.get(liquid_val_col,"") if liquid_val_col else "")
+              elif "EMP" in op:
+                  kind="EMPENHO"; val=money(r.get(empenho_val_col,"") if empenho_val_col else "")
+              else:
+                  kind=op or "INDETERMINADO"
+                  vals=[money(r.get(c,"")) for c in (empenho_val_col,liquid_val_col,pago_val_col) if c]
+                  val=max(vals) if vals else 0.0
+              opstats[kind]["rows"]+=1; opstats[kind]["value"]+=val
+
+              doc=re.sub(r"\D","",str(r.get(doc_col,"") if doc_col else ""))
+              key=doc or ("SEM_DOCUMENTO:"+str(r.get(cred_col,"") if cred_col else "").strip())
+              c=creditor[key]
+              c["name"]=str(r.get(cred_col,"") if cred_col else "").strip()
+              c["person_type"]=str(r.get(pessoa_col,"") if pessoa_col else "").strip()
+              c["rows"]+=1
+              if kind=="EMPENHO":c["empenhado"]+=val
+              elif kind=="LIQUIDACAO":c["liquidado"]+=val
+              elif kind=="PAGAMENTO":c["pago"]+=val
+
+          with (OUT/"operation_summary.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["operacao","linhas","valor_R$"])
+              for k,v in sorted(opstats.items()):w.writerow([k,v["rows"],round(v["value"],2)])
+
+          with (OUT/"creditor_summary.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f);w.writerow(["documento","nome_credor","tipo_pessoa","linhas","empenhado_R$","liquidado_R$","pago_R$"])
+              for k,v in sorted(creditor.items(),key=lambda kv:kv[1]["pago"],reverse=True):
+                  w.writerow([k,v["name"],v["person_type"],v["rows"],round(v["empenhado"],2),round(v["liquidado"],2),round(v["pago"],2)])
+
+          top=sorted(creditor.items(),key=lambda kv:kv[1]["pago"],reverse=True)[:50]
+          (OUT/"profile.json").write_text(json.dumps({
+              "rows":len(allrows),
+              "files":len(inv),
+              "operations":dict(opstats),
+              "creditors":len(creditor),
+              "top50_paid":[{"document":k,**v} for k,v in top],
+              "limitations":[
+                  "Creditor domicile is not present in the SIAPC expenditure schema.",
+                  "Local/external classification requires CNPJ enrichment or exact/root match against the local RFB establishment base.",
+                  "Payment values are preferred for effective first-round outflow; commitments and liquidations must remain separate."
+              ]
+          },ensure_ascii=False,indent=2),encoding="utf-8")
+
+          manifest=json.loads((OUT/"source_manifest.json").read_text())
+          manifest.update({"status":"downloaded_and_profiled","zip_bytes":zpath.stat().st_size,"rows":len(allrows),"csv_files":len(inv)})
+          (OUT/"source_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"rows":len(allrows),"creditors":len(creditor),"operations":dict(opstats)},ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        if: success()
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/siapc_sao_borja_empenhos_2026"
+          mkdir -p "$DEST"
+          cp artifacts/siapc_sao_borja_empenhos_2026/source_manifest.json "$DEST/"
+          cp artifacts/siapc_sao_borja_empenhos_2026/source_sha256.txt "$DEST/"
+          cp artifacts/siapc_sao_borja_empenhos_2026/schema_inventory.json "$DEST/"
+          cp artifacts/siapc_sao_borja_empenhos_2026/operation_summary.csv "$DEST/"
+          cp artifacts/siapc_sao_borja_empenhos_2026/creditor_summary.csv "$DEST/"
+          cp artifacts/siapc_sao_borja_empenhos_2026/profile.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # TCE-RS/SIAPC — despesa orçamentária por empenhos — PM São Borja — 2026
+
+          Camada exploratória, não canônica.
+
+          Fonte oficial: TCE-RS/SIAPC, órgão 58000 — PM de São Borja.
+          Endpoint documentado pelo próprio TCE-RS:
+          dados/municipal/empenhos/<ano>/<codigo-do-orgao>.csv.zip
+
+          O conjunto contém empenhos, liquidações e pagamentos, inclusive liquidações
+          e pagamentos de empenhos de exercícios anteriores.
+
+          Para a hipótese de retenção territorial, o valor de PAGAMENTO é a medida
+          administrativa mais próxima da saída financeira efetiva. Empenho, liquidação
+          e pagamento devem permanecer separados.
+
+          O arquivo informa CPF/CNPJ e nome do credor, mas não o município do fornecedor.
+          A classificação local/externo exige enriquecimento cadastral RFB. Não classificar
+          fornecedor sem essa etapa.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: profile SIAPC São Borja expenditure 2026"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: siapc-sao-borja-empenhos-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/siapc_sao_borja_empenhos_2026/

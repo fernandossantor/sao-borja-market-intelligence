@@ -1,0 +1,265 @@
+name: public-procurement-territorial-exposure-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/public-procurement-territorial-exposure-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Join procurement-compatible payments to RFB territorial classification
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/public_procurement_territorial_exposure_2026"
+          mkdir -p "$OUT"
+
+          python - <<'PY'
+          import csv,json
+          from collections import defaultdict
+          from pathlib import Path
+
+          CORE=Path("docs/data_sources/public_procurement_core_analytics_2026/core_vendor_summary_2026.csv")
+          RFB=Path("docs/data_sources/rfb_public_creditors_2026/creditors_rfb_classification.csv")
+          DETAIL=Path("docs/data_sources/sao_borja_transparencia_cnpj_rubricas_2026/cnpj_rubrica_summary_2026.csv")
+          RULE=Path("docs/data_sources/public_procurement_eligibility_rubric_20260919_v001.csv")
+          OUT=Path("artifacts/public_procurement_territorial_exposure_2026")
+          SAO="8863"
+          FOUNDATION="96488598000189"
+
+          rfb={}
+          with RFB.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  rfb[r["cnpj"]]=r
+
+          rule={}
+          with RULE.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  rule[r["rubrica"]]=r["classificacao"]
+
+          def recode(r):
+              if r is None:
+                  return "RFB_NOT_FOUND"
+              status=(r.get("exact_situacao") or "").strip()
+              mun=(r.get("exact_municipio_tom") or "").strip()
+              try: root_local=int(float(r.get("root_local_active_count") or 0))
+              except: root_local=0
+
+              if status=="02" and mun==SAO:
+                  return "LOCAL_EXACT_ACTIVE"
+              if mun==SAO and status!="02":
+                  return "LOCAL_EXACT_NONACTIVE_SNAPSHOT"
+              if root_local>0:
+                  return "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT"
+              if status=="02" and mun and mun!=SAO:
+                  return "EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT"
+              if mun and mun!=SAO:
+                  return "EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT"
+              return "RFB_NOT_FOUND"
+
+          vendors=[]
+          core_total=0.0
+          with CORE.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  c=r["cnpj"]
+                  paid=float(r["pago_core_R$"] or 0)
+                  rr=rfb.get(c)
+                  cls=recode(rr)
+                  vendors.append({
+                      **r,
+                      "pago_core_R$":paid,
+                      "territorial_class":cls,
+                      "exact_situacao":rr.get("exact_situacao","") if rr else "",
+                      "exact_uf":rr.get("exact_uf","") if rr else "",
+                      "exact_municipio_tom":rr.get("exact_municipio_tom","") if rr else "",
+                      "exact_municipio_nome":rr.get("exact_municipio_nome","") if rr else "",
+                      "root_local_active_count":rr.get("root_local_active_count","") if rr else "",
+                  })
+                  core_total+=paid
+
+          vendors.sort(key=lambda x:x["pago_core_R$"],reverse=True)
+
+          agg=defaultdict(lambda:{"vendors":0,"paid":0.0})
+          for v in vendors:
+              a=agg[v["territorial_class"]]
+              a["vendors"]+=1
+              a["paid"]+=v["pago_core_R$"]
+
+          def share(x,den=core_total): return x/den if den else None
+          strict=agg["LOCAL_EXACT_ACTIVE"]["paid"]
+          local_nonactive=agg["LOCAL_EXACT_NONACTIVE_SNAPSHOT"]["paid"]
+          root_local=agg["ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT"]["paid"]
+          external_active=agg["EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT"]["paid"]
+          external_nonactive=agg["EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT"]["paid"]
+          notfound=agg["RFB_NOT_FOUND"]["paid"]
+
+          # Rubric x territorial class.
+          rubagg=defaultdict(lambda:defaultdict(float))
+          rubvendors=defaultdict(lambda:defaultdict(set))
+          with DETAIL.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  if rule.get(r["rubrica"])!="CORE_PROCUREMENT":
+                      continue
+                  paid=float(r["pago_R$"] or 0)
+                  if paid<=0: continue
+                  c=r["cnpj"]
+                  cls=recode(rfb.get(c))
+                  rubagg[r["rubrica"]][cls]+=paid
+                  rubvendors[r["rubrica"]][cls].add(c)
+
+          classes=[
+              "LOCAL_EXACT_ACTIVE",
+              "LOCAL_EXACT_NONACTIVE_SNAPSHOT",
+              "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT",
+              "EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT",
+              "EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT",
+              "RFB_NOT_FOUND",
+          ]
+
+          with (OUT/"core_vendor_territorial_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=["rank","cnpj","nome_credor","pago_core_R$","share_core","territorial_class",
+                      "exact_situacao","exact_uf","exact_municipio_tom","exact_municipio_nome",
+                      "root_local_active_count","rubricas_core","empenhos_core"]
+              w=csv.DictWriter(f,fieldnames=fields);w.writeheader()
+              for v in vendors:
+                  w.writerow({k:v.get(k,"") for k in fields})
+
+          with (OUT/"core_territorial_summary_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f)
+              w.writerow(["territorial_class","vendors","pago_core_R$","share_core"])
+              for cls in classes:
+                  v=agg[cls]
+                  w.writerow([cls,v["vendors"],round(v["paid"],2),share(v["paid"])])
+
+          with (OUT/"core_rubric_territorial_2026.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              w=csv.writer(f)
+              w.writerow(["rubrica","territorial_class","vendors","pago_core_R$","share_within_rubric"])
+              for rub,d in sorted(rubagg.items(),key=lambda kv:-sum(kv[1].values())):
+                  den=sum(d.values())
+                  for cls in classes:
+                      val=d.get(cls,0.0)
+                      if val or rubvendors[rub].get(cls):
+                          w.writerow([rub,cls,len(rubvendors[rub].get(cls,set())),round(val,2),val/den if den else None])
+
+          foundation=next((v for v in vendors if v["cnpj"]==FOUNDATION),None)
+          foundation_paid=foundation["pago_core_R$"] if foundation else 0.0
+          ex_den=core_total-foundation_paid
+          ex_strict=strict-(foundation_paid if foundation and foundation["territorial_class"]=="LOCAL_EXACT_ACTIVE" else 0.0)
+          ex_root=root_local-(foundation_paid if foundation and foundation["territorial_class"]=="ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT" else 0.0)
+          ex_local_nonactive=local_nonactive-(foundation_paid if foundation and foundation["territorial_class"]=="LOCAL_EXACT_NONACTIVE_SNAPSHOT" else 0.0)
+          ex_ext_active=external_active-(foundation_paid if foundation and foundation["territorial_class"]=="EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT" else 0.0)
+          ex_ext_nonactive=external_nonactive-(foundation_paid if foundation and foundation["territorial_class"]=="EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT" else 0.0)
+          ex_nf=notfound-(foundation_paid if foundation and foundation["territorial_class"]=="RFB_NOT_FOUND" else 0.0)
+
+          report={
+              "source_payments":"Portal da Transparência da Prefeitura de São Borja",
+              "source_geography":"RFB Dados Abertos CNPJ, competência 2026-08; bytes transported through mirror in this run",
+              "period_payments":"2026-01-01 to 2026-09-18",
+              "core_paid_R$":round(core_total,2),
+              "core_vendors":len(vendors),
+              "classification":{cls:{
+                  "vendors":agg[cls]["vendors"],
+                  "pago_R$":round(agg[cls]["paid"],2),
+                  "share_core":share(agg[cls]["paid"])
+              } for cls in classes},
+              "indicators":{
+                  "strict_local_active_share":share(strict),
+                  "operational_local_presence_share":share(strict+root_local),
+                  "registered_local_upper_bound_share_including_nonactive_exact":share(strict+root_local+local_nonactive),
+                  "external_active_no_local_footprint_share":share(external_active),
+                  "external_plus_nonactive_no_local_footprint_share":share(external_active+external_nonactive),
+                  "indeterminate_notfound_share":share(notfound),
+              },
+              "sensitivity_excluding_fundacao_ivan_goulart":{
+                  "excluded_cnpj":FOUNDATION,
+                  "excluded_paid_R$":round(foundation_paid,2),
+                  "denominator_R$":round(ex_den,2),
+                  "strict_local_active_share":ex_strict/ex_den if ex_den else None,
+                  "operational_local_presence_share":(ex_strict+ex_root)/ex_den if ex_den else None,
+                  "registered_local_upper_bound_share_including_nonactive_exact":(ex_strict+ex_root+ex_local_nonactive)/ex_den if ex_den else None,
+                  "external_active_no_local_footprint_share":ex_ext_active/ex_den if ex_den else None,
+                  "external_plus_nonactive_no_local_footprint_share":(ex_ext_active+ex_ext_nonactive)/ex_den if ex_den else None,
+                  "indeterminate_notfound_share":ex_nf/ex_den if ex_den else None,
+              },
+              "controls":{
+                  "sum_classes_R$":round(sum(v["paid"] for v in agg.values()),2),
+                  "reconciles_core":abs(sum(v["paid"] for v in agg.values())-core_total)<0.02,
+                  "rfb_vendor_matches":sum(1 for v in vendors if v["territorial_class"]!="RFB_NOT_FOUND"),
+                  "rfb_vendor_notfound":sum(1 for v in vendors if v["territorial_class"]=="RFB_NOT_FOUND"),
+              },
+              "interpretation_rule":"These are first-order territorial exposure indicators for rubric-compatible payments, not final leakage rates.",
+              "limitations":[
+                  "RFB bytes were obtained via a transport mirror because the official host timed out; results remain exploratory until official hash/reexecution reconciliation.",
+                  "LOCAL_EXACT_NONACTIVE_SNAPSHOT is kept separate because a supplier may have received payment earlier in 2026 and become nonactive by the August 2026 RFB snapshot.",
+                  "ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT does not prove that the local establishment executed the contract.",
+                  "External supplier does not imply 100% leakage; local supplier does not imply 100% retention.",
+                  "The rubric-compatible core includes institutional service arrangements; the Fundação Ivan Goulart sensitivity isolates the dominant case."
+              ]
+          }
+          (OUT/"territorial_exposure_2026.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact evidence
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_territorial_exposure_2026"
+          mkdir -p "$DEST"
+          cp artifacts/public_procurement_territorial_exposure_2026/* "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # PMSB — exposição territorial de primeira ordem das compras/contratações — 2026
+
+          Camada exploratória, não canônica.
+
+          Une:
+          1. pagamentos por credor/rubrica do Portal da Transparência PMSB;
+          2. núcleo de rubricas compatíveis com aquisição/contratação;
+          3. geografia cadastral RFB 2026-08.
+
+          A nomenclatura deliberadamente evita “taxa de vazamento”.
+
+          LOCAL_EXACT_ACTIVE = CNPJ credor ativo em São Borja no snapshot RFB.
+          LOCAL_EXACT_NONACTIVE_SNAPSHOT = CNPJ registrado em São Borja, porém não ativo no snapshot;
+          fica separado por incompatibilidade temporal potencial com pagamentos anteriores.
+          ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT = CNPJ credor não é local, mas a raiz possui estabelecimento ativo local.
+          EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT = CNPJ ativo fora e raiz sem estabelecimento ativo local.
+          EXTERNAL_EXACT_NONACTIVE_NO_LOCAL_FOOTPRINT = registro exato fora não ativo no snapshot e sem footprint ativo local.
+          RFB_NOT_FOUND = sem match; não inferir.
+
+          Como a RFB oficial estava indisponível para o runner, os bytes deste enriquecimento
+          foram transportados por espelho do snapshot agosto/2026. Resultados permanecem
+          exploratórios até reconciliação por hash ou reexecução oficial.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: measure first-order public procurement territorial exposure"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-procurement-territorial-exposure-2026
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/public_procurement_territorial_exposure_2026/

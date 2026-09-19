@@ -132,5 +132,75 @@
     ],
     "contains_sem_result": false,
     "text_prefix": "Portal da Transparência Área Administrativa Acessibilidade ALT+0 X ACESSIBILIDADE Para navegação via teclado, utilize a combinação de teclas conforme o modelo abaixo: ALT + [Letra Atalho] Atalhos de navegação: A Ir Para Busca B Ir Para Despesas C Ir Para Receitas G Ir para Diárias H Ir Para Folha de Pagamento I Ir Para Contratos J Ir Para Licitações Atalhos para contraste do site: K Cor Original L Com Contraste Tamanho da fonte: A + A - A Resultados da busca de Contratos Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br"
+  },
+  "focused_2025_01": {
+    "status": 200,
+    "bytes": 23916,
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2025&mes=01",
+    "main_text": "Resultados da busca de Contratos Voltar",
+    "anchors": [
+      {
+        "text": "Área Administrativa",
+        "href": "/cms/dashboard"
+      },
+      {
+        "text": "",
+        "href": "/"
+      },
+      {
+        "text": "Ir Para Busca",
+        "href": "#"
+      },
+      {
+        "text": "Ir Para Despesas",
+        "href": "despesas"
+      },
+      {
+        "text": "Ir Para Receitas",
+        "href": "receitas"
+      },
+      {
+        "text": "Ir para Diárias",
+        "href": "despesas/loadDiarias"
+      },
+      {
+        "text": "Ir Para Folha de Pagamento",
+        "href": "folha_pagamentos"
+      },
+      {
+        "text": "Ir Para Contratos",
+        "href": "acordos"
+      },
+      {
+        "text": "Ir Para Licitações",
+        "href": "licitacoes"
+      },
+      {
+        "text": "",
+        "href": "#"
+      },
+      {
+        "text": "Voltar",
+        "href": "/acordos/index?instituicao=1&exercicio=2025&mes=01"
+      },
+      {
+        "text": "www.dbseller.com.br",
+        "href": "http://www.dbseller.com.br"
+      }
+    ],
+    "forms": [
+      {
+        "action": "/consultas/pesquisar",
+        "method": "get",
+        "fields": [
+          "parametros"
+        ]
+      }
+    ],
+    "html_markers": [
+      "/acordos/getRelatorio",
+      "/acordos/index",
+      "/acordos/pesquisar"
+    ]
   }
 }

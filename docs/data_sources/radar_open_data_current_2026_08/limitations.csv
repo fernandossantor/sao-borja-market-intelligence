@@ -1,3 +1,1 @@
 source_file,code,description
-Categorias_Produtos.csv,NCM_COLUMN_NOT_IDENTIFIED,Arquivo não possui coluna NCM identificável pelos aliases auditáveis.
-Composicao_de_Mercado_08_2026.csv,COMPOSITION_FIELDS_NOT_IDENTIFIED,"NCM foi identificado, mas o schema não permitiu mapear INT/OUF/EXT com segurança. Nenhum market share foi calculado."

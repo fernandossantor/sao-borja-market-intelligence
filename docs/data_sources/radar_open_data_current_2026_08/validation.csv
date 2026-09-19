@@ -3,5 +3,5 @@ csv_files_found,3,DADO_CALCULADO,PASS
 csv_files_read_ok,3,DADO_CALCULADO,PASS
 ncm_codes_expected,7,PARÂMETRO,PASS
 ncm_codes_found_any_file,7,DADO_CALCULADO,PASS
-ncm_codes_with_composition,0,DADO_CALCULADO,WARN
+ncm_codes_with_composition,7,DADO_CALCULADO,PASS
 canonical_rows_promoted,0,DADO_OBSERVADO,PASS

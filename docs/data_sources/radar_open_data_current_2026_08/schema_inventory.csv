@@ -1,4 +1,4 @@
 source_file,sha256,status,rows,columns,encoding,separator_mode,file_type,column_mapping,raw_columns,error
-Categorias_Produtos.csv,2eb87aff9c57def4f05f9011f8c57a6c6c20472806040b85387f37d222b48b88,READ_OK,13829,5,utf-8-sig,sniffed,categorias_produtos,,ncm8 | ncm4 | ncm2 | grupo_afinidade_final | codxdescr_ncm8,
-Composicao_de_Mercado_08_2026.csv,43b32b517e024eff1a37f86e155a77f976ca5f51ad4c16308c5b8b6b48ee3c46,READ_OK,64948,7,utf-8-sig,sniffed,composicao_mercado,ncm=cod_ncm | origin_type=tipo_operacao | period=anomes,anomes | cod_ncm | ncm_descr | emit_uf | tipo_operacao | vlr_nominal | corte_sigilo,
+Categorias_Produtos.csv,2eb87aff9c57def4f05f9011f8c57a6c6c20472806040b85387f37d222b48b88,READ_OK,13829,5,utf-8-sig,sniffed,categorias_produtos,ncm=ncm8,ncm8 | ncm4 | ncm2 | grupo_afinidade_final | codxdescr_ncm8,
+Composicao_de_Mercado_08_2026.csv,43b32b517e024eff1a37f86e155a77f976ca5f51ad4c16308c5b8b6b48ee3c46,READ_OK,64948,7,utf-8-sig,sniffed,composicao_mercado,ncm=cod_ncm | origin_type=tipo_operacao | period=anomes | value=vlr_nominal,anomes | cod_ncm | ncm_descr | emit_uf | tipo_operacao | vlr_nominal | corte_sigilo,
 Portfolio_NCMs_Setor.csv,1b00c28a58ca1d8b24ba7a8770d2603d5e41255613cd7b401b340e314e6e2586,READ_OK,1900,5,utf-8-sig,sniffed,portfolio_ncm_setor,ncm=cod_ncm,emit_atividade | emit_classe | emit_setor | cod_ncm | ncm_descr,

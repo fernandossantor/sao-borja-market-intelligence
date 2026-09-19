@@ -1,0 +1,104 @@
+$(function () {
+
+  //$("#search").bind("keyup", {}, keypressInBox);
+
+  $('#procurar').live('submit', function() {
+      var lPass = true;
+
+      if ($('#tipobusca').val() == '') {
+
+        // alert("Selecione o tipo de busca.");
+        // lPass = false;
+        return false;
+      }
+
+      if ($('#search').val() == '') {
+
+        // alert("Preencha o campo de busca.");
+        // lPass = false;
+        return false;
+      }
+
+      if ($('#search').val().length < 3) {
+
+        // alert("É necessário mais informações para iniciar a busca.");
+        // lPass = false;
+        return false;
+      }
+
+      return lPass;
+    })
+});
+
+function keypressInBox(e) {
+
+  var code = (e.keyCode ? e.keyCode : e.which);
+
+  if (code == 13) {
+    e.preventDefault();                                                                                                                                                                       
+    e.stopPropagation();                                                                                                                                                                       
+    e.stopImmediatePropagation();                                                                                                                                                              
+    sUrl = $('#search').attr('data-url');
+    var sitekey  = $('.g-recaptcha').attr('data-sitekey');
+    if (sitekey != '') {
+       pesquisarCaptcha();                                                                                                                                                                    
+       return false;
+    }
+                                                                                                                                                                                                                                                                                                                                                                                        
+    pesquisar(sUrl, 'search', 'tipobusca');
+  }
+};
+
+function pesquisarCaptcha() {                                                                                                                                                                      
+   grecaptcha.execute();                                                                                                                                                                                            
+}
+
+function recaptcha_callback(token) {
+
+  var custom_callback = $('.g-recaptcha').attr('data-custom-callback');
+  if (custom_callback) {
+    $('.g-recaptcha').removeAttr('data-custom-callback');
+    return window[custom_callback](token);
+  }
+
+  return pesquisar(token);
+}
+
+function pesquisar(token){
+
+  if ($('#tipobusca').val() == '') {
+
+    alert("Selecione o tipo de busca.");
+
+    lPass = false;
+    return false;
+  }
+  if ($('#search').val() == '') {
+
+    alert("Preencha o campo de busca.");
+    lPass = false;
+    return false;
+  }
+
+  if ($('#search').val().length < 3) {
+
+    alert("É necessário mais informações para iniciar a busca.");
+    lPass = false;
+    return false;
+  }
+
+  if($('#search').val() != ''){
+
+    $('#ajax-loader').css('display','block');
+
+    var tipo = $('#tipobusca').val();
+    var aDados = {
+      'parametros' : $('#search').val()
+    }
+
+    var uri  = $('#search').attr('data-url');
+                                                                                                                                                                                              
+    window.location.href = uri + 'consultas/pesquisar?parametros='+$('#search').val()+'&tipobusca='+tipo+'&token='+token;
+  }
+
+}

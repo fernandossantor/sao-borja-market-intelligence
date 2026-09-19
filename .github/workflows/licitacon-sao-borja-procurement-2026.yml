@@ -28,12 +28,12 @@ jobs:
 
           OUT=Path("artifacts/licitacon_sao_borja_2026")
           OUT.mkdir(parents=True,exist_ok=True)
-          URL="https://dados.tce.rs.gov.br/dados/licitacon/contrato/orgao/58000.csv.zip"
+          URL="https://dados.tce.rs.gov.br/dados/licitacon/contrato/ano/2026.csv.zip"
           req=urllib.request.Request(URL,headers={"User-Agent":"SBMI exploratory audit/1.0"})
-          with urllib.request.urlopen(req,timeout=180,context=ssl.create_default_context()) as r:
+          with urllib.request.urlopen(req,timeout=600,context=ssl.create_default_context()) as r:
               raw=r.read(); status=r.status
           (OUT/"source_manifest.json").write_text(json.dumps({
-              "source":"TCE-RS / LicitaCon — Contratos Consolidado 2026",
+              "source":"TCE-RS / LicitaCon — Contratos Consolidado 2026 (recurso oficial anual)",
               "url":URL,"http_status":status,"bytes":len(raw),
               "target_orgao":"58000 — PM DE SAO BORJA",
               "nature":"DADO OBSERVADO EM FONTE ADMINISTRATIVA; ainda não convertido em pagamento/retencao"
@@ -117,12 +117,12 @@ jobs:
 
           Camada exploratória, não canônica.
 
-          Fonte oficial: TCE-RS / LicitaCon, conjunto de contratos por órgão — PM São Borja (CD_ORGAO 58000).
+          Fonte oficial: TCE-RS / LicitaCon, conjunto anual Contratos Consolidado 2026; filtragem posterior por CD_ORGAO 58000 — PM São Borja.
 
           Objetivo: identificar estrutura, fornecedor, domicílio e valor contratual
           para testar a hipótese de retenção/vazamento das compras públicas.
 
-          Nesta primeira etapa, é usado o arquivo oficial específico do órgão 58000; os arquivos internos são auditados e o
+          Nesta primeira etapa, é usado o arquivo anual oficial confirmado no catálogo do TCE-RS; os arquivos internos são filtrados por CD_ORGAO 58000, auditados e o
           schema é auditado. Contrato/valor não deve ser tratado como pagamento
           efetivo sem verificar o campo e sua natureza.
           EOF

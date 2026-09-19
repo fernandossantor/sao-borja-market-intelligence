@@ -107,56 +107,70 @@ jobs:
               for list_code,list_name in LISTS.items():
                   params={
                     "iIdLink":"1","iInstituicao":"1","iExercicio":str(year),
-                    "iPago":"1","iTipoLista":list_code
+                    "iPago":"1","iTipoLista":list_code,
+                    "dtInicio":f"01/01/{year}","dtFim":f"31/12/{year}"
                   }
-                  payload={
-                    "aParametros":json.dumps(params,separators=(",",":")),
-                    "page":"1","rows":"100000","sidx":"op","sord":"asc"
-                  }
-                  r=s.post(BASE+"/ordem_cronologica/getElementos",data=payload,timeout=90)
-                  text=r.text
-                  try:
-                      data=r.json()
-                  except Exception:
+                  page=1
+                  while True:
+                      payload={
+                        "aParametros":json.dumps(params,separators=(",",":")),
+                        "page":str(page),"rows":"1000","sidx":"vencimento","sord":"asc"
+                      }
+                      try:
+                          r=s.post(BASE+"/ordem_cronologica/getElementos",data=payload,timeout=60)
+                      except requests.RequestException as exc:
+                          diagnostics.append({
+                            "year":year,"list_code":list_code,"list_name":list_name,
+                            "page":page,"parse_status":"REQUEST_ERROR","error":repr(exc)
+                          })
+                          break
+                      text=r.text
+                      try:
+                          data=r.json()
+                      except Exception:
+                          diagnostics.append({
+                            "year":year,"list_code":list_code,"list_name":list_name,
+                            "page":page,"http_status":r.status_code,"bytes":len(r.content),
+                            "parse_status":"NON_JSON","prefix":text[:240]
+                          })
+                          break
+                      rows=data.get("rows",[]) if isinstance(data,dict) else []
+                      total_pages=int(data.get("total") or 0) if isinstance(data,dict) else 0
                       diagnostics.append({
                         "year":year,"list_code":list_code,"list_name":list_name,
-                        "http_status":r.status_code,"bytes":len(r.content),
-                        "parse_status":"NON_JSON","prefix":text[:240]
+                        "page":page,"http_status":r.status_code,"bytes":len(r.content),
+                        "parse_status":"JSON","records":data.get("records"),
+                        "total_pages":total_pages,"returned_rows":len(rows),
+                        "top_keys":sorted(data.keys()) if isinstance(data,dict) else []
                       })
-                      continue
-                  rows=data.get("rows",[]) if isinstance(data,dict) else []
-                  diagnostics.append({
-                    "year":year,"list_code":list_code,"list_name":list_name,
-                    "http_status":r.status_code,"bytes":len(r.content),
-                    "parse_status":"JSON","records":data.get("records"),
-                    "total_pages":data.get("total"),"returned_rows":len(rows),
-                    "top_keys":sorted(data.keys()) if isinstance(data,dict) else []
-                  })
-                  for item in rows:
-                      d=normalize_row(item)
-                      rid=str(d.get("_rowid") or d.get("id") or "").strip()
-                      # Include year because backend ids may repeat by exercise.
-                      dedup=(year,rid) if rid else (
-                        year,list_code,str(d.get("operacao","")),str(d.get("ndocumento","")),
-                        str(d.get("valor","")),str(d.get("pagamento","")),digits(d.get("cpfcnpj",""))
-                      )
-                      if dedup in seen:
-                          y_duplicate_rows+=1
-                          continue
-                      seen.add(dedup)
-                      val=money(d.get("valor"))
-                      ysum+=val; yrows+=1
-                      rawdoc=digits(d.get("cpfcnpj"))
-                      cnpj=cnpj_ok(rawdoc); cpf=cpf_ok(rawdoc)
-                      if cnpj:
-                          cls="CNPJ_VALIDO"; y_cnpj[cnpj]+=val; y_cnpj_rows[cnpj]+=1
-                      elif cpf:
-                          cls="CPF_VALIDO"
-                      elif rawdoc:
-                          cls="DOCUMENTO_INVALIDO_OU_SINTETICO"
-                      else:
-                          cls="DOCUMENTO_AUSENTE"
-                      y_class_rows[cls]+=1; y_class_value[cls]+=val
+                      for item in rows:
+                          d=normalize_row(item)
+                          rid=str(d.get("_rowid") or d.get("id") or "").strip()
+                          # Include year because backend ids may repeat by exercise.
+                          dedup=(year,rid) if rid else (
+                            year,list_code,str(d.get("operacao","")),str(d.get("ndocumento","")),
+                            str(d.get("valor","")),str(d.get("pagamento","")),digits(d.get("cpfcnpj",""))
+                          )
+                          if dedup in seen:
+                              y_duplicate_rows+=1
+                              continue
+                          seen.add(dedup)
+                          val=money(d.get("valor"))
+                          ysum+=val; yrows+=1
+                          rawdoc=digits(d.get("cpfcnpj"))
+                          cnpj=cnpj_ok(rawdoc); cpf=cpf_ok(rawdoc)
+                          if cnpj:
+                              cls="CNPJ_VALIDO"; y_cnpj[cnpj]+=val; y_cnpj_rows[cnpj]+=1
+                          elif cpf:
+                              cls="CPF_VALIDO"
+                          elif rawdoc:
+                              cls="DOCUMENTO_INVALIDO_OU_SINTETICO"
+                          else:
+                              cls="DOCUMENTO_AUSENTE"
+                          y_class_rows[cls]+=1; y_class_value[cls]+=val
+                      if total_pages<=page or not rows:
+                          break
+                      page+=1
 
               for cnpj,val in y_cnpj.items():
                   by_cnpj[(year,cnpj)]+=val

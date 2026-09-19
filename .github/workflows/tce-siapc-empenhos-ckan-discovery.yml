@@ -1,0 +1,254 @@
+name: tce-siapc-empenhos-ckan-discovery
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/tce-siapc-empenhos-ckan-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          python -m pip install --quiet pandas requests
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq p7zip-full
+
+      - name: Discover CKAN packages and resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, re, unicodedata
+          from pathlib import Path
+          import requests
+
+          API="https://dados.tce.rs.gov.br/api/3/action/package_search"
+          OUT=Path(".data/tmp/tce_ckan_discovery")
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          def norm(v):
+              s=unicodedata.normalize("NFKD", str(v))
+              s="".join(ch for ch in s if not unicodedata.combining(ch)).upper()
+              return re.sub(r"[^A-Z0-9]+"," ",s).strip()
+
+          candidates=[]
+          searches=[]
+          for year in range(2019, 2026):
+              queries=[
+                  f'"Despesa orçamentária por empenhos" "PM DE SÃO BORJA" {year}',
+                  f'"PM DE SÃO BORJA" {year}',
+                  f'58000 {year}',
+              ]
+              seen=set()
+              for q in queries:
+                  try:
+                      r=requests.get(API, params={"q":q,"rows":200}, timeout=60)
+                      searches.append({"year":year,"query":q,"status_code":r.status_code,"url":r.url})
+                      r.raise_for_status()
+                      payload=r.json()
+                  except Exception as exc:
+                      searches.append({"year":year,"query":q,"error":repr(exc)})
+                      continue
+                  if not payload.get("success"):
+                      continue
+                  for pkg in payload.get("result",{}).get("results",[]):
+                      title=pkg.get("title","")
+                      nt=norm(title)
+                      if str(year) not in nt:
+                          continue
+                      if "DESPESA ORCAMENTARIA POR EMPENHOS" not in nt:
+                          continue
+                      if "SAO BORJA" not in nt:
+                          continue
+                      # Prefer Prefeitura; Câmara is a different órgão.
+                      if "PM DE SAO BORJA" not in nt and "PREFEITURA" not in nt:
+                          continue
+                      pid=pkg.get("id") or pkg.get("name")
+                      if pid in seen:
+                          continue
+                      seen.add(pid)
+                      for res in pkg.get("resources",[]):
+                          fmt=(res.get("format") or "").upper()
+                          url=res.get("url") or ""
+                          candidates.append({
+                              "year":year,
+                              "package_id":pkg.get("id",""),
+                              "package_name":pkg.get("name",""),
+                              "package_title":title,
+                              "resource_id":res.get("id",""),
+                              "resource_name":res.get("name",""),
+                              "format":fmt,
+                              "url":url,
+                              "size":res.get("size"),
+                              "last_modified":res.get("last_modified") or res.get("created"),
+                          })
+                      break
+                  if any(c["year"]==year for c in candidates):
+                      break
+
+          with (OUT/"searches.jsonl").open("w",encoding="utf-8") as f:
+              for row in searches:
+                  f.write(json.dumps(row,ensure_ascii=False)+"\n")
+          cols=["year","package_id","package_name","package_title","resource_id","resource_name","format","url","size","last_modified"]
+          with (OUT/"resource_candidates.tsv").open("w",encoding="utf-8") as f:
+              f.write("\t".join(cols)+"\n")
+              for row in candidates:
+                  f.write("\t".join("" if row.get(c) is None else str(row.get(c,"")).replace("\t"," ") for c in cols)+"\n")
+          print("candidates", len(candidates))
+          for row in candidates:
+              print(row["year"], row["package_title"], row["format"], row["url"])
+          PY
+
+      - name: Download best per-year resource and inventory schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv, json, re, subprocess, unicodedata
+          from pathlib import Path
+          import pandas as pd
+          import requests
+
+          ROOT=Path(".data/tmp/tce_ckan_discovery")
+          OUT=Path("artifacts/tce_siapc_empenhos_ckan_discovery_2019_2025")
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          def norm(v):
+              s=unicodedata.normalize("NFKD", str(v))
+              s="".join(ch for ch in s if not unicodedata.combining(ch)).upper()
+              return re.sub(r"[^A-Z0-9]+","_",s).strip("_")
+
+          cand=pd.read_csv(ROOT/"resource_candidates.tsv",sep="\t",dtype=str).fillna("")
+          manifest=[]
+          schemas=[]
+          for year in range(2019,2026):
+              yy=cand[cand["year"].astype(str)==str(year)].copy()
+              if yy.empty:
+                  manifest.append({"year":year,"status":"NO_CKAN_RESOURCE"})
+                  continue
+              yy["pref"]=yy["format"].str.upper().map({"7Z":0,"ZIP":1}).fillna(9)
+              yy=yy.sort_values(["pref","format","resource_name"])
+              chosen=yy.iloc[0].to_dict()
+              url=chosen["url"]
+              ext=".7z" if chosen["format"].upper()=="7Z" else ".zip" if chosen["format"].upper()=="ZIP" else ".bin"
+              ydir=ROOT/str(year)
+              xdir=ydir/"extracted"
+              xdir.mkdir(parents=True, exist_ok=True)
+              archive=ydir/f"resource{ext}"
+              try:
+                  with requests.get(url,stream=True,timeout=(30,900),allow_redirects=True) as r:
+                      r.raise_for_status()
+                      with archive.open("wb") as f:
+                          for chunk in r.iter_content(chunk_size=1024*1024):
+                              if chunk: f.write(chunk)
+                  if ext==".7z":
+                      subprocess.run(["7z","x","-y",f"-o{xdir}",str(archive)],check=True,stdout=subprocess.DEVNULL)
+                  elif ext==".zip":
+                      subprocess.run(["unzip","-oq",str(archive),"-d",str(xdir)],check=True)
+                  else:
+                      raise RuntimeError("Unsupported resource format")
+                  import hashlib
+                  sha=hashlib.sha256(archive.read_bytes()).hexdigest()
+                  manifest.append({"year":year,"status":"DOWNLOADED","format":chosen["format"],"bytes":archive.stat().st_size,"sha256":sha,"resource_id":chosen["resource_id"],"url":url})
+              except Exception as exc:
+                  manifest.append({"year":year,"status":"DOWNLOAD_ERROR","format":chosen["format"],"resource_id":chosen["resource_id"],"url":url,"error":repr(exc)})
+                  continue
+
+              files=[p for p in xdir.rglob("*") if p.is_file() and p.suffix.lower()==".csv"]
+              if not files:
+                  schemas.append({"year":year,"status":"NO_CSV_AFTER_EXTRACT"})
+                  continue
+              for p in files:
+                  raw=p.read_bytes()[:65536]
+                  enc="utf-8-sig"
+                  try: raw.decode(enc)
+                  except UnicodeDecodeError: enc="latin1"
+                  sample=raw.decode(enc,errors="replace")
+                  try: sep=csv.Sniffer().sniff(sample,delimiters=";,|\t").delimiter
+                  except Exception: sep=";"
+                  try:
+                      df=pd.read_csv(p,sep=sep,encoding=enc,dtype=str,low_memory=False)
+                  except Exception as exc:
+                      schemas.append({"year":year,"file":p.name,"status":"READ_ERROR","error":repr(exc)})
+                      continue
+                  cols=list(df.columns)
+                  op_cols=[c for c in cols if any(tok in norm(c) for tok in ["OPERACAO","TP_OP"])]
+                  value_cols=[c for c in cols if any(tok in norm(c) for tok in ["VALOR","VL_","PAGAMENTO","EMPENHO","LIQUIDACAO"])]
+                  doc_cols=[c for c in cols if any(tok in norm(c) for tok in ["CPF","CNPJ","CGC"])]
+                  op_values={}
+                  for c in op_cols[:3]:
+                      op_values[c]=df[c].dropna().astype(str).str.strip().value_counts().head(20).to_dict()
+                  schemas.append({
+                      "year":year,"file":p.name,"status":"READ_OK","rows":len(df),"columns":len(cols),
+                      "encoding":enc,"separator":repr(sep),
+                      "operation_columns":" | ".join(op_cols),
+                      "candidate_value_columns":" | ".join(value_cols),
+                      "document_columns":" | ".join(doc_cols),
+                      "operation_values_top20":json.dumps(op_values,ensure_ascii=False),
+                      "raw_columns":" | ".join(map(str,cols)),
+                  })
+
+          pd.DataFrame(manifest).to_csv(OUT/"download_manifest.csv",index=False,encoding="utf-8-sig")
+          pd.DataFrame(schemas).to_csv(OUT/"schema_inventory.csv",index=False,encoding="utf-8-sig")
+          print(pd.DataFrame(manifest).to_string(index=False))
+          print(pd.DataFrame(schemas).to_string(index=False))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/tce_siapc_empenhos_ckan_discovery_2019_2025"
+          mkdir -p "$DEST"
+          cp .data/tmp/tce_ckan_discovery/searches.jsonl "$DEST/"
+          cp .data/tmp/tce_ckan_discovery/resource_candidates.tsv "$DEST/"
+          cp artifacts/tce_siapc_empenhos_ckan_discovery_2019_2025/download_manifest.csv "$DEST/"
+          cp artifacts/tce_siapc_empenhos_ckan_discovery_2019_2025/schema_inventory.csv "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # TCE-RS/SIAPC — descoberta CKAN de empenhos da Prefeitura de São Borja — 2019–2025
+
+          Objetivo: substituir o teste legado de URL por órgão, que não entregou bytes em 2019–2025, por descoberta reproduzível dos recursos atualmente publicados no catálogo CKAN oficial do TCE-RS.
+
+          Fonte: Dados Abertos TCE-RS / SIAPC, conjunto “Despesa orçamentária por empenhos”.
+          Órgão-alvo: PM DE SÃO BORJA (código TCE 58000).
+          Período: 2019–2025.
+
+          Esta etapa persiste apenas consultas CKAN, metadados dos recursos, hashes dos arquivos baixados e inventário de schema. Não persiste linhas de credores, nomes, CPF/CNPJ ou históricos de empenho.
+
+          Interpretação: sucesso técnico da execução não implica disponibilidade de recurso por ano. Ver download_manifest.csv e schema_inventory.csv.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: discover TCE SIAPC creditor resources via CKAN"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload diagnostic artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tce-siapc-empenhos-ckan-discovery-2019-2025
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/tce_siapc_empenhos_ckan_discovery_2019_2025/

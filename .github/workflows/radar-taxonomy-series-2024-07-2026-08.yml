@@ -1,0 +1,285 @@
+name: radar-taxonomy-series-2024-07-2026-08
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/radar-taxonomy-series-2024-07-2026-08.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --quiet pandas requests
+
+      - name: Download official taxonomies and monthly compositions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          import requests
+
+          BASE="https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos"
+          ROOT=Path(".data/tmp/radar_taxonomy_series")
+          ROOT.mkdir(parents=True,exist_ok=True)
+          manifest=[]
+
+          periods=[]
+          y,m=2024,7
+          while (y,m) <= (2026,8):
+              periods.append((y,m))
+              if m==12: y,m=y+1,1
+              else: m+=1
+
+          files=["Categorias_Produtos.csv","Portfolio_NCMs_Setor.csv"] + [
+              f"Composicao_de_Mercado_{m:02d}_{y}.csv" for y,m in periods
+          ]
+          sess=requests.Session()
+          sess.headers.update({"User-Agent":"SBMI-audit/1.0"})
+          for filename in files:
+              url=f"{BASE}/{filename}"
+              path=ROOT/filename
+              with sess.get(url,stream=True,timeout=(30,900),allow_redirects=True) as r:
+                  r.raise_for_status()
+                  with path.open("wb") as f:
+                      for chunk in r.iter_content(1024*1024):
+                          if chunk: f.write(chunk)
+              h=hashlib.sha256(path.read_bytes()).hexdigest()
+              manifest.append((filename,url,path.stat().st_size,h))
+              print(filename,path.stat().st_size,h)
+
+          with (ROOT/"source_manifest.tsv").open("w",encoding="utf-8") as f:
+              f.write("file\turl\tbytes\tsha256\n")
+              for row in manifest:
+                  f.write("\t".join(map(str,row))+"\n")
+          PY
+
+      - name: Aggregate official taxonomies over the monthly series
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          import pandas as pd
+
+          ROOT=Path(".data/tmp/radar_taxonomy_series")
+          OUT=Path("artifacts/radar_taxonomy_series_2024_07_2026_08")
+          OUT.mkdir(parents=True,exist_ok=True)
+
+          def ncm(series):
+              return series.fillna("").astype(str).str.replace(r"\D","",regex=True).str.zfill(8)
+
+          def to_number(series):
+              s=series.fillna("").astype(str).str.strip().str.replace("R$","",regex=False).str.replace(" ","",regex=False)
+              both=s.str.contains(",",regex=False,na=False) & s.str.contains(".",regex=False,na=False)
+              s=s.where(~both,s.str.replace(".","",regex=False).str.replace(",",".",regex=False))
+              comma=s.str.contains(",",regex=False,na=False) & ~s.str.contains(".",regex=False,na=False)
+              s=s.where(~comma,s.str.replace(",",".",regex=False))
+              thousands=s.str.fullmatch(r"[+-]?\d{1,3}(?:\.\d{3})+",na=False)
+              s=s.where(~thousands,s.str.replace(".","",regex=False))
+              s=s.str.replace(r"[^0-9eE+\-.]","",regex=True)
+              return pd.to_numeric(s,errors="coerce")
+
+          def dep(v):
+              if pd.isna(v): return "NAO_CALCULADO"
+              if v < .05: return "CRITICA"
+              if v < .15: return "ALTA"
+              if v < .30: return "MEDIA"
+              return "FORA_DAS_FAIXAS_NT"
+
+          cat=pd.read_csv(ROOT/"Categorias_Produtos.csv",dtype=str,encoding="utf-8-sig")
+          port=pd.read_csv(ROOT/"Portfolio_NCMs_Setor.csv",dtype=str,encoding="utf-8-sig")
+          cat["ncm"]=ncm(cat["ncm8"])
+          catmap=cat[["ncm","grupo_afinidade_final"]].drop_duplicates()
+          if catmap["ncm"].duplicated().any():
+              raise SystemExit("Categorias_Produtos has non-unique NCM to affinity-group mapping")
+
+          port["ncm"]=ncm(port["cod_ncm"])
+          portmap=port[["ncm","emit_setor","emit_classe","emit_atividade"]].drop_duplicates()
+          sectormap=portmap[["ncm","emit_setor"]].drop_duplicates()
+
+          periods=[]
+          y,m=2024,7
+          while (y,m) <= (2026,8):
+              periods.append((y,m))
+              if m==12: y,m=y+1,1
+              else: m+=1
+
+          affinity_rows=[]
+          sector_rows=[]
+          coverage=[]
+          for year,month in periods:
+              period=f"{year}-{month:02d}"
+              filename=f"Composicao_de_Mercado_{month:02d}_{year}.csv"
+              df=pd.read_csv(ROOT/filename,dtype=str,encoding="utf-8-sig",low_memory=False)
+              expected={"cod_ncm","tipo_operacao","vlr_nominal"}
+              if not expected.issubset(df.columns):
+                  raise SystemExit(f"{filename}: unexpected schema {list(df.columns)}")
+              df["ncm"]=ncm(df["cod_ncm"])
+              df["origin"]=df["tipo_operacao"].fillna("").astype(str).str.upper().str.strip()
+              df=df[df["origin"].isin(["INT","OUF","EXT"])].copy()
+              df["value"]=to_number(df["vlr_nominal"])
+              df=df[df["value"].notna()].copy()
+
+              piv=(df.pivot_table(index="ncm",columns="origin",values="value",aggfunc="sum",fill_value=0)
+                     .reset_index())
+              for col in ["INT","OUF","EXT"]:
+                  if col not in piv.columns: piv[col]=0.0
+              piv["demanda_rs"]=piv[["INT","OUF","EXT"]].sum(axis=1)
+
+              total=float(piv["demanda_rs"].sum())
+              total_ncm=int(piv["ncm"].nunique())
+
+              ac=piv.merge(catmap,on="ncm",how="left",validate="one_to_one")
+              mapped=ac[ac["grupo_afinidade_final"].notna()].copy()
+              mapped_total=float(mapped["demanda_rs"].sum())
+              mapped_ncm=int(mapped["ncm"].nunique())
+              agg=(mapped.groupby("grupo_afinidade_final",dropna=False)
+                   .agg(int_rs=("INT","sum"),ouf=("OUF","sum"),ext=("EXT","sum"),demanda_rs=("demanda_rs","sum"),n_ncm=("ncm","nunique"))
+                   .reset_index())
+              agg["part_rs"]=agg["int_rs"]/agg["demanda_rs"].where(agg["demanda_rs"]!=0)
+              agg["dependencia_nt"]=agg["part_rs"].map(dep)
+              agg.insert(0,"period",period)
+              agg["taxonomy_snapshot"]="2026-08"
+              agg["natureza"]="DADO_CALCULADO_SOBRE_DADOS_OFICIAIS"
+              affinity_rows.extend(agg.to_dict("records"))
+
+              # Portfolio is many-to-many by NCM and sector. Deduplicate NCM within each
+              # sector, but never sum across sectors as if sectors were mutually exclusive.
+              ps=piv.merge(sectormap,on="ncm",how="inner")
+              pagg=(ps.groupby("emit_setor",dropna=False)
+                    .agg(int_rs=("INT","sum"),ouf=("OUF","sum"),ext=("EXT","sum"),demanda_rs=("demanda_rs","sum"),n_ncm=("ncm","nunique"))
+                    .reset_index())
+              pagg["part_rs"]=pagg["int_rs"]/pagg["demanda_rs"].where(pagg["demanda_rs"]!=0)
+              pagg["dependencia_nt"]=pagg["part_rs"].map(dep)
+              pagg.insert(0,"period",period)
+              pagg["taxonomy_snapshot"]="2026-08"
+              pagg["additivity_rule"]="NAO_ADITIVO_ENTRE_SETORES_PORTFOLIO"
+              pagg["natureza"]="DADO_CALCULADO_SOBRE_DADOS_OFICIAIS"
+              sector_rows.extend(pagg.to_dict("records"))
+
+              portfolio_ncm=int(ps["ncm"].nunique())
+              coverage.append({
+                  "period":period,
+                  "composition_unique_ncm":total_ncm,
+                  "composition_total_value":total,
+                  "affinity_mapped_unique_ncm":mapped_ncm,
+                  "affinity_ncm_coverage_pct":mapped_ncm/total_ncm*100 if total_ncm else None,
+                  "affinity_mapped_value":mapped_total,
+                  "affinity_value_coverage_pct":mapped_total/total*100 if total else None,
+                  "portfolio_mapped_unique_ncm":portfolio_ncm,
+                  "portfolio_ncm_coverage_pct":portfolio_ncm/total_ncm*100 if total_ncm else None,
+              })
+
+          affinity=pd.DataFrame(affinity_rows)
+          sectors=pd.DataFrame(sector_rows)
+          cov=pd.DataFrame(coverage)
+
+          affinity.to_csv(OUT/"affinity_group_monthly_2024_07_2026_08.csv",index=False,encoding="utf-8-sig")
+          sectors.to_csv(OUT/"portfolio_sector_monthly_2024_07_2026_08.csv",index=False,encoding="utf-8-sig")
+          cov.to_csv(OUT/"monthly_taxonomy_coverage.csv",index=False,encoding="utf-8-sig")
+
+          current_aff=affinity[affinity["period"]=="2026-08"].copy().sort_values("demanda_rs",ascending=False)
+          current_sec=sectors[sectors["period"]=="2026-08"].copy().sort_values("demanda_rs",ascending=False)
+          current_aff.to_csv(OUT/"affinity_group_current_2026_08.csv",index=False,encoding="utf-8-sig")
+          current_sec.to_csv(OUT/"portfolio_sector_current_2026_08.csv",index=False,encoding="utf-8-sig")
+
+          # Annual/partial-year rollups preserve the same nominal sums and current taxonomy.
+          affinity["year"]=affinity["period"].str[:4].astype(int)
+          ann=(affinity.groupby(["year","grupo_afinidade_final"],dropna=False)
+               .agg(int_rs=("int_rs","sum"),ouf=("ouf","sum"),ext=("ext","sum"),demanda_rs=("demanda_rs","sum"))
+               .reset_index())
+          ann["part_rs"]=ann["int_rs"]/ann["demanda_rs"].where(ann["demanda_rs"]!=0)
+          ann["dependencia_nt"]=ann["part_rs"].map(dep)
+          ann["period_scope"]=ann["year"].map({2024:"jul-dez",2025:"jan-dez",2026:"jan-ago"})
+          ann["taxonomy_snapshot"]="2026-08"
+          ann.to_csv(OUT/"affinity_group_annual_partial.csv",index=False,encoding="utf-8-sig")
+
+          summary={
+              "months":int(cov["period"].nunique()),
+              "affinity_groups_observed":int(affinity["grupo_afinidade_final"].nunique()),
+              "portfolio_sectors_observed":int(sectors["emit_setor"].nunique()),
+              "affinity_min_ncm_coverage_pct":float(cov["affinity_ncm_coverage_pct"].min()),
+              "affinity_min_value_coverage_pct":float(cov["affinity_value_coverage_pct"].min()),
+              "affinity_max_value_coverage_pct":float(cov["affinity_value_coverage_pct"].max()),
+              "taxonomy_snapshot":"2026-08",
+              "portfolio_additive_across_sectors":False,
+              "canonical_rows_promoted":0,
+          }
+          (OUT/"validation_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print(current_aff.head(30).to_string(index=False))
+          PY
+
+      - name: Persist compact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/radar_taxonomy_series_2024_07_2026_08"
+          DEST="docs/data_sources/radar_taxonomy_series_2024_07_2026_08"
+          mkdir -p "$DEST"
+          cp .data/tmp/radar_taxonomy_series/source_manifest.tsv "$DEST/"
+          cp "$SRC/"*.csv "$DEST/"
+          cp "$SRC/validation_summary.json" "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # Radar do Mercado — composição por taxonomias oficiais — jul/2024 a ago/2026
+
+          **Fonte observada:** Receita Estadual/SEFAZ-RS — Radar do Mercado — Dados Abertos.
+          **Composição temporal:** 26 competências mensais, jul/2024–ago/2026.
+          **Taxonomia aplicada:** snapshot corrente 2026-08 de Categorias_Produtos.csv e Portfolio_NCMs_Setor.csv.
+          **Unidade:** valores nominais publicados no Radar.
+          **Fórmula calculada:** Part.RS = INT / (INT + OUF + EXT).
+
+          Duas leituras são produzidas separadamente:
+          1. grupo_afinidade_final — classificação de Categorias_Produtos, com um grupo por NCM na tabela corrente; as agregações são aditivas entre grupos quando a cobertura do mês é completa;
+          2. emit_setor — Portfólio de NCMs por Setor, no qual um mesmo NCM pode integrar mais de um setor. Portanto, setores do Portfólio NÃO são aditivos entre si.
+
+          A classificação de dependência preserva apenas as faixas expressas na NT CIET 05/2026:
+          - CRITICA: Part.RS < 5%;
+          - ALTA: 5% <= Part.RS < 15%;
+          - MEDIA: 15% <= Part.RS < 30%;
+          - acima de 30%: FORA_DAS_FAIXAS_NT, marcador técnico do SBMI, não categoria oficial.
+
+          **Limitação temporal importante:** a taxonomia corrente 2026-08 é aplicada retrospectivamente às competências desde jul/2024. Isso permite uma série coerente sob uma classificação fixa, mas não prova que os rótulos/taxonomias publicados eram idênticos em cada competência histórica. A cobertura por NCM e valor é preservada em monthly_taxonomy_coverage.csv.
+
+          **Limitação territorial:** os indicadores são estaduais e não medem demanda, market share ou retenção monetária de São Borja.
+
+          Nenhuma linha é promovida automaticamente a base canônica.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: aggregate Radar monthly series by official taxonomies"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload audit artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-taxonomy-series-2024-07-2026-08
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/radar_taxonomy_series_2024_07_2026_08/

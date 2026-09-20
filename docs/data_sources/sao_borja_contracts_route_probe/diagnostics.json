@@ -1,0 +1,256 @@
+{
+  "base": "https://transparencia.saoborja.rs.gov.br",
+  "tested": [
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos",
+      "status": 200,
+      "bytes": 23271
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/jquery.js",
+      "status": 200,
+      "bytes": 163855
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/jquery.json.js",
+      "status": 200,
+      "bytes": 1800
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/grid.locale-pt-br.js",
+      "status": 200,
+      "bytes": 3159
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/jqGrid.js",
+      "status": 200,
+      "bytes": 226129
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/arquivos.js",
+      "status": 200,
+      "bytes": 1974
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/consulta.js",
+      "status": 200,
+      "bytes": 3730
+    },
+    {
+      "method": "GET",
+      "url": "https://www.google.com/recaptcha/api.js?hl=pt-BR",
+      "status": 200,
+      "bytes": 979
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/js/acordos/index.js",
+      "status": 200,
+      "bytes": 1282
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2025&mes=",
+      "status": 200,
+      "bytes": 23912,
+      "contains_hig": false,
+      "looks_table": true
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/api/acordos/pesquisar?instituicao=1&exercicio=2025&mes=",
+      "status": 200,
+      "bytes": 22215,
+      "contains_hig": false,
+      "looks_table": true
+    },
+    {
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/api/acordos/index?instituicao=1&exercicio=2025&mes=",
+      "status": 200,
+      "bytes": 22215,
+      "contains_hig": false,
+      "looks_table": true
+    }
+  ],
+  "institutions": [
+    {
+      "value": "",
+      "label": "Selecione..."
+    },
+    {
+      "value": "1",
+      "label": "PREFEITURA MUNICIPAL DE SÃO BORJA"
+    },
+    {
+      "value": "3",
+      "label": "CAMARA DE VEREADORES DE SAO BORJA"
+    }
+  ],
+  "exercises": [
+    {
+      "value": "",
+      "label": "Selecione..."
+    }
+  ],
+  "months": [
+    {
+      "value": "",
+      "label": "Todos"
+    },
+    {
+      "value": "01",
+      "label": "Janeiro"
+    },
+    {
+      "value": "02",
+      "label": "Fevereiro"
+    },
+    {
+      "value": "03",
+      "label": "MarÃ§o"
+    },
+    {
+      "value": "04",
+      "label": "Abril"
+    },
+    {
+      "value": "05",
+      "label": "Maio"
+    },
+    {
+      "value": "06",
+      "label": "Junho"
+    },
+    {
+      "value": "07",
+      "label": "Julho"
+    },
+    {
+      "value": "08",
+      "label": "Agosto"
+    },
+    {
+      "value": "09",
+      "label": "Setembro"
+    },
+    {
+      "value": "10",
+      "label": "Outubro"
+    },
+    {
+      "value": "11",
+      "label": "Novembro"
+    },
+    {
+      "value": "12",
+      "label": "Dezembro"
+    }
+  ],
+  "scripts": [
+    "https://transparencia.saoborja.rs.gov.br/js/jquery.js",
+    "https://transparencia.saoborja.rs.gov.br/js/jquery.json.js",
+    "https://transparencia.saoborja.rs.gov.br/js/grid.locale-pt-br.js",
+    "https://transparencia.saoborja.rs.gov.br/js/jqGrid.js",
+    "https://transparencia.saoborja.rs.gov.br/js/arquivos.js",
+    "https://transparencia.saoborja.rs.gov.br/js/consulta.js",
+    "https://www.google.com/recaptcha/api.js?hl=pt-BR",
+    "https://transparencia.saoborja.rs.gov.br/js/acordos/index.js"
+  ],
+  "route_candidates": [
+    ") {\n       pesquisarCaptcha();                                                                                                                                                                    \n       return false;\n    }\n                                                                                                                                                                                                                                                                                                                                                                                        \n    pesquisar(sUrl, ",
+    ");\n  }\n};\n\nfunction pesquisarCaptcha() {                                                                                                                                                                      \n   grecaptcha.execute();                                                                                                                                                                                            \n}\n\nfunction recaptcha_callback(token) {\n\n  var custom_callback = $(",
+    ");\n    return window[custom_callback](token);\n  }\n\n  return pesquisar(token);\n}\n\nfunction pesquisar(token){\n\n  if ($(",
+    "consultas/pesquisar?parametros=",
+    "/acordos/buscarExercicios/"
+  ],
+  "errors": [],
+  "selects": {
+    "FiltroInstituicao": [
+      {
+        "value": "",
+        "label": "Selecione..."
+      },
+      {
+        "value": "1",
+        "label": "PREFEITURA MUNICIPAL DE SÃO BORJA"
+      },
+      {
+        "value": "3",
+        "label": "CAMARA DE VEREADORES DE SAO BORJA"
+      }
+    ],
+    "FiltroExercicio": [
+      {
+        "value": "",
+        "label": "Selecione..."
+      }
+    ],
+    "FiltroMes": [
+      {
+        "value": "",
+        "label": "Todos"
+      },
+      {
+        "value": "01",
+        "label": "Janeiro"
+      },
+      {
+        "value": "02",
+        "label": "Fevereiro"
+      },
+      {
+        "value": "03",
+        "label": "MarÃ§o"
+      },
+      {
+        "value": "04",
+        "label": "Abril"
+      },
+      {
+        "value": "05",
+        "label": "Maio"
+      },
+      {
+        "value": "06",
+        "label": "Junho"
+      },
+      {
+        "value": "07",
+        "label": "Julho"
+      },
+      {
+        "value": "08",
+        "label": "Agosto"
+      },
+      {
+        "value": "09",
+        "label": "Setembro"
+      },
+      {
+        "value": "10",
+        "label": "Outubro"
+      },
+      {
+        "value": "11",
+        "label": "Novembro"
+      },
+      {
+        "value": "12",
+        "label": "Dezembro"
+      }
+    ]
+  },
+  "selected_institution": {
+    "value": "1",
+    "label": "PREFEITURA MUNICIPAL DE SÃO BORJA"
+  },
+  "selected_exercise": "2025"
+}

@@ -1,0 +1,39 @@
+{
+  "generated_at": "2026-09-20",
+  "source_file": "docs/data_sources/public_procurement_pe39_item_taxonomy_20260920_v001/items.csv",
+  "threshold_target_pct": 65,
+  "selected_items": 24,
+  "selected_value_R$": 703986.45,
+  "selected_share_pct": 65.5072,
+  "total_estimated_R$": 1074671.1400000001,
+  "family_composition": [
+    {
+      "familia": "CONDUTORES",
+      "itens": 18,
+      "valor": 533194.4,
+      "pct": 49.61465700102451
+    },
+    {
+      "familia": "ILUMINACAO",
+      "itens": 2,
+      "valor": 78882.3,
+      "pct": 7.340133838524779
+    },
+    {
+      "familia": "PROTECAO_DISTRIBUICAO",
+      "itens": 3,
+      "valor": 71609.75,
+      "pct": 6.663410538781194
+    },
+    {
+      "familia": "FERRAGENS_FIXACAO",
+      "itens": 1,
+      "valor": 20300,
+      "pct": 1.8889499535643992
+    }
+  ],
+  "rule": "Sort items by estimated value descending and include items until cumulative share reaches at least 65%.",
+  "formula_item": "quantidade * valor_unit_ref",
+  "formula_share": "valor_estimado_item / 1074671.14 * 100",
+  "limitation": "Source item structure is secondary and pending official edital/TR reconciliation; selection is audit-priority only, not a procurement recommendation."
+}

@@ -1,0 +1,252 @@
+{
+  "base": "https://transparencia.saoborja.rs.gov.br",
+  "targets": {
+    "2021": [
+      "99"
+    ],
+    "2022": [
+      "20",
+      "124"
+    ],
+    "2023": [
+      "20",
+      "146"
+    ],
+    "2024": [
+      "105"
+    ]
+  },
+  "years": {
+    "2021": {
+      "target_numbers": [
+        "99"
+      ],
+      "page_status": 200,
+      "parametro_raw": "{\"FiltroInstituicao\":\"1\",\"FiltroExercicio\":\"2021\",\"FiltroMes\":\"\"}",
+      "grid_status": 200,
+      "grid_meta": {
+        "page": "1",
+        "total": "102",
+        "records": "500",
+        "rows_returned": 102
+      },
+      "matches": [
+        {
+          "number": "99",
+          "id": "558",
+          "cell": [
+            "99",
+            "21/12/2021",
+            "20/12/2025 até 20/12/2026",
+            "Contratação da prestação de serviços hospitalares de alta e média complexidade, melhor descritos e caracterizados no Termo de Referência e documentação integrante.",
+            ""
+          ]
+        }
+      ],
+      "details": [
+        {
+          "number": "99",
+          "id": "558",
+          "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/558",
+          "status": 200,
+          "numero": "99 - 2021 Grupo: CONTRATO",
+          "situacao": "Homologado",
+          "data_assinatura": "21/12/2021",
+          "vigencia": "20/12/2025 até 20/12/2026",
+          "valor_total": "952.120,00",
+          "processo": "28354/2021",
+          "contratado": "FUNDACAO IVAN GOULART",
+          "objeto": "Contratação da prestação de serviços hospitalares de alta e média complexidade, melhor descritos e caracterizados no Termo de Referência e documentação integrante. Itens Aditamentos Empenhos Documentos Comissão do Contrato Licitação Ordem Descrição Quantidade Unidade Valor Unitário Valor Total 1 INCENTIVOS (PRÉ-FIXADO) 0 mês 0,00 0,00 2 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 0 mês 0,00 0,00 3 SERVIÇOS DE ALTA COMPLEXIDADE( PRÉ- FIXADO ) 0 mês 0,00 0,00 4 INCENTIVO PRÉ- FIXADO PROGRAMA ASSISTIR 2 mês 476.060,00 952.120,00 5 SERVIÇOS HOSPITALARES - PÓS FIXADOS (ASPS) 0 mês 0,00 0,00 6 CUSTEIO EMENDA PARLAMENTAR ESTADUAL 0 SERVIÇO 0,00 0,00 7 INCREMENTO TEMPORÁRIO DOS SERVIÇOS MAC ESTADUAL 0 SERVIÇO 0,00 0,00 8 REPASSE DO COMPLEMENTO DO PISO DA ENFERMAGEM CFE EC 127/2022 LEI 14434/2022 0 Unidade 0,00 0,00 9 INCENTIVO DE CUSTEIO DE LEITOS UTI II PORTARIA 3.308/2024 0 SERVIÇO 0,00 0,00 10 CUSTEIO SERVIÇOS HOSPITALARES - RECURSO ESTADUAL 0 SERVIÇO 0,00 0,00 11 CUSTEIO SERVIÇOS HOSPITALARES - INCREMENTO RECURSO FEDERAL 0 SERVIÇO 0,00 0,00 12 INCENTIVO FINANCEIRO DA MÉDIA E ALTA COMPLEXIDADE 0 Unidade 0,00 0,00 13 PROGRAMA ACESSO A ESPECIALISTAS 0 SERVIÇO 0,00 0,00 14 INCENTIVO FINANCEIRO PARA A IMPLANTAÇÃO DO PROGRAMA ESTADUAL SERMULHER 0 SERVIÇO 0,00 0,00 15 NCENTIVO FINANCEIRO DE CUSTEIO  PROGRAMA ESTADUAL SERMULHER 0 SERVIÇO 0,00 0,00 16 SERVIÇOS HOSPITALARES PRÉ - FIXADOS - SIA/SUS 0 SERVIÇO 0,00 0,00 17 CUSTEIO PROGRAMA INVERNO GAÚCHO 0 SERVIÇO 0,00 0,00 18 SERVIÇOS HOSPITALARES PÓS FIXADOS FAEC (RES. CIB 131/2025) 0 SERVIÇO 0,00 0,00 19 INCREMENTO TEMPORÁRIO DE SERVIÇOS MAC FEDERAL 0 SERVIÇO 0,00 0,00 Tipo Data Emergencial Inclusão 21/12/2021 NÃO Aditamento 24/01/2022 NÃO Aditamento 29/06/2022 NÃO Aditamento 29/06/2022 NÃO Aditamento 12/07/2022 NÃO Vigência 20/12/2022 NÃO Aditamento 20/12/2022 NÃO Aditamento 09/05/2023 NÃO Aditamento 07/08/2023 NÃO Alteração de Dotação 07/08/2023 NÃO Aditamento 21/08/2023 NÃO Aditamento 06/09/2023 NÃO Aditamento 31/10/2023 NÃO Aditamento 05/12/2023 NÃO Aditamento 08/12/2023 NÃO Renovação 28/12/2023 NÃO Alteração de Dotação 28/12/2023 NÃO Aditamento 23/04/2024 NÃO Aditamento 27/05/2024 NÃO Aditamento 16/07/2024 NÃO Aditamento 03/09/2024 NÃO Renovação 17/12/2024 NÃO Alteração de Dotação 17/12/2024 NÃO Aditamento 26/12/2024 NÃO Aditamento 07/05/2025 NÃO Aditamento 28/05/2025 NÃO Aditamento 15/07/2025 NÃO Aditamento 27/08/2025 NÃO Aditamento 25/11/2025 NÃO Alteração de Dotação 25/11/2025 NÃO Vigência 22/12/2025 NÃO Aditamento 22/12/2025 NÃO Aditamento 22/12/2025 NÃO Aditamento 10/06/2026 NÃO Aditamento 06/07/2026 NÃO Aditamento 03/08/2026 NÃO Aditamento 31/08/2026 NÃO Nenhum Empenho encontrado. Nenhum Documento encontrado. Membro Responsabilidade EDUARDO BONOTTO Gestor Edital Exercicio Modalidade Situacao 163 2021 INEXIGIBILIDADE Homologada Consultar Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br",
+          "contains_ivan_goulart": true
+        }
+      ]
+    },
+    "2022": {
+      "target_numbers": [
+        "20",
+        "124"
+      ],
+      "page_status": 200,
+      "parametro_raw": "{\"FiltroInstituicao\":\"1\",\"FiltroExercicio\":\"2022\",\"FiltroMes\":\"\"}",
+      "grid_status": 200,
+      "grid_meta": {
+        "page": "1",
+        "total": "152",
+        "records": "500",
+        "rows_returned": 152
+      },
+      "matches": [
+        {
+          "number": "20",
+          "id": "581",
+          "cell": [
+            "20",
+            "17/03/2022",
+            "17/03/2026 até 17/03/2027",
+            "Locação de imóvel destinado ao atendimento das finalidades precípuas da administração, mais precisamente os programas da Secretaria Municipal da Saúde, quais sejam: a) Farmácia Básica; b) Central de vacinas; c) CEO; d) Vigilância Sanitária; e) Transporte, SAMU, PIM, CAPS AD e atendimento de algumas especialidades como psicologia e nutrição, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Dispensa.",
+            ""
+          ]
+        },
+        {
+          "number": "124",
+          "id": "685",
+          "cell": [
+            "124",
+            "30/09/2022",
+            "16/09/2026 até 30/09/2027",
+            "Contratação de serviços técnico-profissionais especializados em doença renal crônica com hemodiálise e nos estágios 4 e 5 (pré-dialítico).",
+            ""
+          ]
+        }
+      ],
+      "details": [
+        {
+          "number": "20",
+          "id": "581",
+          "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/581",
+          "status": 200,
+          "numero": "20 - 2022 Grupo: CONTRATO",
+          "situacao": "Homologado",
+          "data_assinatura": "17/03/2022",
+          "vigencia": "17/03/2026 até 17/03/2027",
+          "valor_total": "455.870,88",
+          "processo": "5482/2022",
+          "contratado": "FUNDACAO IVAN GOULART",
+          "objeto": "Locação de imóvel destinado ao atendimento das finalidades precípuas da administração, mais precisamente os programas da Secretaria Municipal da Saúde, quais sejam: a) Farmácia Básica; b) Central de vacinas; c) CEO; d) Vigilância Sanitária; e) Transporte, SAMU, PIM, CAPS AD e atendimento de algumas especialidades como psicologia e nutrição, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Dispensa. Itens Aditamentos Empenhos Documentos Comissão do Contrato Licitação Ordem Descrição Quantidade Unidade Valor Unitário Valor Total 1 ALUGUEL DE IMÓVEL 12 mês 37.989,24 455.870,88 Tipo Data Emergencial Inclusão 18/03/2022 NÃO Vigência 21/03/2023 NÃO Aditamento 21/03/2023 NÃO Alteração de Dotação 21/03/2023 NÃO Renovação 01/04/2024 NÃO Alteração de Dotação 01/04/2024 NÃO Renovação 12/03/2025 NÃO Vigência 10/03/2026 NÃO Renovação 10/03/2026 NÃO Nenhum Empenho encontrado. Nenhum Documento encontrado. Membro Responsabilidade EDUARDO BONOTTO Gestor Edital Exercicio Modalidade Situacao 61 2022 PRD DISPENSA EXCETO PEQUENO VALOR Homologada Consultar Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br",
+          "contains_ivan_goulart": true
+        },
+        {
+          "number": "124",
+          "id": "685",
+          "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/685",
+          "status": 200,
+          "numero": "124 - 2022 Grupo: CONTRATO",
+          "situacao": "Homologado",
+          "data_assinatura": "30/09/2022",
+          "vigencia": "16/09/2026 até 30/09/2027",
+          "valor_total": "0,00",
+          "processo": "21749",
+          "contratado": "FUNDACAO IVAN GOULART",
+          "objeto": "Contratação de serviços técnico-profissionais especializados em doença renal crônica com hemodiálise e nos estágios 4 e 5 (pré-dialítico). Itens Aditamentos Empenhos Documentos Comissão do Contrato Licitação Ordem Descrição Quantidade Unidade Valor Unitário Valor Total 1 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 0 mês 0,00 0,00 2 INCENTIVOS (PRÉ-FIXADO) 0 SERVIÇO 0,00 0,00 Tipo Data Emergencial Inclusão 30/09/2022 NÃO Renovação 22/09/2023 NÃO Aditamento 20/03/2024 NÃO Renovação 01/10/2024 NÃO Aditamento 24/03/2025 NÃO Vigência 09/09/2025 NÃO Vigência 16/09/2026 NÃO Nenhum Empenho encontrado. Nenhum Documento encontrado. Membro Responsabilidade EDUARDO BONOTTO Gestor Edital Exercicio Modalidade Situacao 197 2022 INEXIGIBILIDADE Homologada Consultar Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br",
+          "contains_ivan_goulart": true
+        }
+      ]
+    },
+    "2023": {
+      "target_numbers": [
+        "20",
+        "146"
+      ],
+      "page_status": 200,
+      "parametro_raw": "{\"FiltroInstituicao\":\"1\",\"FiltroExercicio\":\"2023\",\"FiltroMes\":\"\"}",
+      "grid_status": 200,
+      "grid_meta": {
+        "page": "1",
+        "total": "178",
+        "records": "500",
+        "rows_returned": 178
+      },
+      "matches": [
+        {
+          "number": "20",
+          "id": "768",
+          "cell": [
+            "20",
+            "30/03/2023",
+            "30/03/2023 até 28/03/2024",
+            "Autorização de repasse de recurso federal à entidade filantrópica Ivan Goulart.",
+            ""
+          ]
+        },
+        {
+          "number": "146",
+          "id": "898",
+          "cell": [
+            "146",
+            "28/09/2023",
+            "28/09/2023 até 31/12/2023",
+            "Contratação da Fundação Ivan Goulart para realização de mutirão de exames de tomografia e ressonância a serem realizados no período de 90 dias. A fim de atender a demanda de pacientes que aguardam por estes exames para tratamento de doenças e para realização de cirurgias. Melhores descritos no Termo de Referência e demais documentos que integram o processo de Inexigibilidade.",
+            ""
+          ]
+        }
+      ],
+      "details": [
+        {
+          "number": "20",
+          "id": "768",
+          "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/768",
+          "status": 200,
+          "numero": "20 - 2023 Grupo: CONTRATO",
+          "situacao": "Homologado",
+          "data_assinatura": "30/03/2023",
+          "vigencia": "30/03/2023 até 28/03/2024",
+          "valor_total": "1.075.538,21",
+          "processo": "5562/2023",
+          "contratado": "FUNDACAO IVAN GOULART",
+          "objeto": "Autorização de repasse de recurso federal à entidade filantrópica Ivan Goulart. Itens Aditamentos Empenhos Documentos Comissão do Contrato Licitação Ordem Descrição Quantidade Unidade Valor Unitário Valor Total 1 SUBVENÇÕES SOCIAIS 1 Unidade 1.023.851,21 1.023.851,21 2 SUBVENÇÕES SOCIAIS 1 Unidade 51.687,00 51.687,00 Tipo Data Emergencial Inclusão 31/03/2023 NÃO Nenhum Empenho encontrado. Nenhum Documento encontrado. Membro Responsabilidade EDUARDO BONOTTO Gestor Edital Exercicio Modalidade Situacao 65 2023 INEXIGIBILIDADE Homologada Consultar Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br",
+          "contains_ivan_goulart": true
+        },
+        {
+          "number": "146",
+          "id": "898",
+          "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/898",
+          "status": 200,
+          "numero": "146 - 2023 Grupo: CONTRATO",
+          "situacao": "Homologado",
+          "data_assinatura": "28/09/2023",
+          "vigencia": "28/09/2023 até 31/12/2023",
+          "valor_total": "142.367,25",
+          "processo": "16471/2023",
+          "contratado": "FUNDACAO IVAN GOULART",
+          "objeto": "Contratação da Fundação Ivan Goulart para realização de mutirão de exames de tomografia e ressonância a serem realizados no período de 90 dias. A fim de atender a demanda de pacientes que aguardam por estes exames para tratamento de doenças e para realização de cirurgias. Melhores descritos no Termo de Referência e demais documentos que integram o processo de Inexigibilidade. Itens Aditamentos Empenhos Documentos Comissão do Contrato Licitação Ordem Descrição Quantidade Unidade Valor Unitário Valor Total 1 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 1 KMROD 41.586,00 41.586,00 2 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 1 KMROD 100.781,25 100.781,25 Tipo Data Emergencial Inclusão 04/10/2023 NÃO Nenhum Empenho encontrado. Nenhum Documento encontrado. Membro Responsabilidade EDUARDO BONOTTO Gestor Edital Exercicio Modalidade Situacao 158 2023 INEXIGIBILIDADE Homologada Consultar Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br",
+          "contains_ivan_goulart": true
+        }
+      ]
+    },
+    "2024": {
+      "target_numbers": [
+        "105"
+      ],
+      "page_status": 200,
+      "parametro_raw": "{\"FiltroInstituicao\":\"1\",\"FiltroExercicio\":\"2024\",\"FiltroMes\":\"\"}",
+      "grid_status": 200,
+      "grid_meta": {
+        "page": "1",
+        "total": "152",
+        "records": "500",
+        "rows_returned": 152
+      },
+      "matches": [
+        {
+          "number": "105",
+          "id": "1068",
+          "cell": [
+            "105",
+            "29/08/2024",
+            "29/08/2024 até 29/08/2025",
+            "O objeto da presente inexigibilidade de licitação é a contratação da empresa Fundação Ivan Goulart,  para a prestação de serviços de realização de exames de alta e média complexidade, tomografias computadorizadas e ressonâncias magnéticas ( sem contraste ). Melhores descrições estão no Termo de Referência e demais documentos que integram o devido processo de Inexigibilidade.",
+            ""
+          ]
+        }
+      ],
+      "details": [
+        {
+          "number": "105",
+          "id": "1068",
+          "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/1068",
+          "status": 200,
+          "numero": "105 - 2024 Grupo: CONTRATO",
+          "situacao": "Homologado",
+          "data_assinatura": "29/08/2024",
+          "vigencia": "29/08/2024 até 29/08/2025",
+          "valor_total": "122.212,00",
+          "processo": "20558/2024",
+          "contratado": "FUNDACAO IVAN GOULART",
+          "objeto": "O objeto da presente inexigibilidade de licitação é a contratação da empresa Fundação Ivan Goulart, para a prestação de serviços de realização de exames de alta e média complexidade, tomografias computadorizadas e ressonâncias magnéticas ( sem contraste ). Melhores descrições estão no Termo de Referência e demais documentos que integram o devido processo de Inexigibilidade. Itens Aditamentos Empenhos Documentos Comissão do Contrato Licitação Ordem Descrição Quantidade Unidade Valor Unitário Valor Total 1 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 1 KMROD 41.586,00 41.586,00 2 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 1 KMROD 60.469,50 60.469,50 3 SERVIÇOS HOSPITALARES PÓS FIXADOS - SIA/SUS 1 KMROD 20.156,50 20.156,50 Tipo Data Emergencial Inclusão 02/09/2024 NÃO Nenhum Empenho encontrado. Nenhum Documento encontrado. Membro Responsabilidade EDUARDO BONOTTO Gestor Edital Exercicio Modalidade Situacao 331 2024 INEXIGIBILIDADE Homologada Consultar Voltar DBSeller Serviços de Informática Ltda. - Porto Alegre - RS | www.dbseller.com.br",
+          "contains_ivan_goulart": true
+        }
+      ]
+    }
+  },
+  "errors": []
+}

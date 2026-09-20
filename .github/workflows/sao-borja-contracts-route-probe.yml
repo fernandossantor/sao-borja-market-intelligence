@@ -108,36 +108,44 @@ jobs:
                           report["route_candidates"].append(cand)
 
           inst=[x for x in report["institutions"] if x.get("value")]
-          ex=[x for x in report["exercises"] if x.get("value")]
           report["selected_institution"]=inst[0] if inst else None
-          # prefer 2025, otherwise latest numeric exercise
-          exval="2025"
-          vals=[x.get("value","") for x in ex]
-          if exval not in vals and vals:
-              nums=[v for v in vals if v.isdigit()]
-              if nums: exval=sorted(nums,reverse=True)[0]
-          report["selected_exercise"]=exval
 
-          # DBSeller portals in other RS municipalities expose this route.
-          # Test only when an institution value was actually parsed from PMSB itself.
           if inst:
               iid=inst[0]["value"]
-              candidates=[
-                  BASE+"/acordos/pesquisar",
-                  BASE+"/api/acordos/pesquisar",
-                  BASE+"/api/acordos/index",
-              ]
-              for endpoint in candidates:
-                  try:
-                      rr=s.get(endpoint,params={"instituicao":iid,"exercicio":exval,"mes":""},timeout=60)
-                      body=rr.content.decode(rr.encoding or "utf-8","replace")
-                      report["tested"].append({"method":"GET","url":rr.url,"status":rr.status_code,"bytes":len(rr.content),
-                                               "contains_hig":"IVAN GOULART" in body.upper(),
-                                               "looks_table":("<table" in body.lower() or "contrat" in body.lower())})
-                      name=re.sub(r'[^a-zA-Z0-9]+','_',endpoint.replace(BASE,'')).strip('_')
-                      (OUT/(name+".html")).write_text(body,encoding="utf-8")
-                  except Exception as e:
-                      report["errors"].append({"method":"GET","url":endpoint,"error":repr(e)})
+
+              # Exact exercise route observed in the PMSB JavaScript.
+              try:
+                  rr=s.get(BASE+"/acordos/buscarExercicios/"+iid,timeout=60)
+                  payload=rr.json() if rr.ok else {}
+                  years=sorted([str(k) for k in payload.keys() if str(k).isdigit()])
+                  report["exercise_endpoint"]={"url":rr.url,"status":rr.status_code,"payload":payload,"years":years}
+              except Exception as e:
+                  years=[]
+                  report["errors"].append({"method":"GET","url":BASE+"/acordos/buscarExercicios/"+iid,"error":repr(e)})
+
+              # The HTML form uses FiltroInstituicao/FiltroExercicio/FiltroMes.
+              # Probe both GET and POST and extract rows that mention the Foundation.
+              report["year_probes"]=[]
+              target_years=[str(y) for y in range(2019,2026)]
+              for exval in target_years:
+                  params={"FiltroInstituicao":iid,"FiltroExercicio":exval,"FiltroMes":""}
+                  for method in ("GET","POST"):
+                      try:
+                          if method=="GET":
+                              rr=s.get(BASE+"/acordos/pesquisar",params=params,timeout=60)
+                          else:
+                              rr=s.post(BASE+"/acordos/pesquisar",data=params,timeout=60)
+                          body=rr.content.decode(rr.encoding or "utf-8","replace")
+                          plain=re.sub(r'<[^>]+>',' ',body)
+                          plain=re.sub(r'\\s+',' ',unescape(plain)).strip()
+                          hig=[m.group(0) for m in re.finditer(r'.{0,250}IVAN GOULART.{0,500}',plain,re.I)]
+                          report["year_probes"].append({"year":exval,"method":method,"url":rr.url,"status":rr.status_code,
+                                                       "bytes":len(rr.content),"hig_hits":hig[:30],
+                                                       "contains_hig":bool(hig)})
+                          if method=="POST":
+                              (OUT/("acordos_"+exval+".html")).write_text(body,encoding="utf-8")
+                      except Exception as e:
+                          report["errors"].append({"method":method,"url":BASE+"/acordos/pesquisar","year":exval,"error":repr(e)})
 
           (OUT/"diagnostics.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
           print(json.dumps(report,ensure_ascii=False,indent=2))

@@ -17,26 +17,40 @@ Retomar a frente de estrutura de rede dos quatro mercados POM, distinguindo:
 
 As métricas não são market share, faturamento ou concentração de vendas.
 
-## 2. Bens essenciais — pulverização plausível, métrica de raiz precisa ser refeita
+## 2. Bens essenciais — pulverização recalculada sobre a camada documental corrente
 
 Camada específica corrente:
 
 - 54 operadores/linhas;
-- 52 CNPJs documentais validados;
-- 2 linhas ainda sem CNPJ documental suficientemente confiável.
-
-A aba histórica `Estrutura_rede_POM` foi calculada sobre parser textual anterior:
-
-- 47 linhas com CNPJ extraível;
-- 46 CNPJs únicos;
-- 44 raízes;
+- 52 linhas com CNPJ documental validado = **96,30%**;
+- 52 CNPJs únicos;
+- 50 raízes CNPJ únicas;
 - 2 raízes multiunidade;
 - 4 unidades em raízes multi;
-- 8,70% das unidades em raízes multi.
+- **7,69%** das unidades com CNPJ pertencem a raízes multiunidade;
+- maior raiz no recorte: 2 unidades = **3,85%** do denominador com CNPJ.
 
-**Decisão:** não promover 8,70% como métrica corrente.
+Fórmulas:
 
-A leitura “estrutura pulverizada” permanece coerente com o inventário, mas a taxa de multiunidade deve ser **recalculada sobre os 52 CNPJs documentais validados** antes de uso editorial.
+`4 / 52 × 100 = 7,69%`
+
+`2 / 52 × 100 = 3,85%`
+
+As duas raízes repetidas são:
+
+- **87397865 — PGL Distribuição de Alimentos / Peruzzo:** 2 unidades;
+- **91292987 — Libraga, Brandão / Rede Vivo + Rancho Atacadista:** 2 unidades.
+
+Bedi Padaria e Confeitaria e Sabor mineiro da Lu Delícias caseiras permanecem fora do denominador por não possuírem CNPJ documental suficientemente confiável.
+
+**Interpretação:** o inventário documental corrente permanece fortemente pulverizado por raiz empresarial.
+
+**Limites:**
+
+- a raiz CNPJ agrupa unidades do recorte, mas não mede market share;
+- o número de unidades mapeadas não é o total nacional/regional das redes;
+- cinco CNPJs resolvidos documentalmente em 09/09/2026 ainda dependem do join RFB 2026-08 para situação cadastral e classificação territorial oficial;
+- 7,69% descreve apenas as 52 linhas com CNPJ validado, não todo o mercado municipal.
 
 ## 3. Saúde/higiene — farmácias apresentam arquitetura multiunidade muito mais saliente no inventário
 
@@ -139,7 +153,7 @@ RFB/CNPJ, divisão 56, ago/2026:
 
 | Mercado | Evidência estrutural corrente | Readiness |
 |---|---|---|
-| Bens essenciais | inventário documental forte, raiz antiga desatualizada | RECALCULAR RAÍZES SOBRE 52 CNPJs |
+| Bens essenciais | 52 CNPJs únicos, 50 raízes; 7,69% das unidades em raízes multi | USO ESTRUTURAL DOCUMENTAL; JOIN RFB AINDA NECESSÁRIO PARA SITUAÇÃO/TERRITÓRIO |
 | Saúde/higiene | inventário permite leitura multiunidade, sobretudo farmácias | USO ESTRUTURAL COM RESSALVA DE ATIVIDADE |
 | Bens não essenciais | inventário permite leitura de pulverização nominal | USO ESTRUTURAL COM RESSALVA DE ATIVIDADE |
 | Serviços | inventário POM não serve como censo; usar RFB por CNAE | USAR RFB, NÃO AS 80 LINHAS POM |
@@ -149,7 +163,7 @@ RFB/CNPJ, divisão 56, ago/2026:
 
 Há indício de arquiteturas competitivas diferentes:
 
-- **bens essenciais:** pulverização local a recalcular com base documental corrente;
+- **bens essenciais:** pulverização documental confirmada no recorte, com apenas 2 raízes multiunidade entre 50 raízes únicas;
 - **farmácias:** forte presença de grupos multiunidade no inventário;
 - **bens não essenciais:** alta pulverização nominal;
 - **serviços:** base local ampla e heterogênea;
@@ -159,7 +173,7 @@ Essas diferenças justificam estratégias analíticas distintas e não um único
 
 ## 9. Próximas ações
 
-1. recomputar raiz/multiunidade dos 52 CNPJs validados de bens essenciais;
+1. concluir o join RFB 2026-08 dos 52 CNPJs documentais de bens essenciais para situação cadastral e classificação territorial;
 2. revalidar situação cadastral dos 20 CNPJs únicos de farmácias/drogarias;
 3. revalidar atividade dos 103 CNPJs únicos de bens não essenciais;
 4. para serviços, decompor o mercado POM em subserviços antes de usar RFB como denominador;
@@ -169,9 +183,14 @@ Essas diferenças justificam estratégias analíticas distintas e não um único
 
 **Sem novo Delta_cadernos nesta versão.**
 
-O artefato organiza o que já é estruturalmente defensável e explicita quais métricas precisam de reprocessamento antes de promoção.
+O artefato organiza o que já é estruturalmente defensável. A métrica de raízes de bens essenciais foi recalculada; a pendência remanescente é cadastral/territorial no join oficial RFB, não mais o cálculo de pulverização.
 
-## 11. Governança
+## 11. Artefatos
+
+- `docs/data_sources/bens_essenciais_network_roots_20260920_v001.csv`;
+- `matriz_operadores_bens_essenciais_prejoin_rfb_v002_20260909.xlsx` — Drive, fonte documental do recálculo.
+
+## 12. Governança
 
 - Caderno-Base v028 permanece read-only;
 - PR #41 permanece aberto, draft e sem merge;

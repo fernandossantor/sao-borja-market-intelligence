@@ -39,5 +39,5 @@ metric,value,unit,period,status,geography,source,limitation
 "cadastur_lodging_beds","180","leitos","2T2026","OBSERVADO","São Borja","Cadastur","Oferta formal ≠ pernoites"
 "comex_exports_2026_jan_aug","9.848","US$ milhões","jan–ago/2026","OBSERVADO","São Borja","Comex Stat /cities","Domicílio fiscal ≠ origem física"
 "comex_imports_2026_jan_aug","6.515","US$ milhões","jan–ago/2026","OBSERVADO","São Borja","Comex Stat /cities","Domicílio fiscal ≠ destino final"
-"public_purchases_core_2026_partial","72.039","R$ milhões","01/01–18/09/2026","PROVISÓRIO_NÃO_PROMOVER","São Borja","Portal PMSB + classificação RFB","Classificação territorial CNPJ tem controle conflitante pendente"
-"public_purchases_local_footprint_core","74.87","%","01/01–18/09/2026","PROVISÓRIO_NÃO_PROMOVER","São Borja","Portal PMSB + RFB","Join territorial precisa reconciliação linha a linha; não é taxa final de retenção"
+"public_purchases_core_2026_partial","72.039","R$ milhões","01/01–18/09/2026","PROVISÓRIO_NÃO_PROMOVER","São Borja","Portal PMSB + classificação RFB","Controle estrutural RFB reconciliado; falta validar a linhagem CNPJ a CNPJ do subconjunto de credores"
+"public_purchases_local_footprint_core","74.87","%","01/01–18/09/2026","PROVISÓRIO_NÃO_PROMOVER","São Borja","Portal PMSB + RFB","Estrutura RFB reconciliada; validar a linhagem dos CNPJs do join. Presença cadastral local não é taxa final de retenção"

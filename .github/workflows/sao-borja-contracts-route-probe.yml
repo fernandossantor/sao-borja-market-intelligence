@@ -176,7 +176,11 @@ jobs:
                                       param_obj={}
                                       probe["parametro_parse_error"]=repr(e)
                                   if isinstance(param_obj,dict):
-                                      grid_data=dict(param_obj)
+                                      grid_data={
+                                          "instituicao":param_obj.get("FiltroInstituicao",""),
+                                          "exercicio":param_obj.get("FiltroExercicio",""),
+                                          "mes":param_obj.get("FiltroMes",""),
+                                      }
                                       grid_data.update({"page":"1","rows":"15","sidx":"Acordo.numero","sord":"asc","_search":"false","nd":"0"})
                                       try:
                                           gr=s.post(BASE+"/acordos/pesquisar",data=grid_data,headers={"X-Requested-With":"XMLHttpRequest"},timeout=60)

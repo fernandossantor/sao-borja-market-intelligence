@@ -22,7 +22,7 @@ jobs:
         run: |
           python -m pip install --quiet --upgrade requests py7zr pypdf python-docx
           python - <<'PY'
-          import csv, hashlib, json, re
+          import csv, hashlib, json, os, re, zipfile
           from pathlib import Path
           from urllib.parse import urljoin, urlparse
           import requests
@@ -46,7 +46,7 @@ jobs:
           s.headers.update({"User-Agent":"SBMI official-source audit/1.0","Accept":"application/json, */*"})
 
           endpoints={
-              "compra":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}",
+              "compra":f"https://pncp.gov.br/api/consulta/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}",
               "arquivos":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/arquivos",
               "itens":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens",
               "historico":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/historico",
@@ -77,6 +77,35 @@ jobs:
               if st["status"] not in (200,204):
                   body=(raw/f"{name}.response").read_text(encoding="utf-8",errors="replace")
                   print("NON200",name,st["status"],body[:2000])
+
+          # Retrieve all 86 items individually and their official PNCP results.
+          # This avoids dependence on the collection endpoint's default page size.
+          full_items=[]
+          item_results={}
+          item_status={}
+          for n in range(1,87):
+              iu=f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens/{n}"
+              ir=s.get(iu,timeout=60)
+              item_status[str(n)]={"item_status":ir.status_code}
+              if ir.status_code==200:
+                  try:
+                      item=ir.json()
+                      full_items.append(item)
+                  except Exception:
+                      pass
+              ru=f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens/{n}/resultados"
+              rr=s.get(ru,timeout=60)
+              item_status[str(n)]["results_status"]=rr.status_code
+              if rr.status_code==200:
+                  try:
+                      item_results[str(n)]=rr.json()
+                  except Exception:
+                      item_results[str(n)]={"raw":rr.text[:5000]}
+          full_items=sorted(full_items,key=lambda x:x.get("numeroItem",999999))
+          payloads["itens_full"]=full_items
+          (raw/"itens_full.json").write_text(json.dumps(full_items,ensure_ascii=False,indent=2),encoding="utf-8")
+          (raw/"resultados_por_item.json").write_text(json.dumps(item_results,ensure_ascii=False,indent=2),encoding="utf-8")
+          (raw/"item_result_status.json").write_text(json.dumps(item_status,ensure_ascii=False,indent=2),encoding="utf-8")
 
           docs=payloads.get("arquivos") or []
           if isinstance(docs,dict):
@@ -121,8 +150,22 @@ jobs:
                           z.extractall(path=target)
                   except Exception as e:
                       (target/"EXTRACTION_ERROR.txt").write_text(repr(e),encoding="utf-8")
+              elif fp.suffix.lower()==".zip":
+                  try:
+                      with zipfile.ZipFile(fp) as z:
+                          z.extractall(target)
+                  except Exception as e:
+                      (target/"EXTRACTION_ERROR.txt").write_text(repr(e),encoding="utf-8")
               else:
                   # non-archive documents remain in downloads and can be text-extracted below
+                  pass
+
+          # Some source archives preserve restrictive directory permissions.
+          # Normalize only the temporary artifact tree so text extraction/upload can read it.
+          for fp in sorted(ext.rglob("*")):
+              try:
+                  os.chmod(fp,0o755 if fp.is_dir() else 0o644)
+              except Exception:
                   pass
           for fp in ext.rglob("*"):
               if fp.is_file():
@@ -161,7 +204,7 @@ jobs:
           (out/"combined_text.txt").write_text("".join(combined),encoding="utf-8")
 
           # Normalize PNCP item JSON to CSV for independent check of all 86 items.
-          items=payloads.get("itens") or []
+          items=payloads.get("itens_full") or []
           if isinstance(items,dict):
               items=items.get("itens") or items.get("data") or items.get("content") or []
           if items:
@@ -184,6 +227,8 @@ jobs:
               row=next((x for x in items if isinstance(x,dict) and x.get("numeroItem")==n),None)
               if row:
                   print("ITEM",n,json.dumps(row,ensure_ascii=False))
+              if str(n) in item_results:
+                  print("RESULT",n,json.dumps(item_results[str(n)],ensure_ascii=False))
           print("TEXT_INDEX",json.dumps(index,ensure_ascii=False,indent=2))
           PY
 

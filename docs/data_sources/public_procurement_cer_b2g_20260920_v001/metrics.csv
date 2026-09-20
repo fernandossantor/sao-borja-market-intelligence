@@ -1,0 +1,9 @@
+metric,value,unit,period,nature,source,limitation
+"cer_distribution_paid","580031.72","R$","01/01–19/09/2026","OBSERVADO","Portal PMSB /despesas","Primeira rodada do pagamento"
+"cer_distribution_local_paid","0.00","R$","01/01–19/09/2026","CALCULADO","SBMI sobre Portal PMSB + RFB","0 credores locais pagos não prova ausência de fornecedor local potencial"
+"cer_distribution_external_paid","580031.72","R$","01/01–19/09/2026","CALCULADO","SBMI","Credor externo não é vazamento integral"
+"cer_distribution_external_vendors","4","CNPJs credores","01/01–19/09/2026","CALCULADO","SBMI","Credores pagos, não universo de credenciados possíveis"
+"cer_distribution_top1_share","63.3526","% do valor","01/01–19/09/2026","CALCULADO","SBMI","Concentração de pagamentos, não market share"
+"cer_distribution_top2_share","89.9380","% do valor","01/01–19/09/2026","CALCULADO","SBMI","Concentração de pagamentos, não market share"
+"cer_services_local_share","83.5557","%","01/01–19/09/2026","CALCULADO","SBMI","Rubrica Serviços PJ na ação CER"
+"cer_material_consumption_local_share","72.8811","%","01/01–19/09/2026","CALCULADO","SBMI","Rubrica Material de Consumo na ação CER"

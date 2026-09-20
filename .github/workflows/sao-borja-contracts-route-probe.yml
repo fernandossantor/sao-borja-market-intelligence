@@ -139,9 +139,32 @@ jobs:
                           plain=re.sub(r'<[^>]+>',' ',body)
                           plain=re.sub(r'\\s+',' ',unescape(plain)).strip()
                           hig=[m.group(0) for m in re.finditer(r'.{0,250}IVAN GOULART.{0,500}',plain,re.I)]
-                          report["year_probes"].append({"year":exval,"method":method,"url":rr.url,"status":rr.status_code,
-                                                       "bytes":len(rr.content),"hig_hits":hig[:30],
-                                                       "contains_hig":bool(hig)})
+                          probe={"year":exval,"method":method,"url":rr.url,"status":rr.status_code,
+                                 "bytes":len(rr.content),"hig_hits":hig[:30],
+                                 "contains_hig":bool(hig)}
+                          if exval=="2025" and method=="GET":
+                              # Capture form and script structure of the result page to locate async data route.
+                              fm=re.search(r'<form[^>]*id=["\\']FiltroIndexForm["\\'][^>]*>.*?</form>',body,re.I|re.S)
+                              probe["form_snippet"]=(fm.group(0)[:8000] if fm else None)
+                              rscripts=[]
+                              for sm in re.finditer(r'<script[^>]+src=["\\']([^"\\']+)["\\']',body,re.I):
+                                  su=urljoin(BASE+"/acordos/pesquisar",unescape(sm.group(1)))
+                                  if su not in rscripts: rscripts.append(su)
+                              probe["scripts"]=rscripts
+                              probe["inline_route_candidates"]=list(dict.fromkeys(
+                                  mm.group(1) for mm in re.finditer(r'["\\']([^"\\']*(?:acordos|contrat|pesquisar|get[A-Z])[^\"\\']*)["\\']',body,re.I)
+                              ))[:100]
+                              report["result_page_scripts"]=[]
+                              for su in rscripts:
+                                  sr=get(su)
+                                  if sr is None or sr.status_code>=400: continue
+                                  sj=sr.content.decode(sr.encoding or "utf-8","replace")
+                                  cand=list(dict.fromkeys(
+                                      mm.group(1) for mm in re.finditer(r'["\\']([^"\\']*(?:acordos|contrat|pesquisar|get[A-Z])[^"\\']*)["\\']',sj,re.I)
+                                  ))
+                                  if cand:
+                                      report["result_page_scripts"].append({"url":su,"candidates":cand[:100],"text":sj if len(sj)<12000 else sj[:12000]})
+                          report["year_probes"].append(probe)
                           if method=="POST":
                               (OUT/("acordos_"+exval+".html")).write_text(body,encoding="utf-8")
                       except Exception as e:

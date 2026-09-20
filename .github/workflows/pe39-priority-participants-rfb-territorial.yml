@@ -1,0 +1,226 @@
+name: pe39-priority-participants-rfb-territorial
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pe39-priority-participants-rfb-territorial.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  classify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      COMPETENCE: "2026-08"
+      RFB_BASE: "https://dadosabertos.rfb.gov.br/CNPJ/dados_abertos_cnpj"
+      RFB_MIRROR: "https://dados-abertos-rf-cnpj.casadosdados.com.br/arquivos/2026-08-09"
+      SAO_BORJA_TOM: "8863"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install parser
+        run: python -m pip install --quiet pandas
+
+      - name: Scan RFB establishments for the 22 PE39 priority participants
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/pe39_priority_participants_rfb"
+          SRC="docs/data_sources/public_procurement_pe39_participants_20260920_v001/priority_participants_seed.csv"
+          mkdir -p "$OUT/raw"
+          test -s "$SRC"
+          : > "$OUT/transport_sources.txt"
+
+          download_rfb() {
+            local file="$1"
+            local out="$2"
+            echo "Trying official RFB: $file"
+            if curl -4 -fL --retry 1 --retry-delay 2 --connect-timeout 8 --max-time 120               "${RFB_BASE}/${COMPETENCE}/$file" -o "$out"; then
+              echo "$file|OFFICIAL_RFB" >> "$OUT/transport_sources.txt"
+            else
+              echo "Official host unavailable; using controlled August-2026 transport mirror: $file"
+              rm -f "$out"
+              curl -fL --retry 4 --retry-all-errors --retry-delay 5 --connect-timeout 20 --max-time 1800                 "${RFB_MIRROR}/$file" -o "$out"
+              echo "$file|MIRROR_CASA_DOS_DADOS" >> "$OUT/transport_sources.txt"
+            fi
+            test -s "$out"
+            unzip -tq "$out"
+          }
+
+          download_rfb "Municipios.zip" "$OUT/raw/Municipios.zip"
+
+          python - <<'PY'
+          import csv, io, json, zipfile
+          from pathlib import Path
+          OUT=Path("artifacts/pe39_priority_participants_rfb")
+          z=zipfile.ZipFile(OUT/"raw/Municipios.zip")
+          name=next(n for n in z.namelist() if not n.endswith("/"))
+          mapping={}
+          with z.open(name) as fh:
+              for row in csv.reader(io.TextIOWrapper(fh,encoding="latin1"),delimiter=";"):
+                  if len(row)>=2: mapping[row[0]]=row[1]
+          (OUT/"municipios.json").write_text(json.dumps(mapping,ensure_ascii=False),encoding="utf-8")
+          PY
+
+          for i in {0..9}; do
+            download_rfb "Estabelecimentos${i}.zip" "$OUT/raw/Estabelecimentos${i}.zip"
+            SHARD="$i" python - <<'PY'
+          import csv,json,os,zipfile
+          from pathlib import Path
+          import pandas as pd
+
+          OUT=Path("artifacts/pe39_priority_participants_rfb")
+          SRC=Path("docs/data_sources/public_procurement_pe39_participants_20260920_v001/priority_participants_seed.csv")
+          shard=os.environ["SHARD"]
+          with SRC.open(encoding="utf-8-sig",newline="") as f:
+              targets=["".join(ch for ch in r["cnpj"] if ch.isdigit()).zfill(14) for r in csv.DictReader(f)]
+          roots={c[:8] for c in targets}
+          z=zipfile.ZipFile(OUT/"raw"/f"Estabelecimentos{shard}.zip")
+          name=next(n for n in z.namelist() if not n.endswith("/"))
+          found=[]
+          with z.open(name) as fh:
+              for chunk in pd.read_csv(
+                  fh,sep=";",header=None,dtype=str,encoding="latin1",
+                  usecols=[0,1,2,5,19,20],chunksize=400000,
+                  na_filter=False,low_memory=False
+              ):
+                  m=chunk[0].isin(roots)
+                  if not m.any(): continue
+                  for basic,order,dv,status,uf,mun in chunk.loc[m].itertuples(index=False,name=None):
+                      found.append({
+                          "cnpj_basico":basic,"ordem":order,"dv":dv,
+                          "cnpj":basic+order+dv,"situacao":status,
+                          "uf":uf,"municipio_tom":mun,"shard":int(shard)
+                      })
+          (OUT/f"matches_{shard}.json").write_text(json.dumps(found,ensure_ascii=False),encoding="utf-8")
+          print("shard",shard,"matches",len(found))
+          PY
+            rm -f "$OUT/raw/Estabelecimentos${i}.zip"
+          done
+
+          python - <<'PY'
+          import csv,json
+          from collections import defaultdict
+          from pathlib import Path
+
+          OUT=Path("artifacts/pe39_priority_participants_rfb")
+          SRC=Path("docs/data_sources/public_procurement_pe39_participants_20260920_v001/priority_participants_seed.csv")
+          municipios=json.loads((OUT/"municipios.json").read_text(encoding="utf-8"))
+          matches=[]
+          for p in sorted(OUT.glob("matches_*.json")):
+              matches.extend(json.loads(p.read_text(encoding="utf-8")))
+          by_exact={x["cnpj"]:x for x in matches}
+          by_root=defaultdict(list)
+          for x in matches: by_root[x["cnpj_basico"]].append(x)
+
+          rows=[]
+          with SRC.open(encoding="utf-8-sig",newline="") as f:
+              for r in csv.DictReader(f):
+                  c="".join(ch for ch in r["cnpj"] if ch.isdigit()).zfill(14)
+                  exact=by_exact.get(c)
+                  root=c[:8]
+                  local_active=[x for x in by_root.get(root,[]) if x["situacao"]=="02" and x["municipio_tom"]=="8863"]
+                  if exact and exact["situacao"]=="02" and exact["municipio_tom"]=="8863":
+                      cls="LOCAL_EXACT_ACTIVE"
+                  elif local_active:
+                      cls="ROOT_WITH_LOCAL_ACTIVE_FOOTPRINT"
+                  elif exact and exact["situacao"]=="02":
+                      cls="EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT"
+                  elif exact:
+                      cls="EXACT_FOUND_NONACTIVE"
+                  else:
+                      cls="RFB_NOT_FOUND"
+                  rows.append({
+                      **r,
+                      "territorial_class":cls,
+                      "exact_situacao": exact["situacao"] if exact else "",
+                      "exact_uf": exact["uf"] if exact else "",
+                      "exact_municipio_tom": exact["municipio_tom"] if exact else "",
+                      "exact_municipio_nome": municipios.get(exact["municipio_tom"],"") if exact else "",
+                      "root_local_active_count":len(local_active)
+                  })
+
+          dest=OUT/"priority_participants_rfb_202608.csv"
+          with dest.open("w",encoding="utf-8-sig",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0]))
+              w.writeheader(); w.writerows(rows)
+
+          transport={}
+          for line in (OUT/"transport_sources.txt").read_text().splitlines():
+              if "|" in line:
+                  k,v=line.split("|",1); transport[k]=v
+          summary={
+              "substantive_source":"Receita Federal do Brasil — Dados Abertos CNPJ",
+              "competence":"2026-08",
+              "participants":len(rows),
+              "transport_by_file":transport,
+              "transport_mirror_used":any(v!="OFFICIAL_RFB" for v in transport.values()),
+              "class_counts":{},
+              "limitation":"If mirror transport is used, locality is exploratory until reconciled with official RFB hashes/reexecution; cadastral locality is not economic retention."
+          }
+          for r in rows:
+              summary["class_counts"][r["territorial_class"]]=summary["class_counts"].get(r["territorial_class"],0)+1
+          (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact directed evidence
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/pe39_priority_participants_rfb"
+          DEST="docs/data_sources/public_procurement_pe39_participants_20260920_v001"
+          cp "$SRC/priority_participants_rfb_202608.csv" "$DEST/"
+          cp "$SRC/summary.json" "$DEST/rfb_territorial_summary.json"
+          cp "$SRC/transport_sources.txt" "$DEST/rfb_transport_sources.txt"
+          cat > "$DEST/README.md" <<'EOF'
+          # PE39/2026 — participantes dos 18 condutores prioritários
+
+          Universo dirigido: 22 CNPJs extraídos das tabelas de propostas da Ata Final oficial
+          do PE39/2026 para os 18 itens prioritários.
+
+          Territorialização cadastral: RFB Dados Abertos CNPJ, competência 2026-08,
+          por CNPJ exato e por raiz com estabelecimento ativo em São Borja (TOM 8863).
+
+          O arquivo rfb_transport_sources.txt registra, arquivo a arquivo, se os bytes
+          vieram do host oficial ou do espelho de transporte controlado. Se houver uso
+          de espelho, a classificação deve permanecer exploratória até reconciliação
+          com a fonte oficial.
+
+          Localidade cadastral não equivale a origem física do produto, estoque,
+          retenção econômica, capacidade de escala ou competitividade.
+          EOF
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: territorialize PE39 priority participants with RFB"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - name: Upload compact evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pe39-priority-participants-rfb
+          retention-days: 30
+          if-no-files-found: warn
+          path: |
+            artifacts/pe39_priority_participants_rfb/priority_participants_rfb_202608.csv
+            artifacts/pe39_priority_participants_rfb/summary.json
+            artifacts/pe39_priority_participants_rfb/transport_sources.txt

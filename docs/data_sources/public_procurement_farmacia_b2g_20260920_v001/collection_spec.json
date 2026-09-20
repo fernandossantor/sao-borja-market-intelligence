@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-09-20",
+  "analytical_phase": "contestabilidade_B2G",
+  "mechanism": "farmacia_basica_medicamentos",
+  "geography": "São Borja/RS",
+  "period_payments": "2026-01-01/2026-09-19",
+  "procurement": {
+    "municipal_notice": "Pregão Eletrônico 34/2026/DCL/SMPOP",
+    "object": "Registro de preços para aquisição de medicamentos destinados aos usuários do SUS, para distribuição nas Farmácias Básicas, Unidades de Saúde e SAMU",
+    "judgement": "menor preço por item",
+    "dispute_mode": "aberto",
+    "session": "2026-06-16T08:30:00-03:00",
+    "official_notice_url": "https://saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/6765-pregao-eletronico-34-2026-dcl-smpop"
+  },
+  "observed_payment_baseline": {
+    "action": "FARMÁCIA BÁSICA E DEMANDAS JUDICIAIS",
+    "rubric": "MATERIAL, BEM OU SERVIÇO PARA DIST. GRATUITA",
+    "paid_R$": 964631.84,
+    "local_creditors": 0,
+    "external_creditors": 30,
+    "external_pct_first_round_cadastral": 100
+  },
+  "local_offer_inventory": {
+    "unique_cnpjs_pharmacy_drugstore": 20,
+    "root_cnpjs": 7,
+    "pct_units_linked_to_multiunit_roots": 85,
+    "caveat": "Inventário varejista não equivale a capacidade atacadista/B2G."
+  },
+  "pncp_candidate_identifier": {
+    "numero_controle": "88489786000101-1-000109/2026",
+    "org_cnpj": "88489786000101",
+    "year": 2026,
+    "sequence": 109,
+    "status": "SECONDARY_INDEX_ONLY_PENDING_OFFICIAL_RECONFIRMATION",
+    "estimated_value_R$": 1671770,
+    "note": "Identificador e valor encontrados em indexador público de metadados PNCP; não promover antes de reconfirmação oficial."
+  },
+  "official_pncp_routes": [
+    "/v1/orgaos/{cnpj}/compras/{ano}/{sequencial}",
+    "/v1/orgaos/{cnpj}/compras/{ano}/{sequencial}/itens",
+    "/v1/orgaos/{cnpj}/compras/{ano}/{sequencial}/itens/{numeroItem}/resultados",
+    "/v1/orgaos/{cnpj}/compras/{ano}/{sequencial}/historico",
+    "/v1/orgaos/{cnpj}/compras/{ano}/{sequencial}/atas",
+    "/v1/orgaos/{cnpj}/contratos/contratacao/{ano}/{sequencial}"
+  ],
+  "required_fields": [
+    "numero_item",
+    "descricao_item",
+    "quantidade_estimada",
+    "valor_unitario_estimado",
+    "cnpj_participante",
+    "municipio_uf_participante",
+    "proposta_inicial",
+    "proposta_final",
+    "classificacao_final",
+    "vencedor",
+    "segundo_colocado",
+    "diferenca_pct_vencedor_segundo",
+    "situacao_item",
+    "motivo_desclassificacao",
+    "prazo_entrega",
+    "habilitacao_especifica",
+    "local_no_inventario",
+    "raiz_cnpj_local"
+  ],
+  "evidence_gate": {
+    "required_dimensions": [
+      "oferta_local",
+      "participacao_efetiva",
+      "preco",
+      "escala_habilitacao_logistica"
+    ],
+    "allowed_status": [
+      "CONTESTABILIDADE_OBSERVADA",
+      "CONTESTABILIDADE_LIMITADA_OBSERVADA",
+      "NAO_PARTICIPACAO_OBSERVADA_SEM_CAUSA_INFERIDA",
+      "NAO_MENSURAVEL"
+    ]
+  },
+  "next_action": "Extrair itens, resultados, atas e evidências de habilitação/classificação do PE 34/2026; cruzar CNPJs participantes com inventário local.",
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

@@ -1,0 +1,8 @@
+familia,itens,valor_estimado_R$,participacao_pct,formula
+CONDUTORES,41,683788.90,63.6277,SUM(quantidade*valor_unit_ref)/1074671.14*100
+ILUMINACAO,5,108074.70,10.0565,SUM(quantidade*valor_unit_ref)/1074671.14*100
+PROTECAO_DISTRIBUICAO,9,97195.75,9.0442,SUM(quantidade*valor_unit_ref)/1074671.14*100
+FERRAGENS_FIXACAO,8,68730.50,6.3955,SUM(quantidade*valor_unit_ref)/1074671.14*100
+COMANDO_CONEXAO,12,53149.46,4.9456,SUM(quantidade*valor_unit_ref)/1074671.14*100
+INFRA_INSTALACAO,9,37246.75,3.4659,SUM(quantidade*valor_unit_ref)/1074671.14*100
+ISOLACAO_CONSUMIVEIS,2,26485.08,2.4645,SUM(quantidade*valor_unit_ref)/1074671.14*100

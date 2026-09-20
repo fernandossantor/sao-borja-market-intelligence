@@ -1,0 +1,181 @@
+name: sao-borja-contracts-route-probe
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-contracts-route-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Probe PMSB contracts route
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_contracts_route_probe"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import json,re,requests
+          from html import unescape
+          from pathlib import Path
+          from urllib.parse import urljoin
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("artifacts/sao_borja_contracts_route_probe")
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI exploratory contracts probe/1.0"})
+
+          report={"base":BASE,"tested":[],"institutions":[],"exercises":[],"months":[],"scripts":[],"route_candidates":[],"errors":[]}
+
+          def get(url, **kw):
+              try:
+                  r=s.get(url,timeout=60,**kw)
+                  report["tested"].append({"method":"GET","url":r.url,"status":r.status_code,"bytes":len(r.content)})
+                  return r
+              except Exception as e:
+                  report["errors"].append({"method":"GET","url":url,"error":repr(e)})
+                  return None
+
+          r=get(BASE+"/acordos")
+          if r is None:
+              raise SystemExit("unable to fetch /acordos")
+          raw=r.content
+          # portal pages can advertise/contain a charset that requests mis-detects; try common encodings
+          text=None
+          for enc in [r.encoding,"utf-8","iso-8859-1","windows-1252"]:
+              if not enc: continue
+              try:
+                  text=raw.decode(enc)
+                  break
+              except Exception:
+                  pass
+          if text is None:
+              text=raw.decode("utf-8","replace")
+
+          (OUT/"acordos_page.html").write_text(text,encoding="utf-8")
+
+          # Inspect all select/option blocks. Keep labels only as diagnostics.
+          selects={}
+          for sm in re.finditer(r'<select[^>]*(?:name|id)=["\']([^"\']+)["\'][^>]*>(.*?)</select>',text,re.I|re.S):
+              name=sm.group(1)
+              opts=[]
+              for om in re.finditer(r'<option[^>]*value=["\']?([^"\' >]*)["\']?[^>]*>(.*?)</option>',sm.group(2),re.I|re.S):
+                  label=re.sub(r'<[^>]+>',' ',om.group(2))
+                  label=re.sub(r'\s+',' ',unescape(label)).strip()
+                  opts.append({"value":unescape(om.group(1)).strip(),"label":label})
+              selects[name]=opts
+          report["selects"]=selects
+
+          # Normalize likely dimensions.
+          for name,opts in selects.items():
+              low=name.lower()
+              if "instit" in low:
+                  report["institutions"]=opts
+              elif "exerc" in low or "ano" in low:
+                  report["exercises"]=opts
+              elif "mes" in low:
+                  report["months"]=opts
+
+          # Inspect linked JS for route strings.
+          scripts=[]
+          for m in re.finditer(r'<script[^>]+src=["\']([^"\']+)["\']',text,re.I):
+              u=urljoin(BASE+"/acordos",unescape(m.group(1)))
+              if u not in scripts: scripts.append(u)
+          report["scripts"]=scripts
+          for u in scripts:
+              rr=get(u)
+              if rr is None or rr.status_code>=400: continue
+              try: js=rr.content.decode(rr.encoding or "utf-8","replace")
+              except Exception: js=rr.text
+              for pat in [r'["\']([^"\']*acordos[^"\']*)["\']',r'["\']([^"\']*(?:pesquisar|getAcord|getContrato|contrat)[^"\']*)["\']']:
+                  for mm in re.finditer(pat,js,re.I):
+                      cand=mm.group(1)
+                      if cand not in report["route_candidates"]:
+                          report["route_candidates"].append(cand)
+
+          inst=[x for x in report["institutions"] if x.get("value")]
+          ex=[x for x in report["exercises"] if x.get("value")]
+          report["selected_institution"]=inst[0] if inst else None
+          # prefer 2025, otherwise latest numeric exercise
+          exval="2025"
+          vals=[x.get("value","") for x in ex]
+          if exval not in vals and vals:
+              nums=[v for v in vals if v.isdigit()]
+              if nums: exval=sorted(nums,reverse=True)[0]
+          report["selected_exercise"]=exval
+
+          # DBSeller portals in other RS municipalities expose this route.
+          # Test only when an institution value was actually parsed from PMSB itself.
+          if inst:
+              iid=inst[0]["value"]
+              candidates=[
+                  BASE+"/acordos/pesquisar",
+                  BASE+"/api/acordos/pesquisar",
+                  BASE+"/api/acordos/index",
+              ]
+              for endpoint in candidates:
+                  try:
+                      rr=s.get(endpoint,params={"instituicao":iid,"exercicio":exval,"mes":""},timeout=60)
+                      body=rr.content.decode(rr.encoding or "utf-8","replace")
+                      report["tested"].append({"method":"GET","url":rr.url,"status":rr.status_code,"bytes":len(rr.content),
+                                               "contains_hig":"IVAN GOULART" in body.upper(),
+                                               "looks_table":("<table" in body.lower() or "contrat" in body.lower())})
+                      name=re.sub(r'[^a-zA-Z0-9]+','_',endpoint.replace(BASE,'')).strip('_')
+                      (OUT/(name+".html")).write_text(body,encoding="utf-8")
+                  except Exception as e:
+                      report["errors"].append({"method":"GET","url":endpoint,"error":repr(e)})
+
+          (OUT/"diagnostics.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist diagnostics
+        if: always()
+        shell: bash
+        run: |
+          DEST="docs/data_sources/sao_borja_contracts_route_probe"
+          mkdir -p "$DEST"
+          if [ -f artifacts/sao_borja_contracts_route_probe/diagnostics.json ]; then
+            cp artifacts/sao_borja_contracts_route_probe/diagnostics.json "$DEST/diagnostics.json"
+            cat > "$DEST/README.md" <<'EOF'
+          # PMSB — diagnóstico da rota de contratos
+
+          Probe exploratório da página oficial `https://transparencia.saoborja.rs.gov.br/acordos`.
+
+          Objetivo: identificar valores de instituição/exercício e rotas dinâmicas para futura extração
+          censitária de contratos. O probe não promove valores de contratos e não substitui execução
+          financeira.
+
+          A descoberta desta rota deve ser tratada separadamente da série de processos de Licitações
+          e da série de pagamentos.
+          EOF
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$DEST"
+            if ! git diff --cached --quiet; then
+              git commit -m "data: persist PMSB contracts route diagnostics"
+              git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+              git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+            fi
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-contracts-route-probe
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_contracts_route_probe/

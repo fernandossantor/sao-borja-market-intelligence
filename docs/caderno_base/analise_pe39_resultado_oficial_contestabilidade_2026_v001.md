@@ -19,7 +19,7 @@ Agora há:
 - resultado documental oficial da sessão;
 - especificações prioritárias confirmadas por fonte oficial;
 - arquitetura principal/reservada 75%/25% confirmada no T05;
-- **participação efetiva de operador local comprovada em todos os nove clusters**;
+- **participação efetiva de operador local comprovada em itens correspondentes aos nove clusters**;
 - resultados de preço e causas de desclassificação observáveis.
 
 A unidade analítica permanece:
@@ -93,7 +93,7 @@ A Ata Final revelou participação de **COMERCIAL DE TINTAS SANTO ANTONIO LTDA �
 
 O controle territorial já existente no projeto classifica esse CNPJ como `LOCAL_EXACT_ACTIVE`, São Borja/RS.
 
-A empresa apresentou proposta nas 18 linhas prioritárias, cobrindo os nove clusters.
+A empresa apresentou propostas nas 18 linhas prioritárias, incluindo itens dos nove clusters. Isso demonstra participação ampla no objeto, mas não equivale a validação técnica plena de cada produto ofertado.
 
 Esse dado resolve uma parte importante do problema:
 
@@ -127,7 +127,7 @@ Fórmula:
 
 ### Interpretação
 
-No conjunto comparável, a proposta final local ficou 125,04% acima dos vencedores em termos ponderados.
+No conjunto comparável, a proposta final local ficou 125,04% acima dos vencedores em termos ponderados. O edital/TR estabelece entrega em até 20 dias em São Borja e informa que o preço inclui frete, seguro e demais despesas necessárias; portanto, a comparação é de preço contratual entregue, embora sua composição interna não seja observada.
 
 Isso sustenta uma interpretação **mecânica**, não estrutural:
 
@@ -164,7 +164,7 @@ Ainda não é possível medir:
 - taxa local de vitória do PE39 como um todo;
 - diferencial médio local versus externo do universo de concorrentes;
 - capacidade de estoque e escala dos demais operadores locais;
-- preço entregue com decomposição de frete;
+- decomposição de frete e custo logístico dentro do preço entregue;
 - taxa de conversão entre participação, adjudicação/homologação, ARP, empenho e pagamento.
 
 O fato de um operador local ter ofertado os nove clusters não prova que todos os demais operadores locais possam fazê-lo.
@@ -189,9 +189,11 @@ Por:
 
 ### Diagnóstico
 
-A leitura passa de **“oferta local existente, contestabilidade desconhecida”** para:
+A leitura passa de **“oferta local existente, participação desconhecida”** para:
 
-> **contestabilidade formal local demonstrada, mas conversão competitiva baixa no subconjunto observado**, com predominância de diferencial de preço e ocorrência de barreiras documentais/decisórias.
+> **participação B2G local formalmente demonstrada e conversão competitiva baixa no subconjunto observado**, com predominância de diferencial de preço e ocorrência de barreiras documentais/decisórias.
+
+Aqui, “formalmente demonstrada” significa que houve proposta registrada no certame e classificação processual em 15 linhas; não significa validação técnica integral, estoque comprovado ou execução do fornecimento.
 
 A formulação deve continuar provisória até a territorialização dos demais participantes.
 
@@ -211,6 +213,7 @@ Isso mantém a análise centrada no mecanismo territorial e não em empresas ind
 - `docs/data_sources/public_procurement_pe39_official_20260920_v001/README.md`;
 - `docs/data_sources/public_procurement_pe39_official_20260920_v001/priority_conductors_result.csv`;
 - `docs/caderno_base/correcao_metodologica_pe39_contestabilidade_operadores_20260920_v001.md`;
+- `docs/data_sources/public_procurement_pe39_operator_gate_20260920_v002/operator_cluster_matrix_v002.csv`;
 - workflows oficiais de auditoria PNCP registrados em `.github/workflows/`.
 
 ## 12. Governança

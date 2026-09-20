@@ -1,0 +1,189 @@
+name: pncp-pe39-official-materialize
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pncp-pe39-official-materialize.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch official PNCP PE39 resources and extract documents
+        run: |
+          python -m pip install --quiet --upgrade requests py7zr pypdf python-docx
+          python - <<'PY'
+          import csv, hashlib, json, re
+          from pathlib import Path
+          from urllib.parse import urljoin, urlparse
+          import requests
+          import py7zr
+          from pypdf import PdfReader
+          from docx import Document
+
+          CNPJ="88489786000101"
+          ANO=2026
+          SEQ=136
+          BASE="https://pncp.gov.br/api/pncp"
+          out=Path("artifacts/pncp_pe39_official")
+          raw=out/"raw"
+          dl=out/"downloads"
+          ext=out/"extracted"
+          txt=out/"text"
+          for p in (raw,dl,ext,txt):
+              p.mkdir(parents=True,exist_ok=True)
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI official-source audit/1.0","Accept":"application/json, */*"})
+
+          endpoints={
+              "compra":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}",
+              "arquivos":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/arquivos",
+              "itens":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens",
+              "historico":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/historico",
+              "atas":f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/atas",
+          }
+          status={}
+          payloads={}
+          for name,url in endpoints.items():
+              r=s.get(url,timeout=90)
+              status[name]={"url":url,"status":r.status_code,"content_type":r.headers.get("content-type")}
+              (raw/f"{name}.response").write_bytes(r.content)
+              if r.status_code==200:
+                  try:
+                      js=r.json()
+                      payloads[name]=js
+                      (raw/f"{name}.json").write_text(json.dumps(js,ensure_ascii=False,indent=2),encoding="utf-8")
+                  except Exception:
+                      pass
+          (raw/"endpoint_status.json").write_text(json.dumps(status,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          if status["compra"]["status"] != 200 or status["arquivos"]["status"] != 200 or status["itens"]["status"] != 200:
+              print(json.dumps(status,indent=2,ensure_ascii=False))
+              raise SystemExit("Required official PNCP endpoint failed")
+
+          docs=payloads.get("arquivos") or []
+          if isinstance(docs,dict):
+              docs=docs.get("documentos") or docs.get("data") or docs.get("content") or []
+
+          manifest=[]
+          for i,d in enumerate(docs,1):
+              if not isinstance(d,dict):
+                  continue
+              u=d.get("url") or d.get("uri")
+              title=d.get("titulo") or f"documento_{i}"
+              seqdoc=d.get("sequencialDocumento",i)
+              rec={"sequencialDocumento":seqdoc,"titulo":title,"tipoDocumentoNome":d.get("tipoDocumentoNome"),"dataPublicacaoPncp":d.get("dataPublicacaoPncp"),"url":u}
+              if u:
+                  if u.startswith("/"):
+                      u=urljoin("https://pncp.gov.br",u)
+                  rr=s.get(u,timeout=180,allow_redirects=True)
+                  rec["download_status"]=rr.status_code
+                  rec["final_url"]=rr.url
+                  rec["content_type"]=rr.headers.get("content-type")
+                  if rr.status_code==200:
+                      path_suffix=Path(urlparse(rr.url).path).suffix
+                      orig_suffix=Path(title).suffix
+                      suffix=orig_suffix or path_suffix or ".bin"
+                      safe=re.sub(r"[^A-Za-z0-9._-]+","_",Path(title).stem)[:100]
+                      fp=dl/f"{int(seqdoc):03d}_{safe}{suffix}"
+                      fp.write_bytes(rr.content)
+                      rec["file"]=str(fp)
+                      rec["bytes"]=len(rr.content)
+                      rec["sha256"]=hashlib.sha256(rr.content).hexdigest()
+              manifest.append(rec)
+          (out/"documents_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Extract 7z archives
+          extracted_files=[]
+          for fp in dl.iterdir():
+              target=ext/fp.stem
+              target.mkdir(exist_ok=True)
+              if fp.suffix.lower()==".7z":
+                  try:
+                      with py7zr.SevenZipFile(fp,mode="r") as z:
+                          z.extractall(path=target)
+                  except Exception as e:
+                      (target/"EXTRACTION_ERROR.txt").write_text(repr(e),encoding="utf-8")
+              else:
+                  # non-archive documents remain in downloads and can be text-extracted below
+                  pass
+          for fp in ext.rglob("*"):
+              if fp.is_file():
+                  extracted_files.append(str(fp))
+          (out/"extracted_files.json").write_text(json.dumps(extracted_files,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Text extraction from downloaded and extracted files.
+          source_files=[p for p in dl.rglob("*") if p.is_file()] + [p for p in ext.rglob("*") if p.is_file()]
+          index=[]
+          combined=[]
+          for fp in source_files:
+              suffix=fp.suffix.lower()
+              t=""
+              err=None
+              try:
+                  if suffix==".pdf":
+                      t="\n".join((page.extract_text() or "") for page in PdfReader(str(fp)).pages)
+                  elif suffix==".docx":
+                      d=Document(str(fp))
+                      t="\n".join(p.text for p in d.paragraphs)
+                      for table in d.tables:
+                          for row in table.rows:
+                              t += "\n" + " | ".join(c.text for c in row.cells)
+                  elif suffix in {".txt",".csv",".md",".json",".xml",".html",".htm"}:
+                      t=fp.read_text(encoding="utf-8",errors="replace")
+              except Exception as e:
+                  err=repr(e)
+              if t.strip():
+                  op=txt/(re.sub(r"[^A-Za-z0-9._-]+","_",str(fp.relative_to(out)))+".txt")
+                  op.write_text(t,encoding="utf-8")
+                  combined.append(f"\n\n===== {fp.relative_to(out)} =====\n{t}")
+                  index.append({"file":str(fp.relative_to(out)),"text_file":str(op.relative_to(out)),"chars":len(t),"error":err})
+              elif err:
+                  index.append({"file":str(fp.relative_to(out)),"chars":0,"error":err})
+          (out/"text_index.json").write_text(json.dumps(index,ensure_ascii=False,indent=2),encoding="utf-8")
+          (out/"combined_text.txt").write_text("".join(combined),encoding="utf-8")
+
+          # Normalize PNCP item JSON to CSV for independent check of all 86 items.
+          items=payloads.get("itens") or []
+          if isinstance(items,dict):
+              items=items.get("itens") or items.get("data") or items.get("content") or []
+          if items:
+              keys=sorted({k for row in items if isinstance(row,dict) for k in row.keys()})
+              with (out/"itens_pncp.csv").open("w",encoding="utf-8",newline="") as f:
+                  w=csv.DictWriter(f,fieldnames=keys)
+                  w.writeheader()
+                  for row in items:
+                      if isinstance(row,dict):
+                          w.writerow({k:(json.dumps(row.get(k),ensure_ascii=False) if isinstance(row.get(k),(dict,list)) else row.get(k)) for k in keys})
+
+          # Compact audit print.
+          compra=payloads.get("compra",{})
+          print("CONTROL", compra.get("numeroControlePNCP") or compra.get("numeroControlePNCPCompra"))
+          print("OBJECT", compra.get("objetoCompra"))
+          print("VALUE", compra.get("valorTotalEstimado"))
+          print("DOCS", json.dumps(manifest,ensure_ascii=False,indent=2))
+          print("ITEM_COUNT", len(items))
+          for n in (7,8,18,25,30,35,36,41,49,78,79,80,81,82,83,84,85,86):
+              row=next((x for x in items if isinstance(x,dict) and x.get("numeroItem")==n),None)
+              if row:
+                  print("ITEM",n,json.dumps(row,ensure_ascii=False))
+          print("TEXT_INDEX",json.dumps(index,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Upload official PE39 materialization
+        uses: actions/upload-artifact@v4
+        with:
+          name: pncp-pe39-official
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/pncp_pe39_official/

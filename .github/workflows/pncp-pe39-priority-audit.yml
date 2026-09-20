@@ -1,0 +1,158 @@
+name: pncp-pe39-priority-audit
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pncp-pe39-priority-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit official PE39 priority conductors and attachments
+        run: |
+          python -m pip install --quiet --upgrade requests py7zr pypdf python-docx
+          python - <<'PY'
+          import hashlib, json, os, re, tarfile, zipfile
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from pathlib import Path
+          from urllib.parse import urljoin, urlparse
+          import requests, py7zr
+          from pypdf import PdfReader
+          from docx import Document
+
+          CNPJ="88489786000101"; ANO=2026; SEQ=136
+          ITEMS=[7,8,18,25,30,35,36,41,49,78,79,80,81,82,83,84,85,86]
+          BASE="https://pncp.gov.br/api/pncp"
+          out=Path("artifacts/pe39_priority_official")
+          dl=out/"downloads"; ex=out/"extracted"; textdir=out/"text"
+          for p in (out,dl,ex,textdir): p.mkdir(parents=True,exist_ok=True)
+
+          def get_json(url):
+              r=requests.get(url,headers={"User-Agent":"SBMI official-source audit/1.0","Accept":"application/json, */*"},timeout=90)
+              try: body=r.json()
+              except Exception: body={"raw":r.text[:5000]}
+              return {"url":url,"status":r.status_code,"body":body}
+
+          # Official procurement metadata.
+          compra=get_json(f"https://pncp.gov.br/api/consulta/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}")
+          docs=get_json(f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/arquivos")
+          (out/"compra.json").write_text(json.dumps(compra,ensure_ascii=False,indent=2),encoding="utf-8")
+          (out/"documentos.json").write_text(json.dumps(docs,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Concurrent item + result retrieval for the 18 priority conductor lines.
+          def fetch_item(n):
+              item=get_json(f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens/{n}")
+              res=get_json(f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens/{n}/resultados")
+              return n,item,res
+          items={}; results={}
+          with ThreadPoolExecutor(max_workers=12) as pool:
+              futs=[pool.submit(fetch_item,n) for n in ITEMS]
+              for fut in as_completed(futs):
+                  n,item,res=fut.result()
+                  items[str(n)]=item
+                  results[str(n)]=res
+          (out/"priority_items.json").write_text(json.dumps(items,ensure_ascii=False,indent=2),encoding="utf-8")
+          (out/"priority_results.json").write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Download every official document currently listed, including result ata files.
+          doclist=docs["body"] if isinstance(docs.get("body"),list) else docs.get("body",{}).get("documentos",[])
+          manifest=[]
+          for i,d in enumerate(doclist or [],1):
+              u=d.get("url") or d.get("uri")
+              if not u: continue
+              if u.startswith("/"): u=urljoin("https://pncp.gov.br",u)
+              r=requests.get(u,headers={"User-Agent":"SBMI official-source audit/1.0"},timeout=180)
+              title=d.get("titulo") or f"doc_{i}"
+              seq=d.get("sequencialDocumento",i)
+              suffix=Path(title).suffix or Path(urlparse(r.url).path).suffix or ".bin"
+              safe=re.sub(r"[^A-Za-z0-9._-]+","_",Path(title).stem)[:100]
+              fp=dl/f"{int(seq):03d}_{safe}{suffix}"
+              if r.status_code==200: fp.write_bytes(r.content)
+              rec={**d,"download_status":r.status_code,"file":str(fp) if fp.exists() else None,
+                   "bytes":len(r.content),"sha256":hashlib.sha256(r.content).hexdigest() if r.status_code==200 else None}
+              manifest.append(rec)
+          (out/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Extract 7z and zip result archives.
+          for fp in dl.iterdir():
+              target=ex/fp.stem; target.mkdir(exist_ok=True)
+              try:
+                  if fp.suffix.lower()==".7z":
+                      with py7zr.SevenZipFile(fp,"r") as z: z.extractall(target)
+                  elif fp.suffix.lower()==".zip":
+                      with zipfile.ZipFile(fp) as z: z.extractall(target)
+              except Exception as e:
+                  (target/"EXTRACTION_ERROR.txt").write_text(repr(e),encoding="utf-8")
+          for p in sorted(ex.rglob("*")):
+              try: os.chmod(p,0o755 if p.is_dir() else 0o644)
+              except Exception: pass
+
+          # Extract searchable text.
+          combined=[]
+          index=[]
+          for fp in [p for p in ex.rglob("*") if p.is_file()]:
+              t=""; err=None
+              try:
+                  if fp.suffix.lower()==".pdf":
+                      t="\n".join((pg.extract_text() or "") for pg in PdfReader(str(fp)).pages)
+                  elif fp.suffix.lower()==".docx":
+                      d=Document(str(fp)); t="\n".join(p.text for p in d.paragraphs)
+                      for tb in d.tables:
+                          for row in tb.rows: t+="\n"+" | ".join(c.text for c in row.cells)
+                  elif fp.suffix.lower() in {".txt",".csv",".json",".md",".html",".htm"}:
+                      t=fp.read_text(encoding="utf-8",errors="replace")
+              except Exception as e: err=repr(e)
+              if t.strip():
+                  rel=str(fp.relative_to(out))
+                  op=textdir/(re.sub(r"[^A-Za-z0-9._-]+","_",rel)+".txt")
+                  op.write_text(t,encoding="utf-8")
+                  combined.append(f"\n===== {rel} =====\n{t}")
+                  index.append({"source":rel,"chars":len(t),"text":str(op.relative_to(out))})
+              elif err:
+                  index.append({"source":str(fp.relative_to(out)),"chars":0,"error":err})
+          combined_text="\n".join(combined)
+          (out/"combined_text.txt").write_text(combined_text,encoding="utf-8")
+          (out/"text_index.json").write_text(json.dumps(index,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Compact official evidence to job log.
+          print("COMPRA_STATUS",compra["status"])
+          print("COMPRA",json.dumps(compra["body"],ensure_ascii=False))
+          print("DOCS",json.dumps(manifest,ensure_ascii=False,indent=2))
+          for n in ITEMS:
+              print("ITEM",n,json.dumps(items[str(n)],ensure_ascii=False))
+              print("RESULT",n,json.dumps(results[str(n)],ensure_ascii=False))
+
+          # Contexts from edital/TR/ata around the key technical and quota terms.
+          clean=combined_text.replace("\r","")
+          patterns=[r"cota.{0,80}reservad",r"75\s*%",r"25\s*%",r"4\s*x\s*10",r"2\s*x\s*2[,\.]5",
+                    r"plastichumbo",r"ATOX",r"multiplex",r"ME/EPP",r"microempresa",r"item\s+35",r"item\s+36"]
+          for pat in patterns:
+              print("PATTERN",pat)
+              count=0
+              for m in re.finditer(pat,clean,flags=re.I|re.S):
+                  a=max(0,m.start()-700); b=min(len(clean),m.end()+1000)
+                  print(clean[a:b].replace("\n"," ")[:1900])
+                  count+=1
+                  if count>=5: break
+              print("PATTERN_COUNT_SHOWN",count)
+
+          # Single readable bundle for artifact upload.
+          with tarfile.open("pe39_priority_official_bundle.tar.gz","w:gz") as tar:
+              tar.add(out,arcname="pe39_priority_official")
+          PY
+      - name: Upload PE39 priority audit bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: pe39-priority-official
+          retention-days: 30
+          if-no-files-found: error
+          path: pe39_priority_official_bundle.tar.gz

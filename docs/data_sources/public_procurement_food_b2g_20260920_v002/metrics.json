@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-09-20",
+  "mechanism": "alimentacao_escolar_agricultura_familiar",
+  "period": "2026",
+  "contracts_observed": 19,
+  "contracted_floor_R$": 447585.44,
+  "mean_contract_R$": 23557.13,
+  "median_contract_R$": 31923.5,
+  "contracts_ge_39000": 7,
+  "contracts_ge_39900": 6,
+  "max_contract_R$": 40000,
+  "statutory_cap_R$_per_CAF_year_EEx": 40000,
+  "statutory_source": "Resolução CD/FNDE nº 4, de 26/02/2026, art. 38",
+  "selection_priority": [
+    "localidade",
+    "grupos_prioritarios",
+    "organico_agroecologico",
+    "forma_organizacao"
+  ],
+  "price_rule": "Pesquisa da Entidade Executora por alimento/item considerando condições locais de entrega, frequência, apresentação, sazonalidade e disponibilidade.",
+  "controls": [
+    "contrato != pagamento",
+    "CPF/PF != automaticamente local",
+    "37,60% local refere-se somente ao subconjunto CNPJ",
+    "proximidade de R$40 mil deve ser lida à luz do teto regulatório"
+  ],
+  "next_action": "Reconciliar localidade/CAF/produto e pagamentos efetivos dos 19 contratos; cruzar com canal CNPJ por grupo alimentar.",
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

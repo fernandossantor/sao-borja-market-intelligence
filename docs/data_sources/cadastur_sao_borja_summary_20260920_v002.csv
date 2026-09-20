@@ -1,0 +1,7 @@
+category,period,geography,records_total,records_operation_or_regular,records_implantation,capacity_value,capacity_unit,additional_metric,additional_value,additional_unit,nature,limitation
+Meios de hospedagem,2T2026,São Borja/RS,2,2,0,90,UHs,Leitos,180,leitos,DADO OBSERVADO + CÁLCULO DE SOMA,"Cadastur cobre prestadores cadastrados; não equivale ao universo CNAE 55 nem mede ocupação ou demanda"
+Meios de hospedagem - acessibilidade,2T2026,São Borja/RS,2,2,0,21,UHs acessíveis,Leitos acessíveis,26,leitos,DADO CALCULADO,"Soma dos campos dos dois registros cadastrados"
+Agências de turismo,2T2026,São Borja/RS,7,6,1,,,,"",,DADO OBSERVADO + CONTAGEM,"Registro não mede vendas, clientes ou turismo receptivo/emissivo"
+Guias de turismo,2T2026,São Borja/RS,6,6,0,,,Município de atuação inclui São Borja,4,registros,DADO OBSERVADO + CONTAGEM,"Guia é pessoa física na maior parte dos registros; não somar a estabelecimentos como se fosse a mesma unidade"
+Transportadoras turísticas,2T2026,São Borja/RS,5,4,1,12,veículos declarados em registros em operação,,,,"DADO OBSERVADO + CÁLCULO DE SOMA","Quantidade declarada no Cadastur; não mede uso, frota licenciada total ou passageiros"
+Organizadora de eventos,2T2026,São Borja/RS,1,1,0,,,,"",,DADO OBSERVADO,"Cadastro formal; não mede número ou porte dos eventos"

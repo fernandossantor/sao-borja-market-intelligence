@@ -1057,3 +1057,96 @@ Essas contagens medem contratos identificados no módulo por exercício de cadas
 ### 21.6 Próxima etapa
 
 O próximo exercício é **2025**, completando o recorte prioritário 2021–2025 do censo contratual HIG antes de uma síntese longitudinal.
+
+
+## 22. Censo contratual HIG no exercício 2025 — módulo PMSB /acordos — 20/09/2026
+
+### 22.1 Cobertura da rodada
+
+Foi executada extração integral da grade oficial do exercício **2025** no módulo municipal `/acordos`.
+
+Resultados observados:
+
+- **135** linhas retornadas;
+- **135/135** páginas de detalhe verificadas;
+- **0** falhas;
+- **1** contrato cujo campo Contratado contém `FUNDACAO IVAN GOULART`.
+
+Artefato auditável:
+
+`docs/data_sources/sao_borja_hig_contracts_census_2025/`
+
+Com isso, o recorte prioritário **2021–2025** fica integralmente censado na camada contratual do módulo `/acordos`.
+
+### 22.2 Contrato HIG identificado em 2025
+
+Foi localizado:
+
+**Contrato 138/2025 — ID 1462**
+- assinatura: 18/07/2025;
+- vigência corrente observada no Portal: 18/07/2026 a 18/07/2027;
+- processo exibido no detalhe: **84/2025**;
+- objeto: execução de Termo de Fomento entre Município e Fundação para repasse de incentivo financeiro ao **Programa de Residência Médica**;
+- valor total corrente exibido: **R$ 126.420,00**;
+- crosswalk com Licitações: **PRD Dispensa Exceto Pequeno Valor 84/2025 → Contrato 138/2025**;
+- na série de Licitações: `licitacao_id = 21467`, `numero = 84/2025`, `codigo = 213`;
+- o detalhe corrente registra **Renovação em 27/07/2026**.
+
+### 22.3 Controle do campo “Empenho” no objeto
+
+A descrição do objeto inicia com a expressão “Empenho destinado à execução do Termo de Fomento”.
+
+Isso é **texto descritivo do objeto/procedimento**, não evidência suficiente, por si só, de empenho liquidado ou pagamento efetuado.
+
+Assim, o contrato permanece classificado nesta camada como:
+
+- instrumento contratual/fomento identificado;
+- valor corrente observado de R$ 126.420,00;
+- origem econômica do recurso **a verificar**;
+- execução financeira **não comprovada pelo módulo /acordos**.
+
+### 22.4 Snapshot corrente e renovação
+
+A assinatura ocorreu em 18/07/2025, mas a vigência hoje exibida é 18/07/2026–18/07/2027, com renovação registrada em 27/07/2026.
+
+Isso confirma novamente que o detalhe do Portal representa **estado administrativo corrente**. A vigência exibida não deve ser retroprojetada como vigência original do instrumento de 2025.
+
+O mesmo controle vale para o valor de R$ 126.420,00: sem o instrumento original ou execução financeira por competência, ele deve ser tratado como **snapshot corrente do contrato**, não como pagamento de 2025.
+
+### 22.5 Série censitária fechada 2021–2025
+
+| Exercício | Linhas retornadas | Detalhes verificados | Falhas | Contratos HIG |
+|---|---:|---:|---:|---:|
+| 2021 | 102 | 102 | 0 | 6 |
+| 2022 | 152 | 152 | 0 | 4 |
+| 2023 | 178 | 178 | 0 | 2 |
+| 2024 | 152 | 152 | 0 | 1 |
+| 2025 | 135 | 135 | 0 | 1 |
+
+**Total do recorte:** 719 páginas de detalhe verificadas e 14 contratos HIG identificados, sem falhas de leitura.
+
+Esse total de 14 corresponde a **contratos cadastrados nos exercícios**, não a relações financeiras independentes nem a pagamentos. Contratos antigos continuam ativos por renovação/aditivos em anos posteriores.
+
+### 22.6 Primeira leitura longitudinal
+
+A sequência 6 → 4 → 2 → 1 → 1 mostra redução do número de **novos registros contratuais HIG por exercício** no módulo.
+
+Isso **não autoriza concluir redução do financiamento ou da relação Município/FMS–Fundação**, porque simultaneamente contratos-base de exercícios anteriores permanecem ativos por aditivos e renovações.
+
+A estrutura observada sugere mudança de forma administrativa:
+
+- 2021 concentra instrumentos emergenciais de COVID e o contrato hospitalar-base 99/2021;
+- 2022 adiciona contratos estruturantes de sobreaviso, locação, diagnóstico e atenção renal;
+- 2023–2025 mostram menos contratos novos e maior continuidade de contratos anteriores, combinada com instrumentos específicos como diagnóstico, repasse federal, SERMulher, atenção renal e residência médica.
+
+Essa é uma **interpretação documental**, a ser confrontada com execução financeira e contabilidade da Fundação.
+
+### 22.7 Próxima etapa
+
+Encerrado o censo contratual 2021–2025, a prioridade deixa de ser ampliar inventário e passa a ser **análise longitudinal e integração com os demais módulos**.
+
+Novas coletas entram apenas quando necessárias para testar ou qualificar conclusões específicas, sobretudo:
+
+- execução histórica por CNPJ/instrumento/fonte;
+- DRE, balanços e composição anual de receitas da Fundação;
+- decomposição origem econômica × canal FMS × objeto.

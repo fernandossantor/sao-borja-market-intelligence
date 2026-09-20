@@ -54,30 +54,6 @@
       "url": "https://transparencia.saoborja.rs.gov.br/js/acordos/index.js",
       "status": 200,
       "bytes": 1282
-    },
-    {
-      "method": "GET",
-      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?instituicao=1&exercicio=2025&mes=",
-      "status": 200,
-      "bytes": 23912,
-      "contains_hig": false,
-      "looks_table": true
-    },
-    {
-      "method": "GET",
-      "url": "https://transparencia.saoborja.rs.gov.br/api/acordos/pesquisar?instituicao=1&exercicio=2025&mes=",
-      "status": 200,
-      "bytes": 22215,
-      "contains_hig": false,
-      "looks_table": true
-    },
-    {
-      "method": "GET",
-      "url": "https://transparencia.saoborja.rs.gov.br/api/acordos/index?instituicao=1&exercicio=2025&mes=",
-      "status": 200,
-      "bytes": 22215,
-      "contains_hig": false,
-      "looks_table": true
     }
   ],
   "institutions": [
@@ -253,5 +229,158 @@
     "value": "1",
     "label": "PREFEITURA MUNICIPAL DE SÃO BORJA"
   },
-  "selected_exercise": "2025"
+  "exercise_endpoint": {
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/buscarExercicios/1",
+    "status": 200,
+    "payload": {
+      "2018": "2018",
+      "2019": "2019",
+      "2020": "2020",
+      "2021": "2021",
+      "2022": "2022",
+      "2023": "2023",
+      "2024": "2024",
+      "2025": "2025",
+      "2026": "2026"
+    },
+    "years": [
+      "2018",
+      "2019",
+      "2020",
+      "2021",
+      "2022",
+      "2023",
+      "2024",
+      "2025",
+      "2026"
+    ]
+  },
+  "year_probes": [
+    {
+      "year": "2019",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2019&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2019",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2020",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2020&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2020",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2021",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2021&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2021",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2022",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2022&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2022",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2023",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2023&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2023",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2024",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2024&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2024",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2025",
+      "method": "GET",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar?FiltroInstituicao=1&FiltroExercicio=2025&FiltroMes=",
+      "status": 200,
+      "bytes": 23948,
+      "hig_hits": [],
+      "contains_hig": false
+    },
+    {
+      "year": "2025",
+      "method": "POST",
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+      "status": 200,
+      "bytes": 23766,
+      "hig_hits": [],
+      "contains_hig": false
+    }
+  ]
 }

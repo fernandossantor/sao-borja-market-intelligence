@@ -1,0 +1,124 @@
+name: sao-borja-public-accounts-current-revenue-composition
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-public-accounts-current-revenue-composition.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Build current revenue composition
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_public_accounts_revenue_composition_2019_2025"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv, json, math, re
+          from pathlib import Path
+
+          SRC=Path("docs/data_sources/sao_borja_public_accounts_siconfi_dca_2019_2025/dca_rows_2019_2025.csv")
+          OUT=Path("artifacts/sao_borja_public_accounts_revenue_composition_2019_2025")
+          YEARS=range(2019,2026)
+
+          with SRC.open(encoding="utf-8-sig",newline="") as fh:
+              rows=list(csv.DictReader(fh))
+
+          def numcode(r):
+              return re.sub(r"^[A-Z]+","",str(r.get("cod_conta","")))
+
+          def val(r):
+              try:return float(str(r.get("valor","")).replace(",","."))
+              except:return math.nan
+
+          out=[]
+          checks=[]
+          for y in YEARS:
+              yy=[r for r in rows if int(r["_exercise"])==y and r["_annex_requested"]=="DCA-Anexo I-C"
+                  and r.get("coluna")=="Receitas Brutas Realizadas"]
+              parent=[r for r in yy if numcode(r)=="1.0.0.0.00.0.0"]
+              if len(parent)!=1:
+                  raise RuntimeError(f"{y}: current revenue parent count={len(parent)}")
+              total=val(parent[0])
+              comps=[r for r in yy if re.fullmatch(r"1\.[0-9]\.0\.0\.00\.0\.0",numcode(r))]
+              comps=sorted(comps,key=lambda r:numcode(r))
+              for r in comps:
+                  out.append({
+                      "year":y,
+                      "cod_conta":numcode(r),
+                      "conta":r.get("conta"),
+                      "value_R$":val(r),
+                      "share_current_revenue_pct":100*val(r)/total if total else None,
+                      "source":"Tesouro Nacional — SICONFI/DCA Anexo I-C",
+                      "nature":"observed value; calculated share",
+                  })
+              comp_sum=sum(val(r) for r in comps if not math.isnan(val(r)))
+              checks.append({
+                  "year":y,
+                  "current_revenue_R$":total,
+                  "top_level_components_sum_R$":comp_sum,
+                  "difference_R$":comp_sum-total,
+                  "components_n":len(comps),
+              })
+
+          with (OUT/"current_revenue_components.csv").open("w",newline="",encoding="utf-8-sig") as fh:
+              w=csv.DictWriter(fh,fieldnames=list(out[0].keys()));w.writeheader();w.writerows(out)
+
+          with (OUT/"validation.csv").open("w",newline="",encoding="utf-8-sig") as fh:
+              w=csv.DictWriter(fh,fieldnames=list(checks[0].keys()));w.writeheader();w.writerows(checks)
+
+          summary={"period":"2019-2025","source":"SICONFI/DCA Anexo I-C","checks":checks}
+          (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist analysis
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/sao_borja_public_accounts_revenue_composition_2019_2025"
+          mkdir -p "$DEST"
+          cp artifacts/sao_borja_public_accounts_revenue_composition_2019_2025/* "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # São Borja — composição da receita corrente bruta — 2019–2025
+
+          Fonte: Tesouro Nacional / SICONFI, DCA Anexo I-C.
+          Geografia: São Borja/RS.
+          Unidade: R$ correntes por exercício.
+
+          O arquivo seleciona as contas de primeiro nível abaixo de Receitas Correntes
+          (1.x.0.0.00.0.0) e calcula sua participação na receita corrente bruta.
+          A finalidade é explicar a composição anual, em especial a queda excepcional da
+          razão transferências/receita observada em 2022.
+
+          As participações são calculadas. Os valores monetários são observados.
+          Não chamar receita corrente não-transferência de "receita própria" sem revisar
+          a composição das categorias.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "analysis: decompose current revenue 2019 2025"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-public-accounts-revenue-composition-2019-2025
+          path: artifacts/sao_borja_public_accounts_revenue_composition_2019_2025/
+          retention-days: 30

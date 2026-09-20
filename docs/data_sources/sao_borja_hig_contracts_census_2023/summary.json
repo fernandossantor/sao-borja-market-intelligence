@@ -1,0 +1,53 @@
+{
+  "exercise": "2023",
+  "portal_query": {
+    "page": "1",
+    "total": "178",
+    "records": "500",
+    "rows_returned": 178
+  },
+  "details_checked": 178,
+  "failures": [],
+  "hig_contracts_found": 2,
+  "hig_contracts": [
+    {
+      "exercise": "2023",
+      "row_id": "768",
+      "contract_number": "20",
+      "grid_signature_date": "30/03/2023",
+      "grid_validity": "30/03/2023 até 28/03/2024",
+      "detail_number": "20 - 2023 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "30/03/2023",
+      "detail_validity": "30/03/2023 até 28/03/2024",
+      "detail_value_total_snapshot": "1.075.538,21",
+      "process": "5562/2023",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Autorização de repasse de recurso federal à entidade filantrópica Ivan Goulart.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/768"
+    },
+    {
+      "exercise": "2023",
+      "row_id": "898",
+      "contract_number": "146",
+      "grid_signature_date": "28/09/2023",
+      "grid_validity": "28/09/2023 até 31/12/2023",
+      "detail_number": "146 - 2023 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "28/09/2023",
+      "detail_validity": "28/09/2023 até 31/12/2023",
+      "detail_value_total_snapshot": "142.367,25",
+      "process": "16471/2023",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Contratação da Fundação Ivan Goulart para realização de mutirão de exames de tomografia e ressonância a serem realizados no período de 90 dias. A fim de atender a demanda de pacientes que aguardam por estes exames para tratamento de doenças e para realização de cirurgias. Melhores descritos no Termo de Referência e demais documentos que integram o processo de Inexigibilidade.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/898"
+    }
+  ],
+  "controls": [
+    "Contrato/detail snapshot não equivale a pagamento.",
+    "Valor Total do detalhe é estado corrente e não deve ser retroprojetado.",
+    "Processo ≠ contrato ≠ aditivo ≠ empenho ≠ liquidação ≠ pagamento."
+  ]
+}

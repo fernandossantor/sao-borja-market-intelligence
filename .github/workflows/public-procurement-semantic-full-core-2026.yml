@@ -1,0 +1,192 @@
+name: public-procurement-semantic-full-core-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/public-procurement-semantic-full-core-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Build full-core semantic coverage and residual priority
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/public_procurement_semantic_full_core_2026"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json
+          from collections import defaultdict
+          from pathlib import Path
+
+          DETAIL=Path("docs/data_sources/public_procurement_function_territory_2026/core_commitment_detail_2026.csv")
+          KNOWN=Path("docs/data_sources/public_procurement_object_semantics_20260920_v001/top35_semantic_reclassification.csv")
+          OUT=Path("artifacts/public_procurement_semantic_full_core_2026")
+          TARGET_RUBRICS={
+              "MATERIAL DE CONSUMO",
+              "MATERIAL, BEM OU SERVIÇO PARA DIST. GRATUITA",
+              "EQUIPAMENTOS E MATERIAL PERMANENTE",
+          }
+
+          def read(path):
+              with path.open(encoding="utf-8-sig",newline="") as f:
+                  return list(csv.DictReader(f))
+
+          known={}
+          for r in read(KNOWN):
+              known[(r["cnpj"],r["rubrica_orcamentaria"])]=r
+
+          rows=read(DETAIL)
+          if not rows:
+              raise RuntimeError("core commitment detail is empty")
+
+          all_paid=sum(float(r["pago_R$"] or 0) for r in rows)
+          external=[r for r in rows if str(r["territorial_class"]).startswith("EXTERNAL_")]
+          ext_paid=sum(float(r["pago_R$"] or 0) for r in external)
+
+          grouped=defaultdict(lambda:{
+              "nome":"","paid":0.0,"commitments":0,"semantic_class":"UNCLASSIFIED",
+              "confidence":"","object_evidence":"","source":"","method_note":""
+          })
+          for r in external:
+              key=(r["cnpj"],r["rubrica"],r["acao"])
+              g=grouped[key]
+              g["nome"]=r["nome_credor"]
+              g["paid"]+=float(r["pago_R$"] or 0)
+              g["commitments"]+=1
+              k=known.get((r["cnpj"],r["rubrica"]))
+              if k:
+                  g["semantic_class"]=k["semantic_class"]
+                  g["confidence"]=k["confidence"]
+                  g["object_evidence"]=k["object_evidence"]
+                  g["source"]=k["source"]
+                  g["method_note"]=k["method_note"]
+
+          outrows=[]
+          for (cnpj,rub,acao),g in grouped.items():
+              outrows.append({
+                  "cnpj":cnpj,"nome_credor":g["nome"],"rubrica":rub,"acao":acao,
+                  "pago_R$":round(g["paid"],2),"empenhos":g["commitments"],
+                  "semantic_class":g["semantic_class"],"confidence":g["confidence"],
+                  "object_evidence":g["object_evidence"],"source":g["source"],
+                  "method_note":g["method_note"]
+              })
+          outrows.sort(key=lambda x:x["pago_R$"],reverse=True)
+
+          with (OUT/"external_pair_action_semantics.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(outrows[0].keys());w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(outrows)
+
+          residual=[r for r in outrows if r["semantic_class"]=="UNCLASSIFIED"]
+          with (OUT/"residual_priority_top100.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(outrows[0].keys());w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(residual[:100])
+
+          # Pair-level consolidation prevents an entity with several actions from being counted as separate audit coverage.
+          pair=defaultdict(lambda:{"nome":"","paid":0.0,"semantic_class":"UNCLASSIFIED","rubrica":""})
+          for r in external:
+              key=(r["cnpj"],r["rubrica"])
+              p=pair[key];p["nome"]=r["nome_credor"];p["rubrica"]=r["rubrica"];p["paid"]+=float(r["pago_R$"] or 0)
+              k=known.get(key)
+              if k:p["semantic_class"]=k["semantic_class"]
+          pairrows=[{"cnpj":k[0],"nome_credor":v["nome"],"rubrica":v["rubrica"],"pago_R$":round(v["paid"],2),
+                     "semantic_class":v["semantic_class"]} for k,v in pair.items()]
+          pairrows.sort(key=lambda x:x["pago_R$"],reverse=True)
+          with (OUT/"external_pair_semantic_coverage.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(pairrows[0].keys());w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(pairrows)
+
+          known_paid=sum(x["pago_R$"] for x in pairrows if x["semantic_class"]!="UNCLASSIFIED")
+          target=[x for x in pairrows if x["rubrica"] in TARGET_RUBRICS]
+          target_paid=sum(x["pago_R$"] for x in target)
+          target_known=sum(x["pago_R$"] for x in target if x["semantic_class"]!="UNCLASSIFIED")
+          target_residual=target_paid-target_known
+
+          byrub=defaultdict(lambda:{"paid":0.0,"known":0.0,"pairs":0,"known_pairs":0})
+          for x in pairrows:
+              z=byrub[x["rubrica"]];z["paid"]+=x["pago_R$"];z["pairs"]+=1
+              if x["semantic_class"]!="UNCLASSIFIED":
+                  z["known"]+=x["pago_R$"];z["known_pairs"]+=1
+          rubrows=[]
+          for rub,z in sorted(byrub.items(),key=lambda kv:kv[1]["paid"],reverse=True):
+              rubrows.append({
+                  "rubrica":rub,"external_paid_R$":round(z["paid"],2),
+                  "semantically_reviewed_R$":round(z["known"],2),
+                  "semantic_value_coverage_pct":100*z["known"]/z["paid"] if z["paid"] else 0,
+                  "external_pairs":z["pairs"],"reviewed_pairs":z["known_pairs"]
+              })
+          with (OUT/"rubric_semantic_coverage.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(rubrows[0].keys());w=csv.DictWriter(f,fieldnames=fields);w.writeheader();w.writerows(rubrows)
+
+          report={
+              "source":"Portal da Transparência PMSB + documented object classifications",
+              "period":"01/01/2026–19/09/2026",
+              "core_detail_rows":len(rows),
+              "core_paid_R$":round(all_paid,2),
+              "external_detail_rows":len(external),
+              "external_paid_R$":round(ext_paid,2),
+              "external_pairs":len(pairrows),
+              "semantically_reviewed_external_pairs":sum(1 for x in pairrows if x["semantic_class"]!="UNCLASSIFIED"),
+              "semantically_reviewed_external_paid_R$":round(known_paid,2),
+              "semantic_coverage_external_value_pct":100*known_paid/ext_paid if ext_paid else 0,
+              "three_rubric_external_paid_R$":round(target_paid,2),
+              "three_rubric_reviewed_paid_R$":round(target_known,2),
+              "three_rubric_semantic_coverage_pct":100*target_known/target_paid if target_paid else 0,
+              "three_rubric_residual_unreviewed_R$":round(target_residual,2),
+              "control":"Reviewed means pair cnpj×rubric has a semantic classification from the top-35 audit; it does not mean every item inside the pair has been individually inspected.",
+              "limitations":[
+                  "Budget rubric is not procurement object.",
+                  "Budget action is administrative purpose, not item-level description.",
+                  "Known pair classifications can still be mixed-object or item-indeterminate.",
+                  "External creditor does not equal final economic leakage."
+              ]
+          }
+          (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact semantic audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_object_semantics_20260920_v003"
+          mkdir -p "$DEST"
+          cp artifacts/public_procurement_semantic_full_core_2026/* "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # PMSB — auditoria semântica do core de compras/contratações — 2026 — v003
+
+          Fonte: Portal da Transparência PMSB, detalhe integral do CORE_PROCUREMENT,
+          reconciliado a R$72.039.491,18.
+
+          Esta camada usa o detalhe de empenhos para medir cobertura da revisão semântica
+          dos maiores pares externos CNPJ × rubrica. "Revisado" significa que o par
+          recebeu classificação semântica documental/analítica no probe prioritário;
+          não significa que todos os itens de todos os empenhos foram individualmente
+          inspecionados.
+
+          Rubrica orçamentária, ação administrativa, objeto contratual e item adquirido
+          permanecem conceitos distintos.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "analysis: audit full-core procurement semantic coverage"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-procurement-semantic-full-core-2026
+          path: artifacts/public_procurement_semantic_full_core_2026/
+          retention-days: 30

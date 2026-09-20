@@ -181,9 +181,11 @@ Essas diferenças justificam estratégias analíticas distintas e não um único
 
 ## 10. Status editorial
 
-**Sem novo Delta_cadernos nesta versão.**
+**Bens essenciais: PROMOVER COMO ESTRUTURA DO INVENTÁRIO DOCUMENTAL.**
 
-O artefato organiza o que já é estruturalmente defensável. A métrica de raízes de bens essenciais foi recalculada; a pendência remanescente é cadastral/territorial no join oficial RFB, não mais o cálculo de pulverização.
+A métrica de raízes foi recalculada e registrada em `Delta_cadernos` como novo delta para o sucessor do caderno de Bens Essenciais. A pendência remanescente é cadastral/territorial no join oficial RFB, não mais o cálculo de pulverização.
+
+Saúde/higiene, bens não essenciais, serviços e alimentação permanecem neste artefato como readiness/controle até revalidação ou decomposição adicional.
 
 ## 11. Artefatos
 

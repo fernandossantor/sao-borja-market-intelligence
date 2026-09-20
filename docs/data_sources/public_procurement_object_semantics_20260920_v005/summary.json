@@ -1,0 +1,11 @@
+{
+  "period": "01/01/2026–19/09/2026",
+  "third_pass_action_rows": 18,
+  "third_pass_paid_R$": 287961.82,
+  "three_rubric_reviewed_after_third_pass_R$": 10893269.78,
+  "three_rubric_semantic_coverage_after_third_pass_pct": 87.70501593465184,
+  "three_rubric_residual_after_third_pass_R$": 1527080.03,
+  "external_total_reviewed_after_third_pass_R$": 11428027.31,
+  "external_total_semantic_coverage_after_third_pass_pct": 63.126185824058325,
+  "control": "Third pass is action-level semantic classification. Historical official evidence is used only to classify family when paired with current action; historical item/price/quantity are not projected to 2026."
+}

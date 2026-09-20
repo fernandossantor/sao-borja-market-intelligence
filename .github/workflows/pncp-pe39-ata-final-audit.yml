@@ -1,0 +1,145 @@
+name: pncp-pe39-ata-final-audit
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pncp-pe39-ata-final-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and audit official PE39 Ata Final
+        run: |
+          python -m pip install --quiet --upgrade requests pypdf
+          python - <<'PY'
+          import json, re, zipfile, hashlib, time
+          from pathlib import Path
+          import requests
+          from pypdf import PdfReader
+
+          URL="https://pncp.gov.br/pncp-api/v1/orgaos/88489786000101/compras/2026/136/arquivos/3"
+          out=Path("pe39_ata_final_audit")
+          out.mkdir(exist_ok=True)
+          zpath=out/"Ata_Final_144426_250826.zip"
+
+          last=None
+          for attempt in range(5):
+              try:
+                  r=requests.get(URL,headers={"User-Agent":"SBMI official-source audit/1.0"},timeout=120)
+                  if r.status_code==200:
+                      zpath.write_bytes(r.content)
+                      break
+                  last=f"HTTP {r.status_code}"
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(2*(attempt+1))
+          else:
+              raise SystemExit(last)
+
+          meta={"url":URL,"bytes":zpath.stat().st_size,"sha256":hashlib.sha256(zpath.read_bytes()).hexdigest()}
+          (out/"download_meta.json").write_text(json.dumps(meta,indent=2),encoding="utf-8")
+
+          extracted=out/"extracted"; extracted.mkdir(exist_ok=True)
+          with zipfile.ZipFile(zpath) as z:
+              z.extractall(extracted)
+
+          texts=[]
+          files=[]
+          for fp in extracted.rglob("*"):
+              if not fp.is_file(): continue
+              files.append(str(fp.relative_to(out)))
+              t=""
+              if fp.suffix.lower()==".pdf":
+                  try:
+                      t="\n".join((pg.extract_text() or "") for pg in PdfReader(str(fp)).pages)
+                  except Exception as e:
+                      t=f"[PDF_EXTRACT_ERROR {e!r}]"
+              elif fp.suffix.lower() in {".txt",".csv",".json",".html",".htm"}:
+                  t=fp.read_text(encoding="utf-8",errors="replace")
+              if t.strip():
+                  texts.append(f"\n===== {fp.name} =====\n{t}")
+          full="\n".join(texts)
+          (out/"ata_final_text.txt").write_text(full,encoding="utf-8")
+          (out/"files.json").write_text(json.dumps(files,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          terms={
+            "Iluminar":["ILUMINAR","LOPES & GRUENDEMANN","LOPES E GRUENDEMANN","09674510000119","09.674.510/0001-19"],
+            "Mercado JL":["MERCADO JL","17991032000107","17.991.032/0001-07"],
+            "Comercial Loss":["COMERCIAL LOSS","26003402000133","26.003.402/0001-33"],
+            "Steelpet":["STEELPET","46746201000133","46.746.201/0001-33"],
+            "Agropecuaria Vieira":["AGROPECUARIA VIEIRA","11263905000170","11.263.905/0001-70"],
+            "Agropecuaria Centauro":["AGROPECUARIA CENTAURO","29263180000186","29.263.180/0001-86"],
+            "Guasso":["GUASSO FERRAGENS","GUASSO"],
+            "Comercial Passo":["COMERCIAL PASSO"],
+            "Marta Ferragem":["MARTA FERRAGEM"],
+            "Casa do Led Ferragem Bueno":["CASA DO LED","FERRAGEM BUENO"]
+          }
+          norm_full=full.upper().replace(".","").replace("/","").replace("-","")
+          cand={}
+          for name,variants in terms.items():
+              found=[]
+              for v in variants:
+                  nv=v.upper().replace(".","").replace("/","").replace("-","")
+                  p=0
+                  while True:
+                      p=norm_full.find(nv,p)
+                      if p<0: break
+                      found.append({"variant":v,"context":full[max(0,p-500):min(len(full),p+len(v)+1200)].replace("\n"," ")})
+                      p+=max(1,len(nv))
+                      if len(found)>=20: break
+                  if len(found)>=20: break
+              cand[name]={"hits":len(found),"examples":found[:8]}
+          (out/"candidate_hits.json").write_text(json.dumps(cand,ensure_ascii=False,indent=2),encoding="utf-8")
+          print("CANDIDATE_HITS",json.dumps({k:v["hits"] for k,v in cand.items()},ensure_ascii=False))
+
+          # Extract compact contexts for the 18 priority items and known accepted-result tables.
+          ITEMS=[7,8,18,25,30,35,36,41,49,78,79,80,81,82,83,84,85,86]
+          pri={}
+          up=full.upper()
+          for n in ITEMS:
+              patterns=[f"{n:04d} ",f"{n:04d}\t",f"ITEM {n:04d}",f"ITEM {n:03d}",f"ITEM {n} "]
+              hits=[]
+              for pat in patterns:
+                  p=0
+                  while True:
+                      p=up.find(pat.upper(),p)
+                      if p<0: break
+                      hits.append(full[max(0,p-250):min(len(full),p+1800)].replace("\n"," "))
+                      p+=len(pat)
+                      if len(hits)>=25: break
+                  if hits: break
+              pri[str(n)]=hits[:25]
+          (out/"priority_contexts.json").write_text(json.dumps(pri,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Print contexts biased to final/accepted result rows, plus item35/36 and quota statements.
+          for n in ITEMS:
+              hs=pri[str(n)]
+              selected=[h for h in hs if any(x in h.upper() for x in ["ACEITO","ARREMATANTE","VENCEDOR","VALOR TOTAL","MARCA/ FABRICANTE"])]
+              print("PRIORITY",n,json.dumps(selected[:3] or hs[:2],ensure_ascii=False))
+          for pat in [r"cota reservada",r"ampla concorr.ncia",r"item 0036",r"0035 CABO PP",r"0036 CABO PP"]:
+              ms=list(re.finditer(pat,full,flags=re.I))
+              print("TERM",pat,"COUNT",len(ms))
+              for m in ms[:8]:
+                  print(full[max(0,m.start()-500):min(len(full),m.end()+1200)].replace("\n"," ")[:1800])
+          PY
+      - name: Upload audit summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: pe39-ata-final-audit
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            pe39_ata_final_audit/download_meta.json
+            pe39_ata_final_audit/files.json
+            pe39_ata_final_audit/candidate_hits.json
+            pe39_ata_final_audit/priority_contexts.json
+            pe39_ata_final_audit/ata_final_text.txt

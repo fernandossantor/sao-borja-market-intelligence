@@ -1,0 +1,169 @@
+name: sao-borja-hig-contracts-census-2022
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-hig-contracts-census-2022.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Census HIG contracts in 2022
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_hig_contracts_census_2021"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json,re,time,requests
+          from html import unescape
+          from pathlib import Path
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          YEAR="2022"
+          OUT=Path("artifacts/sao_borja_hig_contracts_census_2021")
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI HIG contracts census/1.0"})
+
+          data={"instituicao":"1","exercicio":YEAR,"mes":"",
+                "page":"1","rows":"500","sidx":"Acordo.numero","sord":"asc",
+                "_search":"false","nd":"0"}
+          gr=s.post(BASE+"/acordos/pesquisar",data=data,
+                    headers={"X-Requested-With":"XMLHttpRequest"},timeout=60)
+          gr.raise_for_status()
+          gj=gr.json()
+          rows=gj.get("rows") or []
+
+          def plain(html):
+              x=re.sub(r'<script.*?</script>',' ',html,flags=re.I|re.S)
+              x=re.sub(r'<style.*?</style>',' ',x,flags=re.I|re.S)
+              x=re.sub(r'<[^>]+>',' ',x)
+              return re.sub(r'\s+',' ',unescape(x)).strip()
+
+          def fld(txt,label,next_labels):
+              pat=label+r"\s*:\s*(.*?)(?=\s+(?:"+"|".join(next_labels)+r")\s*:|$)"
+              m=re.search(pat,txt,re.I|re.S)
+              return m.group(1).strip() if m else ""
+
+          labels=["Número","Situação","Data da Assinatura","Lei","Período de Vigência",
+                  "Valor Total","Processo","Contratado","Objeto"]
+
+          hig=[]
+          failures=[]
+          for idx,row in enumerate(rows,1):
+              rid=str(row.get("id",""))
+              if not rid:
+                  continue
+              try:
+                  dr=s.get(BASE+"/acordos/view/"+rid,timeout=45)
+                  dr.raise_for_status()
+                  txt=plain(dr.text)
+                  contratado=fld(txt,"Contratado",labels)
+                  if re.search(r"IVAN\s+GOULART",contratado,re.I):
+                      objeto=fld(txt,"Objeto",labels)
+                      objeto=objeto.split(" Itens ")[0].strip()
+                      timeline=[]
+                      for kind,date in re.findall(r"\b(Aditamento|Renovação|Vigência|Alteração de Dotação)\s+(\d{2}/\d{2}/\d{4})",txt,re.I):
+                          timeline.append({"tipo":kind,"data":date})
+                      cell=row.get("cell") or []
+                      hig.append({
+                          "exercise":YEAR,
+                          "row_id":rid,
+                          "contract_number":str(cell[0]).strip() if cell else "",
+                          "grid_signature_date":str(cell[1]).strip() if len(cell)>1 else "",
+                          "grid_validity":str(cell[2]).strip() if len(cell)>2 else "",
+                          "detail_number":fld(txt,"Número",labels),
+                          "detail_status":fld(txt,"Situação",labels),
+                          "detail_signature_date":fld(txt,"Data da Assinatura",labels),
+                          "detail_validity":fld(txt,"Período de Vigência",labels),
+                          "detail_value_total_snapshot":fld(txt,"Valor Total",labels),
+                          "process":fld(txt,"Processo",labels),
+                          "contractor":contratado,
+                          "object":objeto,
+                          "timeline":timeline,
+                          "url":dr.url
+                      })
+              except Exception as e:
+                  failures.append({"row_id":rid,"error":repr(e)})
+              if idx % 25 == 0:
+                  time.sleep(0.5)
+
+          summary={
+              "exercise":YEAR,
+              "portal_query":{"page":gj.get("page"),"total":gj.get("total"),
+                              "records":gj.get("records"),"rows_returned":len(rows)},
+              "details_checked":len(rows)-len(failures),
+              "failures":failures,
+              "hig_contracts_found":len(hig),
+              "hig_contracts":hig,
+              "controls":[
+                  "Contrato/detail snapshot não equivale a pagamento.",
+                  "Valor Total do detalhe é estado corrente e não deve ser retroprojetado.",
+                  "Processo ≠ contrato ≠ aditivo ≠ empenho ≠ liquidação ≠ pagamento."
+              ]
+          }
+          (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          fields=["exercise","row_id","contract_number","grid_signature_date","grid_validity",
+                  "detail_number","detail_status","detail_signature_date","detail_validity",
+                  "detail_value_total_snapshot","process","contractor","object","timeline_json","url"]
+          with (OUT/"hig_contracts_2022.csv").open("w",newline="",encoding="utf-8") as fh:
+              w=csv.DictWriter(fh,fieldnames=fields)
+              w.writeheader()
+              for r in hig:
+                  rr={k:r.get(k,"") for k in fields if k!="timeline_json"}
+                  rr["timeline_json"]=json.dumps(r.get("timeline",[]),ensure_ascii=False)
+                  w.writerow(rr)
+
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist census
+        if: always()
+        shell: bash
+        run: |
+          DEST="docs/data_sources/sao_borja_hig_contracts_census_2021"
+          mkdir -p "$DEST"
+          if [ -f artifacts/sao_borja_hig_contracts_census_2021/summary.json ]; then
+            cp artifacts/sao_borja_hig_contracts_census_2021/summary.json "$DEST/summary.json"
+            cp artifacts/sao_borja_hig_contracts_census_2021/hig_contracts_2022.csv "$DEST/hig_contracts_2022.csv"
+            cat > "$DEST/README.md" <<'EOF'
+          # PMSB — censo exploratório de contratos HIG — exercício 2022
+
+          Extração integral da grade oficial de contratos de 2021 no módulo `/acordos`,
+          seguida de leitura dos detalhes e filtro pelo contratado FUNDACAO IVAN GOULART.
+
+          O resultado é uma camada contratual. Não constitui série de empenhos, liquidações
+          ou pagamentos. O campo `Valor Total` do detalhe é preservado como snapshot do
+          portal na data da extração e não deve ser retroprojetado.
+          EOF
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$DEST"
+            if ! git diff --cached --quiet; then
+              git commit -m "data: census HIG contracts for 2022"
+              git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+              git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+            fi
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-hig-contracts-census-2022
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_hig_contracts_census_2021/

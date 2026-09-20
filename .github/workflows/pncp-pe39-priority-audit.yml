@@ -152,14 +152,60 @@ jobs:
                   if count>=5: break
               print("PATTERN_COUNT_SHOWN",count)
 
-          # Single readable bundle for artifact upload.
-          with tarfile.open("pe39_priority_official_bundle.tar.gz","w:gz") as tar:
-              tar.add(out,arcname="pe39_priority_official")
+          # Persist a compact audit bundle only. Raw extracted archives can
+          # retain restrictive source permissions, so they are intentionally excluded.
+          compact=Path("pe39_priority_compact")
+          compact.mkdir(exist_ok=True)
+          for name in ("compra.json","documentos.json","priority_items.json","priority_results.json","manifest.json","combined_text.txt","text_index.json"):
+              src=out/name
+              if src.exists():
+                  (compact/name).write_bytes(src.read_bytes())
+          # Candidate/operator contexts for symmetric participation checks.
+          candidate_terms=[
+              "ILUMINAR","LOPES","09674510000119",
+              "MERCADO JL","17991032000107",
+              "COMERCIAL LOSS","26003402000133",
+              "STEELPET","46746201000133",
+              "AGROPECUARIA VIEIRA","11263905000170",
+              "AGROPECUARIA CENTAURO","29263180000186",
+              "GUASSO","COMERCIAL PASSO","MARTA FERRAGEM","CASA DO LED","FERRAGEM BUENO"
+          ]
+          contexts={}
+          up=clean.upper().replace(".","").replace("/","").replace("-","")
+          for term in candidate_terms:
+              norm=term.upper().replace(".","").replace("/","").replace("-","")
+              hits=[]
+              pos=0
+              while True:
+                  p=up.find(norm,pos)
+                  if p<0: break
+                  hits.append(clean[max(0,p-700):min(len(clean),p+len(term)+1200)])
+                  pos=p+max(1,len(norm))
+                  if len(hits)>=20: break
+              contexts[term]=hits
+          (compact/"candidate_contexts.json").write_text(json.dumps(contexts,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          # Extract line-like contexts for every priority item from the accepted/final ata text.
+          item_contexts={}
+          for n in ITEMS:
+              keys=[f"{n:04d}",f"{n:03d}",f"ITEM {n}",f"ITEM {n:02d}"]
+              hits=[]
+              for key in keys:
+                  pos=0
+                  while True:
+                      p=clean.upper().find(key.upper(),pos)
+                      if p<0: break
+                      hits.append(clean[max(0,p-350):min(len(clean),p+1900)])
+                      pos=p+len(key)
+                      if len(hits)>=30: break
+                  if hits: break
+              item_contexts[str(n)]=hits[:30]
+          (compact/"priority_item_contexts.json").write_text(json.dumps(item_contexts,ensure_ascii=False,indent=2),encoding="utf-8")
           PY
-      - name: Upload PE39 priority audit bundle
+      - name: Upload PE39 priority audit compact
         uses: actions/upload-artifact@v4
         with:
           name: pe39-priority-official
           retention-days: 30
           if-no-files-found: error
-          path: pe39_priority_official_bundle.tar.gz
+          path: pe39_priority_compact/

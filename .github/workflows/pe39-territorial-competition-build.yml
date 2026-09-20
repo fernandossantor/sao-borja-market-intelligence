@@ -1,0 +1,477 @@
+name: pe39-territorial-competition-build
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pe39-territorial-competition-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PDF parser
+        run: python -m pip install --quiet pypdf requests
+
+      - name: Build participant × item × territory competition matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv
+          import hashlib
+          import io
+          import json
+          import re
+          import statistics
+          import time
+          import zipfile
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          import requests
+          from pypdf import PdfReader
+
+          ROOT=Path(".")
+          OUT=ROOT/"docs/data_sources/public_procurement_pe39_territorial_competition_20260920_v001"
+          WORK=Path("artifacts/pe39_territorial_competition")
+          OUT.mkdir(parents=True,exist_ok=True)
+          WORK.mkdir(parents=True,exist_ok=True)
+
+          TERR=ROOT/"docs/data_sources/public_procurement_pe39_participants_20260920_v001/priority_participants_rfb_202608.csv"
+          TERR_SUM=ROOT/"docs/data_sources/public_procurement_pe39_participants_20260920_v001/rfb_territorial_summary.json"
+          SEED=ROOT/"docs/data_sources/public_procurement_pe39_participants_20260920_v001/priority_participants_seed.csv"
+          for p in (TERR,TERR_SUM,SEED):
+              if not p.exists():
+                  raise SystemExit(f"Missing required input: {p}")
+
+          # Official Ata Final attachment from the same PNCP procurement.
+          ATA_URL="https://pncp.gov.br/pncp-api/v1/orgaos/88489786000101/compras/2026/136/arquivos/3"
+          zpath=WORK/"Ata_Final_144426_250826.zip"
+          last=None
+          for attempt in range(5):
+              try:
+                  r=requests.get(ATA_URL,headers={"User-Agent":"SBMI official-source audit/1.0"},timeout=120)
+                  if r.status_code==200:
+                      zpath.write_bytes(r.content)
+                      break
+                  last=f"HTTP {r.status_code}"
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(2*(attempt+1))
+          else:
+              raise SystemExit(last)
+
+          meta={
+              "url":ATA_URL,
+              "bytes":zpath.stat().st_size,
+              "sha256":hashlib.sha256(zpath.read_bytes()).hexdigest(),
+          }
+
+          ex=WORK/"extracted"
+          ex.mkdir(exist_ok=True)
+          with zipfile.ZipFile(zpath) as z:
+              z.extractall(ex)
+
+          pdfs=list(ex.rglob("*.pdf"))
+          if not pdfs:
+              raise SystemExit("No PDF extracted from official Ata Final archive")
+          text="\n".join(
+              "\n".join((page.extract_text() or "") for page in PdfReader(str(fp)).pages)
+              for fp in pdfs
+          )
+          (WORK/"ata_final_text.txt").write_text(text,encoding="utf-8")
+
+          items=[7,8,18,25,30,35,36,41,49,78,79,80,81,82,83,84,85,86]
+          cluster_by_item={
+              7:"T01",8:"T02",18:"T03",25:"T03",41:"T03",30:"T04",
+              35:"T05",36:"T05",49:"T06",78:"T07",79:"T07",80:"T07",
+              81:"T08",82:"T08",83:"T08",84:"T09",85:"T09",86:"T09",
+          }
+          qty={
+              7:4200,8:4200,18:2500,25:2500,30:3600,35:2115,36:705,41:1500,
+              49:3820,78:4000,79:4000,80:4000,81:2500,82:2500,83:2500,
+              84:1300,85:1300,86:1300,
+          }
+
+          def norm_cnpj(s):
+              return re.sub(r"\D","",s)
+
+          def clean(s):
+              return re.sub(r"\s+"," ",s).strip()
+
+          def money(s):
+              return float(s.replace(".","").replace(",", "."))
+
+          with TERR.open(encoding="utf-8-sig",newline="") as f:
+              territorial={r["cnpj"]:r for r in csv.DictReader(f)}
+          with SEED.open(encoding="utf-8-sig",newline="") as f:
+              seed={r["cnpj"]:r for r in csv.DictReader(f)}
+          terr_summary=json.loads(TERR_SUM.read_text(encoding="utf-8"))
+
+          row_re=re.compile(
+              r"(\d+)º\s+(.*?)\s+(\d{2}\.\d{3}\.\d{3}/\d{4}-\s*\d{2})\s+"
+              r"(Arrematante|Classificado|Desclassificado|Inabilitado|Rejeitado)\s+"
+              r"([\d\.]+,\d{2})",
+              re.S,
+          )
+
+          rows=[]
+          for item in items:
+              header_re=re.compile(
+                  rf"{item:04d}\s+-\s+(.*?)\s+Classif\.\s+Fornecedor\s+CPF/CNPJ\s+"
+                  rf"Situa[cç][aã]o\s+¹\s+Valor Global",
+                  re.S|re.I,
+              )
+              matches=list(header_re.finditer(text))
+              if not matches:
+                  raise SystemExit(f"Classification table not found for item {item}")
+              m=matches[-1]
+              desc=clean(m.group(1))
+              start=m.end()
+              end=text.find("¹ Arrematante; Desclassificado; Inabilitado, Classificado e Rejeitado.",start)
+              if end < 0:
+                  raise SystemExit(f"Classification table terminator not found for item {item}")
+              parsed=row_re.findall(text[start:end])
+              if not parsed:
+                  raise SystemExit(f"No ranking rows parsed for item {item}")
+
+              for rank,name,cnpj,status,value in parsed:
+                  cnpj14=norm_cnpj(cnpj)
+                  t=territorial.get(cnpj14)
+                  if not t:
+                      raise SystemExit(f"Territorial classification missing for {cnpj14} / {name}")
+                  if t["exact_municipio_tom"]=="8863":
+                      geo="SAO_BORJA"
+                  elif t["exact_uf"]=="RS":
+                      geo="RS_OTHER"
+                  else:
+                      geo="OTHER_UF"
+                  vg=money(value)
+                  rows.append({
+                      "item":item,
+                      "cluster_id":cluster_by_item[item],
+                      "descricao_item":desc,
+                      "quantidade":qty[item],
+                      "rank_final":int(rank),
+                      "cnpj":cnpj14,
+                      "nome_participante":clean(name),
+                      "status_final":status,
+                      "valor_global_final_R$":round(vg,2),
+                      "valor_unitario_final_R$":round(vg/qty[item],6),
+                      "territorial_class":t["territorial_class"],
+                      "geo_tier":geo,
+                      "uf":t["exact_uf"],
+                      "municipio":t["exact_municipio_nome"],
+                      "root_local_active_count":int(t["root_local_active_count"] or 0),
+                  })
+
+          # Hard validations against the independently built participant seed.
+          if len(rows)!=194:
+              raise SystemExit(f"Expected 194 item-participant observations; got {len(rows)}")
+          if len({r["cnpj"] for r in rows})!=22:
+              raise SystemExit("Expected 22 unique participants")
+          counts=Counter(r["cnpj"] for r in rows)
+          for c,r in seed.items():
+              if counts[c] != int(r["itens_prioritarios_count"]):
+                  raise SystemExit(f"Participant count mismatch for {c}: {counts[c]} vs {r['itens_prioritarios_count']}")
+
+          winners={}
+          for r in rows:
+              if r["status_final"]=="Arrematante":
+                  if r["item"] in winners:
+                      raise SystemExit(f"Multiple arrematantes parsed for item {r['item']}")
+                  winners[r["item"]]=r
+          if len(winners)!=17 or 7 in winners:
+              raise SystemExit(f"Expected 17 accepted items and item 7 failed; winners={sorted(winners)}")
+
+          for r in rows:
+              w=winners.get(r["item"])
+              r["winner_cnpj"]=w["cnpj"] if w else ""
+              r["winner_geo_tier"]=w["geo_tier"] if w else ""
+              r["winner_value_global_R$"]=w["valor_global_final_R$"] if w else ""
+              if w and r["status_final"] in ("Arrematante","Classificado"):
+                  r["premium_vs_winner_pct"]=round((r["valor_global_final_R$"]/w["valor_global_final_R$"]-1)*100,4)
+              else:
+                  r["premium_vs_winner_pct"]=""
+
+          def write_csv(path,rows,fields=None):
+              if not rows:
+                  raise SystemExit(f"No rows for {path}")
+              fields=fields or list(rows[0].keys())
+              with path.open("w",encoding="utf-8-sig",newline="") as f:
+                  w=csv.DictWriter(f,fieldnames=fields)
+                  w.writeheader()
+                  w.writerows(rows)
+
+          matrix_fields=[
+              "item","cluster_id","descricao_item","quantidade","rank_final","cnpj","nome_participante",
+              "status_final","valor_global_final_R$","valor_unitario_final_R$","territorial_class",
+              "geo_tier","uf","municipio","root_local_active_count","winner_cnpj","winner_geo_tier",
+              "winner_value_global_R$","premium_vs_winner_pct",
+          ]
+          write_csv(OUT/"participant_item_matrix.csv",rows,matrix_fields)
+
+          # Item summary.
+          item_summary=[]
+          for item in items:
+              rs=[r for r in rows if r["item"]==item]
+              geo=Counter(r["geo_tier"] for r in rs)
+              st=Counter(r["status_final"] for r in rs)
+              w=winners.get(item)
+              local=[r for r in rs if r["geo_tier"]=="SAO_BORJA"]
+              item_summary.append({
+                  "item":item,
+                  "cluster_id":cluster_by_item[item],
+                  "participants_total":len(rs),
+                  "local_sb":geo["SAO_BORJA"],
+                  "rs_other":geo["RS_OTHER"],
+                  "other_uf":geo["OTHER_UF"],
+                  "arrematantes":st["Arrematante"],
+                  "classificados":st["Classificado"],
+                  "desclassificados":st["Desclassificado"],
+                  "winner_cnpj":w["cnpj"] if w else "",
+                  "winner_name":w["nome_participante"] if w else "",
+                  "winner_geo_tier":w["geo_tier"] if w else "FRACASSADO",
+                  "winner_uf":w["uf"] if w else "",
+                  "winner_municipio":w["municipio"] if w else "",
+                  "winner_value_R$":w["valor_global_final_R$"] if w else "",
+                  "local_rank":local[0]["rank_final"] if local else "",
+                  "local_status":local[0]["status_final"] if local else "",
+                  "local_value_R$":local[0]["valor_global_final_R$"] if local else "",
+                  "local_premium_vs_winner_pct":local[0]["premium_vs_winner_pct"] if local else "",
+              })
+          write_csv(OUT/"item_summary.csv",item_summary)
+
+          # Participant summary.
+          participant_summary=[]
+          for cnpj in sorted({r["cnpj"] for r in rows}):
+              rs=[r for r in rows if r["cnpj"]==cnpj]
+              st=Counter(r["status_final"] for r in rs)
+              ranks=[r["rank_final"] for r in rs if r["status_final"] in ("Arrematante","Classificado")]
+              premiums=[
+                  r["premium_vs_winner_pct"] for r in rs
+                  if isinstance(r["premium_vs_winner_pct"],float)
+              ]
+              participant_summary.append({
+                  "cnpj":cnpj,
+                  "nome_participante":rs[0]["nome_participante"],
+                  "geo_tier":rs[0]["geo_tier"],
+                  "uf":rs[0]["uf"],
+                  "municipio":rs[0]["municipio"],
+                  "itens_participados":len(rs),
+                  "vitorias":st["Arrematante"],
+                  "classificados_sem_vitoria":st["Classificado"],
+                  "desclassificados":st["Desclassificado"],
+                  "win_rate_itens_pct":round(st["Arrematante"]/len(rs)*100,4),
+                  "rank_mediano_classificados":statistics.median(ranks) if ranks else "",
+                  "premium_mediano_vs_winner_pct":round(statistics.median(premiums),4) if premiums else "",
+                  "premium_medio_vs_winner_pct":round(statistics.mean(premiums),4) if premiums else "",
+              })
+          write_csv(OUT/"participant_summary.csv",participant_summary)
+
+          # Best valid offer by territory for each item.
+          best_rows=[]
+          for item in items:
+              rs=[r for r in rows if r["item"]==item]
+              w=winners.get(item)
+              for geo in ("SAO_BORJA","RS_OTHER","OTHER_UF"):
+                  valid=[
+                      r for r in rs
+                      if r["geo_tier"]==geo and r["status_final"] in ("Arrematante","Classificado")
+                  ]
+                  best=min(valid,key=lambda r:r["valor_global_final_R$"]) if valid else None
+                  best_rows.append({
+                      "item":item,
+                      "cluster_id":cluster_by_item[item],
+                      "geo_tier":geo,
+                      "best_cnpj":best["cnpj"] if best else "",
+                      "best_name":best["nome_participante"] if best else "",
+                      "best_value_R$":best["valor_global_final_R$"] if best else "",
+                      "best_rank":best["rank_final"] if best else "",
+                      "premium_vs_winner_pct":round((best["valor_global_final_R$"]/w["valor_global_final_R$"]-1)*100,4) if best and w else "",
+                      "is_winner_tier":bool(best and w and best["cnpj"]==w["cnpj"]),
+                  })
+          write_csv(OUT/"best_valid_offer_by_geo_item.csv",best_rows)
+
+          # Winner geography by cluster.
+          cluster_rows=[]
+          for cl in [f"T{i:02d}" for i in range(1,10)]:
+              rs=[r for r in rows if r["cluster_id"]==cl]
+              cluster_items=sorted({r["item"] for r in rs})
+              ws=[r for r in rs if r["status_final"]=="Arrematante"]
+              counts=Counter(r["geo_tier"] for r in ws)
+              values=defaultdict(float)
+              for w in ws:
+                  values[w["geo_tier"]]+=w["valor_global_final_R$"]
+              cluster_rows.append({
+                  "cluster_id":cl,
+                  "items":";".join(map(str,cluster_items)),
+                  "items_total":len(cluster_items),
+                  "items_accepted":len(ws),
+                  "wins_sao_borja":counts["SAO_BORJA"],
+                  "wins_rs_other":counts["RS_OTHER"],
+                  "wins_other_uf":counts["OTHER_UF"],
+                  "winner_value_sao_borja_R$":round(values["SAO_BORJA"],2),
+                  "winner_value_rs_other_R$":round(values["RS_OTHER"],2),
+                  "winner_value_other_uf_R$":round(values["OTHER_UF"],2),
+                  "winner_value_total_R$":round(sum(values.values()),2),
+              })
+          write_csv(OUT/"cluster_winner_geography.csv",cluster_rows)
+
+          # Compact summary.
+          geo_unique=Counter()
+          for cnpj in {r["cnpj"] for r in rows}:
+              geo_unique[next(r["geo_tier"] for r in rows if r["cnpj"]==cnpj)] += 1
+          geo_obs=Counter(r["geo_tier"] for r in rows)
+          geo_status={
+              geo:Counter(r["status_final"] for r in rows if r["geo_tier"]==geo)
+              for geo in ("SAO_BORJA","RS_OTHER","OTHER_UF")
+          }
+          geo_wins=Counter(r["geo_tier"] for r in winners.values())
+          geo_win_value=defaultdict(float)
+          for r in winners.values():
+              geo_win_value[r["geo_tier"]]+=r["valor_global_final_R$"]
+          winner_total=sum(geo_win_value.values())
+
+          wins_by_cnpj=Counter(r["cnpj"] for r in winners.values())
+          value_by_cnpj=defaultdict(float)
+          for r in winners.values():
+              value_by_cnpj[r["cnpj"]]+=r["valor_global_final_R$"]
+
+          best_geo_stats={}
+          for geo in ("SAO_BORJA","RS_OTHER","OTHER_UF"):
+              vals=[
+                  float(r["premium_vs_winner_pct"])
+                  for r in best_rows
+                  if r["geo_tier"]==geo and r["premium_vs_winner_pct"]!=""
+              ]
+              best_geo_stats[geo]={
+                  "items_with_valid_offer":len(vals),
+                  "wins":sum(1 for r in best_rows if r["geo_tier"]==geo and r["is_winner_tier"]),
+                  "median_best_tier_premium_pct":round(statistics.median(vals),4) if vals else None,
+                  "mean_best_tier_premium_pct":round(statistics.mean(vals),4) if vals else None,
+              }
+
+          ext_spreads=[]
+          for item in sorted(winners):
+              rs_item=[r for r in best_rows if r["item"]==item]
+              a=next(r for r in rs_item if r["geo_tier"]=="RS_OTHER")
+              b=next(r for r in rs_item if r["geo_tier"]=="OTHER_UF")
+              if a["best_value_R$"]!="" and b["best_value_R$"]!="":
+                  va=float(a["best_value_R$"]); vb=float(b["best_value_R$"])
+                  ext_spreads.append((max(va,vb)/min(va,vb)-1)*100)
+
+          summary={
+              "ata_final":meta,
+              "source_territorial":{
+                  "substantive_source":terr_summary.get("substantive_source"),
+                  "competence":terr_summary.get("competence"),
+                  "transport_mirror_used":terr_summary.get("transport_mirror_used"),
+                  "limitation":terr_summary.get("limitation"),
+              },
+              "observations_item_participant":len(rows),
+              "unique_participants":len({r["cnpj"] for r in rows}),
+              "accepted_items":len(winners),
+              "failed_items":len(items)-len(winners),
+              "geo_unique_participants":dict(geo_unique),
+              "geo_item_participant_observations":dict(geo_obs),
+              "geo_status_counts":{k:dict(v) for k,v in geo_status.items()},
+              "geo_wins":dict(geo_wins),
+              "geo_winner_value_R$":{k:round(v,2) for k,v in geo_win_value.items()},
+              "geo_winner_value_share_pct":{
+                  k:round(v/winner_total*100,4) for k,v in geo_win_value.items()
+              },
+              "winner_total_R$":round(winner_total,2),
+              "winner_supplier_count":len(wins_by_cnpj),
+              "wins_by_cnpj":dict(wins_by_cnpj),
+              "winner_value_by_cnpj_R$":{k:round(v,2) for k,v in value_by_cnpj.items()},
+              "best_valid_offer_by_geo":best_geo_stats,
+              "best_rs_other_vs_other_uf_spread":{
+                  "items_compared":len(ext_spreads),
+                  "median_pct":round(statistics.median(ext_spreads),4),
+                  "mean_pct":round(statistics.mean(ext_spreads),4),
+                  "within_5_pct_items":sum(1 for x in ext_spreads if x<=5),
+                  "within_10_pct_items":sum(1 for x in ext_spreads if x<=10),
+              },
+          }
+          (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          readme=f"""# PE39/2026 — estrutura competitiva territorial dos 18 condutores prioritários
+
+          **Data:** 20/09/2026
+
+          ## Fontes
+          - universo, propostas finais, classificação e arrematantes: Ata Final oficial do PE39/2026, PNCP;
+          - territorialização cadastral: RFB Dados Abertos CNPJ, competência 2026-08, arquivo previamente consolidado em
+            `public_procurement_pe39_participants_20260920_v001`.
+
+          ## Unidade observacional
+          `item licitatório × CNPJ participante`.
+
+          O arquivo `participant_item_matrix.csv` contém 194 observações, 18 itens e 22 CNPJs únicos.
+
+          ## Derivados
+          - `item_summary.csv`: composição territorial e resultado por item;
+          - `participant_summary.csv`: amplitude de participação, vitórias, desclassificações e posição de preço;
+          - `best_valid_offer_by_geo_item.csv`: melhor oferta final válida em São Borja, demais municípios do RS e outras UFs;
+          - `cluster_winner_geography.csv`: distribuição territorial dos arrematantes por cluster;
+          - `summary.json`: indicadores agregados e validações.
+
+          ## Regras
+          - preço relativo ao vencedor é calculado somente para `Arrematante` ou `Classificado`;
+          - propostas `Desclassificado` não entram como preço competitivo válido;
+          - item 7 permanece fracassado e não recebe vencedor artificial;
+          - `SAO_BORJA`, `RS_OTHER` e `OTHER_UF` são classes cadastrais, não distâncias logísticas.
+
+          ## Limitação territorial
+          A execução corrente da territorialização RFB utilizou espelho de transporte controlado.
+          Portanto, 21 classificações externas permanecem exploratórias até reconciliação de bytes/hash ou
+          reexecução pelo host oficial. O participante local possui confirmação independente no projeto.
+
+          Localidade cadastral não equivale a origem do produto, estoque, capital, escala, retenção econômica,
+          custo de frete ou capacidade de entrega.
+
+          ## Governança
+          Caderno-Base v028 permanece read-only. PR #41 permanece aberto, draft e sem merge.
+          """
+          (OUT/"README.md").write_text(re.sub(r"^          ","",readme,flags=re.M),encoding="utf-8")
+
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_pe39_territorial_competition_20260920_v001"
+          test -s "$DEST/participant_item_matrix.csv"
+          test -s "$DEST/item_summary.csv"
+          test -s "$DEST/participant_summary.csv"
+          test -s "$DEST/best_valid_offer_by_geo_item.csv"
+          test -s "$DEST/cluster_winner_geography.csv"
+          test -s "$DEST/summary.json"
+          test -s "$DEST/README.md"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: build PE39 territorial competition matrix"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi

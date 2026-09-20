@@ -1,0 +1,13 @@
+{
+  "period": "01/01/2026–19/09/2026",
+  "second_pass_pairs": 38,
+  "second_pass_paid_R$": 1307198.89,
+  "three_rubric_previous_reviewed_R$": 9298109.07,
+  "three_rubric_reviewed_after_second_pass_R$": 10605307.96,
+  "three_rubric_semantic_coverage_after_second_pass_pct": 85.38654806212742,
+  "three_rubric_residual_after_second_pass_R$": 1815041.85,
+  "external_total_reviewed_after_second_pass_R$": 11140065.49,
+  "external_total_semantic_coverage_after_second_pass_pct": 61.53554109890549,
+  "control": "Second pass is family-level semantic classification, not item-level inspection. Only pairs with at least medium evidence were counted.",
+  "evidence_levels": "CURRENT_2026_EXACT_OBJECT > CURRENT_2026_FAMILY_OBJECT/HISTORICAL_OFFICIAL+CURRENT_ACTION > CURRENT_ACTION+SUPPLIER_NAME"
+}

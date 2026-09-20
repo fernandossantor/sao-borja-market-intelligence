@@ -1,0 +1,106 @@
+name: pncp-pe39-edital-tr-audit
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pncp-pe39-edital-tr-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install extraction tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq p7zip-full
+          python -m pip install --quiet --upgrade requests pypdf
+      - name: Download and extract official PE39 edital/TR
+        run: |
+          set -euo pipefail
+          mkdir -p pe39_edital_tr/raw pe39_edital_tr/extracted pe39_edital_tr/text
+          python - <<'PY'
+          import hashlib, json, time
+          from pathlib import Path
+          import requests
+          url="https://pncp.gov.br/pncp-api/v1/orgaos/88489786000101/compras/2026/136/arquivos/1"
+          out=Path("pe39_edital_tr/raw/EDITAL_E_ANEXOS_PCE_39_2026.7z")
+          last=None
+          for a in range(5):
+              try:
+                  r=requests.get(url,headers={"User-Agent":"SBMI official-source audit/1.0"},timeout=120)
+                  if r.status_code==200:
+                      out.write_bytes(r.content)
+                      break
+                  last=f"HTTP {r.status_code}"
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(2*(a+1))
+          else:
+              raise SystemExit(last)
+          meta={"url":url,"bytes":out.stat().st_size,"sha256":hashlib.sha256(out.read_bytes()).hexdigest()}
+          Path("pe39_edital_tr/download_meta.json").write_text(json.dumps(meta,indent=2),encoding="utf-8")
+          PY
+          7z x -y pe39_edital_tr/raw/EDITAL_E_ANEXOS_PCE_39_2026.7z -ope39_edital_tr/extracted >/tmp/pe39_7z.log
+          chmod -R u+rwX pe39_edital_tr/extracted
+          find pe39_edital_tr/extracted -type f -printf '%p\n' | sort
+
+      - name: Extract text and audit key clauses
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          from pypdf import PdfReader
+          root=Path("pe39_edital_tr")
+          index=[]
+          combined=[]
+          for fp in (root/"extracted").rglob("*.pdf"):
+              try:
+                  t="\n".join((p.extract_text() or "") for p in PdfReader(str(fp)).pages)
+                  out=root/"text"/(re.sub(r"[^A-Za-z0-9._-]+","_",str(fp.relative_to(root)))+".txt")
+                  out.write_text(t,encoding="utf-8")
+                  index.append({"source":str(fp.relative_to(root)),"chars":len(t),"text":str(out.relative_to(root))})
+                  combined.append(f"\n===== {fp.relative_to(root)} =====\n{t}")
+              except Exception as e:
+                  index.append({"source":str(fp.relative_to(root)),"chars":0,"error":repr(e)})
+          alltext="\n".join(combined)
+          (root/"combined_text.txt").write_text(alltext,encoding="utf-8")
+          (root/"text_index.json").write_text(json.dumps(index,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          patterns=[
+            r"1\.8\.2",r"cota.{0,120}reservad",r"ampla concorr",r"LC\s*n?[º°]?\s*123",
+            r"entrega",r"prazo.{0,80}entrega",r"frete",r"transporte",r"despesas.{0,120}proposta",
+            r"validade.{0,80}proposta",r"registro de pre[cç]os",r"quantidade m[ií]nima",
+            r"CABO PP 4 X 10",r"FIO PLASTICHUMBO",r"CABO MULTIPLEX 4 X 16",
+            r"16,00 MM.{0,80}ATOX",r"PVC 70",r"25MM"
+          ]
+          contexts={}
+          for pat in patterns:
+              hits=[]
+              for m in re.finditer(pat,alltext,re.I|re.S):
+                  hits.append(re.sub(r"\s+"," ",alltext[max(0,m.start()-900):min(len(alltext),m.end()+1600)])[:2800])
+                  if len(hits)>=12: break
+              contexts[pat]=hits
+              print("PATTERN",pat,"COUNT_SHOWN",len(hits))
+              for h in hits[:5]: print(h)
+          (root/"key_contexts.json").write_text(json.dumps(contexts,ensure_ascii=False,indent=2),encoding="utf-8")
+          PY
+
+      - name: Upload compact edital/TR audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: pe39-edital-tr-audit
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            pe39_edital_tr/download_meta.json
+            pe39_edital_tr/text_index.json
+            pe39_edital_tr/key_contexts.json
+            pe39_edital_tr/combined_text.txt

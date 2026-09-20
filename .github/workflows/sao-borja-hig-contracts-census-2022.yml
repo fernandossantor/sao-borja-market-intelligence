@@ -24,7 +24,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          OUT="artifacts/sao_borja_hig_contracts_census_2021"
+          OUT="artifacts/sao_borja_hig_contracts_census_2022"
           mkdir -p "$OUT"
           python - <<'PY'
           import csv,json,re,time,requests
@@ -33,7 +33,7 @@ jobs:
 
           BASE="https://transparencia.saoborja.rs.gov.br"
           YEAR="2022"
-          OUT=Path("artifacts/sao_borja_hig_contracts_census_2021")
+          OUT=Path("artifacts/sao_borja_hig_contracts_census_2022")
           s=requests.Session()
           s.headers.update({"User-Agent":"Mozilla/5.0 SBMI HIG contracts census/1.0"})
 
@@ -134,15 +134,15 @@ jobs:
         if: always()
         shell: bash
         run: |
-          DEST="docs/data_sources/sao_borja_hig_contracts_census_2021"
+          DEST="docs/data_sources/sao_borja_hig_contracts_census_2022"
           mkdir -p "$DEST"
-          if [ -f artifacts/sao_borja_hig_contracts_census_2021/summary.json ]; then
-            cp artifacts/sao_borja_hig_contracts_census_2021/summary.json "$DEST/summary.json"
-            cp artifacts/sao_borja_hig_contracts_census_2021/hig_contracts_2022.csv "$DEST/hig_contracts_2022.csv"
+          if [ -f artifacts/sao_borja_hig_contracts_census_2022/summary.json ]; then
+            cp artifacts/sao_borja_hig_contracts_census_2022/summary.json "$DEST/summary.json"
+            cp artifacts/sao_borja_hig_contracts_census_2022/hig_contracts_2022.csv "$DEST/hig_contracts_2022.csv"
             cat > "$DEST/README.md" <<'EOF'
           # PMSB — censo exploratório de contratos HIG — exercício 2022
 
-          Extração integral da grade oficial de contratos de 2021 no módulo `/acordos`,
+          Extração integral da grade oficial de contratos de 2022 no módulo `/acordos`,
           seguida de leitura dos detalhes e filtro pelo contratado FUNDACAO IVAN GOULART.
 
           O resultado é uma camada contratual. Não constitui série de empenhos, liquidações
@@ -166,4 +166,4 @@ jobs:
           name: sao-borja-hig-contracts-census-2022
           retention-days: 30
           if-no-files-found: warn
-          path: artifacts/sao_borja_hig_contracts_census_2021/
+          path: artifacts/sao_borja_hig_contracts_census_2022/

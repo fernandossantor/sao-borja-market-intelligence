@@ -1,0 +1,106 @@
+{
+  "ata_final": {
+    "url": "https://pncp.gov.br/pncp-api/v1/orgaos/88489786000101/compras/2026/136/arquivos/3",
+    "bytes": 767725,
+    "sha256": "6412b0508682441618c3eefd248cdf4c5a1599dc48d8bed66a531d8a14db1cb9"
+  },
+  "source_territorial": {
+    "substantive_source": "Receita Federal do Brasil — Dados Abertos CNPJ",
+    "competence": "2026-08",
+    "transport_mirror_used": true,
+    "limitation": "If mirror transport is used, locality is exploratory until reconciled with official RFB hashes/reexecution; cadastral locality is not economic retention."
+  },
+  "observations_item_participant": 194,
+  "unique_participants": 22,
+  "accepted_items": 17,
+  "failed_items": 1,
+  "geo_unique_participants": {
+    "OTHER_UF": 9,
+    "RS_OTHER": 12,
+    "SAO_BORJA": 1
+  },
+  "geo_item_participant_observations": {
+    "RS_OTHER": 111,
+    "OTHER_UF": 65,
+    "SAO_BORJA": 18
+  },
+  "geo_status_counts": {
+    "SAO_BORJA": {
+      "Desclassificado": 3,
+      "Classificado": 15
+    },
+    "RS_OTHER": {
+      "Desclassificado": 5,
+      "Arrematante": 12,
+      "Classificado": 94
+    },
+    "OTHER_UF": {
+      "Desclassificado": 2,
+      "Classificado": 58,
+      "Arrematante": 5
+    }
+  },
+  "geo_wins": {
+    "RS_OTHER": 12,
+    "OTHER_UF": 5
+  },
+  "geo_winner_value_R$": {
+    "RS_OTHER": 226249.0,
+    "OTHER_UF": 150342.4
+  },
+  "geo_winner_value_share_pct": {
+    "RS_OTHER": 60.0781,
+    "OTHER_UF": 39.9219
+  },
+  "winner_total_R$": 376591.4,
+  "winner_supplier_count": 9,
+  "wins_by_cnpj": {
+    "23143410000197": 1,
+    "17379156000128": 7,
+    "37683566000175": 2,
+    "50246619000159": 2,
+    "05117514000145": 1,
+    "64436697000120": 1,
+    "47812320000100": 1,
+    "32246085000189": 1,
+    "32005178000111": 1
+  },
+  "winner_value_by_cnpj_R$": {
+    "23143410000197": 24024.0,
+    "17379156000128": 112345.0,
+    "37683566000175": 37980.0,
+    "50246619000159": 90691.2,
+    "05117514000145": 28500.0,
+    "64436697000120": 25441.2,
+    "47812320000100": 9640.0,
+    "32246085000189": 23400.0,
+    "32005178000111": 24570.0
+  },
+  "best_valid_offer_by_geo": {
+    "SAO_BORJA": {
+      "items_with_valid_offer": 15,
+      "wins": 0,
+      "median_best_tier_premium_pct": 92.7861,
+      "mean_best_tier_premium_pct": 184.5124
+    },
+    "RS_OTHER": {
+      "items_with_valid_offer": 17,
+      "wins": 12,
+      "median_best_tier_premium_pct": 0.0,
+      "mean_best_tier_premium_pct": 5.8043
+    },
+    "OTHER_UF": {
+      "items_with_valid_offer": 17,
+      "wins": 5,
+      "median_best_tier_premium_pct": 3.8111,
+      "mean_best_tier_premium_pct": 10.7822
+    }
+  },
+  "best_rs_other_vs_other_uf_spread": {
+    "items_compared": 17,
+    "median_pct": 8.1667,
+    "mean_pct": 16.5865,
+    "within_5_pct_items": 6,
+    "within_10_pct_items": 10
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-09-20",
+  "process": "PE39/2026",
+  "upstream_supplier": "CIGAME",
+  "local_operator_linkage_source": "POM Iluminar 2025 documents Cigame as a supplier used by Iluminar for cables/cordage.",
+  "current_catalog_scope": "Public Cigame web catalog searched on 2026-09-20.",
+  "priority_conductor_value_R$": 533194.4,
+  "clusters_total": 9,
+  "strong_current_upstream_match_clusters": [
+    "T01",
+    "T07",
+    "T09"
+  ],
+  "strong_current_upstream_match_value_R$": 150633,
+  "strong_current_upstream_match_share_priority_pct": 28.251,
+  "strong_plus_partial_T03_value_R$": 268153,
+  "strong_plus_partial_T03_share_priority_pct": 50.2918,
+  "statuses": {
+    "T01": "STRONG_CURRENT_UPSTREAM_MATCH",
+    "T02": "NOT_DEMONSTRATED_IN_SEARCH",
+    "T03": "PARTIAL_COLOR_MATCH",
+    "T04": "CRITICAL_VOLTAGE_MISMATCH",
+    "T05": "CRITICAL_CONSTRUCTION_MISMATCH",
+    "T06": "POTENTIAL_ARCHITECTURE_MATCH_REQUIRES_TR",
+    "T07": "STRONG_CURRENT_UPSTREAM_MATCH",
+    "T08": "PARTIAL_COLOR_MATCH",
+    "T09": "STRONG_CURRENT_UPSTREAM_MATCH"
+  },
+  "controls": [
+    "Current Cigame catalog does not prove Iluminar stock or current commercial access.",
+    "POM supplier relationship is 2025 historical evidence.",
+    "PE39 item descriptions remain secondary until official edital/TR reconciliation.",
+    "Partial color matches are not full item equivalence.",
+    "Voltage/construction mismatches must not be treated as substitutes.",
+    "NOT_DEMONSTRATED_IN_SEARCH is not evidence of absence."
+  ],
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

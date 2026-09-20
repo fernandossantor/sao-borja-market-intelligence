@@ -1,0 +1,183 @@
+{
+  "exercise": "2022",
+  "portal_query": {
+    "page": "1",
+    "total": "152",
+    "records": "500",
+    "rows_returned": 152
+  },
+  "details_checked": 152,
+  "failures": [],
+  "hig_contracts_found": 4,
+  "hig_contracts": [
+    {
+      "exercise": "2022",
+      "row_id": "568",
+      "contract_number": "7",
+      "grid_signature_date": "31/01/2022",
+      "grid_validity": "31/01/2026 até 31/01/2027",
+      "detail_number": "7 - 2022 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "31/01/2022",
+      "detail_validity": "31/01/2026 até 31/01/2027",
+      "detail_value_total_snapshot": "4.325.429,52",
+      "process": "4027/2022",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Contratação do serviço de sobreaviso médico  urgência e emergência, destinado aos pacientes do SUS que forem atendidos nas dependências da Fundação Ivan Goulart, como descrito no Termo de Referência.",
+      "timeline": [
+        {
+          "tipo": "Vigência",
+          "data": "07/02/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "07/02/2022"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "07/02/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "19/09/2023"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "26/01/2024"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "26/01/2024"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "03/02/2025"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "20/01/2026"
+        }
+      ],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/568"
+    },
+    {
+      "exercise": "2022",
+      "row_id": "581",
+      "contract_number": "20",
+      "grid_signature_date": "17/03/2022",
+      "grid_validity": "17/03/2026 até 17/03/2027",
+      "detail_number": "20 - 2022 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "17/03/2022",
+      "detail_validity": "17/03/2026 até 17/03/2027",
+      "detail_value_total_snapshot": "455.870,88",
+      "process": "5482/2022",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Locação de imóvel destinado ao atendimento das finalidades precípuas da administração, mais precisamente os programas da Secretaria Municipal da Saúde, quais sejam: a) Farmácia Básica; b) Central de vacinas; c) CEO; d) Vigilância Sanitária; e) Transporte, SAMU, PIM, CAPS AD e atendimento de algumas especialidades como psicologia e nutrição, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Dispensa.",
+      "timeline": [
+        {
+          "tipo": "Vigência",
+          "data": "21/03/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "21/03/2023"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "21/03/2023"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "01/04/2024"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "01/04/2024"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "12/03/2025"
+        },
+        {
+          "tipo": "Vigência",
+          "data": "10/03/2026"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "10/03/2026"
+        }
+      ],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/581"
+    },
+    {
+      "exercise": "2022",
+      "row_id": "678",
+      "contract_number": "117",
+      "grid_signature_date": "09/09/2022",
+      "grid_validity": "09/09/2022 até 31/03/2023",
+      "detail_number": "117 - 2022 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "09/09/2022",
+      "detail_validity": "09/09/2022 até 31/03/2023",
+      "detail_value_total_snapshot": "0,00",
+      "process": "19892/2022",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Inexigibilidade de licitação para prestação de serviços técnicos para realização de exames de média e alta complexidade de tomografias e ressonâncias magnéticas para os pacientes do SUS, que serão utilizados para controle e diagnósticos das doenças, solicitados pelos médicos da SMS, previamente agendados e autorizados pela regulação da referida secretaria.",
+      "timeline": [
+        {
+          "tipo": "Vigência",
+          "data": "29/01/2023"
+        }
+      ],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/678"
+    },
+    {
+      "exercise": "2022",
+      "row_id": "685",
+      "contract_number": "124",
+      "grid_signature_date": "30/09/2022",
+      "grid_validity": "16/09/2026 até 30/09/2027",
+      "detail_number": "124 - 2022 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "30/09/2022",
+      "detail_validity": "16/09/2026 até 30/09/2027",
+      "detail_value_total_snapshot": "0,00",
+      "process": "21749",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Contratação de serviços técnico-profissionais especializados em doença renal crônica com hemodiálise e nos estágios 4 e 5 (pré-dialítico).",
+      "timeline": [
+        {
+          "tipo": "Renovação",
+          "data": "22/09/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "20/03/2024"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "01/10/2024"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "24/03/2025"
+        },
+        {
+          "tipo": "Vigência",
+          "data": "09/09/2025"
+        },
+        {
+          "tipo": "Vigência",
+          "data": "16/09/2026"
+        }
+      ],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/685"
+    }
+  ],
+  "controls": [
+    "Contrato/detail snapshot não equivale a pagamento.",
+    "Valor Total do detalhe é estado corrente e não deve ser retroprojetado.",
+    "Processo ≠ contrato ≠ aditivo ≠ empenho ≠ liquidação ≠ pagamento."
+  ]
+}

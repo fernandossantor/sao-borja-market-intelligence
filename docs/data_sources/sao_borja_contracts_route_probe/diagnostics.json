@@ -449,7 +449,8 @@
         "pesquisarRelatorio",
         ">\n  var parentURL = window != window.parent ? true : false;\n\n  if (parentURL == true){\n\n    document.getElementById(",
         ";\n    document.getElementById("
-      ]
+      ],
+      "parametro_raw": "{\"FiltroInstituicao\":\"1\",\"FiltroExercicio\":\"2025\",\"FiltroMes\":\"\"}"
     },
     {
       "year": "2025",
@@ -461,6 +462,24 @@
       "contains_hig": false
     }
   ],
+  "grid_probe_2025": {
+    "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
+    "status": 200,
+    "bytes": 3515,
+    "content_type": "text/html; charset=UTF-8",
+    "request_data": {
+      "FiltroInstituicao": "1",
+      "FiltroExercicio": "2025",
+      "FiltroMes": "",
+      "page": "1",
+      "rows": "15",
+      "sidx": "Acordo.numero",
+      "sord": "asc",
+      "_search": "false",
+      "nd": "0"
+    },
+    "text_head": "<pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-trace').style.display = (document.getElementById('cakeErr1-trace').style.display == 'none' ? '' : 'none');\"><b>Notice</b> (8)</a>: Undefined index: instituicao [<b>APP/controllers/acordos_controller.php</b>, line <b>326</b>]<div id=\"cakeErr1-trace\" class=\"cake-stack-trace\" style=\"display: none;\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-code').style.display = (document.getElementById('cakeErr1-code').style.display == 'none' ? '' : 'none')\">Code</a> | <a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-context').style.display = (document.getElementById('cakeErr1-context').style.display == 'none' ? '' : 'none')\">Context</a><div id=\"cakeErr1-code\" class=\"cake-code-dump\" style=\"display: none;\"><pre><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)));</span></code>\n<code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></code>\n<span class=\"code-highlight\"><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$output&nbsp;=&nbsp;call_user_func_array(array(&amp;$controller,&nbsp;$params['action']),&nbsp;$params['pass']);</span></code></span></pre></div><pre id=\"cakeErr1-context\" class=\"cake-context\" style=\"display: none;\">$aRetorno\t=\tarray()\n$aInstituicoes\t=\tarray()</pre><pre class=\"stack-trace\">AcordosController::pesquisar() - APP/controllers/acordos_controller.php, line 326\nDispatcher::_invoke() - CORE/cake/dispatcher.php, line 204\nDispatcher::dispatch() - CORE/cake/dispatcher.php, line 171\n[main] - APP/webroot/index.php, line 83</pre></div></pre><pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr2-trace').style.display = (document.getElementById('cakeErr2-trace').style.display == 'none' ? '' : 'none');\"><b>Notice</b> (8)</a>: Undefined index: exercicio [<b>APP/controllers/acordos_controller.php</b>, line <b>327</b>]<div id=\"cakeErr2-trace\" class=\"cake-stack-trace\" style=\"display: none;\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr2-code').style.display = (document.getElementById('cakeErr2-code').style.display == 'none' ? '' : 'none')\">Code</a> | <a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr2-context').style.display = (document.getElementById('cakeErr2-context').style.display == 'none' ? '' : 'none')\">Context</a><div id=\"cakeErr2-code\" class=\"cake-code-dump\" style=\"display: none;\"><pre><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)));</span></code>\n<code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></code>\n<span class=\"code-highlight\"><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$output&nbsp;=&nbsp;call_user_func_array(array(&amp;$controller,&nbsp;$params['action']),&nbsp;$params['pass']);</span></code></span></pre></div><pre id=\"cakeErr2-context\" class=\"cake-context\" style=\"display: none;\">$aRetorno\t=\tarray()\n$aInstituicoes\t=\tarray()</pre><pre class=\"stack-trace\">AcordosController::pesquisar() - APP/controllers/acordos_controller.php, line 327\nDispatcher::_invoke() - CORE/cake/dispatcher.php, line 204\nDispatcher::dispatch() - CORE/cake/dispatcher.php, line 171\n[main] - APP/webroot/index.php, line 83</pre></div></pre>{\"page\":\"1\",\"total\":\"0\",\"records\":\"15\"}"
+  },
   "result_page_scripts": [
     {
       "url": "https://transparencia.saoborja.rs.gov.br/js/jquery.js",

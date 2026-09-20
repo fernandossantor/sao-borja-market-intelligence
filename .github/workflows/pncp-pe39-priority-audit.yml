@@ -21,7 +21,7 @@ jobs:
         run: |
           python -m pip install --quiet --upgrade requests py7zr pypdf python-docx
           python - <<'PY'
-          import hashlib, json, os, re, tarfile, zipfile
+          import hashlib, json, os, re, tarfile, time, zipfile
           from concurrent.futures import ThreadPoolExecutor, as_completed
           from pathlib import Path
           from urllib.parse import urljoin, urlparse
@@ -37,10 +37,17 @@ jobs:
           for p in (out,dl,ex,textdir): p.mkdir(parents=True,exist_ok=True)
 
           def get_json(url):
-              r=requests.get(url,headers={"User-Agent":"SBMI official-source audit/1.0","Accept":"application/json, */*"},timeout=90)
-              try: body=r.json()
-              except Exception: body={"raw":r.text[:5000]}
-              return {"url":url,"status":r.status_code,"body":body}
+              last=None
+              for attempt in range(4):
+                  try:
+                      r=requests.get(url,headers={"User-Agent":"SBMI official-source audit/1.0","Accept":"application/json, */*"},timeout=90)
+                      try: body=r.json()
+                      except Exception: body={"raw":r.text[:5000]}
+                      return {"url":url,"status":r.status_code,"body":body,"attempt":attempt+1}
+                  except Exception as e:
+                      last=repr(e)
+                      time.sleep(1.5*(attempt+1))
+              return {"url":url,"status":-1,"body":{"error":last},"attempt":4}
 
           # Official procurement metadata.
           compra=get_json(f"https://pncp.gov.br/api/consulta/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}")
@@ -54,7 +61,7 @@ jobs:
               res=get_json(f"{BASE}/v1/orgaos/{CNPJ}/compras/{ANO}/{SEQ}/itens/{n}/resultados")
               return n,item,res
           items={}; results={}
-          with ThreadPoolExecutor(max_workers=12) as pool:
+          with ThreadPoolExecutor(max_workers=4) as pool:
               futs=[pool.submit(fetch_item,n) for n in ITEMS]
               for fut in as_completed(futs):
                   n,item,res=fut.result()

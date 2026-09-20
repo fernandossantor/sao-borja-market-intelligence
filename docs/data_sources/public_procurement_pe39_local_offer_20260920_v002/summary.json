@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-09-20",
+  "operator": "Iluminar Materiais Eletricos e Ferragens",
+  "cnpj": "09.674.510/0001-19",
+  "official_federal_portal_display": {
+    "matrix": true,
+    "municipality": "São Borja",
+    "uf": "RS",
+    "cnae": "47423 - Comércio varejista de material elétrico",
+    "source": "Portal da Transparência federal",
+    "limitation": "Not a substitute for canonical project relink against RFB 2026-08."
+  },
+  "municipal_b2g_2025": {
+    "instrument": "Dispensa 85/2025",
+    "object": "Aquisição de materiais elétricos para reforma da EMEFCM Duque de Caxias",
+    "contracted_R$": 30485.6,
+    "payment_trace_R$": 30485.6,
+    "payment_date": "2025-11-26",
+    "payment_source": "FNDE SIGEF account extract",
+    "scale_vs_pe39_priority_conductor_value_pct": 5.7175,
+    "scale_control": "Only a magnitude benchmark; objects and procurement mechanisms differ."
+  },
+  "competitive_eproc_2022": {
+    "process": "PE08/2022",
+    "item": "0006 - braço reto de 1m para iluminação pública",
+    "quantity": 310,
+    "reference_unit_R$": 32.4,
+    "iluminar_unit_bid_R$": 32,
+    "lowest_listed_unit_bid_R$": 14.85,
+    "local_bid_vs_lowest_listed_pct": 115.4882,
+    "local_bid_vs_reference_pct": -1.2346,
+    "interpretation": "Historical participation and price-pressure evidence only; item is not a conductor and cannot be transported to PE39."
+  },
+  "upgraded_gate": "LOCAL_OFFER_AND_B2G_EXPERIENCE_OBSERVED_CONTESTABILITY_OPEN",
+  "remaining_gates": [
+    "canonical_RFB_2026_08_relink",
+    "exact_equivalence_18_items",
+    "stock_and_scale_48540m",
+    "PE39_delivery_deadline",
+    "PE39_habilitation",
+    "working_capital",
+    "price_competitiveness",
+    "PE39_participation_result"
+  ],
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

@@ -87,16 +87,24 @@ Os inventários POM cumprem função distinta:
 
 Caso emblemático: em bens essenciais, a camada específica já validou 52 CNPJs documentais em 54 linhas, enquanto o parser textual antigo recuperava 47 CNPJs. Para análises futuras, prevalece a camada documental específica.
 
-## 7. RAIS — pendência de reconciliação identificada
+## 7. RAIS — reconciliação 2.824 × 2.893 concluída
 
-Há uma divergência interna a resolver antes de usar o varejo RAIS na triangulação:
+A aparente divergência foi resolvida por competência temporal:
 
-- `Analise_multissetorial`: **2.824 vínculos** no varejo;
-- `Controle_externo_setorial`: **2.893 vínculos** para CNAE divisão 47.
+- **2.824 vínculos** = RAIS **2024**, CNAE divisão 47, recorte usado em `Perfil_trabalho_consumo_v028`;
+- **2.893 vínculos** = RAIS **2025**, CNAE divisão 47, recorte usado em `Setorial_remuneracao` e `Redes_varejo_v022`.
 
-A diferença pode decorrer de filtros/universos distintos, mas isso ainda não foi documentado nesta etapa.
+Logo, não se trata de inconsistência entre dois derivados da mesma competência.
 
-**Regra provisória:** não usar 2.824 e 2.893 como se fossem a mesma estatística; reconciliar a linhagem do derivado RAIS antes de qualquer comparação com SINAC/RFB.
+Variação observada:
+
+`(2.893 / 2.824 - 1) × 100 = +2,44%`.
+
+**Dado calculado:** o estoque de vínculos formais na divisão 47 aumentou em 69 vínculos entre os dois recortes anuais.
+
+A mediana de remuneração de dezembro de **R$ 2.132,59** pertence à RAIS 2024; a estimativa de **37,46% do emprego varejista em estruturas externas** pertence ao modelo RAIS 2025 × RFB 2026-08.
+
+**Regra:** ao triangular emprego e estrutura empresarial, sempre preservar a competência RAIS de cada indicador; não combinar 2.824, R$ 2.132,59 e 37,46% como se fossem observações do mesmo ano.
 
 ## 8. Atualização de controle no Drive
 
@@ -111,7 +119,7 @@ Os cross-checks secundários antigos permanecem identificados como não aceitos 
 
 ## 9. Próximas ações
 
-1. reconciliar 2.824 × 2.893 na RAIS varejo;
+1. preservar explicitamente RAIS 2024 e RAIS 2025 em todas as sínteses de varejo;
 2. construir recortes RFB por classes CNAE exatamente compatíveis com cada crosswalk POM, sem usar a divisão 47 ampla como substituta;
 3. revalidar atividade atual dos inventários saúde e não essenciais antes de tratar unidades/raízes como estrutura corrente;
 4. preservar o inventário de serviços/alimentação do POM como material de pesquisa, não como censo de operadores.
@@ -120,7 +128,7 @@ Os cross-checks secundários antigos permanecem identificados como não aceitos 
 
 O crosswalk SINAC/SIMEI da seção 42.94 permanece válido.
 
-Esta triangulação **não gera novo delta quantitativo por si só**; ela consolida regras de uso e abre uma pendência de reconciliação RAIS.
+Esta triangulação **não gera novo delta quantitativo por si só**; ela consolida regras de uso e registra como resolvida a aparente divergência RAIS 2.824 × 2.893.
 
 ## 11. Governança
 

@@ -167,7 +167,7 @@ Para os quatro leads históricos sem CNPJ corrente reconciliado, ausência de ma
 
 **Oferta local observada:** SIM.  
 **Participação local efetiva:** SIM, em 18/18 itens prioritários por ao menos um operador local identificado.  
-**Equivalência/aceitação de proposta:** demonstrada em 15/18 linhas para esse operador, com três falhas específicas de conversão.  
+**Classificação processual da proposta:** observada em 15/18 linhas para esse operador, com três falhas específicas de conversão. Isso não equivale, por si só, à validação técnica plena de cada produto, pois propostas não vencedoras podem não ter sido submetidas à mesma profundidade de diligência.  
 **Escala declarada:** o operador ofertou os quantitativos integrais dos 18 itens, mas isso não prova estoque físico ou execução.  
 **Prazo/logística:** proposta submetida sob prazo contratual de 20 dias e entrega em São Borja.  
 **Habilitação:** não pode ser generalizada; ao menos um item revelou falha documental em diligência.  
@@ -176,7 +176,7 @@ Para os quatro leads históricos sem CNPJ corrente reconciliado, ausência de ma
 
 A leitura correta passa a ser:
 
-> O PE39 demonstra que a oferta local pode entrar no certame e cobrir tecnicamente grande parte da cesta, mas a conversão em fornecimento foi limitada sobretudo pela competitividade de preço nas linhas classificadas e, em casos específicos, por falhas de documentação/continuidade da proposta.
+> O PE39 demonstra que ao menos um operador local apresentou propostas para toda a cesta prioritária e permaneceu classificado em 15 das 18 linhas; a conversão em fornecimento foi limitada sobretudo pela competitividade de preço nessas linhas e, em casos específicos, por falhas de documentação/continuidade da proposta.
 
 Isso é muito diferente de “não há oferta local”.
 

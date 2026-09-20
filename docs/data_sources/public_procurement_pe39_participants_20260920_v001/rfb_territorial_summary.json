@@ -1,0 +1,24 @@
+{
+  "substantive_source": "Receita Federal do Brasil — Dados Abertos CNPJ",
+  "competence": "2026-08",
+  "participants": 22,
+  "transport_by_file": {
+    "Municipios.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos0.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos1.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos2.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos3.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos4.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos5.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos6.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos7.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos8.zip": "MIRROR_CASA_DOS_DADOS",
+    "Estabelecimentos9.zip": "MIRROR_CASA_DOS_DADOS"
+  },
+  "transport_mirror_used": true,
+  "class_counts": {
+    "EXTERNAL_EXACT_ACTIVE_NO_LOCAL_FOOTPRINT": 21,
+    "LOCAL_EXACT_ACTIVE": 1
+  },
+  "limitation": "If mirror transport is used, locality is exploratory until reconciled with official RFB hashes/reexecution; cadastral locality is not economic retention."
+}

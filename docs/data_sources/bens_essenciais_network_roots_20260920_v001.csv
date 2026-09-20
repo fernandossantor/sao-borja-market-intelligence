@@ -1,0 +1,55 @@
+source_row,operador_fantasia,formato_normalizado,cnpj_unidade,cnpj_base,root_units_in_recorte,root_multiunit_flag,status_cnpj_documental,status_prejoin_rfb,limitacao
+2,Rede Vivo Supermercados,Supermercado,91292987000706,91292987,2,SIM,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+3,Peruzzo Supermercados XXIV,Supermercado,87397865003137,87397865,2,SIM,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+4,Peruzzo Supermercados XXIII,Supermercado,87397865003218,87397865,2,SIM,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+5,Supermercado Baklizi,Supermercado,00610350001737,00610350,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+6,Supermercado Nicoline,Supermercado,89835672003650,89835672,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+7,Mercado Gigante,Mercado,89898753000170,89898753,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+8,Supermercado e Padaria Floresta,Mercado,44399290000163,44399290,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+9,Mercado da Casa,Mercado,01865820000109,01865820,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+10,Mercado Super Um,Mercado,22653587000170,22653587,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+11,Mercado Super Bah,Mercado,39501353000100,39501353,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+12,Lamana Mercado,Mercado,89225544000246,89225544,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+13,Mercado Precioso,Mercado,55330974000125,55330974,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+14,Mercado do Canto,Mercado,01609364000136,01609364,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+15,Minimercado Ponto Bom,Mercado,07254901000159,07254901,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+16,Mercado e Acougue Torres,Mercado,64094757000174,64094757,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+17,Padaria Santa Rita,Supermercado,94404316000192,94404316,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+18,Mercado Santa Lúcia,Mercado,07934366000187,07934366,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+19,Mercado Pe de Pano,Mercado,32072452000175,32072452,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+20,Mercado Alaska,Mercado,22963460000158,22963460,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+21,Nosso Mercado,Mercado,04930281000132,04930281,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+22,Mercado Uniao,Mercado,01578296000195,01578296,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+23,Mercado e Sorveteria Tribom,Minimercado,39365516000175,39365516,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+24,Compre Bem Mercado,Minimercado,53823094000165,53823094,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+25,Mercado do Boeiro,Minimercado,94430741000156,94430741,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+26,Mercado Guisolfi,Minimercado,43984027000179,43984027,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+27,Minimercado D'Gringa,Minimercado,51634027000177,51634027,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+28,Mercado Jl,Minimercado,17991032000107,17991032,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+29,Minimercado da Vila,Minimercado,47632242000161,47632242,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+30,Minimercado J.a,Minimercado,31778318000121,31778318,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+31,Mercado e Padaria Sm,Minimercado,30922573000133,30922573,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+32,Mini-Mercado Martins,Minimercado,21215999000166,21215999,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+33,Bedi Padaria e Confeitaria (Mercearia),Minimercado,,,0,NÃO,SEM_CNPJ,SEM_CNPJ,Sem CNPJ documental; fora do denominador das métricas por raiz.
+34,Padaria Kitute,Padaria,87580916000146,87580916,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+35,Padaria Donald,Padaria,01584229000183,01584229,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+36,Padaria e Cafeteria Tres Irmaos,Padaria,57090051000179,57090051,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+37,Padaria Nova,Padaria,02585088000186,02585088,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+38,Padaria e Confeitaria Glacial,Padaria,27063157000112,27063157,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+39,Padaria Vitória 2,Padaria,66270792000122,66270792,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+40,Padaria Vitória,Padaria,05196339000129,05196339,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+41,Sabor mineiro da Lu Delícias caseiras,Padaria,,,0,NÃO,SEM_CNPJ,SEM_CNPJ,Sem CNPJ documental; fora do denominador das métricas por raiz.
+42,Padaria E Confeitaria Tia Lori,Padaria,05579483000144,05579483,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+43,Casa da Carne Real,Açougue,00958639000184,00958639,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+44,Açougue Dom Vitorio,Açougue,32183512000127,32183512,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+45,Acougue Popular,Açougue,39575019000100,39575019,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+46,"Açougue e Minimercado ""Côza"" Gaúcha",Açougue,13699717000115,13699717,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+47,Acougue e Mini Mercado Prenda,Açougue,42809219000186,42809219,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+48,Açougue Morgental (Alimentos),Açougue,63154624000183,63154624,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+49,Mercado do Peixe,Peixaria,07445396000120,07445396,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+50,Armazém do peixe,Peixaria,49134931000171,49134931,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+51,Fruteira Serrana,Hortifruti,08358482000168,08358482,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+52,Fl Hort Agro,Hortifruti,36211275000111,36211275,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+53,Stok Center,Atacarejo / distribuidora,92016757008842,92016757,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+54,Rancho Atacadista - Filial 25 (Rede Vivo Super Mercados),Atacarejo / distribuidora,91292987002598,91292987,2,SIM,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.
+55,Mercado CDV,Atacarejo / distribuidora,42597504000180,42597504,1,NÃO,OK,PRONTO_JOIN_RFB,Agrupamento por raiz apenas dentro do recorte; não determina matriz/filial nem market share.

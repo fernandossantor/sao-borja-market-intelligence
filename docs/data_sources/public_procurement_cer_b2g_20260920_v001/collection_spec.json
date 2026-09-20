@@ -1,0 +1,91 @@
+{
+  "generated_at": "2026-09-20",
+  "mechanism": "CER_reabilitacao",
+  "period_payments": "2026-01-01/2026-09-19",
+  "observed": {
+    "distribution_free_paid_R$": 580031.72,
+    "local_creditors": 0,
+    "external_creditors": 4,
+    "local_services_pct": 83.5557,
+    "local_consumables_pct": 72.8811
+  },
+  "analytical_segments": [
+    {
+      "id": "OPM_SOB_MEDIDA",
+      "description": "Órteses/próteses que exigem medição, prova, ajuste, adaptação e assistência",
+      "key_requirements": [
+        "visitas ao CER",
+        "medidas",
+        "provas/ajustes",
+        "assistência técnica",
+        "garantia",
+        "serviços em São Borja"
+      ],
+      "price_mechanism": "Tabela SUS + complemento estadual quando aplicável",
+      "minimum_volume_guarantee": false
+    },
+    {
+      "id": "OPM_INDUSTRIALIZADA",
+      "description": "Equipamentos padronizados sem necessidade de molde, como cadeiras de rodas, andadores e muletas",
+      "key_requirements": [
+        "fornecimento",
+        "entrega",
+        "garantia",
+        "habilitação/catálogo"
+      ],
+      "price_mechanism": "Tabela SUS + complemento estadual quando aplicável",
+      "minimum_volume_guarantee": false
+    },
+    {
+      "id": "AASI",
+      "description": "Aparelhos auditivos e suporte técnico-clínico",
+      "key_requirements": [
+        "treinamento em São Borja",
+        "software NOAH",
+        "garantia 2 anos",
+        "insumos de manutenção",
+        "unidades consignadas",
+        "moldes/logística",
+        "interface fonoaudiológica"
+      ],
+      "price_mechanism": "Tabela do credenciamento; complementação estadual em itens quando prevista",
+      "minimum_volume_guarantee": false
+    }
+  ],
+  "documentary_control": {
+    "contract_121_2025_origin_conflict": {
+      "extract": "Chamamento Público 06/2025",
+      "pdf_term": "Chamamento Público 06/2024",
+      "rule": "Não usar número do chamamento isoladamente como chave até reconciliação."
+    }
+  },
+  "required_fields": [
+    "codigo_procedimento_sus",
+    "descricao",
+    "segmento",
+    "quantidade_estimada",
+    "remuneracao_sus",
+    "complemento_estadual",
+    "garantia_minima",
+    "prazo_entrega",
+    "exige_medicao_presencial",
+    "exige_prova_ajuste",
+    "exige_atendimento_em_sao_borja",
+    "exige_clinica_oficina",
+    "exige_software_treinamento",
+    "exige_estoque_consignado",
+    "fornecedor_2026",
+    "cnpj_fornecedor",
+    "municipio_fornecedor",
+    "oferta_local_equivalente",
+    "cnpj_local_candidato",
+    "habilitacao_compativel",
+    "viabilidade_tarifa_logistica"
+  ],
+  "next_action": "Reconciliar pagamentos 2026 com instrumento e item; separar OPM sob medida, industrializada e AASI; validar candidatos locais na RFB 2026-08.",
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

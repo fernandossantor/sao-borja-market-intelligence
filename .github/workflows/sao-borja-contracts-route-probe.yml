@@ -220,6 +220,7 @@ jobs:
                                                               hrefs.append(h)
                                                   details.append({"id":rid,"url":dr.url,"status":dr.status_code,
                                                                   "bytes":len(dr.content),"hits":hits[:20],
+                                                                  "raw_contratado":raw_hits[:5],"related_hrefs":hrefs[:30],
                                                                   "text_head":dplain[:5000]})
                                               report["detail_probe_2025"]=details
                                           except Exception:

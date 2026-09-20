@@ -53,7 +53,7 @@ SERVICOS,hotelaria_alojamento,prefix,55,TRUE,CORE,"POM Serviços/questionário: 
 SERVICOS,clinicas_consultorios,prefix,863,TRUE,CORE,"POM Serviços/questionário: clínicas e consultórios","Atividades ambulatoriais"
 SERVICOS,clinicas_consultorios,prefix,864,TRUE,CORE,"POM Serviços/questionário: clínicas e consultórios","Diagnóstico e terapia"
 SERVICOS,clinicas_consultorios,prefix,865,TRUE,CORE,"POM Serviços/questionário: clínicas e consultórios","Profissionais da área de saúde, exceto médicos/odontólogos"
-SERVICOS,clinicas_consultorios,prefix,866,TRUE,CORE,"POM Serviços/questionário: clínicas e consultórios","Apoio à gestão de saúde presente no mesmo ecossistema; manter explicitado"
+SERVICOS,apoio_gestao_saude,prefix,866,FALSE,ADJACENT_REVIEW,"POM exemplifica clínicas e consultórios; apoio à gestão não é serviço de consumo diretamente delimitado","Não entra no total primário conservador"
 SERVICOS,clinicas_consultorios,prefix,869,TRUE,CORE,"POM Serviços/questionário: clínicas e consultórios","Outras atividades de atenção à saúde"
 SERVICOS,hospitais,prefix,861,FALSE,ADJACENT_REVIEW,"POM exemplifica clínicas e consultórios, não hospitais","Não entra no total primário conservador"
 SERVICOS,assistencias_tecnicas_reparos,prefix,95,TRUE,CORE,"POM Serviços/questionário: assistências técnicas e reparos",""

@@ -1,0 +1,266 @@
+{
+  "exercise": "2021",
+  "portal_query": {
+    "page": "1",
+    "total": "102",
+    "records": "500",
+    "rows_returned": 102
+  },
+  "details_checked": 102,
+  "failures": [],
+  "hig_contracts_found": 6,
+  "hig_contracts": [
+    {
+      "exercise": "2021",
+      "row_id": "453",
+      "contract_number": "3",
+      "grid_signature_date": "11/02/2021",
+      "grid_validity": "11/02/2021 até 11/05/2021",
+      "detail_number": "3 - 2021 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "11/02/2021",
+      "detail_validity": "11/02/2021 até 11/05/2021",
+      "detail_value_total_snapshot": "90.000,00",
+      "process": "003/2021",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "repasse de recurso, auxílio à Fundação Ivan Goulart no valor total de R$ 90.000,00 (noventa mil reais), para três meses, sendo esse recurso oriundo do programa de enfrentamento da emergência de saúde pública, destinado ao custeio de ações e serviços públicos de saúde para o enfrentamento da pandemia COVID-19, que será utilizado para auxílio com as despesas de honorários médicos da unidade especial de atendimento aos pacientes suspeitos e positivos de COVID 19",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/453"
+    },
+    {
+      "exercise": "2021",
+      "row_id": "460",
+      "contract_number": "7",
+      "grid_signature_date": "15/03/2021",
+      "grid_validity": "15/03/2021 até 13/04/2021",
+      "detail_number": "7 - 2021 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "15/03/2021",
+      "detail_validity": "15/03/2021 até 13/04/2021",
+      "detail_value_total_snapshot": "75.000,00",
+      "process": "11/2021",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Repasse de recurso, auxilio à Fundação Ivan Goulart no valor de R$ 75.000,00 (setenta e cinco mil reais) recurso do programa de enfrentamento da emergência de saúde pública, destinado ao custeio de ações e serviços públicos de saúde para o enfrentamento da pandemia COVID 19, para auxiliar nas despesas de pessoal, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Dispensa.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/460"
+    },
+    {
+      "exercise": "2021",
+      "row_id": "469",
+      "contract_number": "15",
+      "grid_signature_date": "16/04/2021",
+      "grid_validity": "16/04/2021 até 15/05/2021",
+      "detail_number": "15 - 2021 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "16/04/2021",
+      "detail_validity": "16/04/2021 até 15/05/2021",
+      "detail_value_total_snapshot": "20.000,00",
+      "process": "17/2021",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Repasse de recurso, auxilio à Fundação Ivan Goulart no valor de R$ 20.000,00 (vinte mil reais) recurso do programa de enfrentamento da emergência de saúde pública, destinado ao custeio de ações e serviços públicos de saúde para o enfrentamento da pandemia COVID 19, para auxiliar nas despesas de pessoal, tendo em vista a criação de tenda para triagem no estacionamento do pronto socorro, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Dispensa.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/469"
+    },
+    {
+      "exercise": "2021",
+      "row_id": "483",
+      "contract_number": "28",
+      "grid_signature_date": "14/05/2021",
+      "grid_validity": "30/04/2021 até 28/07/2021",
+      "detail_number": "28 - 2021 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "14/05/2021",
+      "detail_validity": "30/04/2021 até 28/07/2021",
+      "detail_value_total_snapshot": "90.000,00",
+      "process": "24/2021",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Repasse de recurso, auxílio a Fundação Ivan Goulart no valor total de R$ 90.000,00 (noventa mil reais), para três meses, sendo repassado mensalmente o valor de R$30.000,00 (trinta mil reais), destinado ao custeio de ações e serviços públicos de saúde para o enfrentamento da emergência de saúde pública decorrente do COVID-19, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Dispensa.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/483"
+    },
+    {
+      "exercise": "2021",
+      "row_id": "511",
+      "contract_number": "56",
+      "grid_signature_date": "15/07/2021",
+      "grid_validity": "15/07/2021 até 14/07/2022",
+      "detail_number": "56 - 2021 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "15/07/2021",
+      "detail_validity": "15/07/2021 até 14/07/2022",
+      "detail_value_total_snapshot": "163.692,00",
+      "process": "13/2021",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "O objeto do presente contrato é a prestação de serviços técnicos para realização de exames de tomografia que serão utilizados para diagnóstico e tratamento da COVID-19, solicitados pelos médicos da Secretaria da Saúde Municipal, previamente agendados e autorizados pela regulação da Secretaria da Saúde, melhor descritas no Termo de Referência e demais documentos que integram o devido processo de Inexigibilidade.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/511"
+    },
+    {
+      "exercise": "2021",
+      "row_id": "558",
+      "contract_number": "99",
+      "grid_signature_date": "21/12/2021",
+      "grid_validity": "20/12/2025 até 20/12/2026",
+      "detail_number": "99 - 2021 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "21/12/2021",
+      "detail_validity": "20/12/2025 até 20/12/2026",
+      "detail_value_total_snapshot": "952.120,00",
+      "process": "28354/2021",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Contratação da prestação de serviços hospitalares de alta e média complexidade, melhor descritos e caracterizados no Termo de Referência e documentação integrante.",
+      "timeline": [
+        {
+          "tipo": "Aditamento",
+          "data": "24/01/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "29/06/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "29/06/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "12/07/2022"
+        },
+        {
+          "tipo": "Vigência",
+          "data": "20/12/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "20/12/2022"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "09/05/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "07/08/2023"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "07/08/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "21/08/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "06/09/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "31/10/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "05/12/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "08/12/2023"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "28/12/2023"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "28/12/2023"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "23/04/2024"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "27/05/2024"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "16/07/2024"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "03/09/2024"
+        },
+        {
+          "tipo": "Renovação",
+          "data": "17/12/2024"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "17/12/2024"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "26/12/2024"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "07/05/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "28/05/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "15/07/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "27/08/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "25/11/2025"
+        },
+        {
+          "tipo": "Alteração de Dotação",
+          "data": "25/11/2025"
+        },
+        {
+          "tipo": "Vigência",
+          "data": "22/12/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "22/12/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "22/12/2025"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "10/06/2026"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "06/07/2026"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "03/08/2026"
+        },
+        {
+          "tipo": "Aditamento",
+          "data": "31/08/2026"
+        }
+      ],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/558"
+    }
+  ],
+  "controls": [
+    "Contrato/detail snapshot não equivale a pagamento.",
+    "Valor Total do detalhe é estado corrente e não deve ser retroprojetado.",
+    "Processo ≠ contrato ≠ aditivo ≠ empenho ≠ liquidação ≠ pagamento."
+  ]
+}

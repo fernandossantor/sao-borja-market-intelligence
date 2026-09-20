@@ -1,0 +1,35 @@
+﻿year,cod_conta,conta,value_R$
+2022,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,20460227.75
+2022,1.3.1.0.00.0.0,1.3.1.0.00.0.0 - Exploração do Patrimônio Imobiliário do Estado,472123.57
+2022,1.3.1.1.00.0.0,1.3.1.1.00.0.0 - Exploração do Patrimônio Imobiliário do Estado,472123.57
+2022,1.3.1.1.01.0.0,"1.3.1.1.01.0.0 - Aluguéis, Arrendamentos, Foros, Laudêmios, Tarifas de Ocupação",472123.57
+2022,1.3.1.1.01.1.0,1.3.1.1.01.1.0 - Aluguéis e Arrendamentos,11701.35
+2022,1.3.1.1.01.2.0,"1.3.1.1.01.2.0 - Foros, Laudêmios e Tarifas de Ocupação",460422.22
+2022,1.3.2.0.00.0.0,1.3.2.0.00.0.0 - Valores Mobiliários,16488104.18
+2022,1.3.2.1.00.0.0,1.3.2.1.00.0.0 - Juros e Correções Monetárias,16488104.18
+2022,1.3.2.1.01.0.0,1.3.2.1.01.0.0 - Remuneração de Depósitos Bancários,4729775.22
+2022,1.3.2.1.04.0.0,1.3.2.1.04.0.0 - Remuneração dos Recursos do Regime Próprio de Previdência Social - RPPS,11591793.83
+2022,1.3.2.1.05.0.0,1.3.2.1.05.0.0 - Juros de Títulos de Renda,166535.13
+2022,1.3.6.0.00.0.0,1.3.6.0.00.0.0 - Cessão de Direitos,3500000.0
+2022,1.3.6.1.00.0.0,1.3.6.1.00.0.0 - Cessão de Direitos,3500000.0
+2022,1.3.6.1.01.0.0,1.3.6.1.01.0.0 - Cessão do Direito de Operacionalização de Pagamentos,3500000.0
+2022,1.3.6.1.01.1.0,1.3.6.1.01.1.0 - Cessão do Direito de Operacionalização de Pagamentos - Poderes Executivo e Legislativo,3500000.0
+2022,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,32878239.19
+2022,1.9.1.0.00.0.0,"1.9.1.0.00.0.0 - Multas Administrativas, Contratuais e Judiciais",349915.01
+2022,1.9.1.1.00.0.0,"1.9.1.1.00.0.0 - Multas Administrativas, Contratuais e Judiciais",349915.01
+2022,1.9.1.1.01.0.0,1.9.1.1.01.0.0 - Multas Previstas em Legislação Específica,232457.68
+2022,1.9.1.1.06.0.0,1.9.1.1.06.0.0 - Multas por Danos Ambientais,117457.33
+2022,1.9.1.1.06.2.0,1.9.1.1.06.2.0 - Multas Judiciais por Danos Ambientais,117457.33
+2022,1.9.2.0.00.0.0,"1.9.2.0.00.0.0 - Indenizações, Restituições e Ressarcimentos",284969.95
+2022,1.9.2.2.00.0.0,1.9.2.2.00.0.0 - Restituições,229144.84
+2022,1.9.2.2.50.0.0,1.9.2.2.50.0.0 - Restituição de Recursos Recebidos do SUS,17609.5
+2022,1.9.2.2.99.0.0,1.9.2.2.99.0.0 - Outras Restituições,211535.34
+2022,1.9.2.3.00.0.0,1.9.2.3.00.0.0 - Ressarcimentos,55825.11
+2022,1.9.2.3.99.0.0,1.9.2.3.99.0.0 - Outros Ressarcimentos,55825.11
+2022,1.9.9.0.00.0.0,1.9.9.0.00.0.0 - Demais Receitas Correntes,32243354.23
+2022,1.9.9.9.00.0.0,1.9.9.9.00.0.0 - Outras Receitas Correntes,32243354.23
+2022,1.9.9.9.03.0.0,1.9.9.9.03.0.0 - Compensações Financeiras entre o Regime Geral e os Regimes Próprios de Previdência e Sistema de Proteção Social,154911.82
+2022,1.9.9.9.12.0.0,1.9.9.9.12.0.0 - Encargos Legais pela Inscrição em Dívida Ativa e Receitas de Ônus de Sucumbência,144483.63
+2022,1.9.9.9.12.2.0,1.9.9.9.12.2.0 - Ônus de Sucumbência,144483.63
+2022,1.9.9.9.99.0.0,1.9.9.9.99.0.0 - Outras Receitas,31943958.78
+2022,1.9.9.9.99.2.0,1.9.9.9.99.2.0 - Outras Receitas Não Arrecadadas e Não Projetadas pela RFB - Primárias,31943958.78

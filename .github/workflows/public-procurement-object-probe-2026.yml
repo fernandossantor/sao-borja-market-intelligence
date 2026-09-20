@@ -1,0 +1,200 @@
+name: public-procurement-object-probe-2026
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/public-procurement-object-probe-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Probe high-value external procurement commitment rows
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/public_procurement_object_probe_2026"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import csv,json,re,requests,time
+          from pathlib import Path
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          PAIRS=Path("docs/data_sources/sao_borja_transparencia_cnpj_rubricas_2026/cnpj_rubrica_summary_2026.csv")
+          GEO=Path("docs/data_sources/public_procurement_territorial_exposure_2026/core_vendor_territorial_2026.csv")
+          IDS=Path("docs/data_sources/rfb_public_creditors_2026/creditors_rfb_classification.csv")
+          OUT=Path("artifacts/public_procurement_object_probe_2026")
+
+          TARGET_RUBRICS={
+            "MATERIAL DE CONSUMO",
+            "MATERIAL, BEM OU SERVIÇO PARA DIST. GRATUITA",
+            "EQUIPAMENTOS E MATERIAL PERMANENTE",
+            "SERVIÇOS DE TECNOLOGIA DA INFORMAÇÃO E COMUNICAÇÃO",
+            "SERVIÇOS DE CONSULTORIA",
+            "PASSAGENS E DESPESAS COM LOCOMOÇÃO",
+          }
+
+          def read(path):
+              with path.open(encoding="utf-8-sig",newline="") as f:
+                  return list(csv.DictReader(f))
+
+          geo={r["cnpj"]:r for r in read(GEO)}
+          ids={r["cnpj"]:r for r in read(IDS)}
+          pairs=[]
+          for r in read(PAIRS):
+              cls=geo.get(r["cnpj"],{}).get("territorial_class","")
+              if r["rubrica"] not in TARGET_RUBRICS or not cls.startswith("EXTERNAL_"):
+                  continue
+              pairs.append({
+                  "cnpj":r["cnpj"],"nome":r["nome_credor"],"rubrica":r["rubrica"],
+                  "pago_R$":float(r["pago_R$"] or 0),"empenhos":int(float(r["empenhos"] or 0)),
+                  "classificacao":cls,"id_credor":ids.get(r["cnpj"],{}).get("id_credor","")
+              })
+          pairs.sort(key=lambda x:x["pago_R$"],reverse=True)
+          targets=pairs[:35]
+          if any(not x["id_credor"] for x in targets):
+              raise RuntimeError("missing creditor id in target set")
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI object probe/1.0"})
+          page=s.get(BASE+"/despesas",timeout=60); page.raise_for_status()
+          m=re.search(r"oParametros\.dtDataImportacao\s*=\s*'([^']+)'",page.text)
+          if not m: raise RuntimeError("dtDataImportacao missing")
+          dt_import=m.group(1)
+
+          # Preserve script references and snippets containing grid/commitment definitions.
+          scripts=re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',page.text,re.I)
+          js_hits=[]
+          for src in scripts:
+              url=src if src.startswith("http") else BASE+("/" if not src.startswith("/") else "")+src
+              try:
+                  txt=s.get(url,timeout=30).text
+                  if "getEmpenhos" in txt or "Empenho" in txt or "empenho" in txt:
+                      js_hits.append({"url":url,"text":txt[:200000]})
+              except Exception:
+                  pass
+          (OUT/"frontend_js_hits.json").write_text(json.dumps(js_hits,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          def post_json(path,data,tries=4):
+              last=None
+              for i in range(tries):
+                  try:
+                      r=s.post(BASE+path,data=data,timeout=90)
+                      r.raise_for_status()
+                      return r.json()
+                  except Exception as e:
+                      last=e; time.sleep(0.7*(i+1))
+              raise last
+
+          out_rows=[]
+          errors=[]
+          for ix,t in enumerate(targets,1):
+              base={
+                "iExercicio":"2026","dtDataImportacao":dt_import,"sViewAtual":"instituicoes",
+                "iNivel":"4","dtInicio":"01/01","dtFim":"18/09",
+                "aHistorico":"descricao","iIdLink":"3","iCredor":str(t["id_credor"])
+              }
+              try:
+                  inst=post_json("/despesas/getInstit",{
+                    "aParametros":json.dumps(base,ensure_ascii=False,separators=(",",":")),
+                    "page":1,"rows":100,"sidx":"descricao","sord":"asc","_search":"false"
+                  })
+                  for ir in inst.get("rows",[]):
+                      iid=str(ir.get("id","")); icell=ir.get("cell",[])
+                      idesc=str(icell[0]) if icell else ""
+                      p=base.copy(); p.update({"iInstituicao":iid,"iNivel":"5","sViewAtual":"empenhos"})
+                      emp=post_json("/despesas/getEmpenhos",{
+                        "aParametros":json.dumps(p,ensure_ascii=False,separators=(",",":")),
+                        "page":1,"rows":5000,"sidx":"data","sord":"asc","_search":"false"
+                      })
+                      for er in emp.get("rows",[]):
+                          cell=er.get("cell",[])
+                          rub=str(cell[5] or "").strip() if len(cell)>5 else ""
+                          if rub!=t["rubrica"]: continue
+                          out_rows.append({
+                              "target_rank":ix,
+                              "target_cnpj":t["cnpj"],
+                              "target_nome":t["nome"],
+                              "target_rubrica":t["rubrica"],
+                              "target_pair_paid_R$":t["pago_R$"],
+                              "institution_id":iid,
+                              "institution_desc":idesc,
+                              "row_id":er.get("id"),
+                              "cell_len":len(cell),
+                              "cell":cell
+                          })
+              except Exception as e:
+                  errors.append({"target":t,"error":repr(e)})
+
+          with (OUT/"targets.csv").open("w",newline="",encoding="utf-8-sig") as f:
+              fields=list(targets[0].keys()); w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(targets)
+
+          with (OUT/"raw_empenho_rows.jsonl").open("w",encoding="utf-8") as f:
+              for r in out_rows: f.write(json.dumps(r,ensure_ascii=False)+"\n")
+
+          sample={}
+          for r in out_rows:
+              sample.setdefault(str(r["cell_len"]),r["cell"])
+          report={
+              "source":"Portal da Transparência PMSB",
+              "period":"01/01/2026–18/09/2026",
+              "targets":len(targets),
+              "rows_captured":len(out_rows),
+              "errors":errors,
+              "cell_length_samples":sample,
+              "frontend_js_hits":len(js_hits),
+              "control":"Raw grid rows only. No object-field interpretation is made until frontend schema is inspected."
+          }
+          (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist compact probe
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_object_probe_20260920_v001"
+          mkdir -p "$DEST"
+          cp artifacts/public_procurement_object_probe_2026/targets.csv "$DEST/"
+          cp artifacts/public_procurement_object_probe_2026/raw_empenho_rows.jsonl "$DEST/"
+          cp artifacts/public_procurement_object_probe_2026/summary.json "$DEST/"
+          cp artifacts/public_procurement_object_probe_2026/frontend_js_hits.json "$DEST/"
+          cat > "$DEST/README.md" <<'EOF'
+          # PMSB — probe de objetos/empenhos prioritários — 2026
+
+          Camada exploratória de inspeção de schema.
+
+          Fonte: Portal da Transparência PMSB.
+          Período: 01/01/2026–18/09/2026.
+          Universo: 35 maiores pares credor externo × rubrica entre materiais,
+          distribuição gratuita, equipamentos, TIC, consultoria e passagens.
+
+          Esta camada preserva as células brutas retornadas por /despesas/getEmpenhos.
+          Não atribuir semântica a posições de célula antes de reconciliar o schema
+          com o JavaScript/front-end oficial.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: probe high-value external procurement objects"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-procurement-object-probe-2026
+          path: artifacts/public_procurement_object_probe_2026/
+          retention-days: 30

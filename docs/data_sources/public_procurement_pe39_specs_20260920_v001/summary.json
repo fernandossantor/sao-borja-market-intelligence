@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-09-20",
+  "process": "PE39/2026",
+  "priority_conductor_items": 18,
+  "normalized_technical_clusters": 9,
+  "reduction_pct": 50,
+  "total_quantity_m": 48540,
+  "total_estimated_R$": 533194.4,
+  "cluster_total_check_R$": 533194.4,
+  "largest_clusters": [
+    {
+      "cluster": "CABO_FLEXIVEL_16_ATOX",
+      "value_R$": 117520,
+      "share_pct": 22.0407
+    },
+    {
+      "cluster": "CABO_PP_4X10",
+      "value_R$": 103353,
+      "share_pct": 19.3837
+    },
+    {
+      "cluster": "CABO_FLEX_COBRE_25_PVC70",
+      "value_R$": 73905,
+      "share_pct": 13.8608
+    },
+    {
+      "cluster": "CABO_FLEX_COBRE_10_PVC70",
+      "value_R$": 68850,
+      "share_pct": 12.9127
+    },
+    {
+      "cluster": "CABO_FLEX_COBRE_6_PVC70",
+      "value_R$": 50520,
+      "share_pct": 9.475
+    }
+  ],
+  "duplicate_pattern": {
+    "specification": "CABO PP 4 x 10,00 mm 1kV",
+    "item_35_qty_m": 2115,
+    "item_36_qty_m": 705,
+    "combined_qty_m": 2820,
+    "item_35_share_pct": 75,
+    "item_36_share_pct": 25,
+    "same_reference_unit_R$": 36.65,
+    "observed_pattern": "75% / 25% exact quantity split",
+    "hypothesis": "Possible quota/reservation design for ME/EPP, but NOT confirmed without official edital/TR.",
+    "status": "HYPOTHESIS_PENDING_OFFICIAL_CONFIRMATION"
+  },
+  "official_process_source": "Municipal PE39 page confirms object/criterion/session; item specifications below come from secondary mirror MABUS.",
+  "secondary_item_source": "https://mabus.com.br/licitacao/3630558/pregao-eletronico-municipio-de-sao-borja-sao-borja-rs",
+  "official_documents_status": "EDITAL_E_ANEXOS_PCE_39_2026.7z and FASE_PREPARAT_RIA_PCE_39_2026.7z are publicly indexed, but official content has not yet been programmatically reconciled in SBMI.",
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

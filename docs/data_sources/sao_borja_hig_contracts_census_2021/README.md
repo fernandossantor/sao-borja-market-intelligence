@@ -1,4 +1,4 @@
-# PMSB — censo exploratório de contratos HIG — exercício 2022
+# PMSB — censo exploratório de contratos HIG — exercício 2021
 
 Extração integral da grade oficial de contratos de 2021 no módulo `/acordos`,
 seguida de leitura dos detalhes e filtro pelo contratado FUNDACAO IVAN GOULART.

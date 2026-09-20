@@ -1,0 +1,25 @@
+{
+  "source": "Portal da Transparência PMSB",
+  "period": "01/01/2026–18/09/2026",
+  "targets": 35,
+  "rows_captured": 478,
+  "errors": [],
+  "cell_length_samples": {
+    "12": [
+      "9484 / 2026",
+      "URBANISMO",
+      "INFRA-ESTRUTURA URBANA",
+      "DESENVOLVIMENTO DA INFRA-ESTRUTURA URBAN",
+      "MANUTENÇÃO DO FUNDO MUNICIPAL DE ILUMINA",
+      "MATERIAL DE CONSUMO",
+      "FUNDO MUNICIPAL DE ILUMINAÇÃO PÚBLICA",
+      "2026-05-18",
+      "1235620.70",
+      "0",
+      "1221733.83",
+      "1221733.83"
+    ]
+  },
+  "frontend_js_hits": 0,
+  "control": "Raw grid rows only. No object-field interpretation is made until frontend schema is inspected."
+}

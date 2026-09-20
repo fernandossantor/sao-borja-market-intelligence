@@ -144,15 +144,15 @@ jobs:
                                  "contains_hig":bool(hig)}
                           if exval=="2025" and method=="GET":
                               # Capture form and script structure of the result page to locate async data route.
-                              fm=re.search(r'<form[^>]*id=["\\']FiltroIndexForm["\\'][^>]*>.*?</form>',body,re.I|re.S)
+                              fm=re.search(r"<form[^>]*id=['\"]FiltroIndexForm['\"][^>]*>.*?</form>",body,re.I|re.S)
                               probe["form_snippet"]=(fm.group(0)[:8000] if fm else None)
                               rscripts=[]
-                              for sm in re.finditer(r'<script[^>]+src=["\\']([^"\\']+)["\\']',body,re.I):
+                              for sm in re.finditer(r"<script[^>]+src=['\"]([^'\"]+)['\"]",body,re.I):
                                   su=urljoin(BASE+"/acordos/pesquisar",unescape(sm.group(1)))
                                   if su not in rscripts: rscripts.append(su)
                               probe["scripts"]=rscripts
                               probe["inline_route_candidates"]=list(dict.fromkeys(
-                                  mm.group(1) for mm in re.finditer(r'["\\']([^"\\']*(?:acordos|contrat|pesquisar|get[A-Z])[^\"\\']*)["\\']',body,re.I)
+                                  mm.group(1) for mm in re.finditer(r"['\"]([^'\"]*(?:acordos|contrat|pesquisar|get[A-Z])[^'\"]*)['\"]",body,re.I)
                               ))[:100]
                               report["result_page_scripts"]=[]
                               for su in rscripts:
@@ -160,7 +160,7 @@ jobs:
                                   if sr is None or sr.status_code>=400: continue
                                   sj=sr.content.decode(sr.encoding or "utf-8","replace")
                                   cand=list(dict.fromkeys(
-                                      mm.group(1) for mm in re.finditer(r'["\\']([^"\\']*(?:acordos|contrat|pesquisar|get[A-Z])[^"\\']*)["\\']',sj,re.I)
+                                      mm.group(1) for mm in re.finditer(r"['\"]([^'\"]*(?:acordos|contrat|pesquisar|get[A-Z])[^'\"]*)['\"]",sj,re.I)
                                   ))
                                   if cand:
                                       report["result_page_scripts"].append({"url":su,"candidates":cand[:100],"text":sj if len(sj)<12000 else sj[:12000]})

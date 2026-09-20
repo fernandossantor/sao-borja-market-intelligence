@@ -105,6 +105,36 @@ jobs:
               parts=re.split(r"[.]",code)
               return sum(1 for p in parts if p and set(p)!={"0"})
 
+          def account_parts(row):
+              code=re.sub(r"^[A-Z]+","",str(row.get("cod_conta","")))
+              return re.split(r"[.]",code)
+
+          def is_hierarchy_parent(parent, child):
+              p=account_parts(parent); c=account_parts(child)
+              if len(p)!=len(c): return False
+              strict=False
+              for a,b in zip(p,c):
+                  if a==b:
+                      continue
+                  if a and set(a)=={"0"}:
+                      strict=True
+                      continue
+                  return False
+              return strict
+
+          def non_overlapping_hierarchy_rows(rows):
+              # Keep the least-specific aggregate whenever it is an ancestor of
+              # another matched row. This prevents double counting parent + child
+              # accounts after the 2022 PCASP/FPM coding change. When no aggregate
+              # parent exists (e.g. 2019–2021 FPM components), all disjoint leaves
+              # remain and are summed.
+              kept=[]
+              for r in rows:
+                  if any(is_hierarchy_parent(other,r) for other in rows if other is not r):
+                      continue
+                  kept.append(r)
+              return kept
+
           annual=[]
           component_audit=[]
           checkpoint_transfer_rounded={
@@ -145,18 +175,31 @@ jobs:
               )
 
               fpm_pred=lambda r:"FUNDO DE PARTICIPACAO DOS MUNICIPIOS" in norm(r.get("conta"))
-              fpm_g,fpm_rows=sum_revenue_components(year,fpm_pred,"Receitas Brutas Realizadas")
-              fpm_f,_=sum_revenue_components(year,fpm_pred,"Deduções - FUNDEB")
-              fpm_o,_=sum_revenue_components(year,fpm_pred,"Outras Deduções da Receita")
+
+              def select_fpm_rows(column):
+                  matched=subset(year,"DCA-Anexo I-C",column,fpm_pred)
+                  return matched,non_overlapping_hierarchy_rows(matched)
+
+              fpm_g_all,fpm_g_rows=select_fpm_rows("Receitas Brutas Realizadas")
+              fpm_f_all,fpm_f_rows=select_fpm_rows("Deduções - FUNDEB")
+              fpm_o_all,fpm_o_rows=select_fpm_rows("Outras Deduções da Receita")
+
+              fpm_g=sum(val(r) for r in fpm_g_rows if not math.isnan(val(r)))
+              fpm_f=sum(val(r) for r in fpm_f_rows if not math.isnan(val(r)))
+              fpm_o=sum(val(r) for r in fpm_o_rows if not math.isnan(val(r)))
+
               rec["fpm_bruto_componentes_somados"]=fpm_g
               rec["fpm_deducao_fundeb_componentes_somados"]=fpm_f
               rec["fpm_outras_deducoes_componentes_somados"]=fpm_o
               rec["fpm_liquido_calculado"]=fpm_g-fpm_f-fpm_o
-              rec["fpm_componentes_n"]=len(fpm_rows)
-              for r in fpm_rows:
+              rec["fpm_componentes_n"]=len(fpm_g_rows)
+
+              selected_ids={id(r) for r in fpm_g_rows}
+              for r in fpm_g_all:
                   component_audit.append({
                       "year":year,"metric":"FPM","cod_conta":r.get("cod_conta"),
-                      "conta":r.get("conta"),"coluna":r.get("coluna"),"valor":r.get("valor")
+                      "conta":r.get("conta"),"coluna":r.get("coluna"),"valor":r.get("valor"),
+                      "selected":str(id(r) in selected_ids)
                   })
 
               for key,needle in [
@@ -335,13 +378,13 @@ jobs:
                   "transferencias_correntes_liquidas_calculadas":"transferencias_correntes_brutas - deducao_fundeb - outras_deducoes",
                   "participacao_transferencias_brutas":"transferencias_correntes_brutas / receita_corrente_bruta * 100",
                   "variacao_nominal_yoy":"(valor_t / valor_t-1 - 1) * 100",
-                  "fpm_liquido_calculado":"soma componentes FPM brutos - deducoes FUNDEB - outras deducoes",
+                  "fpm_liquido_calculado":"soma de contas FPM não sobrepostas na hierarquia - deduções FUNDEB não sobrepostas - outras deduções",
               },
               "limitations":[
                   "Valores são nominais; não foram deflacionados.",
                   "Rubricas econômicas de despesa não equivalem ao universo jurídico de licitações/contratos.",
                   "DCA é anual; 2026 permanece separado como execução parcial corrente.",
-                  "FPM é calculado como soma dos componentes cuja conta menciona Fundo de Participação dos Municípios; os componentes são preservados em arquivo de auditoria.",
+                  "FPM usa contas não sobrepostas na hierarquia: quando existe conta agregada ancestral (2022+), ela substitui os filhos para evitar dupla contagem; em estruturas antigas sem pai FPM explícito, somam-se folhas disjuntas. Todas as candidatas e o flag selected são preservados em component_audit.csv.",
                   "FUNDEB recebido usa a conta dedicada menos específica entre as candidatas, preservando todas as candidatas para auditoria.",
               ],
           }

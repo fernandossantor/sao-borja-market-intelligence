@@ -11,13 +11,13 @@
     "transferencias_correntes_liquidas_calculadas": "transferencias_correntes_brutas - deducao_fundeb - outras_deducoes",
     "participacao_transferencias_brutas": "transferencias_correntes_brutas / receita_corrente_bruta * 100",
     "variacao_nominal_yoy": "(valor_t / valor_t-1 - 1) * 100",
-    "fpm_liquido_calculado": "soma componentes FPM brutos - deducoes FUNDEB - outras deducoes"
+    "fpm_liquido_calculado": "soma de contas FPM não sobrepostas na hierarquia - deduções FUNDEB não sobrepostas - outras deduções"
   },
   "limitations": [
     "Valores são nominais; não foram deflacionados.",
     "Rubricas econômicas de despesa não equivalem ao universo jurídico de licitações/contratos.",
     "DCA é anual; 2026 permanece separado como execução parcial corrente.",
-    "FPM é calculado como soma dos componentes cuja conta menciona Fundo de Participação dos Municípios; os componentes são preservados em arquivo de auditoria.",
+    "FPM usa contas não sobrepostas na hierarquia: quando existe conta agregada ancestral (2022+), ela substitui os filhos para evitar dupla contagem; em estruturas antigas sem pai FPM explícito, somam-se folhas disjuntas. Todas as candidatas e o flag selected são preservados em component_audit.csv.",
     "FUNDEB recebido usa a conta dedicada menos específica entre as candidatas, preservando todas as candidatas para auditoria."
   ]
 }

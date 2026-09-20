@@ -1,27 +1,27 @@
 ﻿cod_conta,coluna,conta,metric,selected,valor,year
-RO1.7.1.8.01.2.0,Receitas Brutas Realizadas,1.7.1.8.01.2.0 Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,32148530.05,2019
-RO1.7.1.8.01.4.0,Receitas Brutas Realizadas,1.7.1.8.01.4.0 Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,,1366357.02,2019
+RO1.7.1.8.01.2.0,Receitas Brutas Realizadas,1.7.1.8.01.2.0 Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,True,32148530.05,2019
+RO1.7.1.8.01.4.0,Receitas Brutas Realizadas,1.7.1.8.01.4.0 Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,True,1366357.02,2019
 RO1.7.5.8.01.0.0,Receitas Brutas Realizadas,1.7.5.8.01.0.0 Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação ¿ FUNDEB,FUNDEB_CANDIDATE,True,26524660.31,2019
-RO1.7.1.8.01.2.0,Receitas Brutas Realizadas,1.7.1.8.01.2.0 Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,31100665.47,2020
-RO1.7.1.8.01.4.0,Receitas Brutas Realizadas,1.7.1.8.01.4.0 Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,,1380718.02,2020
+RO1.7.1.8.01.2.0,Receitas Brutas Realizadas,1.7.1.8.01.2.0 Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,True,31100665.47,2020
+RO1.7.1.8.01.4.0,Receitas Brutas Realizadas,1.7.1.8.01.4.0 Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,True,1380718.02,2020
 RO1.7.5.8.01.0.0,Receitas Brutas Realizadas,1.7.5.8.01.0.0 Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação ¿ FUNDEB,FUNDEB_CANDIDATE,True,27895564.15,2020
-RO1.7.1.8.01.2.0,Receitas Brutas Realizadas,1.7.1.8.01.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,41279974.51,2021
-RO1.7.1.8.01.4.0,Receitas Brutas Realizadas,1.7.1.8.01.4.0 - Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,,1598286.38,2021
+RO1.7.1.8.01.2.0,Receitas Brutas Realizadas,1.7.1.8.01.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,True,41279974.51,2021
+RO1.7.1.8.01.4.0,Receitas Brutas Realizadas,1.7.1.8.01.4.0 - Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,True,1598286.38,2021
 RO1.7.5.8.01.0.0,Receitas Brutas Realizadas,1.7.5.8.01.0.0 - Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação ¿ FUNDEB,FUNDEB_CANDIDATE,True,36557027.52,2021
-RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,,48899545.72,2022
-RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,46403103.1,2022
-RO1.7.1.1.51.3.0,Receitas Brutas Realizadas,1.7.1.1.51.3.0 - Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,,2114404.04,2022
+RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,True,48899545.72,2022
+RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,False,46403103.1,2022
+RO1.7.1.1.51.3.0,Receitas Brutas Realizadas,1.7.1.1.51.3.0 - Cota-Parte do Fundo de Participação dos Municípios - 1% Cota entregue no mês de julho,FPM,False,2114404.04,2022
 RO1.7.5.1.00.0.0,Receitas Brutas Realizadas,1.7.5.1.00.0.0 - Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação - FUNDEB,FUNDEB_CANDIDATE,True,33641193.65,2022
-RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,,58147762.89,2023
-RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,52909639.96,2023
-RO1.7.1.1.51.2.0,Receitas Brutas Realizadas,1.7.1.1.51.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cotas Extraordinárias,FPM,,5238122.93,2023
+RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,True,58147762.89,2023
+RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,False,52909639.96,2023
+RO1.7.1.1.51.2.0,Receitas Brutas Realizadas,1.7.1.1.51.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cotas Extraordinárias,FPM,False,5238122.93,2023
 RO1.7.5.1.00.0.0,Receitas Brutas Realizadas,1.7.5.1.00.0.0 - Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação - FUNDEB,FUNDEB_CANDIDATE,True,38098849.76,2023
-RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,,66963886.26,2024
-RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,60697738.25,2024
-RO1.7.1.1.51.2.0,Receitas Brutas Realizadas,1.7.1.1.51.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cotas Extraordinárias,FPM,,6266148.01,2024
+RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,True,66963886.26,2024
+RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,False,60697738.25,2024
+RO1.7.1.1.51.2.0,Receitas Brutas Realizadas,1.7.1.1.51.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cotas Extraordinárias,FPM,False,6266148.01,2024
 RO1.7.5.1.00.0.0,Receitas Brutas Realizadas,1.7.5.1.00.0.0 - Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação - FUNDEB,FUNDEB_CANDIDATE,True,45717749.61,2024
-RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,,75376454.33,2025
-RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,,67103770.79,2025
-RO1.7.1.1.51.2.0,Receitas Brutas Realizadas,1.7.1.1.51.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cotas Extraordinárias,FPM,,8272683.54,2025
+RO1.7.1.1.51.0.0,Receitas Brutas Realizadas,1.7.1.1.51.0.0 -Cota-Parte do Fundo de Participação dos Municípios - FPM,FPM,True,75376454.33,2025
+RO1.7.1.1.51.1.0,Receitas Brutas Realizadas,1.7.1.1.51.1.0 - Cota-Parte do Fundo de Participação dos Municípios - Cota Mensal,FPM,False,67103770.79,2025
+RO1.7.1.1.51.2.0,Receitas Brutas Realizadas,1.7.1.1.51.2.0 - Cota-Parte do Fundo de Participação dos Municípios - Cotas Extraordinárias,FPM,False,8272683.54,2025
 RO1.7.5.1.00.0.0,Receitas Brutas Realizadas,1.7.5.1.00.0.0 - Transferências de Recursos do Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação - FUNDEB,FUNDEB_CANDIDATE,True,49586789.1,2025
 RO1.7.1.5.00.0.0,Receitas Brutas Realizadas,1.7.1.5.00.0.0 - Transferências de Recursos de Complementação da União ao Fundo de Manutenção e Desenvolvimento da Educação Básica e de Valorização dos Profissionais da Educação ¿ FUNDEB ,FUNDEB_CANDIDATE,False,89226.75,2025

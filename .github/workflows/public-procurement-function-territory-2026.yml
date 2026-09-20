@@ -253,6 +253,7 @@ jobs:
           cp artifacts/public_procurement_function_territory_2026/subfunction_territorial_2026.csv "$DEST/"
           cp artifacts/public_procurement_function_territory_2026/action_territorial_2026.csv "$DEST/"
           cp artifacts/public_procurement_function_territory_2026/function_summary_2026.csv "$DEST/"
+          cp artifacts/public_procurement_function_territory_2026/core_commitment_detail_2026.csv "$DEST/"
           cp artifacts/public_procurement_function_territory_2026/vendor_reconciliation_2026.csv "$DEST/"
           cp artifacts/public_procurement_function_territory_2026/function_territory_summary.json "$DEST/"
           cat > "$DEST/README.md" <<'EOF'

@@ -176,3 +176,82 @@ Inferência causal:
 
 Última seção após esta retomada:
 **42.93 — ANTT — corredor fronteiriço e escala física do fluxo exportador**.
+
+
+## 8. Avanço posterior — recortes setoriais SINAC/SIMEI
+
+Foi criado o crosswalk auditável:
+- `docs/data_sources/cnae_pom_crosswalk_20260920_v001.csv`;
+- `docs/data_sources/sinac_simei_pom_recut_20260920_v001.csv`;
+- `docs/data_sources/sinac_simei_pom_market_summary_20260920_v001.csv`;
+- `docs/caderno_base/analise_sinac_simei_por_mercados_pom_20260920_v001.md`.
+
+Resultados primários:
+- Bens Essenciais: 688 SINAC / 398 SIMEI;
+- Saúde/Higiene: 95 / 66;
+- Bens Não Essenciais: 768 / 456;
+- Serviços: 947 / 728;
+- Alimentação Fora do Lar: 498 / 378;
+- Serviços + Alimentação editorial: 1.445 / 1.106.
+
+Os recortes primários somam 2.996 optantes SINAC e 2.026 SIMEI, respectivamente 41,75% e 41,49% dos totais municipais. Isso é cobertura do escopo POM dentro dos regimes, não participação econômica.
+
+Drive:
+- Delta_cadernos linhas 53–56;
+- documento-mestre seção 42.94.
+
+## 9. Avanço posterior — Radar do Mercado
+
+Foi criado benchmark estadual aderente aos mercados POM:
+- `docs/data_sources/radar_pom_benchmark_20260920_v001.csv`;
+- `docs/caderno_base/analise_radar_benchmark_mercados_pom_20260920_v001.md`.
+
+Regra:
+**PROMOVER COMO BENCHMARK ESTADUAL; NÃO MUNICIPALIZAR.**
+
+Principais achados de ago/2026:
+- Saúde: Medicamentos 0,67% Part.RS; Vacinas/Soros 0,15%; Instrumentos Médicos 4,26%; Produtos Farmacêuticos 1,32%; Perfumaria/Cosméticos 6,27%.
+- Não Essenciais: telefones, informática/TIC, comunicação/imagem, áudio/vídeo e brinquedos abaixo de 5%; vestuário 11,72–13,93%; mobiliário e calçados acima de 50%.
+- Essenciais: forte heterogeneidade, de Café 0,45% a Frango 65,39%.
+
+Drive:
+- Delta_cadernos linhas 57–59;
+- documento-mestre seção 42.95.
+
+## 10. Avanço posterior — Preços Dinâmicos
+
+Benchmark regional promovido:
+- `docs/caderno_base/analise_precos_dinamicos_fronteira_oeste_20260920_v002.md`.
+
+Agosto/2026:
+- PCA-RE Fronteira Oeste = R$ 284,19;
+- RS = R$ 298,61;
+- diferença de nível = -4,83%;
+- ICA-RE 12m regional médio = 3,23%;
+- RS = 3,49%;
+- Hortaliças regional = R$ 5,58 / +18,69% 12m;
+- Cebola regional = R$ 5,43 / +101,93% 12m.
+
+Regra:
+**COREDE Fronteira Oeste — região de referência de São Borja. Nunca rotular como preço municipal.**
+
+Drive:
+- Delta_cadernos linha 60;
+- documento-mestre seção 42.96.
+
+## 11. Cesta Nutricional Familiar — estado corrente
+
+A página institucional da PUCRS DataSocial foi revalidada em 20/09/2026 e lista relatórios de junho, julho, agosto e setembro/2026.
+
+A metodologia pública confirma:
+- preços baseados em NFC-e;
+- cesta customizável;
+- relatório de referência para 2 adultos com alimentação regular + 1 criança de 4 a 10 anos;
+- parceria SEFAZ/RS + PUCRS DataSocial + GPCA/PUCRS.
+
+O PDF de setembro foi identificado, mas a recuperação do conteúdo numérico não foi bem-sucedida no ambiente atual.
+
+Regra:
+**não promover custo de cesta sem valor reproduzível e configuração familiar/geográfica explícita.**
+
+A Cesta Nutricional permanece como próxima lacuna dirigida, não como bloco perdido.

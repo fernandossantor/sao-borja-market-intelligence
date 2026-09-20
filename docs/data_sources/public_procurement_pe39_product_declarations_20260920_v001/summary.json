@@ -1,0 +1,14 @@
+{
+  "ata_final": {
+    "url": "https://pncp.gov.br/pncp-api/v1/orgaos/88489786000101/compras/2026/136/arquivos/3",
+    "sha256": "6412b0508682441618c3eefd248cdf4c5a1599dc48d8bed66a531d8a14db1cb9"
+  },
+  "rows_total": 35,
+  "local_rows": 18,
+  "winner_rows": 17,
+  "local_rows_with_corfio_mention": 15,
+  "winner_rows_with_corfio_mention": 0,
+  "local_corfio_mention_share_pct": 83.3333,
+  "winner_corfio_mention_share_pct": 0.0,
+  "limitation": "Modelo and Marca/Fabricante are preserved as one raw field because PDF text extraction does not expose a reliable column boundary. The values are declared proposal fields, not independently verified manufacturer or upstream-supplier evidence."
+}

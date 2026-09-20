@@ -67,7 +67,7 @@ Há uma primeira leitura exploratória das compras públicas de 2026: core de ap
 
 Os derivados atuais sugerem forte heterogeneidade por tipo de aquisição: serviços e obras parecem mais ancorados localmente, enquanto bens, equipamentos e serviços especializados apresentam maior exposição extralocal.
 
-**Limitação crítica:** a classificação territorial dos CNPJs ainda apresenta controles contraditórios no material de auditoria. Um controle reporta reconciliação da base de 7.306 ativos; outro registra divergência na decomposição matriz/filial. Portanto, percentuais de footprint local — inclusive 74,87% no core — permanecem **exploratórios e não devem ser promovidos ao Caderno-Base** até reconciliação CNPJ a CNPJ.
+**Controle cadastral:** a aparente divergência estrutural da RFB foi reconciliada. O universo geral canônico é **7.306 estabelecimentos ativos = 6.881 matrizes locais + 102 filiais de matriz local + 323 filiais de matriz externa**. Os valores 6.906 e 284 pertencem a outro universo analítico — Entidades Empresariais — e haviam sido misturados indevidamente. Permanece, porém, uma limitação distinta: o subconjunto de CNPJs credores usado no indicador de compras públicas ainda precisa ter sua **linhagem validada CNPJ a CNPJ** contra o derivado canônico. Por isso, percentuais como 74,87% continuam exploratórios e não são promovidos ao Caderno-Base.
 
 ### Interpretação
 
@@ -170,7 +170,7 @@ A fase de coleta ampla deve ser considerada encerrada. A partir deste ponto, nov
 Ordem recomendada de análise:
 
 1. **Circuito fiscal e renda 2019–2025:** VAF × receita/transferências × despesa × RAIS/renda.
-2. **Compras públicas e retenção seletiva:** resolver primeiro o controle RFB CNPJ a CNPJ; depois analisar por categoria de gasto.
+2. **Compras públicas e retenção seletiva:** validar a linhagem CNPJ a CNPJ do subconjunto de credores contra o controle RFB canônico já reconciliado; depois aprofundar por categoria de gasto.
 3. **Âncoras institucionais:** HIG, setor público e agroindústria como geradores de demanda/emprego/fornecimento.
 4. **Estrutura dos quatro mercados:** escala, pulverização, redes, digital e cadeia de suprimentos.
 5. **Demanda extralocal:** desenhar pesquisa mínima de origem/ticket apenas para os setores em que a conclusão dependa disso.
@@ -186,4 +186,14 @@ Ordem recomendada de análise:
 - Presença digital não é maturidade comercial.
 - Contrato não é pagamento.
 - Benchmark estadual/regional não é coeficiente municipal.
-- Percentuais provisórios de compras públicas não devem ser promovidos enquanto o join RFB permanecer contraditório.
+- O controle estrutural RFB está reconciliado; percentuais provisórios de compras públicas não devem ser promovidos antes da validação da linhagem CNPJ a CNPJ do subconjunto efetivamente usado no join.
+
+
+## 12. Correção de controle RFB — 20/09/2026
+
+A versão inicial desta síntese registrou uma aparente contradição entre duas decomposições da base RFB 2026-08. A auditoria de linhagem posterior demonstrou que se tratava de **mistura de universos**, não de divergência da base canônica.
+
+- universo geral: 7.306 estabelecimentos ativos = 6.881 matrizes locais + 102 filiais de matriz local + 323 filiais de matriz externa;
+- universo separado de Entidades Empresariais: 6.906 registros, dos quais 284 pertencem a matrizes externas.
+
+A correção está documentada em `docs/data_sources/rfb_structural_control_reconciliation_2026_08.md`. A limitação remanescente para compras públicas é a validação de linhagem do subconjunto de credores, não a estrutura global da RFB.

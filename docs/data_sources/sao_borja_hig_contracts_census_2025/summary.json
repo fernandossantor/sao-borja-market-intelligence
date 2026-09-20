@@ -1,0 +1,41 @@
+{
+  "exercise": "2025",
+  "portal_query": {
+    "page": "1",
+    "total": "135",
+    "records": "500",
+    "rows_returned": 135
+  },
+  "details_checked": 135,
+  "failures": [],
+  "hig_contracts_found": 1,
+  "hig_contracts": [
+    {
+      "exercise": "2025",
+      "row_id": "1462",
+      "contract_number": "138",
+      "grid_signature_date": "18/07/2025",
+      "grid_validity": "18/07/2026 até 18/07/2027",
+      "detail_number": "138 - 2025 Grupo: CONTRATOS 2025",
+      "detail_status": "Homologado",
+      "detail_signature_date": "18/07/2025",
+      "detail_validity": "18/07/2026 até 18/07/2027",
+      "detail_value_total_snapshot": "126.420,00",
+      "process": "84/2025",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "Empenho destinado à execução do Termo de Fomento celebrado entre o Municipio de São Borja e a Fundação Ivan Goulart visando a cooperação mútua para repasse de incentivo financeiro ao Programa de Residência Médica, conforme Plano de Trabalho e Ofício da insituição.",
+      "timeline": [
+        {
+          "tipo": "Renovação",
+          "data": "27/07/2026"
+        }
+      ],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/1462"
+    }
+  ],
+  "controls": [
+    "Contrato/detail snapshot não equivale a pagamento.",
+    "Valor Total do detalhe é estado corrente e não deve ser retroprojetado.",
+    "Processo ≠ contrato ≠ aditivo ≠ empenho ≠ liquidação ≠ pagamento."
+  ]
+}

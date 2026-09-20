@@ -645,3 +645,82 @@ Enquanto SIAPC permanece bloqueado por transporte no ambiente atual:
 - manter pagamentos históricos por credor como **abertos** até existir execução financeira oficial recuperada.
 
 Nenhum valor desta seção deve ser promovido como série histórica de pagamentos.
+
+
+## 17. Validação reproduzível do módulo municipal de contratos — 19/09/2026
+
+### 17.1 Rota técnica confirmada
+
+O módulo oficial de contratos do Portal da Transparência de São Borja foi validado de forma reproduzível.
+
+A página de resultados utiliza `jqGrid` e consulta:
+
+- `POST /acordos/pesquisar`;
+- parâmetros efetivos do backend: `instituicao`, `exercicio` e `mes`;
+- identificador interno de cada contrato em `row.id`;
+- detalhe individual em `/acordos/view/{id}`.
+
+O artefato de validação foi persistido em:
+
+`docs/data_sources/sao_borja_hig_contracts_route_validation/validation.json`
+
+Nos exercícios testados com limite de 500 registros, a consulta retornou integralmente, em uma única página técnica, **102 linhas em 2021, 152 em 2022, 178 em 2023 e 152 em 2024**. Esses números são contagens observadas das linhas devolvidas pelo endpoint para cada exercício testado; não devem ser confundidos, sem auditoria adicional, com uma estatística oficial de “número de contratos”, porque a semântica dos campos `total` e `records` do JSON do portal é não convencional.
+
+### 17.2 Contratos HIG conhecidos reencontrados no módulo oficial
+
+A validação reencontrou, com contratado explícito **FUNDACAO IVAN GOULART**, os seguintes instrumentos já documentados por outras fontes oficiais:
+
+- Contrato **99/2021** — ID interno 558 — serviços hospitalares de média e alta complexidade;
+- Contrato **20/2022** — ID 581 — locação de imóvel para programas municipais de saúde;
+- Contrato **124/2022** — ID 685 — doença renal crônica/hemodiálise;
+- Contrato **20/2023** — ID 768 — repasse de recurso federal;
+- Contrato **146/2023** — ID 898 — mutirão de tomografias e ressonâncias;
+- Contrato **105/2024** — ID 1068 — tomografias e ressonâncias.
+
+Essa coincidência entre documentos oficiais independentes e o módulo `/acordos` valida a rota como fonte adequada para ampliar o **crosswalk contratual**, mas não para substituir a execução financeira.
+
+### 17.3 Alerta: o campo “Valor Total” do detalhe é um retrato corrente do contrato
+
+A rodada mostrou que o campo **Valor Total** exibido no detalhe do portal não pode ser interpretado automaticamente como “valor histórico global originalmente contratado”.
+
+O caso mais evidente é o **Contrato 99/2021**. Em 19/09/2026, o detalhe do portal exibe **R$ 952.120,00**, correspondentes a 2 meses de R$ 476.060,00 no item ASSISTIR. Entretanto, a mesma página lista longa cadeia de aditamentos e renovações de 2022 a 2026 e diversos componentes contratuais adicionais. Esse R$ 952.120,00, portanto, é um **estado corrente do item/contrato no sistema**, e não substitui os valores globais históricos documentados nos instrumentos contratuais e aditivos.
+
+O mesmo controle vale para:
+
+- **Contrato 124/2022**, cujo detalhe corrente aparece com **R$ 0,00**, apesar de existir instrumento-base e aditivos com valores documentados;
+- **Contrato 20/2022**, cujo detalhe corrente mostra **R$ 455.870,88**, correspondente a 12 meses de R$ 37.989,24, valor diferente do aluguel mensal de R$ 36.799,28 observado no 3º aditivo de 2025.
+
+**Regra:** valores do detalhe corrente de `/acordos/view/{id}` devem ser tratados como **snapshot administrativo da consulta**, com data de observação, e nunca retroprojetados para exercícios anteriores sem leitura dos aditivos correspondentes.
+
+### 17.4 Reconciliação do Contrato 20/2023
+
+O módulo oficial esclareceu uma diferença que permanecia entre fontes.
+
+O DOESB de abril de 2023 havia permitido observar **R$ 1.023.851,21**. Já o detalhe do Contrato 20/2023 no Portal da Transparência registra **R$ 1.075.538,21** como valor total, composto por dois itens de Subvenções Sociais:
+
+- **R$ 1.023.851,21**;
+- **R$ 51.687,00**.
+
+Soma observada:
+
+**R$ 1.023.851,21 + R$ 51.687,00 = R$ 1.075.538,21.**
+
+Isso também converge com o valor de **R$ 1.075.538,21** informado institucionalmente pelo HIG para o auxílio relacionado à LC 197/2022.
+
+**Interpretação:** R$ 1.023.851,21 não era necessariamente o valor global do contrato, mas um de seus componentes. Para o inventário contratual, o total oficial observado no detalhe é R$ 1.075.538,21; para a execução financeira, continua necessário verificar o que foi efetivamente repassado/pago.
+
+### 17.5 Ausência de empenhos no detalhe não significa ausência de execução
+
+Nos contratos HIG validados, a página de detalhe apresentou a mensagem **“Nenhum Empenho encontrado.”**
+
+Essa observação é importante, mas sua interpretação deve ser restrita ao módulo consultado. Ela não permite concluir que não houve empenho ou pagamento, pois já existem evidências independentes de execução municipal/FMS em outros módulos e documentos.
+
+**Regra:** o módulo `/acordos` passa a ser fonte de **estrutura contratual e histórico de aditamentos**, não fonte suficiente de execução financeira.
+
+### 17.6 Próxima etapa
+
+A próxima etapa técnica é transformar a rota validada em um extrator censitário controlado por exercício:
+
+**grade anual → IDs → detalhe → contratado → objeto → processo → snapshot de valor → histórico de aditamentos.**
+
+A partir daí será possível identificar sistematicamente todas as relações contratuais da Fundação Ivan Goulart no módulo municipal e reconciliá-las com o inventário já existente, mantendo separadas as camadas de contrato, aditivo e pagamento.

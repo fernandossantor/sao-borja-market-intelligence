@@ -154,9 +154,29 @@ Isso não transforma o operador em caso central. Ao contrário, o achado demonst
 5. só depois retornar a estoque, escala, prazo e upstream dos operadores que de fato demonstraram aderência ao objeto;
 6. acompanhar homologação/ARP/contratos/empenhos/pagamentos separadamente.
 
+## Reconciliação do Edital e Termo de Referência
+
+Uma auditoria posterior extraiu com sucesso os PDFs do pacote oficial do edital usando `p7zip`:
+
+- workflow: `.github/workflows/pncp-pe39-edital-tr-audit.yml`;
+- run: `35532386207`;
+- conclusão: **success**.
+
+O edital confirma expressamente:
+- item 35 do Termo de Referência dividido entre ampla concorrência e cota reservada de até 25% para ME/EPP;
+- alteração da numeração no Portal por causa dessa divisão;
+- valor máximo total de R$ 1.074.671,14.
+
+O Termo de Referência/contrato confirma:
+- prazo de entrega de até 20 dias após confirmação do recebimento da nota de empenho/ordem de compra;
+- entrega no DMPD, em São Borja/RS;
+- preço contratual incluindo despesas diretas e indiretas, inclusive frete, seguro e demais custos necessários à execução.
+
+Assim, a comparação de preços da Ata é mais adequadamente interpretada como comparação de **preço contratual entregue sob condições comuns**, sem revelar a decomposição interna de frete, margem ou custo de aquisição.
+
 ## Limitações
 
-- os PDFs do Edital/TR dentro do arquivo 7z foram materializados, mas a primeira rotina de extração preservou permissões internas restritivas em alguns arquivos; as especificações prioritárias e o desenho de cotas foram confirmados por PNCP/Ata Final;
 - a Ata Final documenta a sessão e o resultado nela registrado, mas não substitui homologação/contratação/pagamento;
+- classificação processual de proposta não equivale automaticamente a validação técnica integral do produto, especialmente para licitantes não vencedores;
 - a classificação territorial dos demais participantes ainda não está concluída;
 - ausência dos dez candidatos anteriores na busca textual da Ata Final não deve ser convertida em ausência absoluta sem preservar a possibilidade de diferenças de razão social/CNPJ; para os seis CNPJs conhecidos, porém, a busca exata na Ata Final não encontrou ocorrência.

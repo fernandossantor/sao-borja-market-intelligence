@@ -1,0 +1,13 @@
+metric,value,unit,period,nature,source,limitation
+"farmacia_drogaria_cnpjs_inventory","20","CNPJs","2026","OBSERVADO_INVENTARIO","POM/RFB inventory audit","Inventário não equivale automaticamente a 20 estabelecimentos ativos atuais"
+"farmacia_drogaria_roots_inventory","7","raízes CNPJ","2026","CALCULADO","estrutura_rede_inventario_pom_20260918_v001.csv","Raiz CNPJ não equivale a marca/rede"
+"farmacia_drogaria_multiunit_share","85.00","% das unidades catalogadas","2026","CALCULADO","estrutura_rede_inventario_pom_20260918_v001.csv","Não é market share"
+"pharmacy_basic_distribution_paid","964631.84","R$","01/01–19/09/2026","OBSERVADO","Portal PMSB /despesas","Primeira rodada do pagamento; não faturamento do mercado"
+"pharmacy_basic_distribution_local_paid","0.00","R$","01/01–19/09/2026","CALCULADO","SBMI sobre Portal PMSB + RFB","Presença cadastral local do credor; não mede origem econômica final"
+"pharmacy_basic_distribution_external_paid","964631.84","R$","01/01–19/09/2026","CALCULADO","SBMI sobre Portal PMSB + RFB","Credor externo não equivale a vazamento econômico integral"
+"pharmacy_basic_distribution_external_vendors","30","CNPJs credores","01/01–19/09/2026","CALCULADO","SBMI","Credores pagos, não universo de licitantes"
+"pharmacy_basic_distribution_local_vendors","0","CNPJs credores","01/01–19/09/2026","CALCULADO","SBMI","Ausência de pagamento local não prova ausência de participação em licitação"
+"pharmacy_basic_top1_share","12.4982","% do valor da rubrica","01/01–19/09/2026","CALCULADO","SBMI","Concentração de pagamentos, não market share"
+"pharmacy_basic_top3_share","32.9054","% do valor da rubrica","01/01–19/09/2026","CALCULADO","SBMI","Concentração de pagamentos, não market share"
+"pharmacy_basic_top10_share","83.2541","% do valor da rubrica","01/01–19/09/2026","CALCULADO","SBMI","Concentração de pagamentos, não market share"
+"pharmacy_basic_hhi_paid_first_round","764.0065","HHI sobre participações dos pagamentos","01/01–19/09/2026","CALCULADO","SBMI","Indicador descritivo do pagamento; não HHI de mercado"

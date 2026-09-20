@@ -992,3 +992,68 @@ Esse fechamento melhora a completude do inventário, mas não fecha a execução
 Com 2021, 2022 e 2023 censados, a próxima rodada é **2024**, preservando o mesmo protocolo:
 
 **grade anual → 100% dos detalhes → filtro por contratado → crosswalk com Licitações → valor histórico do instrumento → snapshot corrente → execução financeira separada.**
+
+
+## 21. Censo contratual HIG no exercício 2024 — módulo PMSB /acordos — 19/09/2026
+
+### 21.1 Cobertura da rodada
+
+Foi executada extração integral da grade oficial do exercício **2024** no módulo municipal `/acordos`.
+
+Resultados observados:
+
+- **152** linhas retornadas;
+- **152/152** páginas de detalhe verificadas;
+- **0** falhas;
+- **1** contrato cujo campo Contratado contém `FUNDACAO IVAN GOULART`.
+
+Artefato auditável:
+
+`docs/data_sources/sao_borja_hig_contracts_census_2024/`
+
+O resultado fecha a identificação da Fundação na camada contratual do módulo para 2024, mas não substitui execução financeira.
+
+### 21.2 Contrato HIG identificado em 2024
+
+Foi localizado apenas:
+
+**Contrato 105/2024 — ID 1068**
+- assinatura: 29/08/2024;
+- vigência observada: 29/08/2024 a 29/08/2025;
+- processo exibido no detalhe: **20558/2024**;
+- objeto: exames de alta e média complexidade, tomografias computadorizadas e ressonâncias magnéticas sem contraste;
+- valor total observado: **R$ 122.212,00**;
+- crosswalk: **Inexigibilidade 27/2024 → Contrato 105/2024**;
+- na série de Licitações: `licitacao_id = 20870`, `numero = 27/2024`, `codigo = 331`.
+
+### 21.3 Confirmação do instrumento já documentado
+
+O censo integral confirma o instrumento já localizado anteriormente por contrato integral.
+
+O valor de **R$ 122.212,00** permanece classificado como **valor contratual estimado**, com pagamento condicionado à efetiva realização/aprovação dos exames segundo a documentação já auditada.
+
+Portanto:
+
+- valor contratual observado: R$ 122.212,00;
+- pagamento efetivo: **não comprovado por esta camada**.
+
+### 21.4 Resultado de completude
+
+Assim como em 2023, o censo de 2024 **não revelou contratos HIG adicionais** além do já conhecido Contrato 105/2024.
+
+No universo devolvido pelo módulo `/acordos`, a camada contratual HIG de 2024 fica fechada em **1 contrato**.
+
+### 21.5 Série censitária parcial 2021–2024
+
+Até esta rodada:
+
+- 2021: 102 detalhes verificados, 6 contratos HIG, 0 falhas;
+- 2022: 152 detalhes, 4 contratos HIG, 0 falhas;
+- 2023: 178 detalhes, 2 contratos HIG, 0 falhas;
+- 2024: 152 detalhes, 1 contrato HIG, 0 falhas.
+
+Essas contagens medem contratos identificados no módulo por exercício de cadastro/consulta, não fluxo financeiro anual e não número de pagamentos.
+
+### 21.6 Próxima etapa
+
+O próximo exercício é **2025**, completando o recorte prioritário 2021–2025 do censo contratual HIG antes de uma síntese longitudinal.

@@ -899,3 +899,96 @@ Esse evento não alterou o Caderno-Base nem os resultados analíticos promovidos
 Com 2021 e 2022 censados, a próxima rodada é **2023**, mantendo o mesmo protocolo:
 
 **grade anual → 100% dos detalhes → filtro por contratado → crosswalk com Licitações → reconstrução do valor histórico do instrumento → separação de snapshot corrente e execução financeira.**
+
+
+## 20. Censo contratual HIG no exercício 2023 — módulo PMSB /acordos — 19/09/2026
+
+### 20.1 Cobertura da rodada
+
+Foi executada extração integral da grade oficial do exercício **2023** no módulo municipal `/acordos`.
+
+Resultados observados:
+
+- **178** linhas retornadas;
+- **178/178** páginas de detalhe verificadas;
+- **0** falhas;
+- **2** contratos cujo campo Contratado contém `FUNDACAO IVAN GOULART`.
+
+Artefato auditável:
+
+`docs/data_sources/sao_borja_hig_contracts_census_2023/`
+
+Como nos exercícios anteriores, o resultado é um **censo da camada contratual do módulo consultado**, não uma série de empenhos, liquidações, pagamentos ou receitas da Fundação.
+
+### 20.2 Contratos HIG identificados em 2023
+
+Foram encontrados exatamente dois contratos:
+
+1. **Contrato 20/2023 — ID 768**
+   - assinatura: 30/03/2023;
+   - vigência observada: 30/03/2023 a 28/03/2024;
+   - processo exibido no detalhe: **5562/2023**;
+   - objeto: autorização de repasse de recurso federal à entidade filantrópica Ivan Goulart;
+   - valor total observado no detalhe: **R$ 1.075.538,21**;
+   - crosswalk: **Inexigibilidade 13/2023 → Contrato 20/2023**;
+   - na série de Licitações, a linha correspondente possui `licitacao_id = 20318`, `numero = 13/2023` e `codigo = 65`.
+
+2. **Contrato 146/2023 — ID 898**
+   - assinatura: 28/09/2023;
+   - vigência observada: 28/09/2023 a 31/12/2023;
+   - processo exibido no detalhe: **16471/2023**;
+   - objeto: mutirão de tomografias e ressonâncias para demanda SUS;
+   - valor total observado: **R$ 142.367,25**;
+   - crosswalk: **Inexigibilidade 31/2023 → Contrato 146/2023**;
+   - na série de Licitações, a linha correspondente possui `licitacao_id = 20419`, `numero = 31/2023` e `codigo = 158`.
+
+### 20.3 Distinção entre identificadores do Portal
+
+O censo de 2023 permite registrar de forma explícita quatro identificadores que não devem ser confundidos:
+
+- `licitacao_id`: identificador interno da linha na extração de Licitações;
+- `numero`: número/modalidade do procedimento, por exemplo **13/2023**;
+- `Processo` no detalhe do contrato, por exemplo **5562/2023**;
+- `row.id` do módulo `/acordos`, por exemplo **768**.
+
+No Contrato 20/2023, por exemplo:
+
+**licitacao_id 20318 → Inexigibilidade 13/2023 → processo 5562/2023 → Contrato 20/2023 → row.id 768.**
+
+Essa cadeia deve ser preservada no crosswalk para impedir que IDs técnicos sejam apresentados como números processuais oficiais.
+
+### 20.4 Contrato 20/2023 — reconciliação mantida
+
+O censo integral confirma o valor de **R$ 1.075.538,21** no detalhe oficial do Contrato 20/2023.
+
+A reconciliação anterior permanece válida:
+
+- R$ 1.023.851,21;
+- R$ 51.687,00;
+- total = **R$ 1.075.538,21**.
+
+O valor menor observado no DOESB corresponde a um componente do contrato, e não ao total observado no módulo contratual. Isso continua sem comprovar execução financeira.
+
+### 20.5 Contrato 146/2023 — confirmação censitária
+
+O censo integral confirma que o Contrato 146/2023:
+
+- é da Fundação Ivan Goulart;
+- deriva da Inexigibilidade 31/2023;
+- possui valor contratual observado de **R$ 142.367,25**;
+- tem objeto específico de tomografias e ressonâncias;
+- não apresenta, no censo contratual, evidência suficiente de pagamento realizado.
+
+### 20.6 Resultado analítico do exercício
+
+Ao contrário de 2021 e 2022, o censo de 2023 **não revelou contratos adicionais da Fundação além dos dois já conhecidos**.
+
+Isso é um resultado observado importante: para o universo devolvido pelo módulo `/acordos` em 2023, a camada contratual HIG fica censitariamente fechada em **2 contratos**, ambos já presentes no inventário anterior.
+
+Esse fechamento melhora a completude do inventário, mas não fecha a execução financeira nem a composição da receita da Fundação.
+
+### 20.7 Próxima etapa
+
+Com 2021, 2022 e 2023 censados, a próxima rodada é **2024**, preservando o mesmo protocolo:
+
+**grade anual → 100% dos detalhes → filtro por contratado → crosswalk com Licitações → valor histórico do instrumento → snapshot corrente → execução financeira separada.**

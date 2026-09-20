@@ -465,12 +465,12 @@
   "grid_probe_2025": {
     "url": "https://transparencia.saoborja.rs.gov.br/acordos/pesquisar",
     "status": 200,
-    "bytes": 3515,
+    "bytes": 8461,
     "content_type": "text/html; charset=UTF-8",
     "request_data": {
-      "FiltroInstituicao": "1",
-      "FiltroExercicio": "2025",
-      "FiltroMes": "",
+      "instituicao": "1",
+      "exercicio": "2025",
+      "mes": "",
       "page": "1",
       "rows": "15",
       "sidx": "Acordo.numero",
@@ -478,7 +478,163 @@
       "_search": "false",
       "nd": "0"
     },
-    "text_head": "<pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-trace').style.display = (document.getElementById('cakeErr1-trace').style.display == 'none' ? '' : 'none');\"><b>Notice</b> (8)</a>: Undefined index: instituicao [<b>APP/controllers/acordos_controller.php</b>, line <b>326</b>]<div id=\"cakeErr1-trace\" class=\"cake-stack-trace\" style=\"display: none;\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-code').style.display = (document.getElementById('cakeErr1-code').style.display == 'none' ? '' : 'none')\">Code</a> | <a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr1-context').style.display = (document.getElementById('cakeErr1-context').style.display == 'none' ? '' : 'none')\">Context</a><div id=\"cakeErr1-code\" class=\"cake-code-dump\" style=\"display: none;\"><pre><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)));</span></code>\n<code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></code>\n<span class=\"code-highlight\"><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$output&nbsp;=&nbsp;call_user_func_array(array(&amp;$controller,&nbsp;$params['action']),&nbsp;$params['pass']);</span></code></span></pre></div><pre id=\"cakeErr1-context\" class=\"cake-context\" style=\"display: none;\">$aRetorno\t=\tarray()\n$aInstituicoes\t=\tarray()</pre><pre class=\"stack-trace\">AcordosController::pesquisar() - APP/controllers/acordos_controller.php, line 326\nDispatcher::_invoke() - CORE/cake/dispatcher.php, line 204\nDispatcher::dispatch() - CORE/cake/dispatcher.php, line 171\n[main] - APP/webroot/index.php, line 83</pre></div></pre><pre class=\"cake-debug\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr2-trace').style.display = (document.getElementById('cakeErr2-trace').style.display == 'none' ? '' : 'none');\"><b>Notice</b> (8)</a>: Undefined index: exercicio [<b>APP/controllers/acordos_controller.php</b>, line <b>327</b>]<div id=\"cakeErr2-trace\" class=\"cake-stack-trace\" style=\"display: none;\"><a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr2-code').style.display = (document.getElementById('cakeErr2-code').style.display == 'none' ? '' : 'none')\">Code</a> | <a href=\"javascript:void(0);\" onclick=\"document.getElementById('cakeErr2-context').style.display = (document.getElementById('cakeErr2-context').style.display == 'none' ? '' : 'none')\">Context</a><div id=\"cakeErr2-code\" class=\"cake-code-dump\" style=\"display: none;\"><pre><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)));</span></code>\n<code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</span></code>\n<span class=\"code-highlight\"><code><span style=\"color: #000000\">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$output&nbsp;=&nbsp;call_user_func_array(array(&amp;$controller,&nbsp;$params['action']),&nbsp;$params['pass']);</span></code></span></pre></div><pre id=\"cakeErr2-context\" class=\"cake-context\" style=\"display: none;\">$aRetorno\t=\tarray()\n$aInstituicoes\t=\tarray()</pre><pre class=\"stack-trace\">AcordosController::pesquisar() - APP/controllers/acordos_controller.php, line 327\nDispatcher::_invoke() - CORE/cake/dispatcher.php, line 204\nDispatcher::dispatch() - CORE/cake/dispatcher.php, line 171\n[main] - APP/webroot/index.php, line 83</pre></div></pre>{\"page\":\"1\",\"total\":\"0\",\"records\":\"15\"}"
+    "json": {
+      "rows": [
+        {
+          "cell": [
+            "1",
+            "05/02/2025",
+            "05/02/2025 até 05/08/2025",
+            "Contratação de empresa para shows musicais de intervalo para o evento 58° Festival de Músicas para o Carnaval  Apparício Sila Rillo, que serão realizados na data 07, 08 e 09 de fevereiro de 2025. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 1603/2025, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Desenvolvimento Econômico, Turismo e Inovação",
+            ""
+          ],
+          "id": "1123"
+        },
+        {
+          "cell": [
+            "2",
+            "18/02/2025",
+            "30/04/2026 até 31/05/2026",
+            "Contratação de empresa para o serviço de radiodifusão para publicidade institucional da Prefeitura Municipal de São Borja. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 1659/2025, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Planejamento Orçamento e Projetos.",
+            ""
+          ],
+          "id": "1129"
+        },
+        {
+          "cell": [
+            "3",
+            "13/02/2025",
+            "31/12/2025 até 31/12/2026",
+            "Aquisição de vales-transportes coletivo urbano para os servidores municipais e alunos da rede municipal. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 32371/2024, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Planejamento, Orçamento e Projetos.",
+            ""
+          ],
+          "id": "1125"
+        },
+        {
+          "cell": [
+            "4",
+            "06/02/2025",
+            "06/02/2025 até 06/02/2030",
+            "Contratação de empresa para prestação dos serviços de publicações no Diário Oficial do Estado. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 756/2025, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Planejamento, Orçamento e Projetos.",
+            ""
+          ],
+          "id": "1124"
+        },
+        {
+          "cell": [
+            "5",
+            "25/02/2025",
+            "25/02/2025 até 25/02/2027",
+            "Credenciamento de pessoas físicas e/ou jurídicas para a realização de serviços médicos especializados: consultas especializadas em Oftalmologia incluindo exames de mapeamento de retina e tonometria binocular, consultas especializadas em Reumatologia, e consultas especializadas em Urologia, afim de atender as demandas reprimidas das referidas especialidades na Secretaria Municipal da Saúde",
+            ""
+          ],
+          "id": "1132"
+        },
+        {
+          "cell": [
+            "6",
+            "11/02/2025",
+            "30/04/2026 até 30/05/2026",
+            "Contratação de empresa para o serviço de prestação de serviço de publicidade institucional em jornal de circulação local, para o ano de 2025. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 2555/2025, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Planejamento, Orçamento e Projetos.",
+            ""
+          ],
+          "id": "1126"
+        },
+        {
+          "cell": [
+            "7",
+            "11/02/2025",
+            "30/04/2026 até 30/05/2026",
+            "Contratação de empresa para o serviço de jornal impresso de circulação local nos sábados para publicidade institucional da Prefeitura Municipal de São Borja. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 2554/2025, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Planejamento Orçamento e Projetos.",
+            ""
+          ],
+          "id": "1130"
+        },
+        {
+          "cell": [
+            "8",
+            "25/02/2025",
+            "25/02/2025 até 25/02/2026",
+            "Credenciamento de empresas especializadas para o fornecimento de aparelhos de Amplificação Sonora Individual - AASI,  com intuito de suprir demandas existentes no Centro Especializado em Reabilitação Física e Auditiva  CER II Aline Olea Becker",
+            ""
+          ],
+          "id": "1134"
+        },
+        {
+          "cell": [
+            "9",
+            "28/02/2025",
+            "28/02/2025 até 12/10/2025",
+            "Contratação de empresa para fornecer cursos do Projeto Qualificação Profissional na área de Comércio e Logística com intuito de fortalecer a qualificação e capacitação profissional da população, em especial o público socialmente vulnerável com inscrição no Cad. Único, que buscam a inserção no mercado de trabalho. A contratação é relacionada ao convênio FPE nº 3145/2024 firmado com o Governo do Estado do Rio Grande do Sul. Maiores detalhes podem ser consultados no Termo de Referência e demais doc",
+            ""
+          ],
+          "id": "1136"
+        },
+        {
+          "cell": [
+            "10",
+            "17/03/2025",
+            "17/03/2025 até 17/05/2025",
+            "Contratação de empresa para realização de curso/capacitação sobre Educação Especial, Deficiência Intelectual e Transtorno do Espectro Autista (TEA) para os servidores da Secretaria Municipal de Educação e Cultura  SMEC, com intuito de capacitá-los na prestação dos serviços a população. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 3267/2025, de inexigibilidade de licitação, formulados pela Secretaria responsável, no presente process",
+            ""
+          ],
+          "id": "1140"
+        },
+        {
+          "cell": [
+            "11",
+            "14/02/2025",
+            "14/02/2025 até 14/02/2026",
+            "Contratação de empresa para prestação do serviço de pesagem de caminhões que realizam a coleta de Resíduos Sólidos Urbanos do Município, com uso de balança rodoviária, devidamente instalada, certificada, aferida e em pleno funcionamento, com fornecimento de mão de obra.. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 29644/2024, de dispensa emergencial de licitação, formulados pela Secretaria responsável, no presente processo, a Secre",
+            ""
+          ],
+          "id": "1128"
+        },
+        {
+          "cell": [
+            "12",
+            "24/02/2025",
+            "24/02/2025 até 24/05/2025",
+            "Contratação de empresa especializada na prestação de serviços de promoção de eventos, para a organização, execução e gestão do evento Cais Folia 2025.",
+            ""
+          ],
+          "id": "1131"
+        },
+        {
+          "cell": [
+            "13",
+            "25/02/2025",
+            "25/02/2025 até 25/02/2027",
+            "Credenciamento de pessoas físicas e/ou jurídicas para a realização de serviços médicos especializados: consultas especializadas em Oftalmologia incluindo exames de mapeamento de retina e tonometria binocular, consultas especializadas em Reumatologia, e consultas especializadas em Urologia, afim de atender as demandas reprimidas das referidas especialidades na Secretaria Municipal da Saúde",
+            ""
+          ],
+          "id": "1137"
+        },
+        {
+          "cell": [
+            "14",
+            "27/02/2025",
+            "27/02/2025 até 27/05/2025",
+            "Contratação de banda musical para animação do Cais Folia do ano de 2025, que acontecerá no Cais do Porto de São Borja do dia 01/03/2025 a 04/03/2025. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 2904/2025, de Inexigibilidade de Licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Planejamento, Orçamento e Projetos.",
+            ""
+          ],
+          "id": "1133"
+        },
+        {
+          "cell": [
+            "15",
+            "28/02/2025",
+            "28/02/2025 até 28/05/2025",
+            "Contratação de empresa especializada para prestação do serviço de segurança privada (vigias) no evento Cais Folia 2025, tudo de acordo com legislação e regulamentos que tratam sobre o assunto. Maiores detalhes podem ser consultados no Termo de Referência e demais documentos que integram o processo nº 5780/2025, de dispensa emergencial de licitação, formulados pela Secretaria responsável, no presente processo, a Secretaria Municipal de Desenvolvimento Econômico, Turismo e Inovação.",
+            ""
+          ],
+          "id": "1135"
+        }
+      ],
+      "page": "1",
+      "total": "135",
+      "records": "15"
+    }
   },
   "result_page_scripts": [
     {

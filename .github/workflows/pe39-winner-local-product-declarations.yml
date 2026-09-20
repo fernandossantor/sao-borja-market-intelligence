@@ -1,0 +1,250 @@
+name: pe39-winner-local-product-declarations
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/pe39-winner-local-product-declarations.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install parser
+        run: python -m pip install --quiet pypdf requests
+
+      - name: Extract declared product fields for winners and local participant
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import csv
+          import hashlib
+          import json
+          import re
+          import time
+          import zipfile
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          import requests
+          from pypdf import PdfReader
+
+          ROOT=Path(".")
+          SRC=ROOT/"docs/data_sources/public_procurement_pe39_territorial_competition_20260920_v001/participant_item_matrix.csv"
+          OUT=ROOT/"docs/data_sources/public_procurement_pe39_product_declarations_20260920_v001"
+          WORK=Path("artifacts/pe39_product_declarations")
+          OUT.mkdir(parents=True,exist_ok=True)
+          WORK.mkdir(parents=True,exist_ok=True)
+          if not SRC.exists():
+              raise SystemExit(f"Missing {SRC}")
+
+          LOCAL_CNPJ="28927340000181"
+          ATA_URL="https://pncp.gov.br/pncp-api/v1/orgaos/88489786000101/compras/2026/136/arquivos/3"
+
+          zpath=WORK/"Ata_Final_144426_250826.zip"
+          last=None
+          for attempt in range(5):
+              try:
+                  r=requests.get(ATA_URL,headers={"User-Agent":"SBMI official-source audit/1.0"},timeout=120)
+                  if r.status_code==200:
+                      zpath.write_bytes(r.content)
+                      break
+                  last=f"HTTP {r.status_code}"
+              except Exception as e:
+                  last=repr(e)
+              time.sleep(2*(attempt+1))
+          else:
+              raise SystemExit(last)
+
+          ex=WORK/"extracted"; ex.mkdir(exist_ok=True)
+          with zipfile.ZipFile(zpath) as z:
+              z.extractall(ex)
+          pdfs=list(ex.rglob("*.pdf"))
+          if not pdfs:
+              raise SystemExit("Ata Final PDF not found")
+          text="\n".join("\n".join((p.extract_text() or "") for p in PdfReader(str(fp)).pages) for fp in pdfs)
+
+          with SRC.open(encoding="utf-8-sig",newline="") as f:
+              matrix=list(csv.DictReader(f))
+
+          items=sorted({int(r["item"]) for r in matrix})
+          cluster={int(r["item"]):r["cluster_id"] for r in matrix}
+          description={int(r["item"]):r["descricao_item"] for r in matrix}
+          winner={}
+          local_final={}
+          for r in matrix:
+              item=int(r["item"])
+              if r["status_final"]=="Arrematante":
+                  winner[item]=r
+              if r["cnpj"]==LOCAL_CNPJ:
+                  local_final[item]=r
+
+          def clean(s):
+              return re.sub(r"\s+"," ",s).strip()
+
+          def norm_cnpj(s):
+              return re.sub(r"\D","",s)
+
+          def br_money(s):
+              return float(s.replace(".","").replace(",", "."))
+
+          # Extract the initial proposal table for each item and target CNPJ.
+          # We preserve the combined Modelo + Marca/Fabricante text as raw because PDF extraction
+          # does not provide a stable column boundary between those two fields.
+          extracted=[]
+          for item in items:
+              header_re=re.compile(
+                  rf"{item:04d}\s+-\s+(.*?)\nFornecedor CNPJ/CPF Data Modelo Marca/ Fabricante Quantidade Lance Valor Total LC\n123/2006",
+                  re.S|re.I,
+              )
+              h=header_re.search(text)
+              if not h:
+                  raise SystemExit(f"Initial proposal table not found for item {item}")
+              start=h.end()
+              nxt=re.search(
+                  r"\n\d{4}\s+-\s+.*?\nFornecedor CNPJ/CPF Data Modelo Marca/ Fabricante Quantidade Lance Valor Total LC\n123/2006",
+                  text[start:],
+                  re.S,
+              )
+              end=start+nxt.start() if nxt else start+30000
+              section=text[start:end]
+
+              targets=[("LOCAL",LOCAL_CNPJ)]
+              if item in winner:
+                  targets.append(("WINNER",winner[item]["cnpj"]))
+
+              for role,cnpj in targets:
+                  # Targeted regex by CNPJ is more robust to page footers and free-text model fields.
+                  cnpj_fmt=rf"{cnpj[0:2]}\.{cnpj[2:5]}\.{cnpj[5:8]}/{cnpj[8:12]}-\s*{cnpj[12:14]}"
+                  pat=re.compile(
+                      rf"{cnpj_fmt}\s+"
+                      rf"(\d{{2}}/\d{{2}}/\d{{4}}\s*-\s*\d{{2}}:\d{{2}}:\d{{2}})\s+"
+                      rf"(.*?)\s+([\d\.]+)\s+R\$([\d\.,]+)\s+R\$\s*([\d\.,]+)\s+Sim",
+                      re.S,
+                  )
+                  m=pat.search(section)
+                  if not m:
+                      raise SystemExit(f"Declared product row not found for item {item}, {role}, {cnpj}")
+                  dt,raw,qty,unit,total=m.groups()
+                  final=local_final[item] if role=="LOCAL" else winner[item]
+                  extracted.append({
+                      "item":item,
+                      "cluster_id":cluster[item],
+                      "descricao_item":description[item],
+                      "role":role,
+                      "cnpj":cnpj,
+                      "nome_participante":final["nome_participante"],
+                      "declaracao_modelo_marca_raw":clean(raw),
+                      "data_proposta_inicial":clean(dt),
+                      "quantidade_proposta":qty,
+                      "valor_unitario_inicial_R$":round(br_money(unit),6),
+                      "valor_total_inicial_R$":round(br_money(total),2),
+                      "status_final":final["status_final"],
+                      "rank_final":final["rank_final"],
+                      "valor_global_final_R$":final["valor_global_final_R$"],
+                      "valor_unitario_final_R$":final["valor_unitario_final_R$"],
+                      "contains_corfio":bool(re.search(r"CORFIO",raw,re.I)),
+                  })
+
+          if len(extracted)!=35:
+              raise SystemExit(f"Expected 35 rows (18 local + 17 winner); got {len(extracted)}")
+          local_rows=[r for r in extracted if r["role"]=="LOCAL"]
+          winner_rows=[r for r in extracted if r["role"]=="WINNER"]
+          if len(local_rows)!=18 or len(winner_rows)!=17:
+              raise SystemExit("Role count validation failed")
+
+          fields=list(extracted[0].keys())
+          with (OUT/"winner_local_product_declarations.csv").open("w",encoding="utf-8-sig",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(extracted)
+
+          # Cluster-level compact view.
+          cluster_rows=[]
+          for cl in [f"T{i:02d}" for i in range(1,10)]:
+              lr=[r for r in local_rows if r["cluster_id"]==cl]
+              wr=[r for r in winner_rows if r["cluster_id"]==cl]
+              cluster_rows.append({
+                  "cluster_id":cl,
+                  "local_items":";".join(str(r["item"]) for r in lr),
+                  "local_declared_raw":" || ".join(f"{r['item']}: {r['declaracao_modelo_marca_raw']}" for r in lr),
+                  "local_corfio_mentions":sum(r["contains_corfio"] for r in lr),
+                  "winner_items":";".join(str(r["item"]) for r in wr),
+                  "winner_declared_raw":" || ".join(f"{r['item']}: {r['declaracao_modelo_marca_raw']}" for r in wr),
+                  "winner_corfio_mentions":sum(r["contains_corfio"] for r in wr),
+              })
+          with (OUT/"cluster_product_declarations.csv").open("w",encoding="utf-8-sig",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=list(cluster_rows[0].keys())); w.writeheader(); w.writerows(cluster_rows)
+
+          summary={
+              "ata_final":{
+                  "url":ATA_URL,
+                  "sha256":hashlib.sha256(zpath.read_bytes()).hexdigest(),
+              },
+              "rows_total":len(extracted),
+              "local_rows":len(local_rows),
+              "winner_rows":len(winner_rows),
+              "local_rows_with_corfio_mention":sum(r["contains_corfio"] for r in local_rows),
+              "winner_rows_with_corfio_mention":sum(r["contains_corfio"] for r in winner_rows),
+              "local_corfio_mention_share_pct":round(sum(r["contains_corfio"] for r in local_rows)/len(local_rows)*100,4),
+              "winner_corfio_mention_share_pct":round(sum(r["contains_corfio"] for r in winner_rows)/len(winner_rows)*100,4),
+              "limitation":"Modelo and Marca/Fabricante are preserved as one raw field because PDF text extraction does not expose a reliable column boundary. The values are declared proposal fields, not independently verified manufacturer or upstream-supplier evidence.",
+          }
+          (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          readme="""# PE39/2026 — declarações de modelo/marca: vencedor × participante local
+
+          Fonte: Ata Final oficial do PE39/2026.
+
+          O arquivo winner_local_product_declarations.csv preserva, para cada item prioritário:
+          - o campo combinado Modelo + Marca/Fabricante da proposta inicial do participante local;
+          - o mesmo campo do arrematante final, quando houve vencedor;
+          - valores iniciais e posição/valor final.
+
+          O campo declaracao_modelo_marca_raw é intencionalmente não separado.
+          A extração PDF não fornece fronteira de coluna estável entre Modelo e Marca/Fabricante,
+          portanto qualquer separação automática criaria informação não observada.
+
+          contains_corfio mede somente a ocorrência textual de CORFIO no campo declarado.
+          Não comprova fabricante, fornecedor upstream, estoque, autenticidade, equivalência técnica
+          ou produto efetivamente entregue.
+
+          O item 7 não possui linha WINNER porque o item fracassou.
+
+          Governança: Caderno-Base v028 permanece read-only; PR #41 permanece aberto, draft e sem merge.
+          """
+          (OUT/"README.md").write_text(re.sub(r"^          ","",readme,flags=re.M),encoding="utf-8")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist directed evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="docs/data_sources/public_procurement_pe39_product_declarations_20260920_v001"
+          test -s "$DEST/winner_local_product_declarations.csv"
+          test -s "$DEST/cluster_product_declarations.csv"
+          test -s "$DEST/summary.json"
+          test -s "$DEST/README.md"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "data: extract PE39 winner and local product declarations"
+            git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+            git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+          fi

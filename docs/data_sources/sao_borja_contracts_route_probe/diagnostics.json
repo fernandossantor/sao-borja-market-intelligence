@@ -248,6 +248,7 @@
       }
     ]
   },
+  "acordos_index_js": ";(function($) {\n\n  $(function($) {\n    var sBaseUrl = $('#base').attr('href');\n\n    $(document).ajaxSend(function() {\n      $('#ajax-loader').show()\n    })\n\n    $(document).ajaxStop(function() {\n      $('#ajax-loader').hide()\n    })\n\n    $('#FiltroIndexForm').live('submit', function() {\n      var lPass = true;\n\n      // Verifica se os campos obrigatÃ³rios foram preenchidos\n      $('select.required').each(function() {\n\n        if (this.value == '') {\n\n          alert(\"Campo \" + $(this).parent().find('label').text() + \" Ã© de preenchimento obrigatÃ³rio.\");\n\n          lPass = false;\n          return false;\n        }\n      })\n\n      return lPass;\n    })\n\n    $('#FiltroInstituicao').live('change', function() {\n      var oExercicio = $('#FiltroExercicio');\n\n      $.getJSON( sBaseUrl + '/acordos/buscarExercicios/' + this.value, function(data) {\n\n        if (!Object.keys(data).length) {\n          alert('Nenhum exercÃ­cio encontrado para a instituiÃ§Ã£o selecionada.')\n          return false\n        }\n\n        oExercicio.find('option:not(:first)').remove()\n        data = Object.keys(data).reverse();\n\n        $.each(data, function(i, sLabel) {\n          oExercicio.append('<option value=\"' + sLabel + '\">' + sLabel + '</option>')\n        })\n      })\n    })\n\n  });\n})(jQuery);",
   "selected_institution": {
     "value": "1",
     "label": "PREFEITURA MUNICIPAL DE SÃO BORJA"

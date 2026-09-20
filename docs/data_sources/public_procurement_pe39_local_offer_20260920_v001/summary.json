@@ -1,0 +1,38 @@
+{
+  "generated_at": "2026-09-20",
+  "object": "PE39/2026 local offer gate — priority conductors",
+  "priority_conductor_items": 18,
+  "priority_conductor_quantity_m": 48540,
+  "priority_conductor_estimated_value_R$": 533194.4,
+  "priority_conductor_share_of_pe39_pct": 49.6147,
+  "current_inventory_candidates": 6,
+  "direct_family_match_candidates": 1,
+  "direct_family_match": "Iluminar Materiais Eletricos e Ferragens — CNPJ 09.674.510/0001-19",
+  "historical_unreconciled_leads": 4,
+  "current_result_status": "PE39 result not published according to secondary indexer; no participant/winner inference.",
+  "gate_state": "POTENTIAL_FAMILY_LEVEL_ONLY — exact specification, scale, habilitation, price and participation remain unresolved.",
+  "sources": {
+    "current_inventory": {
+      "title": "Empresas de Varejo de São Borja",
+      "drive_id": "1VJXCl6sMwv3sfryUkgR8kQxzs1ci_jvjjnoPkWune0c",
+      "file_modified": "2026-09-15"
+    },
+    "historical_pom": {
+      "title": "PLANEJAMENTO ILUMINAR",
+      "drive_id": "1Ml8zgB_g__oWKpaiqk8Mli0OerYIsVaKCay7kN3T6e4",
+      "reference_period": "2025"
+    },
+    "pe39_priority_basket": "docs/data_sources/public_procurement_pe39_priority_basket_20260920_v001/priority_basket_65pct.csv"
+  },
+  "controls": [
+    "Current retail inventory is not a substitute for canonical RFB 2026-08 active-status relink.",
+    "Historical product-family evidence does not establish exact equivalence to PE39 specifications.",
+    "48,540 m is aggregate priority-basket demand; no claim that a single local operator can supply it.",
+    "Presence of local store does not prove B2G habilitation, stock, working capital, price competitiveness or participation."
+  ],
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

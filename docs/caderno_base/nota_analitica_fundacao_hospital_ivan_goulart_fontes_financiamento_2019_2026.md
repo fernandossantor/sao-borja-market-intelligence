@@ -724,3 +724,75 @@ A próxima etapa técnica é transformar a rota validada em um extrator censitá
 **grade anual → IDs → detalhe → contratado → objeto → processo → snapshot de valor → histórico de aditamentos.**
 
 A partir daí será possível identificar sistematicamente todas as relações contratuais da Fundação Ivan Goulart no módulo municipal e reconciliá-las com o inventário já existente, mantendo separadas as camadas de contrato, aditivo e pagamento.
+
+
+## 18. Censo contratual HIG no exercício 2021 — módulo PMSB /acordos — 19/09/2026
+
+### 18.1 Cobertura da rodada
+
+Foi executada uma extração integral da grade do exercício **2021** no módulo oficial `/acordos` da Prefeitura de São Borja.
+
+Resultados observados:
+- **102** linhas retornadas pela grade;
+- **102/102** páginas de detalhe verificadas;
+- **0** falhas de leitura;
+- **6** contratos cujo campo Contratado contém `FUNDACAO IVAN GOULART`.
+
+Artefato:
+`docs/data_sources/sao_borja_hig_contracts_census_2021/`
+
+O resultado é um censo do **módulo contratual municipal para o exercício 2021**, não um censo de todas as entradas financeiras da Fundação.
+
+### 18.2 Contratos HIG identificados em 2021
+
+Foram localizados:
+
+- **Contrato 3/2021 — ID 453** — 11/02/2021 — **R$ 90.000,00** — auxílio COVID-19 para honorários médicos da unidade especial;
+- **Contrato 7/2021 — ID 460** — 15/03/2021 — **R$ 75.000,00** — auxílio COVID-19 para despesas de pessoal;
+- **Contrato 15/2021 — ID 469** — 16/04/2021 — **R$ 20.000,00** — auxílio COVID-19 para pessoal ligado à tenda de triagem;
+- **Contrato 28/2021 — ID 483** — 14/05/2021 — **R$ 90.000,00** — três meses de R$ 30.000,00 para ações e serviços de enfrentamento da COVID-19;
+- **Contrato 56/2021 — ID 511** — 15/07/2021 — detalhe corrente em **R$ 163.692,00** — tomografias para diagnóstico e tratamento da COVID-19;
+- **Contrato 99/2021 — ID 558** — 21/12/2021 — contratualização hospitalar de média e alta complexidade; detalhe corrente em **R$ 952.120,00**, sem substituir o valor global histórico do instrumento.
+
+Todos os valores acima são valores contratuais/snapshots observados no módulo; **nenhum deve ser interpretado como pagamento sem a respectiva execução financeira**.
+
+### 18.3 Crosswalk fechado para três instrumentos anteriormente vistos apenas como processos/dispensas
+
+A rodada permitiu fechar:
+
+- **PRD Dispensa 11/2021 → Contrato 7/2021**;
+- **PRD Dispensa 17/2021 → Contrato 15/2021**;
+- **PRD Dispensa 24/2021 → Contrato 28/2021**.
+
+Também confirmou:
+- **Inexigibilidade 13/2021 → Contrato 56/2021**;
+- **Contrato 99/2021 → ID interno 558**.
+
+Consequência metodológica: o número do processo/instrumento licitatório **não deve ser presumido como igual ao número do contrato**.
+
+### 18.4 Controle específico do Contrato 56/2021
+
+A fonte original havia informado **R$ 27.282,00 como valor mensal estimado**.
+
+O detalhe do Portal exibe **R$ 163.692,00** como valor total corrente.
+
+Há consistência aritmética:
+
+**R$ 27.282,00 × 6 = R$ 163.692,00.**
+
+Essa consistência não demonstra, porém, quantidade produzida, faturada ou paga. Portanto:
+- R$ 27.282,00 permanece como parâmetro mensal estimado da fonte original;
+- R$ 163.692,00 é o valor total exibido no detalhe contratual;
+- nenhum dos dois é pagamento observado.
+
+### 18.5 Situação do Contrato 99/2021
+
+O Contrato 99/2021 concentra a cadeia principal de contratualização hospitalar. O detalhe corrente lista aditamentos, renovações, alterações de dotação e vigências entre 2022 e 2026.
+
+Isso torna o contrato um **eixo longitudinal**, mas reforça a necessidade de reconstrução por competência: cada aditivo deve ser interpretado no período em que vigorou, sem somar automaticamente todos os valores históricos ao snapshot corrente.
+
+### 18.6 Estado da cobertura
+
+Para 2021, a identificação de contratos da Fundação no módulo `/acordos` passa de amostra/piloto para **cobertura integral do exercício consultado**, com 102 detalhes verificados e zero falhas.
+
+Próxima etapa operacional: repetir o mesmo procedimento, exercício por exercício, começando por **2022**, preservando a separação entre contrato, aditivo e execução financeira.

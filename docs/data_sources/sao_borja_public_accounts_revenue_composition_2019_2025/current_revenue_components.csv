@@ -1,0 +1,50 @@
+﻿year,cod_conta,conta,value_R$,share_current_revenue_pct,source,nature
+2019,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,212254429.33,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2019,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",27302212.4,12.862964738206813,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2019,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,7148602.76,3.367940439483501,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2019,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,13795905.93,6.499702255235853,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2019,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,877321.31,0.4133347477220347,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2019,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,160074494.3,75.41632690789511,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2019,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,3055892.63,1.4397309114566876,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,237824712.98,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",30380818.55,12.774458200462496,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,7958002.32,3.3461629030407924,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,11540275.61,4.852429112768649,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,302584.63,0.1272301041420561,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,186542411.32,78.4369332280819,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2020,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,1100620.55,0.4627864515041199,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,261744601.07,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",34991063.27,13.36839924375064,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,10452176.71,3.9932730865400776,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,8164865.83,3.119401812538788,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,108124.71,0.04130924174099145,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,206741472.88,78.98595502442086,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2021,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,1286897.67,0.49166159100864776,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,308857744.24,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",41758270.22,13.520227677228469,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,9982228.63,3.231982625063545,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,20460227.75,6.624482672547541,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,163639.85,0.05298227195263155,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,203615138.6,65.92521715815533,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2022,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,32878239.19,10.645107595052478,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,342261488.45,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",49179711.58,14.369046252536393,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,11166325.47,3.2625129752602176,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,28165639.74,8.229275185926925,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,421998.81,0.12329719359052241,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,251995044.82,73.6264678685324,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2023,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,1332768.03,0.38940052415353776,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,370103110.4,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",53597301.71,14.481721499739118,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,14189801.87,3.8340131361403444,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,18469920.77,4.990479747667639,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,392055.11,0.10593131994385963,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,279066232.55,75.40229322806579,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2024,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,4387798.39,1.1855610684432658,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.0.0.0.00.0.0,1.0.0.0.00.0.0 - Receitas Correntes,395601572.25,100.0,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.1.0.0.00.0.0,"1.1.0.0.00.0.0 - Impostos, Taxas e Contribuições de Melhoria",57992988.88,14.65944347747723,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.2.0.0.00.0.0,1.2.0.0.00.0.0 - Contribuições,12626340.16,3.1916809855398647,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.3.0.0.00.0.0,1.3.0.0.00.0.0 - Receita Patrimonial,27970936.16,7.070481545589964,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.6.0.0.00.0.0,1.6.0.0.00.0.0 - Receita de Serviços,413810.69,0.1046028931701244,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.7.0.0.00.0.0,1.7.0.0.00.0.0 - Transferências Correntes,295354667.57,74.65962935641492,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share
+2025,1.9.0.0.00.0.0,1.9.0.0.00.0.0 - Outras Receitas Correntes,1242828.79,0.3141617418078904,Tesouro Nacional — SICONFI/DCA Anexo I-C,observed value; calculated share

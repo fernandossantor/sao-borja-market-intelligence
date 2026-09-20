@@ -1,0 +1,55 @@
+{
+  "period": "2019-2025",
+  "source": "SICONFI/DCA Anexo I-C",
+  "checks": [
+    {
+      "year": 2019,
+      "current_revenue_R$": 212254429.33,
+      "top_level_components_sum_R$": 424508858.66,
+      "difference_R$": 212254429.33,
+      "components_n": 7
+    },
+    {
+      "year": 2020,
+      "current_revenue_R$": 237824712.98,
+      "top_level_components_sum_R$": 475649425.96,
+      "difference_R$": 237824712.98,
+      "components_n": 7
+    },
+    {
+      "year": 2021,
+      "current_revenue_R$": 261744601.07,
+      "top_level_components_sum_R$": 523489202.14,
+      "difference_R$": 261744601.07,
+      "components_n": 7
+    },
+    {
+      "year": 2022,
+      "current_revenue_R$": 308857744.24,
+      "top_level_components_sum_R$": 617715488.48,
+      "difference_R$": 308857744.24,
+      "components_n": 7
+    },
+    {
+      "year": 2023,
+      "current_revenue_R$": 342261488.45,
+      "top_level_components_sum_R$": 684522976.9,
+      "difference_R$": 342261488.45,
+      "components_n": 7
+    },
+    {
+      "year": 2024,
+      "current_revenue_R$": 370103110.4,
+      "top_level_components_sum_R$": 740206220.8,
+      "difference_R$": 370103110.4,
+      "components_n": 7
+    },
+    {
+      "year": 2025,
+      "current_revenue_R$": 395601572.25,
+      "top_level_components_sum_R$": 791203144.5,
+      "difference_R$": 395601572.25,
+      "components_n": 7
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+operador,cnpj,evidencia_presenca,subcategoria_ou_descricao,match_familia_condutores,evidencia_produto,logistica_escala_status,evidencia_logistica,equivalencia_especificacao_18_itens,habilitacao_b2g,participacao_pe39,classificacao_gate
+Iluminar Materiais Eletricos e Ferragens,09.674.510/0001-19,CURRENT_INVENTORY,Loja de Materiais Eletricos e Ferragens,DIRECT_FAMILY_MATCH,Cabos de fiação elétrica; fios de alta rotatividade; cabos via Condusvale/Cigame/atacado,PARTIAL_DOCUMENTED,Atacado com pronta-entrega; rotas 24–72h em parte do abastecimento; fábrica >=20 dias,PENDING,PENDING,PENDING,POTENTIAL_FAMILY_LEVEL_ONLY
+Mercado JL,17.991.032/0001-07,CURRENT_INVENTORY,Minimercado + ferragens,GENERIC_FERRAGENS_ONLY,,UNKNOWN,,PENDING,PENDING,PENDING,LEAD_ONLY
+Comercial Loss,26.003.402/0001-33,CURRENT_INVENTORY,Ferragens e Ferramentas,GENERIC_FERRAGENS_ONLY,,UNKNOWN,,PENDING,PENDING,PENDING,LEAD_ONLY
+Steelpet,46.746.201/0001-33,CURRENT_INVENTORY,Pet Shop + Ferragens,GENERIC_FERRAGENS_ONLY,,UNKNOWN,,PENDING,PENDING,PENDING,LEAD_ONLY
+Agropecuaria Vieira,11.263.905/0001-70,CURRENT_INVENTORY,Agroveterinária + ferragens,GENERIC_FERRAGENS_ONLY,,UNKNOWN,,PENDING,PENDING,PENDING,LEAD_ONLY
+Agropecuária Centauro,29.263.180/0001-86,CURRENT_INVENTORY,Agroveterinária + ferragem,GENERIC_FERRAGENS_ONLY,,UNKNOWN,,PENDING,PENDING,PENDING,LEAD_ONLY
+Guasso Ferragens,,HISTORICAL_POM_2025,Ferragens/ferramentas,PARTIAL_ELECTRICAL_HISTORICAL,Alguns itens elétricos; variedade descrita como limitada,UNKNOWN,,PENDING,PENDING,PENDING,HISTORICAL_LEAD_NEEDS_CURRENT_RECONCILIATION
+Comercial Passo,,HISTORICAL_POM_2025,Ferragens,WEAK_MATCH_HISTORICAL,Portfólio principalmente ferragens,UNKNOWN,,PENDING,PENDING,PENDING,HISTORICAL_LEAD_NEEDS_CURRENT_RECONCILIATION
+Marta Ferragem,,HISTORICAL_POM_2025,Construção + iluminação básica,WEAK_MATCH_HISTORICAL,Construção e iluminação básica,UNKNOWN,,PENDING,PENDING,PENDING,HISTORICAL_LEAD_NEEDS_CURRENT_RECONCILIATION
+Casa do Led e Ferragem Bueno,,HISTORICAL_POM_2025,LED + ferragens,WEAK_MATCH_HISTORICAL,Iluminação LED e ferragens,UNKNOWN,,PENDING,PENDING,PENDING,HISTORICAL_LEAD_NEEDS_CURRENT_RECONCILIATION

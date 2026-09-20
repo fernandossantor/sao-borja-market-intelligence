@@ -99,6 +99,8 @@ jobs:
               if rr is None or rr.status_code>=400: continue
               try: js=rr.content.decode(rr.encoding or "utf-8","replace")
               except Exception: js=rr.text
+              if u.endswith("/js/acordos/index.js"):
+                  report["acordos_index_js"]=js
               for pat in [r'["\']([^"\']*acordos[^"\']*)["\']',r'["\']([^"\']*(?:pesquisar|getAcord|getContrato|contrat)[^"\']*)["\']']:
                   for mm in re.finditer(pat,js,re.I):
                       cand=mm.group(1)

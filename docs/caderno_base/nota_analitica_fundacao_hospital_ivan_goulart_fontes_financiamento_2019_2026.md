@@ -436,3 +436,212 @@ Após esta rodada:
 **Conclusão metodológica:** continuam **não calculáveis** com rigor os quatro percentuais centrais até que sejam obtidas demonstrações contábeis/receita total e decomposição anual por origem.
 
 **Próxima ação operacional:** protocolar pedido de acesso à documentação junto à Fundação/HIG e/ou Procuradoria de Fundações do MPRS, mantendo em paralelo a reconstrução dos fluxos públicos por fonte e exercício.
+
+
+## 16. Histórico B2G — crosswalk processo → contrato/aditivo — piloto HIG — 19/09/2026
+
+### 16.1 Descoberta metodológica
+
+A continuidade do histórico B2G pelas rotas municipais acessíveis mostrou que a camada já extraída de **processos de licitação 2019–2025 não é suficiente, isoladamente, para reconstruir a relação financeira Município/FMS → Fundação Ivan Goulart**.
+
+Foram localizadas páginas e documentos oficiais de **contratos e termos aditivos** em que a Fundação aparece explicitamente como contratada/beneficiária e que acrescentam detalhes não preservados no extrato agregado dos processos.
+
+A partir desta rodada, a regra operacional passa a ser:
+
+**processo → contrato/extrato → aditivo → origem econômica declarada → execução financeira.**
+
+Cada camada responde a uma pergunta diferente e nenhuma deve ser usada como substituta automática da seguinte.
+
+### 16.2 Instrumentos oficiais adicionais observados
+
+#### 2020 — COVID-19
+
+**Contrato 033/2020 — Dispensa 28/2020**
+- Fundação Ivan Goulart;
+- auxílio emergencial no contexto COVID-19;
+- valor publicado: **R$ 1.713.705,90**;
+- fundamento: Lei Federal 13.995/2020;
+- classificação da origem: **federal**;
+- status: valor de instrumento publicado; pagamento histórico ainda não reconciliado.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/1430-extrato-de-contrato
+
+**Contrato 058/2020 — Dispensa 45/2020**
+- valor: **R$ 200.000,00**;
+- origem declarada: Portaria 1.666/2020;
+- finalidade: ações e serviços de saúde para enfrentamento da COVID-19;
+- status: instrumento publicado, não pagamento reconciliado.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/1519-extrato-de-contrato
+
+**Contrato 089/2020**
+- valor: **R$ 90.000,00**;
+- três meses;
+- finalidade: honorários médicos da unidade especial COVID-19;
+- origem pública emergencial, esfera ainda a confirmar na execução.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/1709-extrato-de-contrato
+
+**Contrato 098/2020**
+- valor: **R$ 170.000,00**;
+- parcela única;
+- finalidade: medicamentos, materiais hospitalares e EPIs no enfrentamento da COVID-19;
+- origem pública emergencial, esfera ainda a confirmar na execução.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/1754-extrato-de-contrato
+
+### 16.3 2021 — continuidade COVID e exames
+
+**Contrato 003/2021**
+- valor total: **R$ 90.000,00**;
+- período informado: três meses;
+- finalidade: honorários médicos da unidade especial COVID-19;
+- status: instrumento publicado.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/1821-extrato-de-contrato
+
+**Contrato 056/2021 — Inexigibilidade 13/2021**
+- tomografias para diagnóstico/tratamento relacionado à COVID-19;
+- valor estimado: **R$ 27.282,00 mensais**;
+- assinatura: 15/07/2021;
+- status: **estimativa mensal**, não valor anual nem pagamento.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/2046-extrato-de-contrato
+
+### 16.4 2022–2025 — hemodiálise / doença renal crônica
+
+**Inexigibilidade 021/2022 / Contrato 124/2022**
+- serviços especializados em doença renal crônica, hemodiálise e estágios 4 e 5 pré-dialítico;
+- pacientes SUS;
+- valor publicado no instrumento-base: **R$ 2.584.531,56**.
+
+Fonte oficial:
+https://www.saoborja.rs.gov.br/index.php/vacinacao/itemlist/user/625-fernandarohlederbronzoni?start=0
+
+**1º aditivo — 2024**
+- acréscimo de **R$ 1.263.465,75**;
+- origem: Portaria GM/MS 1.992/2023;
+- 15 parcelas de **R$ 84.231,05**;
+- classificação: federal via cadeia FNS/FMS.
+
+Fonte:
+https://www.saoborja.rs.gov.br/images/DOESB/2024/Marco/doesb25_03_2024.pdf
+
+**3º aditivo — 2025**
+- altera a temporalidade do componente de R$ 84.231,05;
+- o repasse passa a ser informado como **mensal contínuo a contar de janeiro de 2025**.
+
+Fonte:
+https://www.saoborja.rs.gov.br/images/DOESB/2025/Marco/doesb24_03_2025.pdf
+
+**Controle de sobreposição:** contrato-base, 1º aditivo e 3º aditivo pertencem ao mesmo encadeamento contratual. Não somar R$ 2,584 milhões + R$ 1,263 milhão + R$ 84,231 mil × meses como se fossem três receitas independentes.
+
+### 16.5 2023 — recurso federal e exames
+
+**Contrato 20/2023 — Inexigibilidade 13/2023**
+- objeto: autorização/repasse de recurso federal à Fundação;
+- fundamento publicado: LC 172/2020, LC 197/2022 e Portaria 96/2023;
+- valor: **R$ 1.023.851,21**;
+- origem: **federal**.
+
+Fonte:
+https://www.saoborja.rs.gov.br/images/DOESB/2023/Abril/doesb10_04_2023.pdf
+
+Esse valor fecha a lacuna que existia no extrato agregado do processo 20318, mas continua sendo **valor autorizado/contratado, não prova de pagamento efetivo**.
+
+**Contrato 146/2023 — Inexigibilidade 31/2023**
+- mutirão de tomografias e ressonâncias;
+- período: 90 dias;
+- valor total estimado: **R$ 142.367,25**.
+
+Fonte:
+https://www.saoborja.rs.gov.br/index.php/licitacoes-e-contratos/item/3409-contrato-de-numero-146-2023-dcl-smpop
+
+### 16.6 2024 — exames de média/alta complexidade
+
+**Contrato 105/2024 — Inexigibilidade 27/2024**
+- tomografias e ressonâncias sem contraste;
+- demanda acumulada de pacientes SUS;
+- preço estimado: **R$ 122.212,00**;
+- composição publicada: 200 tomografias e 200 ressonâncias;
+- o próprio contrato condiciona pagamento à execução, empenho e aprovação no SIA/SUS.
+
+Fonte:
+https://www.saoborja.rs.gov.br/images/conteudo/Licitacoes/2024/Contrato_105_2024_FUNDAO_IVAN_GOULART.pdf
+
+**Interpretação permitida:** é evidência de contratação e regra de pagamento.
+
+**Interpretação vedada:** tratar R$ 122.212,00 como pagamento realizado sem execução correspondente.
+
+### 16.7 2025 — novo componente estadual SERMulher
+
+**21º aditivo ao Contrato 99/2021**
+- programa estadual SERMulher;
+- implantação: **R$ 200.000,00**, parcela única;
+- custeio: **R$ 125.000,00 mensais**, indicado no extrato como R$ 1.500.000,00 em 12 meses;
+- origem declarada: Fundo Estadual de Saúde / programa estadual.
+
+Fonte:
+https://www.saoborja.rs.gov.br/images/DOESB/2025/Junho/doesb05_06_2025.pdf
+
+**Controle:** o valor anual informado é consequência aritmética do componente mensal, não um fluxo adicional. A execução precisa ser reconciliada por competência e fonte antes de agregação.
+
+### 16.8 Fluxo não assistencial — locação do Contrato 20/2022
+
+O **3º aditivo ao Contrato 20/2022**, publicado em 2025, registra:
+
+- Fundação Ivan Goulart como contratada/locadora;
+- locação das edificações do antigo Hospital São Francisco de Borja;
+- imóvel utilizado para Farmácia Básica, Central de Vacinas, CEO, Vigilância Sanitária, Transporte, SAMU, PIM, CAPS AD e especialidades;
+- vigência prorrogada até 17/03/2026;
+- aluguel reajustado para **R$ 36.799,28 mensais**.
+
+Fonte:
+https://www.saoborja.rs.gov.br/images/DOESB/2025/Marco/doesb24_03_2025.pdf
+
+**Implicação analítica:** nem todo pagamento municipal ao CNPJ da Fundação corresponde a prestação hospitalar SUS do HIG. A execução por credor deve ser classificada por **natureza econômica/objeto**, e não apenas pelo favorecido.
+
+A receita de locação também não deve ser classificada automaticamente como “receita operacional hospitalar” sem observar a contabilidade da Fundação.
+
+### 16.9 Consequência para o indicador “participação do canal Prefeitura/FMS”
+
+O numerador “pagamentos que transitam pela Prefeitura/FMS” precisará ser desagregado no mínimo em:
+
+1. assistência hospitalar SUS;
+2. incentivos/transferências de custeio;
+3. investimento/equipamentos;
+4. subvenções/auxílios;
+5. locações e outras relações não assistenciais;
+6. demais objetos.
+
+Só depois essa soma poderá ser comparada aos **ingressos financeiros totais** da Fundação, com denominador compatível.
+
+### 16.10 Artefato auditável criado
+
+Foi criado:
+
+`docs/data_sources/sao_borja_hig_contracts_history_2020_2025/`
+
+com:
+- `README.md`;
+- `hig_contracts_observed_2020_2025.csv`.
+
+O conjunto é explicitamente **exploratório e não censitário**. Ele demonstra a utilidade da rota municipal de contratos/aditivos, mas ainda não substitui uma extração sistemática do módulo `/acordos`.
+
+### 16.11 Decisão operacional B2G
+
+Enquanto SIAPC permanece bloqueado por transporte no ambiente atual:
+
+- manter SICONFI/DCA para agregados 2019–2025;
+- manter Licitações PMSB como série estrutural de processos;
+- avançar no crosswalk de contratos/aditivos municipais;
+- tentar mapear de forma reproduzível a consulta geral de contratos;
+- manter pagamentos históricos por credor como **abertos** até existir execução financeira oficial recuperada.
+
+Nenhum valor desta seção deve ser promovido como série histórica de pagamentos.

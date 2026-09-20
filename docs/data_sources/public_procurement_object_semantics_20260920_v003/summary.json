@@ -1,0 +1,23 @@
+{
+  "source": "Portal da Transparência PMSB + documented object classifications",
+  "period": "01/01/2026–19/09/2026",
+  "core_detail_rows": 4646,
+  "core_paid_R$": 72039491.18,
+  "external_detail_rows": 1981,
+  "external_paid_R$": 18103465.56,
+  "external_pairs": 454,
+  "semantically_reviewed_external_pairs": 35,
+  "semantically_reviewed_external_paid_R$": 9832866.6,
+  "semantic_coverage_external_value_pct": 54.3148303147323,
+  "three_rubric_external_paid_R$": 12420349.81,
+  "three_rubric_reviewed_paid_R$": 9298109.07,
+  "three_rubric_semantic_coverage_pct": 74.86189368445815,
+  "three_rubric_residual_unreviewed_R$": 3122240.74,
+  "control": "Reviewed means pair cnpj×rubric has a semantic classification from the top-35 audit; it does not mean every item inside the pair has been individually inspected.",
+  "limitations": [
+    "Budget rubric is not procurement object.",
+    "Budget action is administrative purpose, not item-level description.",
+    "Known pair classifications can still be mixed-object or item-indeterminate.",
+    "External creditor does not equal final economic leakage."
+  ]
+}

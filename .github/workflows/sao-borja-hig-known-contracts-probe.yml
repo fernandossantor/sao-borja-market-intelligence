@@ -1,0 +1,161 @@
+name: sao-borja-hig-known-contracts-probe
+
+on:
+  push:
+    branches:
+      - explore/receita-estadual-rs-market-intel-v1
+    paths:
+      - ".github/workflows/sao-borja-hig-known-contracts-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: explore/receita-estadual-rs-market-intel-v1
+
+      - name: Validate known HIG contracts on PMSB portal
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="artifacts/sao_borja_hig_known_contracts_probe"
+          mkdir -p "$OUT"
+          python - <<'PY'
+          import json,re,requests
+          from html import unescape
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          BASE="https://transparencia.saoborja.rs.gov.br"
+          OUT=Path("artifacts/sao_borja_hig_known_contracts_probe")
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI HIG contracts validation/1.0"})
+
+          targets={
+              "2021":["99"],
+              "2022":["20","124"],
+              "2023":["20","146"],
+              "2024":["105"],
+          }
+          report={"base":BASE,"targets":targets,"years":{},"errors":[]}
+
+          class ParamParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.value=None
+              def handle_starttag(self,tag,attrs):
+                  if tag.lower()=="input":
+                      d=dict(attrs)
+                      if d.get("id")=="parametro":
+                          self.value=d.get("value")
+
+          def plain(html):
+              x=re.sub(r'<script.*?</script>',' ',html,flags=re.I|re.S)
+              x=re.sub(r'<style.*?</style>',' ',x,flags=re.I|re.S)
+              x=re.sub(r'<[^>]+>',' ',x)
+              return re.sub(r'\s+',' ',unescape(x)).strip()
+
+          def field(text,label,next_labels):
+              pat=label+r"\s*:\s*(.*?)(?=\s+(?:"+"|".join(next_labels)+r")\s*:|$)"
+              m=re.search(pat,text,re.I|re.S)
+              return m.group(1).strip() if m else None
+
+          for year,numbers in targets.items():
+              yr={"target_numbers":numbers}
+              try:
+                  page=s.get(BASE+"/acordos/pesquisar",params={
+                      "FiltroInstituicao":"1","FiltroExercicio":year,"FiltroMes":""
+                  },timeout=60)
+                  yr["page_status"]=page.status_code
+                  pp=ParamParser(); pp.feed(page.text)
+                  yr["parametro_raw"]=unescape(pp.value) if pp.value else None
+
+                  data={"instituicao":"1","exercicio":year,"mes":"",
+                        "page":"1","rows":"500","sidx":"Acordo.numero","sord":"asc",
+                        "_search":"false","nd":"0"}
+                  gr=s.post(BASE+"/acordos/pesquisar",data=data,
+                            headers={"X-Requested-With":"XMLHttpRequest"},timeout=60)
+                  yr["grid_status"]=gr.status_code
+                  gj=gr.json()
+                  rows=gj.get("rows") or []
+                  yr["grid_meta"]={"page":gj.get("page"),"total":gj.get("total"),
+                                   "records":gj.get("records"),"rows_returned":len(rows)}
+                  matches=[]
+                  for row in rows:
+                      cell=row.get("cell") or []
+                      number=str(cell[0]).strip() if cell else ""
+                      if number in numbers:
+                          matches.append({"number":number,"id":str(row.get("id","")),
+                                          "cell":cell})
+                  yr["matches"]=matches
+                  details=[]
+                  for m in matches:
+                      rid=m["id"]
+                      dr=s.get(BASE+"/acordos/view/"+rid,timeout=60)
+                      txt=plain(dr.text)
+                      labels=["Número","Situação","Data da Assinatura","Lei","Período de Vigência",
+                              "Valor Total","Processo","Contratado","Objeto"]
+                      details.append({
+                          "number":m["number"],"id":rid,"url":dr.url,"status":dr.status_code,
+                          "numero":field(txt,"Número",labels),
+                          "situacao":field(txt,"Situação",labels),
+                          "data_assinatura":field(txt,"Data da Assinatura",labels),
+                          "vigencia":field(txt,"Período de Vigência",labels),
+                          "valor_total":field(txt,"Valor Total",labels),
+                          "processo":field(txt,"Processo",labels),
+                          "contratado":field(txt,"Contratado",labels),
+                          "objeto":field(txt,"Objeto",labels),
+                          "contains_ivan_goulart":bool(re.search(r"IVAN\s+GOULART",txt,re.I)),
+                      })
+                  yr["details"]=details
+              except Exception as e:
+                  report["errors"].append({"year":year,"error":repr(e)})
+              report["years"][year]=yr
+
+          (OUT/"validation.json").write_text(
+              json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - name: Persist validation
+        if: always()
+        shell: bash
+        run: |
+          DEST="docs/data_sources/sao_borja_hig_contracts_route_validation"
+          mkdir -p "$DEST"
+          if [ -f artifacts/sao_borja_hig_known_contracts_probe/validation.json ]; then
+            cp artifacts/sao_borja_hig_known_contracts_probe/validation.json "$DEST/validation.json"
+            cat > "$DEST/README.md" <<'EOF'
+          # PMSB — validação de contratos conhecidos da Fundação Ivan Goulart
+
+          Validação exploratória da rota oficial do Portal da Transparência de São Borja.
+          O arquivo cruza números de contratos já documentados em fontes oficiais com os
+          identificadores internos da rota `/acordos/view/{id}`.
+
+          Esta validação comprova presença/estrutura contratual, mas não transforma valor
+          contratado em valor executado, liquidado ou pago.
+          EOF
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add "$DEST"
+            if ! git diff --cached --quiet; then
+              git commit -m "data: validate known HIG contracts on PMSB portal"
+              git pull --rebase origin explore/receita-estadual-rs-market-intel-v1
+              git push origin HEAD:explore/receita-estadual-rs-market-intel-v1
+            fi
+          fi
+
+      - name: Upload artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-borja-hig-known-contracts-probe
+          retention-days: 30
+          if-no-files-found: warn
+          path: artifacts/sao_borja_hig_known_contracts_probe/

@@ -796,3 +796,106 @@ Isso torna o contrato um **eixo longitudinal**, mas reforça a necessidade de re
 Para 2021, a identificação de contratos da Fundação no módulo `/acordos` passa de amostra/piloto para **cobertura integral do exercício consultado**, com 102 detalhes verificados e zero falhas.
 
 Próxima etapa operacional: repetir o mesmo procedimento, exercício por exercício, começando por **2022**, preservando a separação entre contrato, aditivo e execução financeira.
+
+
+## 19. Censo contratual HIG no exercício 2022 — módulo PMSB /acordos — 19/09/2026
+
+### 19.1 Cobertura da rodada
+
+Foi executada extração integral da grade oficial do exercício **2022** no módulo municipal `/acordos`.
+
+Resultados observados:
+
+- **152** linhas retornadas;
+- **152/152** páginas de detalhe verificadas;
+- **0** falhas;
+- **4** contratos cujo campo Contratado contém `FUNDACAO IVAN GOULART`.
+
+Artefato auditável:
+
+`docs/data_sources/sao_borja_hig_contracts_census_2022/`
+
+Como em 2021, o resultado é um **censo da camada contratual do módulo consultado**, e não uma série de receitas, empenhos ou pagamentos.
+
+### 19.2 Contratos HIG identificados em 2022
+
+Foram localizados:
+
+1. **Contrato 7/2022 — ID 568**
+   - assinatura: 31/01/2022;
+   - objeto: sobreaviso médico de urgência e emergência para pacientes SUS atendidos nas dependências do HIG;
+   - crosswalk: **Inexigibilidade 3/2022 → Contrato 7/2022**;
+   - instrumento original: **R$ 295.111,54/mês por 12 meses**, totalizando **R$ 3.541.338,48**;
+   - snapshot corrente do Portal: **R$ 4.325.429,52**, com vigência corrente 31/01/2026–31/01/2027;
+   - a diferença confirma atualização contratual posterior e impede retroprojetar o snapshot corrente para 2022.
+
+2. **Contrato 20/2022 — ID 581**
+   - assinatura: 17/03/2022;
+   - objeto: locação do antigo Hospital São Francisco de Borja para programas municipais de saúde;
+   - crosswalk: **Dispensa 6/2022 → Contrato 20/2022**;
+   - valor mensal original publicado em 2022: **R$ 32.246,39**;
+   - prazo original: 12 meses;
+   - cálculo meramente contratual de referência: **R$ 32.246,39 × 12 = R$ 386.956,68**, sem transformar esse produto em pagamento observado;
+   - snapshot corrente do Portal: **R$ 455.870,88**, equivalente a 12 meses de R$ 37.989,24;
+   - 3º aditivo de 2025 já havia mostrado R$ 36.799,28/mês, reforçando a existência de reajustes ao longo da cadeia.
+
+3. **Contrato 117/2022 — ID 678**
+   - assinatura: 09/09/2022;
+   - objeto: tomografias e ressonâncias magnéticas para pacientes SUS;
+   - crosswalk: **Inexigibilidade 20/2022 → Contrato 117/2022**;
+   - valor total original publicado: **R$ 366.636,00**;
+   - snapshot corrente do Portal: **R$ 0,00**;
+   - o zero corrente não apaga o valor histórico do instrumento.
+
+4. **Contrato 124/2022 — ID 685**
+   - assinatura: 30/09/2022;
+   - objeto: doença renal crônica, hemodiálise e estágios 4 e 5 pré-dialítico;
+   - crosswalk: **Inexigibilidade 21/2022 → Contrato 124/2022**;
+   - instrumento-base histórico já documentado: **R$ 2.584.531,56**;
+   - snapshot corrente do Portal: **R$ 0,00**;
+   - a cadeia possui renovação e aditivos em 2023–2026.
+
+### 19.3 O exercício 2022 confirma empiricamente a regra de snapshot
+
+A comparação entre instrumentos originais e o estado corrente do Portal é particularmente informativa:
+
+| Contrato | Valor histórico observado no instrumento | Snapshot corrente do Portal | Interpretação |
+|---|---:|---:|---|
+| 7/2022 | R$ 3.541.338,48 / 12 meses | R$ 4.325.429,52 | contrato renovado/atualizado; não retroprojetar |
+| 20/2022 | R$ 32.246,39/mês | R$ 455.870,88 no total corrente | locação reajustada ao longo do tempo |
+| 117/2022 | R$ 366.636,00 | R$ 0,00 | zero corrente não significa contrato histórico sem valor |
+| 124/2022 | R$ 2.584.531,56 | R$ 0,00 | zero corrente não substitui contrato-base/aditivos |
+
+**Conclusão metodológica:** a rota `/acordos` é adequada para identidade do contrato, objeto, contratado, vigência corrente e histórico de eventos. Para valores históricos, deve ser reconciliada com o instrumento vigente em cada competência.
+
+### 19.4 Crosswalk 2022 fechado
+
+A série estrutural de Licitações e o censo de Contratos agora permitem afirmar documentalmente:
+
+- Inexigibilidade 3/2022 → Contrato 7/2022;
+- Dispensa 6/2022 → Contrato 20/2022;
+- Inexigibilidade 20/2022 → Contrato 117/2022;
+- Inexigibilidade 21/2022 → Contrato 124/2022.
+
+Isso reduz a lacuna entre as camadas **processo/instrumento** e **contrato**, mas a execução financeira permanece aberta.
+
+### 19.5 Controle de integridade do censo
+
+Na primeira execução automatizada de 2022 foi detectada uma colisão de caminho: os artefatos novos foram temporariamente gravados na pasta de 2021.
+
+O erro foi identificado antes de qualquer promoção analítica. Foram executados os seguintes controles:
+
+- o `summary.json` de 2021 foi restaurado a partir da versão canônica anterior;
+- o `README.md` de 2021 foi restaurado;
+- o CSV de 2022 indevidamente colocado na pasta de 2021 foi removido;
+- o workflow de 2022 foi corrigido para usar `sao_borja_hig_contracts_census_2022`;
+- a pasta de 2022 passou a conter seus próprios artefatos;
+- nova verificação confirmou que o `summary.json` de 2021 voltou a declarar `exercise = 2021`.
+
+Esse evento não alterou o Caderno-Base nem os resultados analíticos promovidos, mas fica registrado por governança e reprodutibilidade.
+
+### 19.6 Próxima etapa
+
+Com 2021 e 2022 censados, a próxima rodada é **2023**, mantendo o mesmo protocolo:
+
+**grade anual → 100% dos detalhes → filtro por contratado → crosswalk com Licitações → reconstrução do valor histórico do instrumento → separação de snapshot corrente e execução financeira.**

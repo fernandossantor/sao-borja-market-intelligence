@@ -305,3 +305,134 @@ Receita recebida pelo HIG **não equivale automaticamente a retenção territori
 Promover agora a **arquitetura de financiamento multiorigem** e a evidência de que o canal municipal agrega recursos próprios e repasses intergovernamentais.
 
 Não promover ainda uma taxa de dependência ou a afirmação de que “a Prefeitura mantém o hospital” até obter demonstrações contábeis/receita total e decomposição por origem.
+
+
+## 15. Fechamento da busca pública e rota de aquisição documental — 19/09/2026
+
+### 15.1 Resultado da busca por demonstrações contábeis
+
+Foi realizada nova busca dirigida por:
+
+- Balanço Patrimonial;
+- DRE/Demonstração do Resultado;
+- Relatório de Gestão Orçamentária;
+- Balanço Social;
+- prestação de contas;
+- combinações com “Fundação Ivan Goulart”, “Hospital Ivan Goulart” e CNPJ 96.488.598/0001-89.
+
+**Resultado observado:** os demonstrativos contábeis anuais completos de 2019–2025 não foram localizados em acesso web público indexado nesta rodada.
+
+Isso **não comprova inexistência nem ausência de publicidade por outras rotas**. O próprio HIG informa que Balanço Patrimonial anual, Relatório Anual de Atividades, Relatório de Gestão de Orçamento, Relatório de Gestão de Investimento e parecer do Conselho Fiscal são produzidos e deliberados institucionalmente.
+
+A página institucional de transparência atualmente disponível está concentrada em recursos de convênios/emendas para equipamentos e lista, entre outros, os instrumentos federais **900685, 947317 e 971148**. Esses registros ajudam a mapear canais diretos de investimento, mas não substituem a DRE nem permitem calcular a receita operacional total.
+
+Fontes:
+- HIG — Conselho Fiscal: https://www.hospitalivangoulart.org.br/conselho-fiscal-da-fundacao-aprova-relatorios-do-hig-em-assembleia-extraordinaria/
+- HIG — Transparência: https://www.hospitalivangoulart.org.br/transparencia-2/
+
+### 15.2 Rota institucional prioritária — MPRS / Procuradoria de Fundações
+
+A Fundação Ivan Goulart consta na relação oficial de fundações privadas acompanhadas pela **Procuradoria de Fundações do Ministério Público do Rio Grande do Sul**.
+
+A página oficial informa:
+- e-mail: `fundacoes@mprs.mp.br`;
+- telefone (Secretaria/Jurídico): (51) 3295-1076;
+- telefone (Contabilidade): (51) 3295-1077.
+
+Fonte:
+https://www.mprs.mp.br/fundacao/paginas/dados_fundacionais/
+
+Foi também localizado no Diário Eletrônico do MPRS o **Procedimento Administrativo de acompanhamento de Instituições nº 00879.000.428/2019**, da Promotoria de Justiça Cível de São Borja, cujo objeto é **“Acompanhamento da Fundação Ivan Goulart”**.
+
+Fonte:
+https://www.mprs.mp.br/media/de/arquivos/demp-19-11-2019.pdf
+
+Há ainda registro de alteração estatutária da Fundação aprovada pela Portaria 50/2024-PF, vinculada ao **PGEA 00031.000.758/2023**, confirmando a atuação contemporânea da Procuradoria de Fundações sobre a entidade.
+
+Fonte:
+https://www.mprs.mp.br/media/de/arquivos/demp-08-03-2024.pdf
+
+**Decisão operacional:** a rota prioritária para obtenção das prestações de contas e demonstrações contábeis passa a ser:
+
+1. setor Financeiro da Fundação/HIG;
+2. Procuradoria de Fundações do MPRS, com referência expressa ao PA 00879.000.428/2019;
+3. Promotoria de Justiça Cível de São Borja, caso o acervo do procedimento seja mantido localmente.
+
+O setor Financeiro do HIG publica contato institucional em:
+https://www.hospitalivangoulart.org.br/contato/
+
+### 15.3 Benchmark histórico de composição — NÃO transportável para 2019–2026
+
+Trabalho de conclusão de curso da UNIPAMPA, produzido em contexto de estágio no HIG e baseado em informações institucionais atribuídas ao Hospital em 2015, registra que, naquele contexto histórico, a instituição recebia em média **70% dos recursos institucionais do SUS e 30% de convênios e particulares**.
+
+Fonte:
+https://repositorio.unipampa.edu.br/bitstreams/6df50fc5-976e-46cb-aea1-862745b141fc/download
+
+Classificação: **benchmark histórico/contextual**, não indicador corrente.
+
+Limitações:
+- referência institucional antiga, ligada ao contexto 2015–2017;
+- não cobre 2019–2026;
+- o denominador “recursos institucionais” não foi demonstrado como equivalente à receita operacional total;
+- a arquitetura SUS e os serviços do HIG mudaram materialmente desde então.
+
+**Regra:** o 70/30 não pode ser usado para preencher lacunas, projetar anos recentes ou calcular a dependência financeira atual. Serve apenas como evidência histórica de que a composição de recursos já era multiorigem.
+
+### 15.4 Evidência operacional corrente de 2026 — atendimento não é receita
+
+Publicação regional de 16/09/2026 informa, a partir de declaração da administração do HIG:
+
+- expansão de uma ala com **23 leitos em 12 quartos** voltados a convênios e particulares;
+- investimento descrito como realizado com **recursos próprios da instituição**;
+- mais de **60% dos atendimentos** realizados pelo SUS.
+
+Fonte:
+https://grupomissoes.com.br/35912-2/
+
+Classificação: **evidência institucional reportada por mídia regional**, útil para confirmar a coexistência corrente dos circuitos SUS e privado.
+
+Limitações:
+- participação de atendimentos **não equivale a participação de receita**;
+- “recursos próprios” aplicados a um investimento específico não informam a origem contábil de toda a receita anual;
+- não utilizar o percentual de atendimentos como proxy do mix financeiro.
+
+### 15.5 Pagamentos municipais 2026 — precisão da camada observada
+
+O derivado auditável do Portal PMSB para 01/01–18/09/2026 registra para a Fundação:
+
+- **R$ 30.769.932,49** pagos em todas as rubricas observadas;
+- **R$ 28.342.657,23** classificados no CORE_PROCUREMENT;
+- 100% do total observado na função Saúde;
+- R$ 30.693.954,01 associados à ação de assistência à saúde de média e alta complexidade;
+- R$ 2.427.275,26 em Subvenções Sociais, além dos R$ 28.342.657,23 em Outros Serviços de Terceiros — Pessoa Jurídica.
+
+Fonte interna auditável:
+`docs/data_sources/fundacao_ivan_goulart_payment_profile_2026/`
+
+**Controle:** esses valores medem execução municipal/FMS por credor. Não medem receita total da Fundação nem identificam, isoladamente, a origem econômica municipal/estadual/federal.
+
+### 15.6 Documento de aquisição criado
+
+Foi criado o protocolo:
+
+`docs/caderno_base/protocolo_solicitacao_dados_fundacao_ivan_goulart_financas_2019_2026.md`
+
+O documento lista:
+- demonstrações necessárias;
+- decomposição anual desejada;
+- controles de reconciliação;
+- rotas HIG e MPRS;
+- modelo de mensagem institucional;
+- critério de fechamento dos quatro indicadores.
+
+### 15.7 Estado da pergunta central
+
+Após esta rodada:
+
+**Fato:** a arquitetura multiorigem está mais bem documentada e há uma rota institucional concreta para aquisição da contabilidade.
+
+**Fato:** existe benchmark histórico 70/30 e evidência corrente de mais de 60% dos atendimentos SUS, mas ambos possuem denominadores incompatíveis com a pergunta financeira atual.
+
+**Conclusão metodológica:** continuam **não calculáveis** com rigor os quatro percentuais centrais até que sejam obtidas demonstrações contábeis/receita total e decomposição anual por origem.
+
+**Próxima ação operacional:** protocolar pedido de acesso à documentação junto à Fundação/HIG e/ou Procuradoria de Fundações do MPRS, mantendo em paralelo a reconstrução dos fluxos públicos por fonte e exercício.

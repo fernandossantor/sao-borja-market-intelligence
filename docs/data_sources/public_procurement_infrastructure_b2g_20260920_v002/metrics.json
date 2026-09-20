@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-09-20",
+  "period_payments": "2026-01-01/2026-09-19",
+  "lighting": {
+    "material_total_R$": 1975045.33,
+    "material_external_pct": 75.2047,
+    "zagonel_paid_R$": 1221733.83,
+    "zagonel_share_material_pct": 61.8585,
+    "residual_ex_zagonel_R$": 753311.5,
+    "residual_local_pct": 65.0088,
+    "arp_27_2025": {
+      "registered_total_R$": 3322699,
+      "line_items_product_R$": 2771960.27,
+      "line_items_product_pct": 83.42496,
+      "explicit_services_R$": 550738.73,
+      "explicit_services_pct": 16.57504,
+      "luminaires_R$": 1542463.65,
+      "relays_R$": 118562.72,
+      "arms_R$": 828218.5,
+      "connectors_R$": 113134.2,
+      "pole_straps_R$": 169581.2,
+      "executive_project_R$": 9957.05,
+      "luminaire_tests_R$": 43952,
+      "installation_R$": 496829.68,
+      "zagonel_2026_paid_vs_arp_total_pct": 36.76932,
+      "control": "Decomposição por linhas da Ata; não representa custo econômico puro de bens versus serviços e não pode ser rateada proporcionalmente sobre pagamentos 2026."
+    },
+    "separate_current_process": {
+      "process": "PE 39/2026",
+      "object": "Materiais elétricos para manutenção da rede de iluminação pública e infraestrutura elétrica de prédios públicos",
+      "judgement": "menor preço por item",
+      "analytical_role": "mercado de manutenção corrente; testar separadamente do projeto LED integrado"
+    }
+  },
+  "roads": {
+    "material_total_R$": 229618.9,
+    "material_external_pct": 82.1464,
+    "planet_pav_paid_R$": 157350,
+    "planet_pav_share_material_pct": 68.5266,
+    "works_R$": 64128,
+    "works_local_pct": 100,
+    "recurring_family_evidence": [
+      "PLANET PAV Contrato 157/2023: CBUQ aplicação a frio, sacos de 25kg",
+      "BENTO LEAL Contrato 92/2024: CBUQ + emulsão, R$299.836,00",
+      "1º aditivo Contrato 92/2024: vigência até 23/07/2026 +25% = R$74.959,00",
+      "PE 30/2025: CBUQ aplicação a frio + emulsão, menor preço por item",
+      "PE 44/2026: CBUQ aplicação a frio + emulsão, menor preço por item"
+    ],
+    "current_planet_pav_object_status": "PENDING_RECONCILIATION"
+  },
+  "next_action": "Reconciliar ZAGONEL por item; recuperar resultado PE39/2026; reconciliar PLANET PAV 2026; recuperar resultado PE44/2026; comparar apenas item/unidade/preço entregue equivalentes.",
+  "governance": {
+    "caderno_base_v028": "READ_ONLY",
+    "pr_41": "OPEN_DRAFT_NO_MERGE",
+    "branch": "explore/receita-estadual-rs-market-intel-v1"
+  }
+}

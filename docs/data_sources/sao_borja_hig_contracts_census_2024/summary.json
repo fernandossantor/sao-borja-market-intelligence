@@ -1,0 +1,36 @@
+{
+  "exercise": "2024",
+  "portal_query": {
+    "page": "1",
+    "total": "152",
+    "records": "500",
+    "rows_returned": 152
+  },
+  "details_checked": 152,
+  "failures": [],
+  "hig_contracts_found": 1,
+  "hig_contracts": [
+    {
+      "exercise": "2024",
+      "row_id": "1068",
+      "contract_number": "105",
+      "grid_signature_date": "29/08/2024",
+      "grid_validity": "29/08/2024 até 29/08/2025",
+      "detail_number": "105 - 2024 Grupo: CONTRATO",
+      "detail_status": "Homologado",
+      "detail_signature_date": "29/08/2024",
+      "detail_validity": "29/08/2024 até 29/08/2025",
+      "detail_value_total_snapshot": "122.212,00",
+      "process": "20558/2024",
+      "contractor": "FUNDACAO IVAN GOULART",
+      "object": "O objeto da presente inexigibilidade de licitação é a contratação da empresa Fundação Ivan Goulart, para a prestação de serviços de realização de exames de alta e média complexidade, tomografias computadorizadas e ressonâncias magnéticas ( sem contraste ). Melhores descrições estão no Termo de Referência e demais documentos que integram o devido processo de Inexigibilidade.",
+      "timeline": [],
+      "url": "https://transparencia.saoborja.rs.gov.br/acordos/view/1068"
+    }
+  ],
+  "controls": [
+    "Contrato/detail snapshot não equivale a pagamento.",
+    "Valor Total do detalhe é estado corrente e não deve ser retroprojetado.",
+    "Processo ≠ contrato ≠ aditivo ≠ empenho ≠ liquidação ≠ pagamento."
+  ]
+}

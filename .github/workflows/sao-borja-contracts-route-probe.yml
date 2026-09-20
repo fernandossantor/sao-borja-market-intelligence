@@ -29,6 +29,7 @@ jobs:
           python - <<'PY'
           import json,re,requests
           from html import unescape
+          from html.parser import HTMLParser
           from pathlib import Path
           from urllib.parse import urljoin
 
@@ -155,33 +156,40 @@ jobs:
                                   mm.group(1) for mm in re.finditer(r"['\"]([^'\"]*(?:acordos|contrat|pesquisar|get[A-Z])[^'\"]*)['\"]",body,re.I)
                               ))[:100]
                               # Recover the hidden JSON used as jqGrid postData and probe only page 1 (capped).
-                              im=re.search(r"<input[^>]*id=['\\"]parametro['\\"][^>]*>",body,re.I|re.S)
-                              if im:
-                                  vm=re.search(r"value=([\\\"'])(.*?)\\1",im.group(0),re.I|re.S)
-                                  if vm:
-                                      param_raw=unescape(vm.group(2))
-                                      probe["parametro_raw"]=param_raw
+                              class ParamParser(HTMLParser):
+                                  def __init__(self):
+                                      super().__init__()
+                                      self.value=None
+                                  def handle_starttag(self,tag,attrs):
+                                      if tag.lower()=="input":
+                                          d=dict(attrs)
+                                          if d.get("id")=="parametro":
+                                              self.value=d.get("value")
+                              pp=ParamParser()
+                              pp.feed(body)
+                              if pp.value is not None:
+                                  param_raw=unescape(pp.value)
+                                  probe["parametro_raw"]=param_raw
+                                  try:
+                                      param_obj=json.loads(param_raw)
+                                  except Exception as e:
+                                      param_obj={}
+                                      probe["parametro_parse_error"]=repr(e)
+                                  if isinstance(param_obj,dict):
+                                      grid_data=dict(param_obj)
+                                      grid_data.update({"page":"1","rows":"15","sidx":"Acordo.numero","sord":"asc","_search":"false","nd":"0"})
                                       try:
-                                          param_obj=json.loads(param_raw)
-                                      except Exception as e:
-                                          param_obj={}
-                                          probe["parametro_parse_error"]=repr(e)
-                                      if isinstance(param_obj,dict):
-                                          grid_data=dict(param_obj)
-                                          grid_data.update({"page":"1","rows":"15","sidx":"Acordo.numero","sord":"asc","_search":"false","nd":"0"})
+                                          gr=s.post(BASE+"/acordos/pesquisar",data=grid_data,headers={"X-Requested-With":"XMLHttpRequest"},timeout=60)
+                                          gtxt=gr.content.decode(gr.encoding or "utf-8","replace")
+                                          gp={"url":gr.url,"status":gr.status_code,"bytes":len(gr.content),
+                                              "content_type":gr.headers.get("content-type"),"request_data":grid_data}
                                           try:
-                                              gr=s.post(BASE+"/acordos/pesquisar",data=grid_data,headers={"X-Requested-With":"XMLHttpRequest"},timeout=60)
-                                              gtxt=gr.content.decode(gr.encoding or "utf-8","replace")
-                                              gp={"url":gr.url,"status":gr.status_code,"bytes":len(gr.content),
-                                                  "content_type":gr.headers.get("content-type"),"request_data":grid_data}
-                                              try:
-                                                  gj=gr.json()
-                                                  gp["json"]=gj
-                                              except Exception:
-                                                  gp["text_head"]=gtxt[:12000]
-                                              report["grid_probe_2025"]=gp
-                                          except Exception as e:
-                                              report["errors"].append({"method":"POST","url":BASE+"/acordos/pesquisar","stage":"grid_probe_2025","error":repr(e)})
+                                              gp["json"]=gr.json()
+                                          except Exception:
+                                              gp["text_head"]=gtxt[:12000]
+                                          report["grid_probe_2025"]=gp
+                                      except Exception as e:
+                                          report["errors"].append({"method":"POST","url":BASE+"/acordos/pesquisar","stage":"grid_probe_2025","error":repr(e)})
                               report["result_page_scripts"]=[]
                               for su in rscripts:
                                   sr=get(su)

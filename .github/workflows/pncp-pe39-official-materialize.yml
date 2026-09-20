@@ -67,9 +67,16 @@ jobs:
                       pass
           (raw/"endpoint_status.json").write_text(json.dumps(status,ensure_ascii=False,indent=2),encoding="utf-8")
 
-          if status["compra"]["status"] != 200 or status["arquivos"]["status"] != 200 or status["itens"]["status"] != 200:
+          # Compra may return a non-200 response while public document/item
+          # endpoints remain available. Preserve all responses, but require
+          # arquivos + itens for this materialization.
+          if status["arquivos"]["status"] != 200 or status["itens"]["status"] != 200:
               print(json.dumps(status,indent=2,ensure_ascii=False))
-              raise SystemExit("Required official PNCP endpoint failed")
+              raise SystemExit("Required official PNCP document/item endpoint failed")
+          for name,st in status.items():
+              if st["status"] not in (200,204):
+                  body=(raw/f"{name}.response").read_text(encoding="utf-8",errors="replace")
+                  print("NON200",name,st["status"],body[:2000])
 
           docs=payloads.get("arquivos") or []
           if isinstance(docs,dict):

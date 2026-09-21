@@ -1,6 +1,11 @@
 name: bens-essenciais-operadores-rfb-join
 
 on:
+  push:
+    branches:
+      - 'explore/receita-estadual-rs-market-intel-v1'
+    paths:
+      - '.github/workflows/bens-essenciais-operadores-rfb-join.yml'
   pull_request:
     paths:
       - '.github/workflows/bens-essenciais-operadores-rfb-join.yml'
@@ -15,7 +20,7 @@ jobs:
     timeout-minutes: 300
     env:
       COMPETENCE: '2026-08'
-      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/public.php/dav/files/gn672Ad4CF8N6TK/Dados/Cadastros/CNPJ'
+      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj'
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 300
     env:
       COMPETENCE: '2026-08'
-      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj'
+      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/public.php/dav/files/YggdBLfdninEJX9'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -144,7 +144,7 @@ jobs:
           download_rfb 'Municipios.zip' "$raw/Municipios.zip"
           for i in {0..9}; do
             file="Estabelecimentos${i}.zip"; out="$raw/$file"
-            echo "Downloading and scanning $file from official RFB Nextcloud public DAV file route"
+            echo "Downloading and scanning $file from current official RFB Nextcloud public DAV share"
             download_rfb "$file" "$out"
             python "$raw/scan_one.py" "$out"
             rm -f "$out"

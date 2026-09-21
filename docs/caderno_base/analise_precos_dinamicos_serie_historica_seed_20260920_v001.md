@@ -20,7 +20,7 @@ Regra:
 |---|---:|---:|---|
 | jul/2024 | R$ 248,70 | R$ 258,80 | âncora histórica oficial |
 | nov/2024 | R$ 270,33 | R$ 283,92 | âncora histórica oficial |
-| mar/2026 | R$ 274,55 | R$ 289,85 | nova observação validada |
+| mar/2026 | R$ 274,55 | R$ 287,85 | observação corrigida após auditoria cruzada |
 | ago/2026 | R$ 284,19 | R$ 298,61 | benchmark corrente já promovido |
 
 ## 3. Março/2026 — nova validação
@@ -34,7 +34,7 @@ Tabela oficial do boletim de referência março/2026:
 - 12 meses: **-3,22%**.
 
 ### Rio Grande do Sul
-- PCA-RE: **R$ 289,85**;
+- PCA-RE: **R$ 287,85**;
 - variação mensal: **-0,17%**;
 - acumulado no ano: **-1,16%**;
 - 12 meses: **-2,84%**.
@@ -43,18 +43,28 @@ Tabela oficial do boletim de referência março/2026:
 
 Fórmula:
 
-`(274,55 / 289,85 - 1) × 100 = -5,28%`.
+`(274,55 / 287,85 - 1) × 100 = -4,62%`.
 
-**Dado calculado:** em março/2026, o PCA-RE da Fronteira Oeste estava aproximadamente **5,28% abaixo** do nível estadual.
+**Dado calculado:** em março/2026, o PCA-RE da Fronteira Oeste estava aproximadamente **4,62% abaixo** do nível estadual.
 
 Isso não significa que famílias de São Borja pagavam 5,28% menos nem que todos os itens tinham preços inferiores.
+
+## 3.1. Auditoria corretiva do valor estadual de março/2026
+
+**Dado observado em fonte primária:** o Portal do Estado do Rio Grande do Sul, em notícia da Secretaria da Fazenda publicada em 02/04/2026, informa PCA-RE estadual de **R$ 287,85**, queda mensal de **0,17%** e variação de **-2,84% em 12 meses**.
+
+**Checagem calculada de consistência:** fevereiro/2026 havia fechado em R$ 288,33. A variação de R$ 288,33 para R$ 287,85 é de aproximadamente **-0,17%**, coerente com a variação mensal publicada.
+
+O valor **R$ 289,85**, antes transcrito no seed, é incompatível com a fonte primária e com a própria variação mensal. Foi, portanto, classificado como **erro de transcrição** e invalidado.
+
+Fonte primária: Portal do Estado do Rio Grande do Sul / Ascom Sefaz, 02/04/2026, “Preço médio da cesta de alimentos tem queda em março no Rio Grande do Sul”.
 
 ## 4. Leitura temporal permitida
 
 Entre março e agosto de 2026:
 
 - Fronteira Oeste: R$ 274,55 → R$ 284,19;
-- RS: R$ 289,85 → R$ 298,61.
+- RS: R$ 287,85 → R$ 298,61.
 
 Esse avanço de nível é descritivo e não substitui a série mensal intermediária.
 

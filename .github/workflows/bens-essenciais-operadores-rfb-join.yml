@@ -20,7 +20,8 @@ jobs:
     timeout-minutes: 300
     env:
       COMPETENCE: '2026-08'
-      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/public.php/dav/files/YggdBLfdninEJX9'
+      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/public.php/webdav'
+      RFB_SHARE_TOKEN: 'YggdBLfdninEJX9'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -136,7 +137,7 @@ jobs:
             local file="$1"; local out="$2"
             local url="${RFB_FILE_BASE}/${COMPETENCE}/${file}"
             echo "${file}|${url}" >> artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
-            curl --fail --location --retry 8 --retry-all-errors --retry-delay 10 --retry-max-time 900 --connect-timeout 45 --max-time 1800 --output "$out" "$url"
+            curl --fail --location --user "${RFB_SHARE_TOKEN}:" --header "X-Requested-With: XMLHttpRequest" --retry 8 --retry-all-errors --retry-delay 10 --retry-max-time 900 --connect-timeout 45 --max-time 1800 --output "$out" "$url"
             test -s "$out"
             unzip -tq "$out" >/dev/null
             sha256sum "$out" >> artifacts/operator_join/RFB_SHA256SUMS.txt
@@ -144,7 +145,7 @@ jobs:
           download_rfb 'Municipios.zip' "$raw/Municipios.zip"
           for i in {0..9}; do
             file="Estabelecimentos${i}.zip"; out="$raw/$file"
-            echo "Downloading and scanning $file from current official RFB Nextcloud public DAV share"
+            echo "Downloading and scanning $file from current official RFB public WebDAV share with public-share authentication"
             download_rfb "$file" "$out"
             python "$raw/scan_one.py" "$out"
             rm -f "$out"

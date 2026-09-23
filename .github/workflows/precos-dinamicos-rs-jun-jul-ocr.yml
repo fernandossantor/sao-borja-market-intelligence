@@ -1,0 +1,81 @@
+name: precos-dinamicos-rs-jun-jul-ocr
+
+on:
+  push:
+    branches:
+      - 'explore/receita-estadual-rs-market-intel-v1'
+    paths:
+      - '.github/workflows/precos-dinamicos-rs-jun-jul-ocr.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils tesseract-ocr
+
+      - name: Download June and July official PDFs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .data/tmp/pca_state artifacts/pca_state
+          curl --fail --location --retry 5 --retry-all-errors -o .data/tmp/pca_state/2026-06.pdf 'https://receitadoc.sefaz.rs.gov.br/media/fzjpx4ka/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_julho-2026-ref-junho26.pdf'
+          curl --fail --location --retry 5 --retry-all-errors -o .data/tmp/pca_state/2026-07.pdf 'https://receitadoc.sefaz.rs.gov.br/media/5l4dgkl2/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_agosto-2026-ref-julho26.pdf'
+          sha256sum .data/tmp/pca_state/*.pdf > artifacts/pca_state/SHA256SUMS.txt
+
+      - name: High-resolution numeric OCR on page 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > artifacts/pca_state/ocr_numeric_consolidated.txt
+          for period in 2026-06 2026-07; do
+            pdf=.data/tmp/pca_state/${period}.pdf
+            png=.data/tmp/pca_state/${period}_p4
+            pdftoppm -f 4 -l 4 -singlefile -png -r 600 "$pdf" "$png" >/dev/null 2>&1
+            echo "===== ${period} =====" | tee -a artifacts/pca_state/ocr_numeric_consolidated.txt
+            for psm in 3 6 11 12; do
+              base=artifacts/pca_state/${period}_p4_num_psm${psm}
+              tesseract "${png}.png" "$base" --psm "$psm" -c tessedit_char_whitelist='0123456789,.' >/dev/null 2>&1 || true
+              echo "--- NUMERIC PSM ${psm} ---" | tee -a artifacts/pca_state/ocr_numeric_consolidated.txt
+              cat "${base}.txt" | tee -a artifacts/pca_state/ocr_numeric_consolidated.txt || true
+            done
+            tesseract "${png}.png" artifacts/pca_state/${period}_p4_tsv --psm 11 tsv >/dev/null 2>&1 || true
+            echo | tee -a artifacts/pca_state/ocr_numeric_consolidated.txt
+          done
+
+      - name: Commit audit note
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          raw=Path('artifacts/pca_state/ocr_numeric_consolidated.txt').read_text(encoding='utf-8', errors='replace')
+          note = '# PCA-RE estadual — junho e julho/2026 — OCR numérico dirigido — v001\n\n' + \
+                 '**Data:** 22/09/2026\n**Fonte:** PDFs oficiais Receita.doc / SEFAZ-RS.\n' + \
+                 '**Natureza:** auditoria técnica auxiliar; OCR não é promovido isoladamente como dado observado.\n\n' + \
+                 '## Método\n\nPágina 4 renderizada a 600 dpi; OCR numérico com PSM 3, 6, 11 e 12; TSV PSM 11 preservado no artefato do workflow.\n\n' + \
+                 '## Saída bruta\n\n' + raw + '\n\n' + \
+                 '## Gate\n\nAceitar valor estadual somente se a leitura for coerente entre OCRs e com as variações publicadas/meses adjacentes. Não reconstruir a partir de percentual arredondado.\n'
+          Path('docs/data_sources/precos_dinamicos_rs_jun_jul_2026_ocr_target_20260922_v001.md').write_text(note,encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/data_sources/precos_dinamicos_rs_jun_jul_2026_ocr_target_20260922_v001.md
+          git commit -m 'data: auditar OCR estadual PCA junho julho 2026'
+          git push
+
+      - name: Upload raw OCR
+        uses: actions/upload-artifact@v4
+        with:
+          name: pca-state-jun-jul-ocr
+          path: artifacts/pca_state/
+          retention-days: 14

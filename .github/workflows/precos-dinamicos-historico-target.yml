@@ -49,7 +49,7 @@ jobs:
             printf '%s\t%s\n' "$period" "$url" >> artifacts/precos_dinamicos_2026/SOURCES.tsv
           done < .data/tmp/precos_dinamicos_2026/urls.tsv
 
-      - name: Extract page 3 text and OCR fallback
+      - name: Extract pages 3-4 text and OCR fallback
         shell: bash
         run: |
           set -euo pipefail
@@ -59,14 +59,17 @@ jobs:
           for pdf in "$tmp"/2026-*.pdf; do
             period="$(basename "$pdf" .pdf)"
             echo "===== ${period} =====" | tee -a "$outdir/extract_consolidated.txt"
-            pdftotext -layout -f 3 -l 3 "$pdf" "$outdir/${period}_page3_pdftotext.txt" || true
-            echo "--- pdftotext ---" | tee -a "$outdir/extract_consolidated.txt"
-            cat "$outdir/${period}_page3_pdftotext.txt" | tee -a "$outdir/extract_consolidated.txt" || true
-            pdftoppm -f 3 -l 3 -singlefile -png -r 300 "$pdf" "$tmp/${period}_page3" >/dev/null 2>&1
-            tesseract "$tmp/${period}_page3.png" "$outdir/${period}_page3_ocr" --psm 6 >/dev/null 2>&1 || true
-            echo "--- OCR ---" | tee -a "$outdir/extract_consolidated.txt"
-            cat "$outdir/${period}_page3_ocr.txt" | tee -a "$outdir/extract_consolidated.txt" || true
-            echo | tee -a "$outdir/extract_consolidated.txt"
+            for page in 3 4; do
+              echo "=== PAGE ${page} ===" | tee -a "$outdir/extract_consolidated.txt"
+              pdftotext -layout -f "$page" -l "$page" "$pdf" "$outdir/${period}_page${page}_pdftotext.txt" || true
+              echo "--- pdftotext ---" | tee -a "$outdir/extract_consolidated.txt"
+              cat "$outdir/${period}_page${page}_pdftotext.txt" | tee -a "$outdir/extract_consolidated.txt" || true
+              pdftoppm -f "$page" -l "$page" -singlefile -png -r 300 "$pdf" "$tmp/${period}_page${page}" >/dev/null 2>&1
+              tesseract "$tmp/${period}_page${page}.png" "$outdir/${period}_page${page}_ocr" --psm 6 >/dev/null 2>&1 || true
+              echo "--- OCR ---" | tee -a "$outdir/extract_consolidated.txt"
+              cat "$outdir/${period}_page${page}_ocr.txt" | tee -a "$outdir/extract_consolidated.txt" || true
+              echo | tee -a "$outdir/extract_consolidated.txt"
+            done
           done
 
       - name: Build audit note
@@ -79,7 +82,7 @@ jobs:
           note = '# Preços Dinâmicos — extração dirigida 2026 — auditoria de transporte/texto\n\n' + \
                  '**Data:** 22/09/2026\n**Status:** extração técnica para auditoria; NÃO promover valores sem validação manual contra a página oficial.\n' + \
                  '**Fonte:** Receita.doc / SEFAZ-RS — Boletins de Preços Dinâmicos, competências jan., fev., abr., mai., jun. e jul./2026.\n\n' + \
-                 '## Método\n\n- download direto dos PDFs oficiais listados em Receita.doc;\n- SHA-256 dos arquivos;\n- extração da página 3 por pdftotext -layout;\n- renderização a 300 dpi e OCR somente como fallback técnico;\n- nenhuma interpolação.\n\n' + \
+                 '## Método\n\n- download direto dos PDFs oficiais listados em Receita.doc;\n- SHA-256 dos arquivos;\n- extração das páginas 3 e 4 por pdftotext -layout;\n- renderização a 300 dpi e OCR somente como fallback técnico;\n- nenhuma interpolação.\n\n' + \
                  '## Extração bruta\n\n' + src + '\n\n' + \
                  '## Governança\n\n- tratar OCR como camada auxiliar, nunca como dado observado definitivo;\n- validar manualmente Fronteira Oeste e Rio Grande do Sul antes de atualizar o seed;\n- Caderno-Base v028 permanece read-only;\n- PR #41 permanece aberto, draft e sem merge.\n'
           Path('docs/data_sources/precos_dinamicos_2026_target_extract_20260922_v001.md').write_text(note, encoding='utf-8')

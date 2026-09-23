@@ -299,6 +299,110 @@ Página 4 renderizada a 600 dpi; OCR numérico com PSM 3, 6, 11 e 12; TSV PSM 11
 
 
 
+## Recortes dirigidos — junho
+
+.data/tmp/pca_state/2026-06_p4.png PNG 4500x6500 4500x6500+0+0 8-bit sRGB 335398B 0.000u 0:00.000
+--- 45%x70% PSM 6 ---
+8
+37 46
+31
+86
+3
+5
+29
+83 3
+35
+27
+2
+27 27423
+6.
+--- 45%x70% PSM 11 ---
+31
+
+46
+
+31
+
+22
+
+29
+
+27443
+--- 45%x70% PSM 12 ---
+31
+
+46
+
+31
+
+22
+
+29
+
+27443
+--- 35%x60% PSM 6 ---
+,
+,
+
+37 46
+
+31
+
+3
+
+3
+
+29
+
+35
+9702728067
+--- 35%x60% PSM 11 ---
+,
+
+46
+
+31
+
+31
+
+29
+
+9702728067
+--- 35%x60% PSM 12 ---
+,
+
+.
+
+46
+
+31
+
+31
+
+2
+
+29
+
+9702728067
+--- 28%x55% PSM 6 ---
+,
+3 46
+.
+29
+--- 28%x55% PSM 11 ---
+,
+--- 28%x55% PSM 12 ---
+,
+
+46
+
+31
+
+2
+
+29
+
+
 ## Gate
 
 Aceitar valor estadual somente se a leitura for coerente entre OCRs e com as variações publicadas/meses adjacentes. Não reconstruir a partir de percentual arredondado.

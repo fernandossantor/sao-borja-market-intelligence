@@ -8,13 +8,14 @@
 
 - download direto dos PDFs oficiais listados em Receita.doc;
 - SHA-256 dos arquivos;
-- extração da página 3 por pdftotext -layout;
+- extração das páginas 3 e 4 por pdftotext -layout;
 - renderização a 300 dpi e OCR somente como fallback técnico;
 - nenhuma interpolação.
 
 ## Extração bruta
 
 ===== 2026-01 =====
+=== PAGE 3 ===
 --- pdftotext ---
 --- OCR ---
 1. Preco da Cesta de Alimentos (PCA-RE)
@@ -50,7 +51,39 @@ CENTRO SUL 276,10 -0,85% -0,85% -1,02%
 FRONTEIRA OESTE 275,41 -1,14% -1,14% -0,38%
 CAMPANHA 275,00 -0,54% -0,54% -0,64%
 
+=== PAGE 4 ===
+--- pdftotext ---
+--- OCR ---
+PCA-RE por Regiao do RS
+Janeiro de 2026
+Faas
+{oy
+ore ! Legenda
+JX af Hi Preco max
+ay” ;
+A a ee la
+vA A BG
+ag a
+Preco min
+Evolucao PCA-RE
+Fevereiro de 2025 até Janeiro de 2026
+Evolucao do preco
+@JACUI CENTRO @LITORAL @RIO GRANDE DO SUL
+320
+31100 313,21
+51 30
+7
+300 49 9
+93 ; > 2936 5
+83
+280
+27 62
+260
+fev mar abr mai jun jul ago set out nov dez jan
+2025 2026
+
 ===== 2026-02 =====
+=== PAGE 3 ===
 --- pdftotext ---
 This slide contains the following visuals: card ,Evolução do preço ,textbox ,shape ,textbox ,shape ,textbox ,slicer ,textbox. Please refer to the notes on this slide for details
 --- OCR ---
@@ -88,7 +121,36 @@ PARANHANA-ENCOSTA SERRA 277,90 -1,06% -1,75% -2,63%
 CAMPANHA 276,30 0,47% -0,07% -2,77%
 FRONTEIRA OESTE 273,97 -0,52% -1,66% -1,99%
 
+=== PAGE 4 ===
+--- pdftotext ---
+This slide contains the following visuals: Evolução do preço ,image ,textbox ,shapeMap ,textbox ,card ,textbox ,shape ,shape ,textbox ,slicer ,card ,slicer. Please refer to the notes on this slide for details
+--- OCR ---
+PCA-RE por Regiao do RS
+Fevereiro de 2026
+Legenda
+Hi Preco max
+|| Preco min
+Evolucao PCA-RE
+Marco de 2025 até Fevereiro de 2026
+Evolucao do preco
+@HORTENSIAS @JACU! CENTRO @RIO GRANDE DO SUL
+320
+87
+315, 45 31 5
+9
+306,19
+300 292.14 7 06
+296,26 296, 77 29
+288, 287-15 288,33
+280 ,, 2
+13 27 2
+47
+260
+mar abr mai jun jul ago set out nov dez jan fev
+2025 2026
+
 ===== 2026-04 =====
+=== PAGE 3 ===
 --- pdftotext ---
 --- OCR ---
 1. Preco da Cesta de Alimentos (PCA-RE)
@@ -124,7 +186,40 @@ CAMPANHA 285,51 4,03% 3,27% -2,18%
 CENTRO SUL 282,90 2,45% 1,59% -0,26%
 FRONTEIRA OESTE 281,40 2,49% 1,01% -1,47%
 
+=== PAGE 4 ===
+--- pdftotext ---
+--- OCR ---
+PCA-RE por Regiao do RS
+Abril de 2026
+y mee Legenda
+y afi Preco max
+ae y a AY, NG 7 (J
+wy - "!
+: " Preco min
+Evolucao PCA-RE
+
+Maio de 2025 até Abril de 2026
+
+Evolucao do preco
+@HORTENSIAS @JACUI CENTRO @RIO GRANDE DO SUL
+320 3, as
+45 314,05
+ee
+30
+"06 ,
+an ti 296,26
+|
+oO e 5 i, 5
+
+280 89? 279 37
+sa 7 —_ Sones | Naot aNG
+
+mai jun jul ago set out nov dez jan fev mar abr
+
+2025 2026
+
 ===== 2026-05 =====
+=== PAGE 3 ===
 --- pdftotext ---
 --- OCR ---
 :
@@ -161,7 +256,38 @@ PARANHANA-ENCOSTA SERRA 289,60 1,22% 2,39% 0,10%
 CENTRO SUL 288,09 1,84% 3,45% 0,52%
 FRONTEIRA OESTE 285,58 1,49% 2,51% 1,10%
 
+=== PAGE 4 ===
+--- pdftotext ---
+--- OCR ---
+PCA-RE por Regiao do RS
+Maio de 2026
+on Nu
+Lone” Legenda
+LON ONS 8
+(eae afi = Preco max
+ra > - at oe ’ ? nar
+6 7 —_ = \ LAY, oy \o
+we q
+. Preco min
+Evolugao PCA-RE
+Junho de 2025 até Maio de 2026
+Evolucao do preco
+@HORTENSIAS @JACUI CENTRO @RIO GRANDE DO SUL
+320
+315,87 45 31 44
+31
+9 4 30
+300 06 am. 300,54
+297,07 29
+288, Ts 85
+280 27392 279320 67
+Se es 56 : aa ~ = . a _ ~ 279 o 4
+260 — —eeue =
+jun jul ago set out nov dez jan fev mar abr mai
+2025 2026
+
 ===== 2026-06 =====
+=== PAGE 3 ===
 --- pdftotext ---
 --- OCR ---
 °
@@ -198,7 +324,34 @@ SUL 289,64 -0,06% 3,68% 0,81%
 FRONTEIRA OESTE 287,31 0,60% 3,13% 2,38%
 CENTRO SUL 286,19 -0,66% 2,77% 0,89%
 
+=== PAGE 4 ===
+--- pdftotext ---
+--- OCR ---
+PCA-RE por Regiao do RS
+Junho de 2026
+Legenda
+Hi Preco max
+|| Preco min
+Evolucao PCA-RE
+Julho de 2025 até Junho de 2026
+Evolucao do preco
+@HORTENSIAS @JACU! CENTRO @RIO GRANDE DO SUL
+320 3 46
+313,45 3 31
+86 3
+3
+,06 ~ 3 22
+300 39
+292,77 > 2
+288, 15 "35
+280 27 v
+27213 2 27 < 27 23
+260
+jul ago set out nov dez jan fev mar abr mai jun
+2025 2026
+
 ===== 2026-07 =====
+=== PAGE 3 ===
 --- pdftotext ---
 --- OCR ---
 :
@@ -234,6 +387,34 @@ CELEIRO 285,69 -1,51% -3,04% -1,56%
 CENTRO SUL 284,20 -0,70% 2,05% 0,32%
 FRONTEIRA OESTE 282,74 -1,59% 1,49% 1,14%
 CENTRAL 282,34 -3,16% 0,82% -0,47%
+
+=== PAGE 4 ===
+--- pdftotext ---
+--- OCR ---
+PCA-RE por Regiao do RS
+Julho de 2026
+Legenda
+Hi Preco max
+|| Preco min
+Evolucao PCA-RE
+Agosto de 2025 até Julho de 2026
+Evolucao do preco
+@HORTENSIAS @JACU! CENTRO @ RIO GRANDE DO SUL
+320 3
+31 318,70
+a
+3
+06 ' 3 2
+: er ee es
+2 a1 ‘
+288; 15 "85
+280 27 7
+27 27
+31
+26
+260
+ago set out nov dez jan fev mar abr mai jun jul
+2025 2026
 
 
 

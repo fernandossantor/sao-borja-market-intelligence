@@ -1,0 +1,108 @@
+name: precos-dinamicos-historico-target
+
+on:
+  push:
+    branches:
+      - 'explore/receita-estadual-rs-market-intel-v1'
+    paths:
+      - '.github/workflows/precos-dinamicos-historico-target.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PDF tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils tesseract-ocr
+
+      - name: Download official Receita.doc bulletins
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .data/tmp/precos_dinamicos_2026 artifacts/precos_dinamicos_2026
+          cat > .data/tmp/precos_dinamicos_2026/urls.tsv <<'EOF'
+          2026-01	https://receitadoc.sefaz.rs.gov.br/media/5lmd020x/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_fevereiro-2026-ref-janeiro26.pdf
+          2026-02	https://receitadoc.sefaz.rs.gov.br/media/5ahfacrb/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_mar%C3%A7o-2026-ref-fevereiro26.pdf
+          2026-04	https://receitadoc.sefaz.rs.gov.br/media/5ooixktn/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_maio-2026-ref-abril26.pdf
+          2026-05	https://receitadoc.sefaz.rs.gov.br/media/t0rfjgv0/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_junho-2026-ref-maio26.pdf
+          2026-06	https://receitadoc.sefaz.rs.gov.br/media/fzjpx4ka/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_julho-2026-ref-junho26.pdf
+          2026-07	https://receitadoc.sefaz.rs.gov.br/media/5l4dgkl2/boletim-pre%C3%A7os-din%C3%A2micos-da-receita-estadual_agosto-2026-ref-julho26.pdf
+          EOF
+          while IFS=$'\t' read -r period url; do
+            out=".data/tmp/precos_dinamicos_2026/${period}.pdf"
+            echo "Downloading ${period}"
+            curl --fail --location --retry 5 --retry-all-errors --retry-delay 5 --connect-timeout 30 --max-time 300 -o "$out" "$url"
+            test -s "$out"
+            pdfinfo "$out" | head -20
+            sha256sum "$out" >> artifacts/precos_dinamicos_2026/SHA256SUMS.txt
+            printf '%s\t%s\n' "$period" "$url" >> artifacts/precos_dinamicos_2026/SOURCES.tsv
+          done < .data/tmp/precos_dinamicos_2026/urls.tsv
+
+      - name: Extract page 3 text and OCR fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          outdir=artifacts/precos_dinamicos_2026
+          tmp=.data/tmp/precos_dinamicos_2026
+          : > "$outdir/extract_consolidated.txt"
+          for pdf in "$tmp"/2026-*.pdf; do
+            period="$(basename "$pdf" .pdf)"
+            echo "===== ${period} =====" | tee -a "$outdir/extract_consolidated.txt"
+            pdftotext -layout -f 3 -l 3 "$pdf" "$outdir/${period}_page3_pdftotext.txt" || true
+            echo "--- pdftotext ---" | tee -a "$outdir/extract_consolidated.txt"
+            cat "$outdir/${period}_page3_pdftotext.txt" | tee -a "$outdir/extract_consolidated.txt" || true
+            pdftoppm -f 3 -l 3 -singlefile -png -r 300 "$pdf" "$tmp/${period}_page3" >/dev/null 2>&1
+            tesseract "$tmp/${period}_page3.png" "$outdir/${period}_page3_ocr" --psm 6 >/dev/null 2>&1 || true
+            echo "--- OCR ---" | tee -a "$outdir/extract_consolidated.txt"
+            cat "$outdir/${period}_page3_ocr.txt" | tee -a "$outdir/extract_consolidated.txt" || true
+            echo | tee -a "$outdir/extract_consolidated.txt"
+          done
+
+      - name: Build audit note
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          src=Path('artifacts/precos_dinamicos_2026/extract_consolidated.txt').read_text(encoding='utf-8', errors='replace')
+          note = '# Preços Dinâmicos — extração dirigida 2026 — auditoria de transporte/texto\n\n' + \
+                 '**Data:** 22/09/2026\n**Status:** extração técnica para auditoria; NÃO promover valores sem validação manual contra a página oficial.\n' + \
+                 '**Fonte:** Receita.doc / SEFAZ-RS — Boletins de Preços Dinâmicos, competências jan., fev., abr., mai., jun. e jul./2026.\n\n' + \
+                 '## Método\n\n- download direto dos PDFs oficiais listados em Receita.doc;\n- SHA-256 dos arquivos;\n- extração da página 3 por pdftotext -layout;\n- renderização a 300 dpi e OCR somente como fallback técnico;\n- nenhuma interpolação.\n\n' + \
+                 '## Extração bruta\n\n' + src + '\n\n' + \
+                 '## Governança\n\n- tratar OCR como camada auxiliar, nunca como dado observado definitivo;\n- validar manualmente Fronteira Oeste e Rio Grande do Sul antes de atualizar o seed;\n- Caderno-Base v028 permanece read-only;\n- PR #41 permanece aberto, draft e sem merge.\n'
+          Path('docs/data_sources/precos_dinamicos_2026_target_extract_20260922_v001.md').write_text(note, encoding='utf-8')
+          PY
+
+      - name: Commit audit extraction
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/data_sources/precos_dinamicos_2026_target_extract_20260922_v001.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "data: auditar extração dirigida dos boletins PCA 2026"
+            git push
+          fi
+
+      - name: Upload extraction artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: precos-dinamicos-2026-target-extract
+          path: artifacts/precos_dinamicos_2026/
+          if-no-files-found: error
+          retention-days: 14

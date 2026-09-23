@@ -21,7 +21,7 @@ jobs:
       - name: Install tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq poppler-utils tesseract-ocr
+          sudo apt-get install -y -qq poppler-utils tesseract-ocr imagemagick
 
       - name: Download June and July official PDFs
         shell: bash
@@ -52,6 +52,24 @@ jobs:
             echo | tee -a artifacts/pca_state/ocr_numeric_consolidated.txt
           done
 
+      - name: Targeted right-side crops for June
+        shell: bash
+        run: |
+          set -euo pipefail
+          img=.data/tmp/pca_state/2026-06_p4.png
+          : > artifacts/pca_state/june_targeted_crops.txt
+          identify "$img" | tee -a artifacts/pca_state/june_targeted_crops.txt
+          for geom in '45%x70%' '35%x60%' '28%x55%'; do
+            tag=$(echo "$geom" | tr '%x' '__')
+            crop=artifacts/pca_state/june_right_${tag}.png
+            convert "$img" -gravity east -crop "${geom}+0+0" +repage -colorspace Gray -contrast-stretch 1%x1% "$crop"
+            for psm in 6 11 12; do
+              base=artifacts/pca_state/june_right_${tag}_psm${psm}
+              tesseract "$crop" "$base" --psm "$psm" -c tessedit_char_whitelist='0123456789,.' >/dev/null 2>&1 || true
+              echo "--- ${geom} PSM ${psm} ---" | tee -a artifacts/pca_state/june_targeted_crops.txt
+              cat "${base}.txt" | tee -a artifacts/pca_state/june_targeted_crops.txt || true
+            done
+          done
       - name: Commit audit note
         shell: bash
         run: |
@@ -59,11 +77,12 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           raw=Path('artifacts/pca_state/ocr_numeric_consolidated.txt').read_text(encoding='utf-8', errors='replace')
+          crops=Path('artifacts/pca_state/june_targeted_crops.txt').read_text(encoding='utf-8', errors='replace')
           note = '# PCA-RE estadual — junho e julho/2026 — OCR numérico dirigido — v001\n\n' + \
                  '**Data:** 22/09/2026\n**Fonte:** PDFs oficiais Receita.doc / SEFAZ-RS.\n' + \
                  '**Natureza:** auditoria técnica auxiliar; OCR não é promovido isoladamente como dado observado.\n\n' + \
                  '## Método\n\nPágina 4 renderizada a 600 dpi; OCR numérico com PSM 3, 6, 11 e 12; TSV PSM 11 preservado no artefato do workflow.\n\n' + \
-                 '## Saída bruta\n\n' + raw + '\n\n' + \
+                 '## Saída bruta\n\n' + raw + '\n\n## Recortes dirigidos — junho\n\n' + crops + '\n\n' + \
                  '## Gate\n\nAceitar valor estadual somente se a leitura for coerente entre OCRs e com as variações publicadas/meses adjacentes. Não reconstruir a partir de percentual arredondado.\n'
           Path('docs/data_sources/precos_dinamicos_rs_jun_jul_2026_ocr_target_20260922_v001.md').write_text(note,encoding='utf-8')
           PY

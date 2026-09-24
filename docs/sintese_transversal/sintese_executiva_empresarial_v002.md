@@ -185,7 +185,7 @@ Saúde, higiene e cuidados pessoais:
 `1sJudMz_AFVw1T7xDYwx10TLPSaZyKfXWkD5NU09MMT8`
 
 Bens essenciais:
-`1QSk2VU5eVGdP2H42fLaKCIJP5Nq4E0P54C768AGgKvY`
+`1r9p39EaDSdHtxLYyqzahjG6xIaWlO-sNcbFBZBQ3L-c`
 
 
 ## Contexto territorial ampliado
@@ -275,3 +275,24 @@ Caderno Setorial Alimentação/Serviços v002:
 
 Planilha técnica Alimentação/Serviços v002:
 `1FjtEZSJiNbhAVDXz5Tff7KGBMMVcf26QQskdcUDt6AY`
+
+
+## Atualização Bens Essenciais — 24/09/2026
+
+O Caderno Setorial de Bens Essenciais foi harmonizado editorialmente para v002 sem reabrir auditorias de oferta ou alterar o modelo de demanda.
+
+Permanecem:
+- demanda potencial anual modelada: **R$ 234.706.228,14**;
+- demanda potencial mensal: **R$ 19.558.852,34**;
+- 54 linhas na base corrente;
+- 52 reconciliadas documentalmente;
+- duas missões qualitativas: abastecimento e reposição;
+- market share, retenção e vazamento indisponíveis.
+
+A principal mudança é de governança: as antigas seções de “pesquisa prioritária/complementar” passaram a ser tratadas como limites informacionais e fontes complementares possíveis. Não haverá pesquisa primária no escopo corrente.
+
+Caderno Setorial Bens Essenciais v002:
+`1r9p39EaDSdHtxLYyqzahjG6xIaWlO-sNcbFBZBQ3L-c`
+
+Planilha técnica Bens Essenciais v002:
+`1MdDysTN-rnFi60O6TA865cvHgUt9lDHpAmQ-kx448YE`

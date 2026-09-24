@@ -31,7 +31,7 @@ A unidade está apresentada como:
 - Rua General Osório, 2051;
 - atividade principal de varejo de vestuário.
 
-**Decisão provisória:** manter. citeturn124470search1
+**Decisão provisória:** manter.
 
 ### 2.2 CNPJ adicional — 93.202.695/0002-56
 
@@ -39,7 +39,7 @@ Foi localizada outra filial ativa da mesma raiz em São Borja:
 
 - Avenida Presidente Vargas, 2055, sala 1;
 - comércio varejista de vestuário;
-- não consta no inventário BNE original. citeturn904817search1
+- não consta no inventário BNE original.
 
 **Interpretação:** a raiz 93.202.695 está subcoberta no inventário.
 
@@ -53,7 +53,7 @@ A pessoa jurídica foi revalidada como:
 - matriz;
 - fantasia D Castro Camisaria;
 - Rua Liôncio Sílvio Pereira Aquino, 309;
-- CNAE principal de comércio varejista de vestuário. citeturn762052search3turn762052search7
+- CNAE principal de comércio varejista de vestuário.
 
 **Decisão provisória:** manter.
 
@@ -67,7 +67,7 @@ O inventário contém duas empresas chamadas **Linda Variedades**, mas elas não
 - matriz;
 - Rua Cândido Falcão, 1201, sala 01;
 - aberta em 19/10/2022;
-- CNAE principal de vestuário. citeturn762052search1turn762052search5
+- CNAE principal de vestuário.
 
 ### 4.2 F. Zhu — 55.498.031/0001-06
 
@@ -75,7 +75,7 @@ O inventário contém duas empresas chamadas **Linda Variedades**, mas elas não
 - matriz;
 - Rua General Marques, 983;
 - aberta em 12/06/2024;
-- CNAE principal de vestuário. citeturn762052search0turn762052search2
+- CNAE principal de vestuário.
 
 **Interpretação:** trata-se de **colisão de nome fantasia**, não de evidência de rede ou de multiunidade.
 
@@ -88,7 +88,7 @@ O CNPJ de C.R. Comércio do Vestuário Ltda foi revalidado como:
 - ativo;
 - matriz;
 - Avenida Presidente Vargas, 1952;
-- CNAE principal de varejo de vestuário. citeturn810779search4turn860630search0
+- CNAE principal de varejo de vestuário.
 
 As fontes recuperadas não confirmaram o nome de fachada **Kolwertn Multimarcas**.
 
@@ -102,7 +102,7 @@ Fonte cadastral atualizada em 09/08/2026 apresenta:
 - matriz;
 - fantasia Peguei da Vick;
 - Avenida Presidente Vargas, 1963;
-- atividade principal de varejo de vestuário. citeturn124470search0
+- atividade principal de varejo de vestuário.
 
 **Decisão provisória:** manter.
 
@@ -110,7 +110,7 @@ Fonte cadastral atualizada em 09/08/2026 apresenta:
 
 ### 7.1 CNPJ do inventário — 05.823.159/0004-72
 
-O CNPJ do inventário está ativo, é filial e está cadastrado na Entrada BR-287, km 7, 3345, em São Borja. A matriz de filiais da empresa também o apresenta como filial ativa. citeturn810779search0turn810779search1
+O CNPJ do inventário está ativo, é filial e está cadastrado na Entrada BR-287, km 7, 3345, em São Borja. A matriz de filiais da empresa também o apresenta como filial ativa.
 
 ### 7.2 CNPJ adicional — 05.823.159/0001-20
 
@@ -118,9 +118,9 @@ Foi identificada a matriz da mesma raiz em São Borja:
 
 - ativa;
 - Rua General Osório, 2298;
-- CNPJ exibido no próprio site oficial da M.H. Moda Íntima em 2026. citeturn124470search2turn124470search3
+- CNPJ exibido no próprio site oficial da M.H. Moda Íntima em 2026.
 
-O site institucional ainda apresenta, na seção “Nossas Lojas”, um ponto de atendimento em São Borja na General Marques, 1014. citeturn124470search5
+O site institucional ainda apresenta, na seção “Nossas Lojas”, um ponto de atendimento em São Borja na General Marques, 1014.
 
 **Interpretação:** a raiz está subcoberta no inventário, mas existe diferença entre endereços cadastrais e endereço de loja divulgado pela própria marca. Não é metodologicamente seguro transformar esses endereços em quantidade de unidades físicas sem reconciliação.
 

@@ -93,24 +93,59 @@ Controle:
 
 ### Serviços
 
+Estrutura formal — posição 12/09/2026:
+- **947 optantes SINAC**;
+- **728 optantes SIMEI**;
+- salões/barbearias: **385 / 370**;
+- oficinas automotivas: **318 / 261**;
+- clínicas/consultórios — recorte CNAE POM: **106 / 0**;
+- assistências técnicas/reparos: **100 / 84**;
+- hotelaria/alojamento: **27 / 6**;
+- lavanderias: **11 / 7**.
+
+Salões + oficinas:
+- **703/947 = 74,23%** do recorte SINAC;
+- **631/728 = 86,68%** do recorte SIMEI.
+
 Na amostra POM n=153:
 - 79,7% pesquisam sempre/muitas vezes;
 - 88,3% dizem que avaliações influenciam muito/parcialmente;
-- 90,2% relatam já ter desistido por demora na resposta.
+- 90,2% relatam já ter desistido por demora na resposta;
+- 91,5% usam agendamento digital;
+- 66,0% aceitam automação com opção humana.
 
 Leitura:
-a contratação começa antes da prestação.
+**a contratação começa antes da prestação, mas “Serviços” não é um mercado homogêneo.**
+
+Controle:
+**optantes SINAC/SIMEI não são empresas ativas, pontos físicos, faturamento ou market share; os percentuais POM não podem ser aplicados automaticamente a cada submercado.**
 
 ### Alimentação fora do lar
 
 Na amostra:
+- consumo ao menos semanal: 55,6%;
 - qualidade da comida: 95,4%;
+- preço: 66,0%;
+- atendimento: 58,8%;
+- ambiente agradável: 54,2%;
 - conteúdo digital já influenciou escolha: 92,8%;
 - delivery frequente/já utilizado: 94,2%;
-- atendimento humanizado importante/muito importante: 98,1%.
+- atendimento humanizado importante/muito importante: 98,1%;
+- hospitalidade/tradição/cultura local valorizada: 81,7%.
+
+Oferta cadastral:
+- CNAE 56 — **409 estabelecimentos**;
+- participação cadastral externa: **0,98%**.
+
+Contexto institucional separado — PNAE/B2G 2026:
+- canal empresarial CNPJ: **R$ 869.843,54 pagos** no universo auditado;
+- agricultura/agroindústria familiar: **19 contratos, R$ 447.585,44 contratados**.
 
 Leitura:
-digital e experiência humana são complementares.
+**digital e experiência humana são complementares; B2G é um circuito institucional próprio e não deve ser somado ao consumo das famílias.**
+
+Controle:
+**contrato ≠ pagamento; PNAE não mede demanda de restaurantes, bares, cafeterias ou delivery.**
 
 ## Dez decisões mais defensáveis
 
@@ -144,7 +179,7 @@ Bens não essenciais:
 `1gNCKoKPj2SECZf3ocNhiXorftSoQgfqDTAbo-_U0e9A`
 
 Alimentação fora do lar e Serviços:
-`1kBEy-Al33bHK3Mt8Nv_75oFhmVmsNPa9BcIJILJFcBM`
+`1BmyJR43OmSp1VDw1nA4oO0iSTna9BiRHs3WYc54Ny3s`
 
 Saúde, higiene e cuidados pessoais:
 `1sJudMz_AFVw1T7xDYwx10TLPSaZyKfXWkD5NU09MMT8`
@@ -221,3 +256,22 @@ Caderno Setorial Saúde/Higiene v002:
 
 Planilha técnica Saúde/Higiene v002:
 `112obn025oVqF4muFMod5yCbokP27Wsoy4Xmf6U3HGJY`
+
+
+## Atualização Alimentação/Serviços — 24/09/2026
+
+A v002 transversal incorpora a estrutura SINAC/SIMEI por submercado de Serviços e o contexto PNAE/B2G de alimentação.
+
+Regras preservadas:
+- 947 SINAC e 728 SIMEI medem optantes no recorte POM/CNAE, não empresas ativas ou pontos físicos;
+- 74,23% e 86,68% descrevem composição do recorte, não participação econômica;
+- POM n=153 continua descritivo da amostra;
+- CNAE 56 é contexto cadastral;
+- contrato PNAE não é pagamento;
+- B2G não é demanda de alimentação fora do lar das famílias.
+
+Caderno Setorial Alimentação/Serviços v002:
+`1BmyJR43OmSp1VDw1nA4oO0iSTna9BiRHs3WYc54Ny3s`
+
+Planilha técnica Alimentação/Serviços v002:
+`1FjtEZSJiNbhAVDXz5Tff7KGBMMVcf26QQskdcUDt6AY`

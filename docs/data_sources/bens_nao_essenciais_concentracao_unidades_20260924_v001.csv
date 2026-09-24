@@ -1,0 +1,11 @@
+indicador,valor_cenario_base,valor_sensibilidade_conservadora,unidade,formula_ou_regra,interpretacao,limitacao
+storefronts_total,122,121,storefronts,soma inclui_cenario,Total de operações físicas/mercadológicas do cenário,"Exploratório, não canônico"
+operator_keys_total,109,108,chaves de operador,raízes reconciliadas + chaves sintéticas individuais,Quantidade de chaves econômicas usadas para agrupar unidades,Não equivale necessariamente a empresas definitivas
+operator_keys_multi_storefront,8,8,raízes/chaves,contagem de operator_key com n>1,Raízes com mais de um storefront,Não mede faturamento
+storefronts_em_raizes_multiunidade,21,21,storefronts,soma das unidades em operator_key com n>1,Unidades pertencentes a raízes multi-storefront,Não mede participação econômica
+share_storefronts_raizes_multiunidade,17.21,17.36,% de storefronts,storefronts em raízes multiunidade / total,Peso das redes/raízes multiunidade em número de pontos,Não é market share
+maior_raiz_storefronts,6,6,storefronts,máximo n por operator_key,Grupo Grazziotin é a maior raiz em unidades,Não é liderança por faturamento
+maior_raiz_share_pct,4.92,4.96,% de storefronts,6 / total * 100,Participação da maior raiz em número de unidades,Não é market share
+segunda_maior_raiz_storefronts,3,3,storefronts,segundo maior n por operator_key,Brasil Free Shop possui 3 unidades,Não é liderança por faturamento
+duas_maiores_raizes_share_pct,7.38,7.44,% de storefronts,(6+3) / total * 100,Peso conjunto das duas maiores raízes em unidades,Não é CR2 de vendas
+hhi_unidades,114.22,115.43,índice,Σ(100 × unidades_i/total)^2,Diagnóstico descritivo de dispersão das unidades por operator_key,Não aplicar limiares antitruste ou interpretar como concentração de vendas

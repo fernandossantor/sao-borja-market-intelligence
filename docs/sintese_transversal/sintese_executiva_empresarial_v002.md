@@ -37,10 +37,27 @@ Duas missões:
 
 ### Saúde, higiene e cuidados pessoais
 
-Três arenas:
+Três arenas qualitativas:
 - farmácia/conveniência;
 - especializada/autoridade técnica;
 - e-commerce/preço/pesquisa.
+
+Camada estrutural CNES — 22/09/2026:
+- **23 registros privados / 23 CNPJs**;
+- **7 raízes CNPJ**;
+- **4 raízes multiunidade**;
+- **20/23 = 86,96%** das unidades do recorte em raízes multiunidade;
+- maior raiz: **MB Farmácias, 8/23 = 34,78%** das unidades do recorte.
+
+O crosswalk CNES × POM identificou quatro CNPJs privados adicionais e corrigiu a duplicidade Panvel. Agafarma possui sinais operacionais recentes, mas não aparece no recorte CNES consultado, funcionando como controle de possível subcobertura.
+
+Leitura empresarial:
+- farmácias: preservar conveniência e melhorar qualidade consultiva;
+- especializadas: tornar autoridade técnica e mix visíveis antes da visita;
+- e-commerce: pressão por pesquisa/preço em categorias comparáveis.
+
+Controle:
+**CNES não é censo RFB; unidades cadastradas não são vendas ou market share; 23 não é total exaustivo do mercado privado.**
 
 ### Bens não essenciais
 
@@ -130,7 +147,7 @@ Alimentação fora do lar e Serviços:
 `1kBEy-Al33bHK3Mt8Nv_75oFhmVmsNPa9BcIJILJFcBM`
 
 Saúde, higiene e cuidados pessoais:
-`1NME-jQRVe2OYv8bxMwC86W4TSza3B2pwsku56A5-XlU`
+`1sJudMz_AFVw1T7xDYwx10TLPSaZyKfXWkD5NU09MMT8`
 
 Bens essenciais:
 `1QSk2VU5eVGdP2H42fLaKCIJP5Nq4E0P54C768AGgKvY`
@@ -186,3 +203,21 @@ Caderno Setorial BNE v002:
 
 Planilha técnica BNE v002:
 `1BiHO31FJTpt9jZUM5wIIKL78QOKG0QBeHcc6W4G0oTk`
+
+
+## Atualização Saúde/Higiene — 24/09/2026
+
+A v002 transversal incorpora a revisão do Caderno Setorial Saúde/Higiene com a camada institucional corrente do CNES.
+
+Regras preservadas:
+- POM n=12 permanece evidência qualitativa;
+- 23 registros privados CNES não constituem total exaustivo do mercado;
+- 86,96% descreve participação de unidades em raízes multiunidade, não market share;
+- Agafarma funciona como controle de subcobertura;
+- REGIC de serviços de saúde não mede centralidade do varejo farmacêutico.
+
+Caderno Setorial Saúde/Higiene v002:
+`1sJudMz_AFVw1T7xDYwx10TLPSaZyKfXWkD5NU09MMT8`
+
+Planilha técnica Saúde/Higiene v002:
+`112obn025oVqF4muFMod5yCbokP27Wsoy4Xmf6U3HGJY`

@@ -143,3 +143,22 @@ A única etapa editorial prioritária remanescente é leitura humana integral vo
 - precisão e padronização das referências.
 
 Gráficos e PDF continuam opcionais.
+
+
+## Complemento de QA estrutural — 25/09/2026
+
+Após o QA argumentativo principal, foi feita uma segunda passagem de consistência editorial.
+
+Verificações adicionais concluídas:
+- sumários dos cinco cadernos foram comparados com os títulos reais do corpo; nenhuma seção corrente ficou fora da navegação;
+- listas de figuras e tabelas foram verificadas contra inserções editoriais indevidas;
+- um parágrafo analítico que havia ficado deslocado dentro da LISTA DE TABELAS de Saúde/Higiene foi removido;
+- caracteres de controle residuais foram removidos de Bens Essenciais e Saúde/Higiene;
+- títulos editoriais dos quatro setoriais foram suavizados para evitar formulações causais desnecessárias;
+- em Alimentação/Serviços, o título do benchmark POF passou de “cresce com capacidade orçamentária” para “varia com a capacidade orçamentária”;
+- o Caderno Geral recebeu uma seção de implementação mínima para ligar território→setor→empresa por meio de registros internos de origem, missão, canal, valor, desfecho e motivo de perda;
+- a organização do Drive foi normalizada em pastas 01–06.
+
+Resultado desta passagem: **sem inconsistência estrutural bloqueadora identificada**.
+
+A pendência continua sendo leitura humana integral, não nova investigação.

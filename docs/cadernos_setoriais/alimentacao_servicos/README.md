@@ -261,3 +261,32 @@ Leitura central:
 **a tecnologia reduz fricção, mas não substitui automaticamente o valor do contato humano.**
 
 Market size e demanda total de visitantes permanecem não respondíveis com a base atual.
+
+
+## Atualização — dimensão de mercado — 2026-09-26
+
+### Alimentação fora do lar
+
+A POF/RS registra R$ 249,69/família/mês para alimentação fora do domicílio. Atualizada pelo IPCA específico da categoria e territorializada pela população de São Borja, a demanda residente modelada é:
+
+- **R$ 8.949.244,90/mês**;
+- **R$ 107.390.938,78/ano**.
+
+Natureza: **ESTIMATIVA MODELADA DE DEMANDA RESIDENTE**. Não mede faturamento dos estabelecimentos locais nem gasto de visitantes.
+
+Como benchmark fiscal regional, o COREDE Fronteira Oeste registrou em 2025 **R$ 316.172.104,88 em NFC-e na divisão CNAE 56**. Esse valor é observado para o COREDE e **não pode ser rateado para São Borja**.
+
+NCM de alimentos não será usado como denominador principal de foodservice. A rota fiscal preferida permanece `São Borja × CNAE 56 × valor`.
+
+### Serviços
+
+A POF/IPCA fornece apenas um submercado:
+- **Serviços pessoais: R$ 18.419.423,64/ano** de demanda residente modelada.
+
+Não generalizar esse valor ao universo de Serviços.
+
+O portal público NFS-e foi auditado. Foram localizados endpoints anônimos de configuração e contadores, mas **nenhum agregado monetário por competência, atividade/item, CNAE ou município do tomador**. O endpoint público de relatórios é apenas um renderizador genérico e não uma API de dados fiscais.
+
+Assim, o caminho prioritário continua sendo solicitar à Secretaria Municipal de Fazenda uma extração agregada de NFS-e/CFS-e por competência, código de tributação/item, valor bruto, situação, local da prestação e município do destinatário/tomador.
+
+**Situação corrente:** AFL possui demanda residente modelada; Serviços possui apenas submercado pessoal modelado. Faturamento privado capturado e market share seguem bloqueados.

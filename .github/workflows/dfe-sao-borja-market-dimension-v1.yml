@@ -1,0 +1,307 @@
+name: dfe-sao-borja-market-dimension-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dfe-sao-borja-market-dimension-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download official RS DFe municipality packages and extract São Borja
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests
+          mkdir -p artifacts/dfe_sao_borja/raw artifacts/dfe_sao_borja/output
+          cat > /tmp/extract_dfe.py <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import hashlib
+          import io
+          import json
+          import re
+          import unicodedata
+          import zipfile
+          from collections import defaultdict
+          from datetime import datetime
+          from pathlib import Path
+
+          import requests
+
+          YEARS = (2023, 2024, 2025, 2026)
+          BASE = "https://receitadados.sefaz.rs.gov.br/Arquivos"
+          OUT = Path("artifacts/dfe_sao_borja")
+          RAW = OUT / "raw"
+          OUTPUT = OUT / "output"
+          TARGET_IBGE = "4318002"
+
+          def norm_text(value: str) -> str:
+              s = unicodedata.normalize("NFKD", str(value or ""))
+              s = "".join(ch for ch in s if not unicodedata.combining(ch))
+              s = re.sub(r"[^A-Za-z0-9]+", " ", s).strip().upper()
+              return s
+
+          def canonical_header(value: str) -> str:
+              return re.sub(r"[^a-z0-9]+", "_", norm_text(value).lower()).strip("_")
+
+          def decode_bytes(data: bytes) -> tuple[str, str]:
+              for enc in ("utf-8-sig", "utf-8", "cp1252", "latin1"):
+                  try:
+                      return data.decode(enc), enc
+                  except UnicodeDecodeError:
+                      pass
+              raise UnicodeDecodeError("unknown", b"", 0, 1, "no supported encoding")
+
+          def sniff_delimiter(text: str) -> str:
+              sample = "\n".join(text.splitlines()[:20])
+              try:
+                  return csv.Sniffer().sniff(sample, delimiters=";,\t|").delimiter
+              except csv.Error:
+                  return ";"
+
+          def parse_number(raw: str) -> float:
+              s = str(raw or "").strip().replace("\xa0", "").replace("R$", "").replace(" ", "")
+              if not s:
+                  return 0.0
+              # Handle pt-BR thousands + decimal and standard decimal.
+              if "," in s and "." in s:
+                  if s.rfind(",") > s.rfind("."):
+                      s = s.replace(".", "").replace(",", ".")
+                  else:
+                      s = s.replace(",", "")
+              elif "," in s:
+                  tail = s.rsplit(",", 1)[1]
+                  if len(tail) in (1, 2, 3):
+                      s = s.replace(".", "").replace(",", ".")
+                  else:
+                      s = s.replace(",", "")
+              try:
+                  return float(s)
+              except ValueError:
+                  s2 = re.sub(r"[^0-9.\-]", "", s)
+                  return float(s2) if s2 else 0.0
+
+          def parse_date(raw: str) -> str:
+              s = str(raw or "").strip()
+              for fmt in ("%d/%m/%Y", "%Y-%m-%d", "%d-%m-%Y"):
+                  try:
+                      return datetime.strptime(s, fmt).date().isoformat()
+                  except ValueError:
+                      pass
+              return s
+
+          session = requests.Session()
+          session.headers.update({"User-Agent": "SBMI DFe Sao Borja market dimension audit/1.0"})
+          manifest = {
+              "source": "Receita Estadual do Rio Grande do Sul — Receita Dados — Documentos Eletrônicos — DFe Totais Município",
+              "source_page": "https://receitadados.sefaz.rs.gov.br/paineis/documentos-eletronicos/",
+              "technical_info": "https://receitadados.sefaz.rs.gov.br/media/k00bi44t/dfe-por-munic%C3%ADpio-di%C3%A1ria.txt",
+              "target": {"municipio": "São Borja", "ibge": TARGET_IBGE},
+              "years": {},
+              "notes": [
+                  "The official technical note states weekly updates and statistical disclosure only when there are at least four taxpayers.",
+                  "NF-e values are filtered by the CFOP list documented by Receita Estadual; NFC-e is a distinct fiscal model.",
+                  "These totals are fiscal-document values by issuer municipality and model, not sector-specific market size and not market share.",
+              ],
+          }
+
+          daily = []
+
+          for year in YEARS:
+              url = f"{BASE}/DFe_Totais_Municipio_{year}.zip"
+              target = RAW / f"DFe_Totais_Municipio_{year}.zip"
+              h = hashlib.sha256()
+              total = 0
+              with session.get(url, stream=True, timeout=(30, 300), allow_redirects=True) as r:
+                  r.raise_for_status()
+                  headers = {
+                      "status": r.status_code,
+                      "final_url": r.url,
+                      "content_type": r.headers.get("content-type"),
+                      "content_length": r.headers.get("content-length"),
+                      "last_modified": r.headers.get("last-modified"),
+                      "etag": r.headers.get("etag"),
+                  }
+                  with target.open("wb") as f:
+                      for chunk in r.iter_content(1024 * 1024):
+                          if chunk:
+                              f.write(chunk)
+                              h.update(chunk)
+                              total += len(chunk)
+
+              if not zipfile.is_zipfile(target):
+                  raise SystemExit(f"Not a ZIP: {url}")
+
+              year_info = {
+                  "url": url,
+                  "download_headers": headers,
+                  "bytes": total,
+                  "sha256": h.hexdigest(),
+                  "members": [],
+                  "matched_rows": 0,
+              }
+
+              with zipfile.ZipFile(target) as z:
+                  for info in z.infolist():
+                      if info.is_dir():
+                          continue
+                      raw = z.read(info.filename)
+                      text, encoding = decode_bytes(raw)
+                      delim = sniff_delimiter(text)
+                      reader = csv.DictReader(io.StringIO(text), delimiter=delim)
+                      fields = reader.fieldnames or []
+                      canon = {canonical_header(f): f for f in fields}
+
+                      def field(*candidates):
+                          for c in candidates:
+                              if c in canon:
+                                  return canon[c]
+                          return None
+
+                      f_date = field("data", "dt_emissao")
+                      f_code = field("cod_municipio", "codigo_municipio", "cod_ibge", "codigo_ibge")
+                      f_name = field("nome_municipio", "municipio")
+                      f_model = field("modelo", "modelo_documento")
+                      f_qty = field("quantidade", "qtde", "qtd")
+                      f_val = field("valor", "vlr", "valor_total")
+                      f_updated = field("dados_atualizados_ate", "atualizado_ate", "data_atualizacao")
+
+                      required = {"data": f_date, "municipio": f_name or f_code, "modelo": f_model, "quantidade": f_qty, "valor": f_val}
+                      missing = [k for k, v in required.items() if not v]
+                      member_meta = {
+                          "name": info.filename,
+                          "size": info.file_size,
+                          "encoding": encoding,
+                          "delimiter": delim,
+                          "columns": fields,
+                          "canonical_columns": sorted(canon),
+                          "missing_required": missing,
+                      }
+                      year_info["members"].append(member_meta)
+                      if missing:
+                          continue
+
+                      for row in reader:
+                          code_raw = str(row.get(f_code, "") if f_code else "").strip()
+                          name_raw = str(row.get(f_name, "") if f_name else "").strip()
+                          is_target = (re.sub(r"\D", "", code_raw) == TARGET_IBGE) or (norm_text(name_raw) == "SAO BORJA")
+                          if not is_target:
+                              continue
+                          rec = {
+                              "data": parse_date(row.get(f_date, "")),
+                              "ano": year,
+                              "cod_municipio": code_raw,
+                              "nome_municipio": name_raw or "São Borja",
+                              "modelo": str(row.get(f_model, "")).strip(),
+                              "quantidade": parse_number(row.get(f_qty, "")),
+                              "valor": parse_number(row.get(f_val, "")),
+                              "dados_atualizados_ate": str(row.get(f_updated, "") if f_updated else "").strip(),
+                              "source_member": info.filename,
+                          }
+                          daily.append(rec)
+                          year_info["matched_rows"] += 1
+
+              manifest["years"][str(year)] = year_info
+
+          if not daily:
+              raise SystemExit("No São Borja rows found")
+
+          daily.sort(key=lambda r: (r["data"], r["modelo"]))
+          daily_cols = ["data","ano","cod_municipio","nome_municipio","modelo","quantidade","valor","dados_atualizados_ate","source_member"]
+          with (OUTPUT / "sao_borja_dfe_daily_2023_2026.csv").open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=daily_cols)
+              w.writeheader(); w.writerows(daily)
+
+          monthly = defaultdict(lambda: {"quantidade": 0.0, "valor": 0.0, "dias": set(), "updated": set()})
+          annual = defaultdict(lambda: {"quantidade": 0.0, "valor": 0.0, "dias": set(), "updated": set()})
+
+          for r in daily:
+              date = r["data"]
+              month = date[:7] if re.fullmatch(r"\d{4}-\d{2}-\d{2}", date) else str(r["ano"])
+              mk = (month, r["modelo"])
+              ak = (str(r["ano"]), r["modelo"])
+              for bucket, key in ((monthly, mk), (annual, ak)):
+                  bucket[key]["quantidade"] += r["quantidade"]
+                  bucket[key]["valor"] += r["valor"]
+                  bucket[key]["dias"].add(date)
+                  if r["dados_atualizados_ate"]:
+                      bucket[key]["updated"].add(r["dados_atualizados_ate"])
+
+          def write_agg(path, bucket, time_name):
+              with path.open("w", newline="", encoding="utf-8") as f:
+                  cols = [time_name, "modelo", "quantidade", "valor", "dias_observados", "dados_atualizados_ate"]
+                  w = csv.DictWriter(f, fieldnames=cols)
+                  w.writeheader()
+                  for (period, model), v in sorted(bucket.items()):
+                      w.writerow({
+                          time_name: period,
+                          "modelo": model,
+                          "quantidade": round(v["quantidade"], 6),
+                          "valor": round(v["valor"], 2),
+                          "dias_observados": len(v["dias"]),
+                          "dados_atualizados_ate": " | ".join(sorted(v["updated"])),
+                      })
+
+          write_agg(OUTPUT / "sao_borja_dfe_monthly_2023_2026.csv", monthly, "mes")
+          write_agg(OUTPUT / "sao_borja_dfe_annual_2023_2026.csv", annual, "ano")
+
+          manifest["matched_total_rows"] = len(daily)
+          manifest["date_min"] = min(r["data"] for r in daily)
+          manifest["date_max"] = max(r["data"] for r in daily)
+          manifest["models"] = sorted({r["modelo"] for r in daily})
+          (OUTPUT / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+
+          # Compact log summary for follow-up without downloading the artifact.
+          log_summary = []
+          for (year, model), v in sorted(annual.items()):
+              log_summary.append({
+                  "ano": year,
+                  "modelo": model,
+                  "quantidade": round(v["quantidade"], 2),
+                  "valor": round(v["valor"], 2),
+                  "dias_observados": len(v["dias"]),
+                  "dados_atualizados_ate": sorted(v["updated"]),
+              })
+          print("SBMI_DFE_SUMMARY_BEGIN")
+          print(json.dumps({
+              "rows": len(daily),
+              "date_min": manifest["date_min"],
+              "date_max": manifest["date_max"],
+              "models": manifest["models"],
+              "annual": log_summary,
+              "year_downloads": {
+                  y: {
+                      "bytes": x["bytes"],
+                      "sha256": x["sha256"],
+                      "matched_rows": x["matched_rows"],
+                      "members": [m["name"] for m in x["members"]],
+                  }
+                  for y, x in manifest["years"].items()
+              },
+          }, ensure_ascii=False, indent=2))
+          print("SBMI_DFE_SUMMARY_END")
+          PY
+          python /tmp/extract_dfe.py
+
+      - name: Upload audited São Borja DFe extract
+        uses: actions/upload-artifact@v4
+        with:
+          name: dfe-sao-borja-market-dimension-v1
+          path: artifacts/dfe_sao_borja/
+          if-no-files-found: error
+          retention-days: 30

@@ -200,3 +200,85 @@ Documentos relacionados:
 **ALTA.**
 
 Esta é a rota oficial com maior potencial de transformar os atuais benchmarks de demanda residente em uma análise comparável com faturamento fiscal observado por mercado, sem recorrer a CNPJ, lojas, emprego ou outras proxies estruturais.
+
+
+## 12. Priorização taxonômica do pedido por NCM
+
+A auditoria do Radar do Mercado identificou **110 grupos de afinidade distintos**. O detalhamento NCM atingiu a janela pública de 10.000 linhas, portanto a lista de grupos foi validada por uma consulta independente à dimensão `grupo_afinidade_final`, mas o projeto **não trata o arquivo de 10.000 linhas como catálogo NCM8 completo**.
+
+Para reduzir o volume da primeira extração, recomenda-se priorizar os grupos classificados como **ALTA** no crosswalk setorial. A Receita pode entregar NCM8/NCM4 e o SBMI executar o agrupamento posteriormente; não é necessário que `grupo_afinidade_final` seja um campo oficial da extração.
+
+### 12.1 Bens Essenciais — prioridade alta
+
+- Açúcares, Sacarídeos e Produtos de Confeitaria (sem cacau) — Alimentação no domicílio (CORE)
+- Bebidas Não Alcoólicas (Exceto Sucos) — Alimentação no domicílio (CORE)
+- Cacau e Preparações — Alimentação no domicílio (CORE)
+- Café — Alimentação no domicílio (CORE)
+- Carnes Preparadas (Defumadas/Salgadas) — Alimentação no domicílio (CORE)
+- Carnes de Bovinos — Alimentação no domicílio (CORE)
+- Carnes de Espécies Exóticas/Diversas e Subprodutos — Alimentação no domicílio (CORE)
+- Carnes de Frango — Alimentação no domicílio (CORE)
+- Carnes de Outras Aves (Exceto Frango) — Alimentação no domicílio (CORE)
+- Carnes de Ovinos e Caprinos — Alimentação no domicílio (CORE)
+- Carnes de Suínos — Alimentação no domicílio (CORE)
+- Cereais e Grãos (exceto soja) — Alimentação no domicílio (CORE)
+- Chás e Especiarias — Alimentação no domicílio (CORE)
+- Conservas de Frutas e Hortícolas — Alimentação no domicílio (CORE)
+- Erva-mate — Alimentação no domicílio (CORE)
+- Farinha, Malte e Preparações de Cereais — Alimentação no domicílio (CORE)
+- Frutas e Hortícolas — Alimentação no domicílio (CORE)
+- Laticínios — Alimentação no domicílio (CORE)
+- Massas e Panificação — Alimentação no domicílio (CORE)
+- Mel e Outros Produtos Comestíveis de Origem Animal — Alimentação no domicílio (CORE)
+- Ovos — Alimentação no domicílio (CORE)
+- Pescados e Frutos do Mar — Alimentação no domicílio (CORE)
+- Pescados e Frutos do Mar - Preparações e Conservas — Alimentação no domicílio (CORE)
+- Preparações Alimentícias Diversas (Molhos, Condimentos, etc) — Alimentação no domicílio (CORE)
+- Preparações de Carne — Alimentação no domicílio (CORE)
+- Sabões e Preparações de Limpeza, Ceras e Pastas — Limpeza doméstica (ADJACENT)
+- Sucos e Bebidas à Base de Frutas/Vegetais — Alimentação no domicílio (CORE)
+- Toucinho e Gorduras Não Fundidas — Alimentação no domicílio (CORE)
+- Óleos e Gorduras Vegetais/animais — Alimentação no domicílio (CORE)
+
+### 12.2 Saúde, Higiene e Cuidados Pessoais — prioridade alta
+
+- Instrumentos Médicos — Artigos médicos/ortopédicos (EXPANDED)
+- Medicamentos — Remédios/farmacêuticos (CORE)
+- Perfumaria e Cosméticos — Higiene, beleza e cosméticos (CORE)
+- Preparações, Suplementos e Complementos alimentares — Suplementação (EXPANDED)
+- Produtos Farmacêuticos — Remédios/farmacêuticos (CORE)
+
+**Controle:** “Medicamentos” e “Produtos Farmacêuticos” devem ser auditados no nível NCM antes de qualquer soma, para evitar dupla contagem ou sobreposição conceitual.
+
+### 12.3 Bens Não Essenciais — prioridade alta
+
+- Aparelhos Telefônicos — Eletrônicos de consumo (EXPANDED)
+- Calçados — Vestuário e calçados (CORE)
+- Eletrodomésticos (Linha Branca + Portáteis) — Eletrodomésticos (CORE)
+- Eletrônicos de Consumo – Comunicação/Imagem — Eletrônicos de consumo (EXPANDED)
+- Eletrônicos de Consumo – Informática/TIC — Eletrônicos de consumo (EXPANDED)
+- Eletrônicos de Consumo – Áudio/Vídeo — Eletrônicos de consumo (EXPANDED)
+- Mobiliário e Iluminação — Móveis e decoração (CORE)
+- Vestuário Tecido (Plano) — Vestuário (CORE)
+- Vestuário de Malha — Vestuário (CORE)
+
+### 12.4 Serviços e Alimentação Fora do Lar
+
+Para **Serviços**, NCM é apenas complementar a operações mistas, como oficinas; a fonte principal permanece NFS-e/CFS-e por item de serviço.
+
+Para **Alimentação Fora do Lar**, não se recomenda dimensionar o mercado pela soma de NCMs alimentares. O primeiro recorte fiscal adequado permanece CNAE 56/transações dos estabelecimentos. Os NCMs alimentares podem ser usados em análises de suprimento, não como denominador principal do consumo fora do lar.
+
+### 12.5 Solicitação operacional preferida
+
+Se a extração integral de NCM do município for tecnicamente viável e compatível com sigilo, **preferir o universo completo** e aplicar o crosswalk no SBMI.
+
+Se o volume impedir a extração integral, solicitar os NCMs pertencentes aos grupos prioritários acima, com metadado de cobertura e indicação de eventuais grupos/códigos suprimidos.
+
+Documento de crosswalk:
+`radar_ncm_crosswalk_cadernos_v001_20260926.md`.
+
+Rastreabilidade taxonômica:
+- workflow: `radar-mercado-ncm-taxonomy-v1`;
+- run: `36266057411`;
+- artifact: `10913828012`;
+- Drive: `SBMI_Radar_Mercado_NCM_taxonomia_v001.zip`, ID `1B8MCdhgFU9RcH8VdGwMU_k0RdCQei6e_`.

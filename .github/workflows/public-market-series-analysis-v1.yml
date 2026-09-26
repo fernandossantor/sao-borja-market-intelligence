@@ -1,0 +1,71 @@
+name: public-market-series-analysis-v1
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  SOURCE_RUN_ID: "36279321664"
+  SOURCE_ARTIFACT: "sbmi-public-market-series-curated-v1"
+  EXECUTION_ID: "public-market-series-analysis-v001"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Run focused unit tests
+        run: python -m pytest -q tests/test_public_market_series_analysis.py
+
+      - name: Download curated source artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p input/curated
+          gh run download "$SOURCE_RUN_ID" -n "$SOURCE_ARTIFACT" -D input/curated
+          INNER_ZIP="$(find input/curated -type f -name 'SBMI_public_market_series_curated_v001.zip' | head -n 1)"
+          test -n "$INNER_ZIP"
+          mkdir -p work/curated
+          unzip -q "$INNER_ZIP" -d work/curated
+          test -d work/curated/public_market_series_curated_v001
+
+      - name: Build analysis layer
+        run: |
+          python -m sbmi.public_market_series_analysis_cli \
+            --curated-root work/curated/public_market_series_curated_v001 \
+            --output-dir out/public_market_series_analysis_v001 \
+            --execution-id "$EXECUTION_ID" \
+            --source-run-id "$SOURCE_RUN_ID"
+
+      - name: Package and inspect
+        run: |
+          cd out
+          zip -qr SBMI_public_market_series_analysis_v001.zip public_market_series_analysis_v001
+          sha256sum SBMI_public_market_series_analysis_v001.zip > SBMI_public_market_series_analysis_v001.sha256
+          cat public_market_series_analysis_v001/validation.csv
+          cat public_market_series_analysis_v001/summary.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-public-market-series-analysis-v1
+          path: |
+            out/SBMI_public_market_series_analysis_v001.zip
+            out/SBMI_public_market_series_analysis_v001.sha256
+          if-no-files-found: error
+          retention-days: 30

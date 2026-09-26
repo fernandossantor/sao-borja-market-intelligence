@@ -190,18 +190,25 @@ def _build_radar_composition(
 
         unmapped = joined.loc[joined["grupo_afinidade_final"].isna()].copy()
         if not unmapped.empty:
+            unmapped["vlr_publicado_nao_sigilo"] = unmapped["vlr_nominal"].where(
+                unmapped["corte_sigilo"].eq(0),
+                0.0,
+            )
             unmapped_parts.append(
                 unmapped.groupby("ncm8", as_index=False).agg(
                     rows=("ncm8", "size"),
                     rows_corte_sigilo=("corte_sigilo", lambda s: int(s.eq(1).sum())),
-                    vlr_publicado_nao_sigilo=(
-                        "vlr_nominal",
-                        lambda s: float(s[unmapped.loc[s.index, "corte_sigilo"].eq(0)].sum()),
-                    ),
+                    vlr_publicado_nao_sigilo=("vlr_publicado_nao_sigilo", "sum"),
                 ).assign(ano_mes=period)
             )
 
         benchmark_source = joined.loc[joined["grupo_afinidade_final"].notna()].copy()
+        benchmark_source["vlr_nominal_publicado_nao_sigilo"] = benchmark_source[
+            "vlr_nominal"
+        ].where(
+            benchmark_source["corte_sigilo"].eq(0),
+            0.0,
+        )
         grouped = (
             benchmark_source.groupby(
                 [
@@ -222,8 +229,8 @@ def _build_radar_composition(
                 ncm8_unicos=("ncm8", "nunique"),
                 rows_corte_sigilo=("corte_sigilo", lambda s: int(s.eq(1).sum())),
                 vlr_nominal_publicado_nao_sigilo=(
-                    "vlr_nominal",
-                    lambda s: float(s[benchmark_source.loc[s.index, "corte_sigilo"].eq(0)].sum()),
+                    "vlr_nominal_publicado_nao_sigilo",
+                    "sum",
                 ),
             )
             .reset_index()
@@ -324,7 +331,7 @@ def _build_radar_exports(
 
         benchmark_source = joined.loc[joined["grupo_afinidade_final"].notna()].copy()
         grouped = (
-            joined.groupby(
+            benchmark_source.groupby(
                 [
                     "ano_mes",
                     "grupo_afinidade_final",

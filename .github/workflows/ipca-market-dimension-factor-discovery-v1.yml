@@ -108,7 +108,7 @@ jobs:
               preferred[table]={}
               for target,hs in by.items():
                   def specificity(h):
-                      m=re.match(r"^(\\d+)\\s",h.get("normalized_label",""))
+                      m=re.match(r"^(\d+)\s",h.get("normalized_label",""))
                       return (len(m.group(1)) if m else 0, m.group(1) if m else "")
                   preferred[table][target]=sorted(hs,key=specificity,reverse=True)[0]
 

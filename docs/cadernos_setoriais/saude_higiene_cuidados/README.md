@@ -164,3 +164,28 @@ O documento orienta farmácias e especializados sobre três arenas:
 Decisões apoiadas: proposta de valor, autoridade técnica, presença digital, visibilidade de mix, entrega/retirada e qualidade consultiva.
 
 Não transformar saliência de rede nem a contagem POM inconsistente em liderança ou market share.
+
+
+## Atualização — dimensão de mercado — 2026-09-26
+
+O crosswalk POF/RS + IPCA específico produz dois módulos de demanda residente:
+
+- **Higiene e Cuidados Pessoais:** R$ 57.577.114,03/ano;
+- **Remédios:** R$ 69.588.767,08/ano.
+
+Soma calculada da cesta-núcleo:
+**R$ 127.165.881,11/ano**.
+
+Natureza: **ESTIMATIVA MODELADA DE DEMANDA RESIDENTE**. Não é faturamento, mercado capturado ou tamanho total do caderno. Suplementos e outras categorias podem estar fora da cesta; serviços clínicos permanecem separados.
+
+O Radar do Mercado forneceu taxonomia NCM completa. O pacote prioritário para eventual extração municipal contém **640 NCM8**:
+- 394 Remédios/farmacêuticos — CORE;
+- 65 Higiene, beleza e cosméticos — CORE;
+- 151 Artigos médicos/ortopédicos — EXPANDED;
+- 30 Suplementação — EXPANDED.
+
+Os grupos `Medicamentos` e `Produtos Farmacêuticos` foram preservados separadamente; eventual soma monetária futura deve respeitar a classificação efetivamente retornada pela Receita.
+
+Farmácia Popular/BNAFAR foi auditada: a publicação aberta localizada não fornece dimensão monetária municipal defensável. Uma extração agregada de dispensações/valor administrativo permanece a solicitar.
+
+**Situação corrente:** dois módulos de demanda residente estão modelados; faturamento municipal setorial e market share permanecem não defensáveis.

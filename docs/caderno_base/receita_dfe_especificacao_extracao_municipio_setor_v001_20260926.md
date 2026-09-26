@@ -285,3 +285,40 @@ Rastreabilidade taxonômica corrente:
 - Drive: `SBMI_Radar_Mercado_taxonomia_NCM_completa_v001.zip`, ID `1hXk6FCqM4nf3gMwPD5mm-UEoyXfsitlz`.
 
 O catálogo completo permite ao SBMI fornecer, se necessário, a lista exata de NCM8 prioritários em vez de depender apenas dos nomes dos grupos de afinidade.
+
+
+## 14. Canal de encaminhamento recomendado
+
+A Carta de Serviços da Receita Estadual apresenta o **Receita Dados** como serviço de arquivos/publicações da Receita e indica o **Fale Conosco / Plantão Fiscal Virtual** como canal para dúvidas e demandas relacionadas ao serviço.
+
+Fonte oficial:
+- https://receita.fazenda.rs.gov.br/servicos-ao-cidadao/servicos?servico=2299
+- https://atendimento.receita.rs.gov.br/atendimento-da-receita-estadual
+
+Para pedido formal de informação pública ou **abertura de dados**, o Governo do RS informa que o SIC/LAI recebe:
+- pedidos de acesso a informações/documentos;
+- pedidos de abertura de dados públicos.
+
+O encaminhamento é feito pelo formulário eletrônico da Ouvidoria-Geral do Estado, com Login GOV.BR.
+
+Fonte oficial:
+- https://ouvidoriageral.rs.gov.br/sic-lai
+- https://www3.ouvidoriageral.rs.gov.br/informacoes
+
+### Estratégia recomendada
+
+1. **Fale Conosco / Receita Dados:** apresentar a especificação e perguntar se o recorte agregado já existe internamente ou se há arquivo/API não publicada.
+2. Se não houver canal direto de entrega, **SIC/LAI — pedido de informação/abertura de dados:** solicitar acesso ao agregado existente ou abertura do recorte, preservando sigilo estatístico.
+3. Evitar formular o pedido como obrigação de criar análise inédita. Solicitar preferencialmente:
+   - exportação de visão/tabela já sistematizada, se existente;
+   - confirmação das dimensões disponíveis;
+   - metadados e regra de sigilo;
+   - em caso de impossibilidade de entrega, indicação da limitação técnica/metodológica.
+
+O serviço específico de “dados do contribuinte indisponíveis no autoatendimento” **não é adequado** a esta demanda, pois é destinado aos dados do próprio contribuinte.
+
+### Prazo do SIC/LAI
+
+A Carta de Serviços do SIC/LAI informa prazo de resposta de **20 dias**, prorrogável, mediante justificativa, por mais **10 dias**.
+
+A solicitação do SBMI deve identificar a Secretaria da Fazenda/Receita Estadual como órgão detentor e manter o pedido restrito a dados agregados públicos/estatísticos.

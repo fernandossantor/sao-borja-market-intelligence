@@ -181,9 +181,9 @@ jobs:
                       f_date = field("data", "dt_emissao")
                       f_code = field("cod_municipio", "codigo_municipio", "cod_ibge", "codigo_ibge")
                       f_name = field("nome_municipio", "municipio")
-                      f_model = field("modelo", "modelo_documento")
-                      f_qty = field("quantidade", "qtde", "qtd")
-                      f_val = field("valor", "vlr", "valor_total")
+                      f_model = field("modelo", "modelo_documento", "modelo_dfe")
+                      f_qty = field("quantidade", "qtde", "qtd", "qtde_dfe")
+                      f_val = field("valor", "vlr", "valor_total", "vlr_total_dfe")
                       f_updated = field("dados_atualizados_ate", "atualizado_ate", "data_atualizacao")
 
                       required = {"data": f_date, "municipio": f_name or f_code, "modelo": f_model, "quantidade": f_qty, "valor": f_val}

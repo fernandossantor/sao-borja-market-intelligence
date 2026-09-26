@@ -195,3 +195,29 @@ Fonte oficial:
 **Uso correto:** controle de consistência fiscal para uma futura extração de NFS-e/ISS.
 
 **Uso incorreto:** dividir o ISS arrecadado por uma alíquota única para estimar faturamento de serviços. A arrecadação agrega principal, multas/juros e dívida ativa, e o universo de serviços possui alíquotas, regimes, retenções, bases e locais de incidência heterogêneos. Portanto, ISS arrecadado não é proxy defensável de faturamento empresarial.
+
+
+## 14. Município do destinatário — viabilidade para demanda não residente
+
+O manual de conectividade da NFS-e padrão INFISC/RTC publicado para São Borja documenta, no grupo de endereço nacional do destinatário, o campo:
+
+- `cMun` — código IBGE do município do endereço do destinatário do serviço.
+
+O mesmo manual contém também:
+- `cLocPrestacao` — local da prestação;
+- país da prestação;
+- informações de destinatário e endereço;
+- município de intermediário quando aplicável.
+
+Fonte oficial:
+- https://nfse.saoborja.rs.gov.br/services/arquivos/download/arquivosportal?id=45
+
+**Implicação:** existe suporte técnico no layout atual para produzir, em dados agregados, uma separação entre destinatários com endereço em São Borja e em outros municípios.
+
+Isso melhora a viabilidade de estimar uma camada de **demanda/captura externa em serviços**, mas com três controles:
+
+1. `município do destinatário` não é necessariamente residência usual da pessoa consumidora;
+2. é preciso medir completude histórica do campo, especialmente antes da adoção do novo layout nacional/RTC;
+3. operações B2B podem atribuir o endereço da empresa tomadora, não o local efetivo do usuário final.
+
+Portanto, o campo deve ser solicitado e auditado, mas só pode ser promovido a proxy de demanda não residente após avaliar cobertura e significado por submercado.

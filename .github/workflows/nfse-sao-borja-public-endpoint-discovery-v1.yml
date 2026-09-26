@@ -1,0 +1,226 @@
+name: nfse-sao-borja-public-endpoint-discovery-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/nfse-sao-borja-public-endpoint-discovery-v1.yml"]
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/nfse-sao-borja-public-endpoint-discovery-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install browser dependencies
+        run: |
+          python -m pip install --quiet requests playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Inspect public portal endpoints
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/nfse_public_endpoint_discovery
+          cat > /tmp/discover.py <<'PY'
+          from __future__ import annotations
+
+          import asyncio
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urljoin, urlsplit, urlunsplit
+
+          import requests
+          from playwright.async_api import async_playwright
+
+          OUT = Path("artifacts/nfse_public_endpoint_discovery")
+          BASE = "https://nfse.saoborja.rs.gov.br/portal/"
+          HOST = "nfse.saoborja.rs.gov.br"
+          UA = "Mozilla/5.0 SBMI public NFS-e endpoint audit/1.0"
+
+          def clean_url(url: str) -> str:
+              p = urlsplit(url)
+              return urlunsplit((p.scheme, p.netloc, p.path, "", ""))
+
+          def keyword_counts(text: str):
+              low = text.lower()
+              keys = [
+                  "empresa", "empresas", "nfse", "nfs-e", "quantidade",
+                  "contador", "estat", "dashboard", "valor", "servico",
+                  "serviço", "iss", "api", "services", "cnae", "tribut"
+              ]
+              return {k: low.count(k) for k in keys if low.count(k)}
+
+          s = requests.Session()
+          s.headers.update({"User-Agent": UA})
+          r = s.get(BASE, timeout=60)
+          r.raise_for_status()
+          html = r.text
+          (OUT / "portal.html").write_text(html, encoding="utf-8")
+
+          refs = sorted(
+              set(
+                  urljoin(BASE, x)
+                  for x in re.findall(r'(?:src|href)=["\']([^"\']+)["\']', html, re.I)
+              )
+          )
+          scripts = [u for u in refs if urlsplit(u).hostname == HOST and urlsplit(u).path.lower().endswith(".js")]
+
+          static = {
+              "portal_status": r.status_code,
+              "portal_bytes": len(r.content),
+              "scripts": scripts,
+              "portal_keyword_counts": keyword_counts(html),
+              "candidate_strings": sorted(
+                  set(
+                      m.group(0)
+                      for m in re.finditer(
+                          r'(?:"|\')((?:/|https?://)[^"\']*(?:api|service|nfse|contador|estat|dashboard)[^"\']*)(?:"|\')',
+                          html,
+                          re.I,
+                      )
+                  )
+              )[:300],
+          }
+
+          js_hits = []
+          for u in scripts[:80]:
+              try:
+                  rr = s.get(u, timeout=60)
+                  if rr.status_code != 200 or len(rr.content) > 3_000_000:
+                      continue
+                  txt = rr.text
+                  counts = keyword_counts(txt)
+                  if not counts:
+                      continue
+                  candidates = sorted(
+                      set(
+                          re.findall(
+                              r'["\']([^"\']*(?:/api/|/services/|/service/|nfse|contador|estatistica|dashboard)[^"\']*)["\']',
+                              txt,
+                              re.I,
+                          )
+                      )
+                  )
+                  js_hits.append(
+                      {
+                          "url": clean_url(u),
+                          "bytes": len(rr.content),
+                          "keyword_counts": counts,
+                          "candidate_strings": candidates[:200],
+                      }
+                  )
+              except Exception as exc:
+                  js_hits.append({"url": clean_url(u), "error": repr(exc)})
+
+          network = []
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  ctx = await browser.new_context(
+                      user_agent=UA,
+                      viewport={"width": 1440, "height": 1000},
+                  )
+                  page = await ctx.new_page()
+
+                  async def on_response(resp):
+                      u = resp.url
+                      purl = urlsplit(u)
+                      if purl.hostname != HOST:
+                          return
+                      rt = resp.request.resource_type
+                      if rt not in ("xhr", "fetch", "document", "script"):
+                          return
+                      rec = {
+                          "url": clean_url(u),
+                          "status": resp.status,
+                          "resource_type": rt,
+                          "content_type": resp.headers.get("content-type"),
+                      }
+                      try:
+                          ct = (resp.headers.get("content-type") or "").lower()
+                          if (
+                              rt in ("xhr", "fetch")
+                              or "json" in ct
+                              or "text" in ct
+                          ):
+                              body = await resp.text()
+                              rec["bytes"] = len(body.encode("utf-8", errors="ignore"))
+                              rec["keyword_counts"] = keyword_counts(body)
+                              rec["body_head"] = body[:30000]
+                      except Exception as exc:
+                          rec["body_error"] = repr(exc)
+                      network.append(rec)
+
+                  page.on("response", on_response)
+                  await page.goto(BASE, wait_until="domcontentloaded", timeout=120000)
+                  await page.wait_for_timeout(25000)
+                  try:
+                      body_text = await page.locator("body").inner_text()
+                  except Exception:
+                      body_text = ""
+                  (OUT / "rendered_body.txt").write_text(body_text, encoding="utf-8")
+                  await browser.close()
+
+          asyncio.run(main())
+
+          # De-duplicate network records by url+type+status, retaining richest body.
+          dedup = {}
+          for rec in network:
+              key = (rec.get("url"), rec.get("resource_type"), rec.get("status"))
+              old = dedup.get(key)
+              if old is None or len(rec.get("body_head", "")) > len(old.get("body_head", "")):
+                  dedup[key] = rec
+          network = list(dedup.values())
+
+          # Prioritize likely anonymous data endpoints.
+          for rec in network:
+              score = 0
+              if rec.get("resource_type") in ("xhr", "fetch"):
+                  score += 10
+              score += sum(rec.get("keyword_counts", {}).values())
+              if any(x in rec.get("url", "").lower() for x in ("api", "service", "contador", "estat", "dashboard")):
+                  score += 10
+              rec["score"] = score
+          network.sort(key=lambda x: (-x.get("score", 0), x.get("url", "")))
+
+          result = {
+              "source": BASE,
+              "privacy": "Public unauthenticated portal only. No cookies, request headers, credentials or tokens are persisted.",
+              "static": static,
+              "js_hits": js_hits,
+              "network_count": len(network),
+              "network": network[:200],
+              "question": "Does the unauthenticated portal expose any aggregate service-value data beyond public counters?",
+          }
+          (OUT / "discovery.json").write_text(
+              json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          print("SBMI_NFSE_PUBLIC_DISCOVERY_BEGIN")
+          print(json.dumps({
+              "static": static,
+              "js_hits": js_hits[:30],
+              "network_count": len(network),
+              "top_network": network[:40],
+          }, ensure_ascii=False, indent=2)[:120000])
+          print("SBMI_NFSE_PUBLIC_DISCOVERY_END")
+          PY
+          python /tmp/discover.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nfse-sao-borja-public-endpoint-discovery-v1
+          path: artifacts/nfse_public_endpoint_discovery/
+          if-no-files-found: error
+          retention-days: 30

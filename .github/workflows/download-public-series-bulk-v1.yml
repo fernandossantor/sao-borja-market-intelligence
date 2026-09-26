@@ -277,7 +277,62 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: sbmi-series-publicas-bulk-v1
-          path: artifacts/series_publicas_bulk/
+          name: sbmi-series-metadata-v1
+          path: |
+            artifacts/series_publicas_bulk/manifest.csv
+            artifacts/series_publicas_bulk/summary.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-radar-composicao-v1
+          path: |
+            artifacts/series_publicas_bulk/raw/radar/composicao/
+            artifacts/series_publicas_bulk/raw/radar/Portfolio_NCMs_Setor.csv
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-radar-exportacoes-v1
+          path: artifacts/series_publicas_bulk/raw/radar/exportacoes/
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-dfe-municipio-v1
+          path: artifacts/series_publicas_bulk/raw/dfe/municipio/
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-dfe-cnae-2018-2022-v1
+          path: |
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2018.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2019.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2020.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2021.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2022.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-dfe-cnae-2023-2026-v1
+          path: |
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2023.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2024.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2025.zip
+            artifacts/series_publicas_bulk/raw/dfe/cnae_classe/DFe_Totais_CNAE_Classe_2026.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-cesta-alimentos-mensal-v1
+          path: artifacts/series_publicas_bulk/raw/cesta_alimentos/
           if-no-files-found: error
           retention-days: 30

@@ -193,23 +193,72 @@ Solicitar:
 
 Se a Receita puder fornecer `grupo_afinidade_final` do Radar, ele pode ser incluído como dimensão derivada. Caso contrário, o SBMI fará o crosswalk localmente a partir de NCM.
 
-## 8. Limitação técnica
+## 8. Catálogo NCM8 completo
 
-A consulta detalhada NCM atingiu o limite de **10.000 linhas**. Ela não é tratada como catálogo NCM8 completo. Para controlar esse risco, foi executada consulta independente apenas a `grupo_afinidade_final`, que retornou **110 grupos distintos**.
+A primeira consulta detalhada atingiu o limite público de **10.000 linhas** e cobriu **92 dos 110 grupos de afinidade**.
 
-Assim, o universo de grupos está auditado; a lista integral de NCM8 por grupo ainda não está canonizada.
+Para eliminar a truncagem sem alterar o modelo público, foi criada uma segunda extração reprodutível:
+
+1. consulta independente do domínio completo de grupos;
+2. identificação dos **18 grupos ausentes** na janela inicial;
+3. consulta individual de cada grupo ausente;
+4. recomposição e deduplicação por `grupo_afinidade_final × NCM8 × descrição`.
+
+Resultado final auditado:
+
+- grupos de afinidade: **110**;
+- linhas NCM8/grupo: **11.765**;
+- grupos ausentes após recomposição: **0**;
+- NCM8 inválidos após normalização: **0**.
+
+Natureza: **CATÁLOGO TAXONÔMICO OBSERVADO NO MODELO PÚBLICO DO RADAR**.
+
+Esse catálogo não contém faturamento municipal e não transforma valores estaduais em valores de São Borja. Sua utilidade é fornecer uma taxonomia íntegra para:
+
+- especificar pedidos de `São Borja × NCM × valor`;
+- filtrar grupos amplos por NCM8 quando necessário;
+- auditar sobreposição entre grupos como Medicamentos e Produtos Farmacêuticos;
+- construir módulos de produto coerentes com os cadernos.
 
 ## 9. Rastreabilidade
 
-Workflow: `.github/workflows/radar-mercado-ncm-taxonomy-v1.yml`  
-Run final: `36266057411`  
-Job: `108470821179`  
-Commit: `ffd95f7de24fa5201ef19e6f098cacf542a56439`  
-Artifact: `10913828012`  
-Digest: `sha256:6ee7762dd392aabc6e059344d77e6b2e6ededd652ca8e334bd47fd2fe4c7bf6d`
+### Extração inicial e domínio de grupos
 
-Google Drive: `SBMI_Radar_Mercado_NCM_taxonomia_v001.zip` — ID `1B8MCdhgFU9RcH8VdGwMU_k0RdCQei6e_`.
+Workflow: `.github/workflows/radar-mercado-ncm-taxonomy-v1.yml`
+
+Execução validada:
+- run: `36266655049`;
+- commit: `3d2b1606b7d9c1b436c94f2ae167d1c3ea6778e1`;
+- artifact: `10913519416`;
+- digest: `sha256:0361697f8094b0408bca759dc584536c4ed3940186d501beee3baa52e50eec11`.
+
+Google Drive:
+- `SBMI_Radar_Mercado_taxonomia_NCM_v001.zip`;
+- ID: `1QA5tVqZvUKXVPTuzbcIEzbK2UtF5t4x1`.
+
+### Catálogo completo
+
+Workflow: `.github/workflows/radar-mercado-ncm-taxonomy-complete-v1.yml`
+
+Execução:
+- run: `36267773156`;
+- commit: `ae8282d8c47f770f0dabc01b638e1029da8d2edd`;
+- artifact: `10914542081`;
+- digest: `sha256:ace7428be2e1b4cdc8c47f8a41eef63da11094b066feaf8a578fa7b158f1d5e3`.
+
+Google Drive:
+- `SBMI_Radar_Mercado_taxonomia_NCM_completa_v001.zip`;
+- ID: `1hXk6FCqM4nf3gMwPD5mm-UEoyXfsitlz`.
 
 ## 10. Decisão
 
-O crosswalk é **taxonômico**. A próxima fronteira empírica continua sendo obter valores agregados de São Borja por CNAE/NCM. Nenhum CNPJ, loja, vínculo ou participação regional será usado para ratear o envelope municipal.
+O universo taxonômico NCM8 do Radar utilizado pelo SBMI está **canonizado para esta etapa**: 110 grupos e 11.765 associações grupo × NCM8.
+
+Isso **não desbloqueia market share por si só**. A próxima fronteira empírica continua sendo obter valores agregados de São Borja por CNAE/NCM.
+
+Nenhum CNPJ, loja, vínculo, remuneração ou participação regional será usado para ratear o envelope municipal.
+
+O catálogo completo passa a ser a base preferencial para desenhar:
+- o pedido `São Borja × NCM × valor` à Receita Estadual;
+- filtros NCM8 para grupos classificados como REVIEW/ADJACENT;
+- checagens de sobreposição entre módulos.

@@ -233,3 +233,30 @@ Leitura central:
 **São Borja apresenta centralidade temática intermediária e o setor enfrenta dupla concorrência — centros urbanos superiores + e-commerce.**
 
 O documento não deve produzir market share ou vazamento sem gasto observado.
+
+
+## Atualização — dimensão de mercado — 2026-09-26
+
+A POF/RS, atualizada por IPCA específico, permitiu modelar três módulos de demanda residente:
+
+- **Vestuário:** R$ 73.130.722,82/ano;
+- **Mobiliários e artigos do lar:** R$ 32.823.271,13/ano;
+- **Eletrodomésticos:** R$ 27.404.143,52/ano.
+
+Soma calculada:
+**R$ 133.358.137,47/ano**.
+
+Natureza: **ESTIMATIVA MODELADA DE TRÊS MÓDULOS**. Esse valor é um piso modular conhecido e não o tamanho total de Bens Não Essenciais, pois outras arenas do POM permanecem fora do crosswalk monetário.
+
+O Radar do Mercado produziu um pacote de **1.299 NCM8 prioritários**:
+- Vestuário — CORE: 304;
+- Vestuário e calçados — CORE: 50;
+- Móveis e decoração — CORE: 126;
+- Eletrodomésticos — CORE: 117;
+- Eletrônicos de consumo — EXPANDED: 702.
+
+Os eletrônicos permanecem EXPANDED porque ampliam o escopo POM, mas não integram os três módulos POF atualmente somados.
+
+A divisão CNAE 47 é ampla demais para separar essas arenas. O caminho fiscal preferencial passa a ser `São Borja × NCM8 × valor` ou, secundariamente, CNAE em nível de classe/grupo.
+
+**Situação corrente:** dimensão residente parcial por módulos disponível; tamanho total, faturamento capturado, e-commerce monetário e market share continuam não defensáveis.

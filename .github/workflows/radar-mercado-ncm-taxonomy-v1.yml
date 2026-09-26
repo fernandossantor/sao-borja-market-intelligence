@@ -111,7 +111,33 @@ jobs:
               with (OUT/"radar_ncm_taxonomy.csv").open("w",newline="",encoding="utf-8") as f:
                 w=csv.DictWriter(f,fieldnames=["grupo_afinidade_final","ncm8","ncm4","codxdescr_ncm8"]);w.writeheader();w.writerows(uniq)
               counts=Counter(r["grupo_afinidade_final"] for r in uniq)
-              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
+
+              # Independent distinct-group query: validates the complete affinity-group
+              # domain even when the NCM-detail window reaches its 10,000-row cap.
+              semg={"Version":2,"From":[{"Name":src,"Entity":ENTITY,"Type":0}],
+                "Select":[col(src,"grupo_afinidade_final")],
+                "OrderBy":[{"Direction":1,"Expression":{"Column":{"Expression":{"SourceRef":{"Source":src}},"Property":"grupo_afinidade_final"}}}]}
+              cmdg={"SemanticQueryDataShapeCommand":{"Query":semg,
+                "Binding":{"Primary":{"Groupings":[{"Projections":[0]}]},"DataReduction":{"DataVolume":6,"Primary":{"Window":{"Count":1000}}},"Version":1},
+                "ExecutionMetricsKind":1}}
+              commandsg=[cmdg]
+              qbodyg={"version":"1.0.0","queries":[{"Query":{"Commands":commandsg},"CacheKey":json.dumps({"Commands":commandsg},separators=(",",":")),"QueryId":"","ApplicationContext":appctx}],"cancelQueries":[],"modelId":tpl["modelId"]}
+              headersg=dict(headers);headersg["activityid"]=str(uuid.uuid4());headersg["requestid"]=str(uuid.uuid4())
+              respg=await ctx.request.post(cap["url"],headers=headersg,data=json.dumps(qbodyg))
+              bodyg=await respg.text()
+              if respg.status!=200:raise RuntimeError(f"Groups HTTP {respg.status}: {bodyg[:2000]}")
+              jg=json.loads(bodyg);dg=jg["results"][0]["result"]["data"];dsg=dg["dsr"]["DS"][0]
+              dmg=(dsg.get("PH") or [{}])[0].get("DM0",[]);dictg=(dsg.get("ValueDicts") or {}).get("D0",[])
+              prevg=[None];groups=[]
+              for er in dmg:
+                itg=iter(er.get("C",[]));Rg=er.get("R",0) or 0
+                vg=prevg[0] if Rg&1 else next(itg,None);prevg=[vg]
+                if isinstance(vg,(int,float)) and int(vg)==vg and 0<=int(vg)<len(dictg): vg=dictg[int(vg)]
+                if vg is not None and str(vg).strip(): groups.append(str(vg).strip())
+              groups=sorted(set(groups))
+              with (OUT/"radar_affinity_groups.csv").open("w",newline="",encoding="utf-8") as fg:
+                wg=csv.writer(fg);wg.writerow(["grupo_afinidade_final"]);wg.writerows([[g] for g in groups])
+              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"detail_window_truncated":len(rawrows)>=10000,"affinity_groups_complete_count":len(groups),"affinity_groups_complete":groups,"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
                 "warning":"Taxonomy only. Radar values are not São Borja values; no municipal dimension was observed.","decoder":"fixed D0-D3 mapping to Select order"}
               (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
               print("SBMI_RADAR_NCM_TAXONOMY_BEGIN");print(json.dumps(summary,ensure_ascii=False,indent=2)[:120000]);print("SBMI_RADAR_NCM_TAXONOMY_END")

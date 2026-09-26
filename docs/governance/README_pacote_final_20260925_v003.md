@@ -41,6 +41,12 @@ GitHub: `docs/governance/padrao_editorial_decisorio_cadernos_20260925_v001.md`
 
 Regra: `evidência → contexto → relação → mecanismo → interpretação → implicação → decisão → indicador → limite`.
 
+## Checkpoint corrente
+
+Drive: `1OOdAizyBUH24nM8X0gz6MrQ7SxEz6W1E65TfRgh7nJQ`
+
+GitHub: `docs/caderno_base/checkpoint_20260925_qa_textual_aprofundado_cadernos_v001.md`
+
 ## Base técnica
 
 - Caderno-Base v029 — `1Fj6MgIPDetaN8PPUeJ7k8zsH5L6jeHoClmb3ZST9oD4`

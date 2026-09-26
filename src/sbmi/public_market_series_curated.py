@@ -67,6 +67,20 @@ def _numeric_decimal_comma(series: pd.Series) -> pd.Series:
     )
 
 
+def _radar_numeric_value(series: pd.Series, period: str) -> pd.Series:
+    """Normaliza a mudança de apresentação numérica observada no Radar em 2026."""
+    raw = series.astype("string").str.strip()
+    year = int(period[:4])
+    if year >= 2026:
+        raw = raw.str.replace(".", "", regex=False)
+    parsed = pd.to_numeric(raw, errors="coerce")
+    invalid = parsed.isna() & series.notna()
+    if invalid.any():
+        examples = series.loc[invalid].astype("string").head(5).tolist()
+        raise ValueError(f"Radar contém valores monetários não parseáveis: {examples}")
+    return parsed
+
+
 def parse_crosswalk_markdown(path: Path) -> pd.DataFrame:
     """Extrai a tabela de 110 grupos do crosswalk editorial do Radar."""
     rows: list[list[str]] = []
@@ -124,7 +138,7 @@ def _build_radar_composition(
     raw_dir: Path,
     dim_ncm: pd.DataFrame,
     out_dir: Path,
-) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, object]]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict[str, object]]:
     fact_path = out_dir / "radar_composicao_rs_ncm_mensal.csv"
     files = sorted(raw_dir.glob("Composicao_de_Mercado_*.csv"), key=_period_from_radar_filename)
     if not files:
@@ -151,7 +165,9 @@ def _build_radar_composition(
         frame["ano_mes"] = period
         frame["anomes_fonte"] = raw_anomes
         frame["ncm8"] = _normalize_ncm(frame["cod_ncm"])
-        frame["vlr_nominal"] = pd.to_numeric(frame["vlr_nominal"], errors="coerce")
+        raw_value = frame["vlr_nominal"].astype("string")
+        dot_thousands_rows = int(raw_value.str.contains(".", regex=False, na=False).sum())
+        frame["vlr_nominal"] = _radar_numeric_value(raw_value, period)
         frame["corte_sigilo"] = pd.to_numeric(frame["corte_sigilo"], errors="coerce").astype("Int64")
         frame["source_file"] = file.name
 
@@ -184,6 +200,10 @@ def _build_radar_composition(
                 "rows_corte_sigilo": int(suppressed.sum()),
                 "pct_rows_corte_sigilo": float(suppressed.mean() * 100.0),
                 "vlr_nominal_publicado_nao_sigilo": float(joined.loc[non_suppressed, "vlr_nominal"].sum()),
+                "source_values_dot_thousands_rows": dot_thousands_rows,
+                "source_numeric_rule": (
+                    "dot_thousands_removed" if int(period[:4]) >= 2026 else "plain_integer"
+                ),
                 "source_file": file.name,
             }
         )
@@ -298,7 +318,9 @@ def _build_radar_exports(
         frame["anomes_fonte"] = frame["anomes"].astype("string")
         frame["ncm8"] = _normalize_ncm(frame["cod_ncm"])
         frame["cod_pais"] = frame["cod_pais"].astype("string").str.replace(r"\.0$", "", regex=True).str.zfill(3)
-        frame["vlr_fob"] = pd.to_numeric(frame["vlr_fob"], errors="coerce")
+        raw_value = frame["vlr_fob"].astype("string")
+        dot_thousands_rows = int(raw_value.str.contains(".", regex=False, na=False).sum())
+        frame["vlr_fob"] = _radar_numeric_value(raw_value, period)
         frame["source_file"] = file.name
         fact = frame[["ano_mes", "anomes_fonte", "ncm8", "cod_pais", "vlr_fob", "source_file"]].copy()
         _append_csv(fact, fact_path, first=idx == 0, float_format="%.2f")
@@ -317,6 +339,10 @@ def _build_radar_exports(
                 "rows_taxonomia_mapeada": int(joined["grupo_afinidade_final"].notna().sum()),
                 "pct_rows_taxonomia_mapeada": float(joined["grupo_afinidade_final"].notna().mean() * 100.0),
                 "vlr_fob_publicado": float(joined["vlr_fob"].sum()),
+                "source_values_dot_thousands_rows": dot_thousands_rows,
+                "source_numeric_rule": (
+                    "dot_thousands_removed" if int(period[:4]) >= 2026 else "plain_integer"
+                ),
                 "source_file": file.name,
             }
         )

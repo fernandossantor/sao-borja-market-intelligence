@@ -263,3 +263,43 @@ Como o manual corrente incorpora a transição da Reforma Tributária, a Prefeit
 4. qual campo representa o valor bruto do serviço de modo mais estável em toda a série.
 
 Sem essa confirmação, campos do layout de 2026 não devem ser retroprojetados automaticamente para competências anteriores.
+
+
+## 16. Auditoria da superfície pública
+
+Foi encerrada a busca técnica por endpoint público anônimo de valores agregados de NFS-e.
+
+Na abertura do portal foram observadas chamadas públicas para:
+- configuração do portal;
+- contador de emitentes;
+- contador de NFS-e;
+- conteúdos públicos;
+- parâmetro de interface.
+
+No instante da auditoria, os endpoints retornaram **6.900 emitentes** e **4.225.020 NFS-e emitidas**. Os contadores são dinâmicos e não possuem período explícito.
+
+Nenhuma chamada pública observada retornou:
+- valor bruto agregado;
+- competência;
+- código de tributação/item;
+- CNAE;
+- município do tomador;
+- base de cálculo ou ISS em formato estatístico.
+
+O bundle público também contém o endpoint `/services/relatorios/public/relatorioTela/requisitar`. A inspeção do código confirmou que se trata de um **renderizador genérico de relatórios**, ao qual o componente envia dados previamente disponíveis no cliente ou uma `urlDados`. Sua existência não equivale a uma API pública de NFS-e.
+
+Documento de auditoria:
+`docs/caderno_base/nfse_sao_borja_endpoints_publicos_auditoria_v001_20260926.md`.
+
+Rastreabilidade:
+- endpoint discovery run: `36268105386`, artifact `10914950672`;
+- context run: `36268475097`, artifact `10915030891`;
+- Drive endpoints: `1wc3XCSKBD60FaTg7ioK0ZPj5VGrv1rDI`;
+- Drive contexto: `1XHfjjd0sYwOKQopGaqMQanvuyYobM0-H`.
+
+**Decisão:** a superfície pública é insuficiente para dimensão monetária. A solicitação institucional agregada à Secretaria Municipal de Fazenda permanece necessária.
+
+A configuração pública do portal informa como contato institucional do módulo ISSQN:
+`iss@saoborja.rs.gov.br`.
+
+Esse endereço pode ser usado para encaminhar a solicitação técnica, sem prejuízo de eventual protocolo formal indicado pela Prefeitura.

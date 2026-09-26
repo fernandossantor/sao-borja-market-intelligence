@@ -1,0 +1,202 @@
+name: dfe-corede-sector-query-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dfe-corede-sector-query-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dfe-corede-sector-query-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  query:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Query public DFe semantic model for Fronteira Oeste x CNAE division
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/dfe_corede_sector_query
+          cat > /tmp/query.py <<'PY'
+          from __future__ import annotations
+          import asyncio,csv,json,re,uuid
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+
+          OUT=Path("artifacts/dfe_corede_sector_query")
+          REPORT="https://app.powerbi.com/view?r=eyJrIjoiOGZlNDQzMzMtOGQ0MS00Y2I4LWE2ZDEtNmQ4YmEwMzZlZDEzIiwidCI6IjgzYmQwOTBiLTc1NmUtNGEwMi1hNTEyLWU1ZWEwMmMwMzA0MSJ9"
+          ENTITY="v_PBI_Dfe_Totais_Corede_Setor"
+          TARGET_COREDE="FRONTEIRA OESTE"
+          TARGET_YEAR="2025"
+          TARGET_MODEL="NFC-e"
+
+          def col(source,prop,name=None):
+              return {
+                "Column":{"Expression":{"SourceRef":{"Source":source}},"Property":prop},
+                "Name":name or f"{ENTITY}.{prop}"
+              }
+          def agg(source,prop,name=None):
+              return {
+                "Aggregation":{"Expression":{"Column":{"Expression":{"SourceRef":{"Source":source}},"Property":prop}},"Function":0},
+                "Name":name or f"Sum({ENTITY}.{prop})"
+              }
+          def in_filter(source,prop,value):
+              return {"Condition":{"In":{"Expressions":[{"Column":{"Expression":{"SourceRef":{"Source":source}},"Property":prop}}],"Values":[[{"Literal":{"Value":f"'{value}'"}}]]}}}
+
+          async def main():
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  context=await browser.new_context()
+                  page=await context.new_page()
+                  captured={"url":None,"headers":None,"template":None}
+                  event=asyncio.Event()
+
+                  async def on_request(req):
+                      if captured["template"] is not None or "querydata" not in req.url.lower():
+                          return
+                      try:
+                          body=req.post_data_json
+                          if not isinstance(body,dict) or not body.get("queries"):
+                              return
+                          # We need the report's real model/query context, not a slicer-only request.
+                          captured["url"]=req.url
+                          captured["headers"]=await req.all_headers()
+                          captured["template"]=body
+                          event.set()
+                      except Exception:
+                          return
+
+                  page.on("request",on_request)
+                  await page.goto(REPORT,wait_until="domcontentloaded",timeout=120000)
+                  try:
+                      await asyncio.wait_for(event.wait(),timeout=90)
+                  except asyncio.TimeoutError:
+                      raise RuntimeError("No public querydata request captured")
+                  await page.wait_for_timeout(5000)
+
+                  template=captured["template"]
+                  q0=template["queries"][0]
+                  appctx=q0.get("ApplicationContext",{})
+                  source_name="v"
+                  semantic={
+                    "Version":2,
+                    "From":[{"Name":source_name,"Entity":ENTITY,"Type":0}],
+                    "Select":[
+                      col(source_name,"cod_cnae_divisao"),
+                      col(source_name,"nome_cnae_divisao"),
+                      agg(source_name,"vlr_total_dfe"),
+                      agg(source_name,"qtde_dfe"),
+                    ],
+                    "Where":[
+                      in_filter(source_name,"corede",TARGET_COREDE),
+                      in_filter(source_name,"Filtro Ano",TARGET_YEAR),
+                      in_filter(source_name,"Modelo",TARGET_MODEL),
+                    ],
+                    "OrderBy":[{"Direction":1,"Expression":{"Column":{"Expression":{"SourceRef":{"Source":source_name}},"Property":"cod_cnae_divisao"}}}]
+                  }
+                  cmd={
+                    "SemanticQueryDataShapeCommand":{
+                      "Query":semantic,
+                      "Binding":{
+                        "Primary":{"Groupings":[{"Projections":[0,1,2,3]}]},
+                        "DataReduction":{"DataVolume":6,"Primary":{"Window":{"Count":500}}},
+                        "Version":1
+                      },
+                      "ExecutionMetricsKind":1
+                    }
+                  }
+                  commands=[cmd]
+                  cache=json.dumps({"Commands":commands},separators=(",",":"),ensure_ascii=False)
+                  custom={
+                    "version":"1.0.0",
+                    "queries":[{
+                      "Query":{"Commands":commands},
+                      "CacheKey":cache,
+                      "QueryId":"",
+                      "ApplicationContext":appctx
+                    }],
+                    "cancelQueries":[],
+                    "modelId":template["modelId"]
+                  }
+
+                  headers={k:v for k,v in (captured["headers"] or {}).items()
+                           if k.lower() not in ("content-length","host","cookie","origin","referer","user-agent")}
+                  # Keep public embed resource header in memory only; do not persist it.
+                  headers["content-type"]="application/json"
+                  headers["activityid"]=str(uuid.uuid4())
+                  headers["requestid"]=str(uuid.uuid4())
+
+                  resp=await context.request.post(captured["url"],headers=headers,data=json.dumps(custom,ensure_ascii=False))
+                  body=await resp.text()
+                  status=resp.status
+                  if status!=200:
+                      raise RuntimeError(f"custom query HTTP {status}: {body[:2000]}")
+                  js=json.loads(body)
+
+                  # Parse DSR rows robustly using descriptor names and row dictionaries.
+                  result=js["results"][0]["result"]["data"]
+                  desc=result["descriptor"]["Select"]
+                  names=[d.get("Name") for d in desc]
+                  ds=result["dsr"]["DS"][0]
+                  rows=[]
+                  # Grouped rowset is expected in PH/DM0.
+                  for ph in ds.get("PH",[]):
+                      for row in ph.get("DM0",[]):
+                          rec={}
+                          # PowerBI sparse-row encoding: S defines initial columns; C may hold compressed values.
+                          # For this small custom query, request textual labels and aggregates and preserve raw row too.
+                          rec["_raw"]=row
+                          rows.append(rec)
+
+                  out={
+                    "source_report":REPORT,
+                    "entity":ENTITY,
+                    "filters":{"corede":TARGET_COREDE,"ano":TARGET_YEAR,"modelo":TARGET_MODEL},
+                    "http_status":status,
+                    "modelId":template["modelId"],
+                    "datasetId":appctx.get("DatasetId"),
+                    "descriptor_names":names,
+                    "response":js,
+                    "note":"Public semantic-model query. No embed/resource keys, cookies or authorization headers are persisted.",
+                  }
+                  (OUT/"query_result.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+
+                  # Print compact raw DSR for follow-up parsing without exposing headers.
+                  print("SBMI_DFE_COREDE_SECTOR_QUERY_BEGIN")
+                  print(json.dumps({
+                    "filters":out["filters"],
+                    "modelId":out["modelId"],
+                    "datasetId":out["datasetId"],
+                    "descriptor":result["descriptor"],
+                    "dsr":result["dsr"],
+                  },ensure_ascii=False,indent=2)[:150000])
+                  print("SBMI_DFE_COREDE_SECTOR_QUERY_END")
+                  await browser.close()
+
+          asyncio.run(main())
+          PY
+          python /tmp/query.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dfe-corede-sector-query-v1
+          path: artifacts/dfe_corede_sector_query/
+          if-no-files-found: error
+          retention-days: 30

@@ -99,11 +99,18 @@ jobs:
 
           # Build target -> preferred code per table, requiring exact normalized label.
           maps={}
+          preferred={}
           for table,info in discoveries.items():
               by={}
               for h in info["hits"]:
-                  by.setdefault(h["target"],[]).append(h["code"])
-              maps[table]=by
+                  by.setdefault(h["target"],[]).append(h)
+              maps[table]={target:[h["code"] for h in hs] for target,hs in by.items()}
+              preferred[table]={}
+              for target,hs in by.items():
+                  def specificity(h):
+                      m=re.match(r"^(\\d+)\\s",h.get("normalized_label",""))
+                      return (len(m.group(1)) if m else 0, m.group(1) if m else "")
+                  preferred[table][target]=sorted(hs,key=specificity,reverse=True)[0]
 
           def months(start,end):
               sy,sm=map(int,(start[:4],start[4:]))
@@ -152,7 +159,9 @@ jobs:
               if not old_codes or not new_codes:
                   factors.append({"target":target,"status":"MISSING_COMPATIBLE_CODE","old_codes":old_codes,"new_codes":new_codes})
                   continue
-              old_code=old_codes[0]; new_code=new_codes[0]
+              old_pref=preferred["1419"][target]
+              new_pref=preferred["7060"][target]
+              old_code=old_pref["code"]; new_code=new_pref["code"]
               old_url,old=fetch_series(1419,old_code,periods_old)
               new_url,new=fetch_series(7060,new_code,periods_new)
               combined=old+new
@@ -170,6 +179,8 @@ jobs:
                       "factor":factor,
                       "old_code":old_code,
                       "new_code":new_code,
+                      "old_label":old_pref["label"],
+                      "new_label":new_pref["label"],
                   })
 
           # Compare food-group candidates with the preserved SBMI factor.
@@ -193,6 +204,7 @@ jobs:
               "variable":63,
               "classification":315,
               "discoveries":discoveries,
+              "preferred":preferred,
               "series":series,
               "factors":factors,
               "warning":"Candidate factors only. A category is promoted only after semantic equivalence across the 2019/2020 classification break is audited. The POF reference period spans 2017-2018, so start-month choice is a modeling assumption and must be explicit.",

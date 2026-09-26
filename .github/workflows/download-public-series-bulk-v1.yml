@@ -1,0 +1,283 @@
+name: download-public-series-bulk-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/download-public-series-bulk-v1.yml"]
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/download-public-series-bulk-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --quiet requests
+
+      - name: Download public series concurrently
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/series_publicas_bulk
+          cat > /tmp/bulk.py <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import hashlib
+          import io
+          import json
+          import threading
+          import zipfile
+          from concurrent.futures import ThreadPoolExecutor, as_completed
+          from pathlib import Path
+
+          import requests
+
+          OUT = Path("artifacts/series_publicas_bulk")
+          RAW = OUT / "raw"
+          RAW.mkdir(parents=True, exist_ok=True)
+
+          YEARS = list(range(2018, 2027))
+          MONTHS = list(range(1, 13))
+          UA = "SBMI/1.0 public-data downloader (academic market-intelligence project)"
+
+          lock = threading.Lock()
+          manifest = []
+
+          def sha256_bytes(b: bytes) -> str:
+              return hashlib.sha256(b).hexdigest()
+
+          def looks_like_html(b: bytes) -> bool:
+              h = b[:500].lstrip().lower()
+              return h.startswith(b"<!doctype html") or h.startswith(b"<html")
+
+          def sniff_csv(b: bytes):
+              sample = b[:200000]
+              text = None
+              enc = None
+              for candidate in ("utf-8-sig", "utf-8", "cp1252", "latin1"):
+                  try:
+                      text = sample.decode(candidate)
+                      enc = candidate
+                      break
+                  except UnicodeDecodeError:
+                      pass
+              if text is None:
+                  text = sample.decode("latin1", errors="replace")
+                  enc = "latin1"
+              first = text.splitlines()[0] if text.splitlines() else ""
+              delim = ";" if first.count(";") >= first.count(",") else ","
+              header = [x.strip() for x in first.split(delim)]
+              return enc, delim, header
+
+          def add(rec):
+              with lock:
+                  manifest.append(rec)
+
+          def fetch(task):
+              kind, url, relpath, expected = task
+              rec = {
+                  "kind": kind,
+                  "url": url,
+                  "relative_path": relpath,
+                  "status": None,
+                  "available": False,
+                  "bytes": 0,
+                  "sha256": "",
+                  "content_type": "",
+                  "format": expected,
+                  "rows_approx": "",
+                  "encoding": "",
+                  "delimiter": "",
+                  "header": "",
+                  "zip_members": "",
+                  "note": "",
+              }
+              try:
+                  r = requests.get(url, headers={"User-Agent": UA}, timeout=(10, 25))
+                  rec["status"] = r.status_code
+                  rec["content_type"] = r.headers.get("content-type", "")
+                  b = r.content
+                  if r.status_code != 200 or not b or looks_like_html(b):
+                      rec["note"] = "not available / non-data response"
+                      add(rec)
+                      return rec
+
+                  if expected == "zip":
+                      try:
+                          zf = zipfile.ZipFile(io.BytesIO(b))
+                          members = [z.filename for z in zf.infolist() if not z.is_dir()]
+                          rec["zip_members"] = "|".join(members)
+                          if not members:
+                              rec["note"] = "empty zip"
+                              add(rec)
+                              return rec
+                      except zipfile.BadZipFile:
+                          rec["note"] = "invalid zip"
+                          add(rec)
+                          return rec
+                  else:
+                      enc, delim, header = sniff_csv(b)
+                      rec["encoding"] = enc
+                      rec["delimiter"] = delim
+                      rec["header"] = "|".join(header)
+                      rec["rows_approx"] = max(0, b.count(b"\n") - 1)
+                      if len(header) < 2:
+                          rec["note"] = "CSV header not plausible"
+                          add(rec)
+                          return rec
+
+                  path = RAW / relpath
+                  path.parent.mkdir(parents=True, exist_ok=True)
+                  path.write_bytes(b)
+                  rec["available"] = True
+                  rec["bytes"] = len(b)
+                  rec["sha256"] = sha256_bytes(b)
+                  add(rec)
+                  return rec
+              except Exception as exc:
+                  rec["note"] = f"{type(exc).__name__}: {exc}"
+                  add(rec)
+                  return rec
+
+          tasks = []
+
+          for year in YEARS:
+              for month in MONTHS:
+                  fn = f"Composicao_de_Mercado_{month:02d}_{year}.csv"
+                  tasks.append((
+                      "radar_composicao_mercado",
+                      f"https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/{fn}",
+                      f"radar/composicao/{year}/{fn}",
+                      "csv",
+                  ))
+                  fn = f"Exportacoes_NCM_{month:02d}_{year}.csv"
+                  tasks.append((
+                      "radar_exportacoes_ncm",
+                      f"https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/{fn}",
+                      f"radar/exportacoes/{year}/{fn}",
+                      "csv",
+                  ))
+
+          tasks.append((
+              "radar_portfolio_ncm_setor",
+              "https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/Portfolio_NCMs_Setor.csv",
+              "radar/Portfolio_NCMs_Setor.csv",
+              "csv",
+          ))
+
+          for year in YEARS:
+              tasks.extend([
+                  (
+                      "dfe_totais_municipio",
+                      f"https://receitadados.sefaz.rs.gov.br/Arquivos/DFe_Totais_Municipio_{year}.zip",
+                      f"dfe/municipio/DFe_Totais_Municipio_{year}.zip",
+                      "zip",
+                  ),
+                  (
+                      "dfe_totais_cnae_classe",
+                      f"https://receitadados.sefaz.rs.gov.br/Arquivos/DFe_Totais_CNAE_Classe_{year}.zip",
+                      f"dfe/cnae_classe/DFe_Totais_CNAE_Classe_{year}.zip",
+                      "zip",
+                  ),
+                  (
+                      "cesta_alimentos_mensal",
+                      f"https://arquivosradar.sefaz.rs.gov.br/CestaAlimentos/Mensal_Todas/public_dados_mensais_{year}.csv",
+                      f"cesta_alimentos/public_dados_mensais_{year}.csv",
+                      "csv",
+                  ),
+              ])
+
+          with ThreadPoolExecutor(max_workers=16) as ex:
+              futs = [ex.submit(fetch, t) for t in tasks]
+              for fut in as_completed(futs):
+                  fut.result()
+
+          manifest.sort(key=lambda r: (r["kind"], r["relative_path"]))
+
+          fields = [
+              "kind","url","relative_path","status","available","bytes","sha256",
+              "content_type","format","rows_approx","encoding","delimiter","header",
+              "zip_members","note"
+          ]
+          with (OUT / "manifest.csv").open("w", newline="", encoding="utf-8") as f:
+              w = csv.DictWriter(f, fieldnames=fields)
+              w.writeheader()
+              w.writerows(manifest)
+
+          available = [r for r in manifest if r["available"]]
+          by_kind = {}
+          for r in available:
+              by_kind.setdefault(r["kind"], []).append(r)
+
+          def month_range(items):
+              vals = []
+              for r in items:
+                  p = r["relative_path"]
+                  import re
+                  m = re.search(r"_(\d{2})_(\d{4})\.csv$", p)
+                  if m:
+                      vals.append((int(m.group(2)), int(m.group(1))))
+              if not vals:
+                  return None
+              vals.sort()
+              return {
+                  "first": f"{vals[0][0]:04d}-{vals[0][1]:02d}",
+                  "last": f"{vals[-1][0]:04d}-{vals[-1][1]:02d}",
+                  "months": len(vals),
+              }
+
+          summary = {
+              "probe_years": YEARS,
+              "available_files": len(available),
+              "attempted_files": len(manifest),
+              "available_by_kind": {k: len(v) for k, v in sorted(by_kind.items())},
+              "coverage": {
+                  "radar_composicao_mercado": month_range(by_kind.get("radar_composicao_mercado", [])),
+                  "radar_exportacoes_ncm": month_range(by_kind.get("radar_exportacoes_ncm", [])),
+                  "dfe_totais_municipio_years": [
+                      int(r["relative_path"].split("_")[-1].split(".")[0])
+                      for r in by_kind.get("dfe_totais_municipio", [])
+                  ],
+                  "dfe_totais_cnae_classe_years": [
+                      int(r["relative_path"].split("_")[-1].split(".")[0])
+                      for r in by_kind.get("dfe_totais_cnae_classe", [])
+                  ],
+                  "cesta_alimentos_years": [
+                      int(r["relative_path"].split("_")[-1].split(".")[0])
+                      for r in by_kind.get("cesta_alimentos_mensal", [])
+                  ],
+                  "portfolio_ncm_setor": bool(by_kind.get("radar_portfolio_ncm_setor")),
+              },
+              "notes": [
+                  "HTTP 200 + structural validation required before saving.",
+                  "Missing/future URLs remain in manifest.csv but are not saved.",
+                  "Source values are preserved exactly; no analytical transformation.",
+              ],
+          }
+          (OUT / "summary.json").write_text(
+              json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+
+          print("SBMI_BULK_DOWNLOAD_BEGIN")
+          print(json.dumps(summary, ensure_ascii=False, indent=2))
+          print("SBMI_BULK_DOWNLOAD_END")
+          PY
+          python /tmp/bulk.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-series-publicas-bulk-v1
+          path: artifacts/series_publicas_bulk/
+          if-no-files-found: error
+          retention-days: 30

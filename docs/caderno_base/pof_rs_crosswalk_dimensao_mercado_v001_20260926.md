@@ -138,25 +138,32 @@ Estes valores **não estão atualizados a preços de 2026** e misturam uma popul
 
 ## 9. Atualização monetária
 
-O modelo canônico de Bens Essenciais utiliza o fator:
+A atualização monetária foi aprofundada com fatores IPCA específicos por módulo, combinando as tabelas SIDRA 1419 e 7060 e acumulando as variações mensais de janeiro/2018 a junho/2026.
 
-`1,781742384675`
+O fator canônico de Bens Essenciais permanece:
 
-com base no IPCA nacional do grupo Alimentação e bebidas até junho de 2026.
+`Alimentação e bebidas = 1,781742384675`.
 
-Como esse fator é do grupo alimentar, a primeira extensão metodologicamente comparável pode ser aplicada a **Alimentação Fora do Lar**, preservando a mesma limitação já registrada: trata-se de proxy nacional do grupo, não índice local e não índice exclusivo da subcategoria.
+O novo pipeline reproduziu esse fator por composição das variações mensais publicadas em **1,781565142282**, diferença relativa de apenas **-0,00995%**. O pequeno resíduo é compatível com a acumulação de taxas mensais publicadas com arredondamento; por governança, o fator canônico anterior é preservado.
 
-Estimativa provisória, preços aproximados de jun/2026:
+Para **Alimentação Fora do Lar**, existe índice mais aderente:
 
-`61.311 × (249,69 / 2,72) × 1,781742384675 = R$ 10.028.028,42/mês`
+- IPCA `1201.Alimentação fora do domicílio`;
+- código c315 = **7433**;
+- fator jan/2018–jun/2026 = **1,590068184251**.
 
-`R$ 10.028.028,42 × 12 = R$ 120.336.341,08/ano`.
+Assim, a estimativa corrente substitui a sensibilidade provisória baseada no grupo alimentar geral:
 
-**Natureza: ESTIMATIVA MODELADA PROVISÓRIA DE DEMANDA RESIDENTE.**
+`61.311 × (249,69 / 2,72) × 1,590068184251 = R$ 8.949.244,90/mês`
 
-Não é faturamento observado, mercado capturado ou gasto realizado exclusivamente em São Borja.
+`R$ 8.949.244,90 × 12 = R$ 107.390.938,78/ano`.
 
-Para Saúde/Higiene, Bens Não Essenciais e Serviços, **não usar esse fator alimentar**. É necessário construir fatores de preços específicos/compatíveis antes de promover estimativas a preços de 2026.
+**Natureza: ESTIMATIVA MODELADA DE DEMANDA RESIDENTE.**
+
+O valor provisório anterior de **R$ 120.336.341,08/ano**, obtido com o fator geral `Alimentação e bebidas`, fica **substituído**. A diferença é metodológica e não representa retração do mercado.
+
+Os demais fatores específicos e estimativas por módulo estão documentados em:
+`docs/caderno_base/demanda_residente_modulos_setoriais_v001_20260926.md`.
 
 ## 10. Rastreabilidade
 

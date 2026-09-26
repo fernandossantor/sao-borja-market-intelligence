@@ -221,3 +221,45 @@ Isso melhora a viabilidade de estimar uma camada de **demanda/captura externa em
 3. operações B2B podem atribuir o endereço da empresa tomadora, não o local efetivo do usuário final.
 
 Portanto, o campo deve ser solicitado e auditado, mas só pode ser promovido a proxy de demanda não residente após avaliar cobertura e significado por submercado.
+
+
+## 15. Campos fiscais e temporais confirmados no layout atual
+
+O manual de conectividade INFISC/RTC atualmente publicado pelo Município documenta campos adicionais relevantes para uma extração agregada:
+
+- `dCompet` — data da competência da NFS-e;
+- `cLocPrestacao` — local da prestação do serviço;
+- `infAdicLT` — código IBGE do local de tributação, quando aplicável;
+- `cTribNac` — código de tributação nacional do ISSQN;
+- `cTribMun` — código de tributação municipal do ISSQN;
+- estrutura `total`/totalizações e grupo de valores;
+- `vBC` — base de cálculo do IBS/CBS no layout RTC;
+- a própria fórmula técnica de `vBC` referencia `vServ`, confirmando a existência do valor do serviço no documento.
+
+Fonte oficial:
+- https://nfse.saoborja.rs.gov.br/services/arquivos/download/arquivosportal?id=45
+
+### Implicação para o pedido
+
+A chave técnica preferencial pode ser refinada para:
+
+`competência × cTribNac/cTribMun × município/local da prestação × município do destinatário/tomador × situação × tipo de documento`
+
+e as métricas devem priorizar:
+
+- valor bruto do serviço (`vServ` ou campo equivalente da base administrativa);
+- base tributável compatível;
+- quantidade de documentos;
+- quantidade de prestadores distintos na célula;
+- indicador de cancelamento/substituição.
+
+### Controle de comparabilidade
+
+Como o manual corrente incorpora a transição da Reforma Tributária, a Prefeitura deve informar:
+
+1. desde quando cada campo está disponível historicamente;
+2. se o significado ou obrigatoriedade mudou entre 2023 e 2026;
+3. como notas antigas foram migradas para o novo padrão;
+4. qual campo representa o valor bruto do serviço de modo mais estável em toda a série.
+
+Sem essa confirmação, campos do layout de 2026 não devem ser retroprojetados automaticamente para competências anteriores.

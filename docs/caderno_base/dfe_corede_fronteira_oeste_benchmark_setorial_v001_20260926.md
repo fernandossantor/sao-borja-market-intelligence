@@ -53,6 +53,77 @@ Esses valores abrangem todo o COREDE Fronteira Oeste. Não devem ser comparados 
 
 `* valor médio por documento = valor NFC-e / quantidade NFC-e. Não denominar automaticamente “ticket médio do consumidor”.`
 
+
+## 3A. Série histórica 2023-2025
+
+Foi executada uma segunda consulta pública, mantendo `COREDE = FRONTEIRA OESTE` e `modelo = NFC-e`, mas recuperando a série anual 2023-2025 por divisão CNAE.
+
+### Total NFC-e do COREDE
+
+| Ano | Valor NFC-e | Quantidade | Valor médio/documento |
+|---:|---:|---:|---:|
+| 2023 | R$ 8.872.450.065,47 | 90.808.849 | R$ 97,70 |
+| 2024 | R$ 10.078.977.261,66 | 99.650.104 | R$ 101,14 |
+| 2025 | R$ 11.129.327.451,44 | 105.348.009 | R$ 105,64 |
+
+Variações **nominais calculadas**:
+
+- valor total: +13,60% em 2024/2023 e +10,42% em 2025/2024;
+- quantidade de documentos: +9,74% e +5,72%, respectivamente;
+- 2025 versus 2023: +25,44% em valor e +16,01% em quantidade.
+
+Essas variações não devem ser interpretadas como crescimento real de consumo sem deflação e controle de mudanças de formalização/composição.
+
+### Divisão 47 — Comércio varejista
+
+| Ano | Valor NFC-e | Quantidade | % do valor regional |
+|---:|---:|---:|---:|
+| 2023 | R$ 8.129.374.041,41 | 84.349.815 | 91,6249% |
+| 2024 | R$ 9.219.172.341,39 | 91.986.774 | 91,4693% |
+| 2025 | R$ 10.123.462.565,95 | 96.180.616 | 90,9620% |
+
+Variação nominal calculada 2025/2023:
+- valor: **+24,53%**;
+- quantidade: **+14,03%**.
+
+A participação da divisão 47 no valor regional permanece dominante, mas recua levemente no período. Isso é uma descrição da composição fiscal regional; não identifica quais categorias varejistas ganharam ou perderam participação dentro da divisão.
+
+### Divisão 56 — Alimentação
+
+| Ano | Valor NFC-e | Quantidade | % do valor regional |
+|---:|---:|---:|---:|
+| 2023 | R$ 237.676.433,30 | 3.376.466 | 2,6788% |
+| 2024 | R$ 283.321.723,88 | 4.218.259 | 2,8110% |
+| 2025 | R$ 316.172.104,88 | 4.512.222 | 2,8409% |
+
+Variação nominal calculada:
+- 2024/2023: +19,20% em valor e +24,93% em quantidade;
+- 2025/2024: +11,59% em valor e +6,97% em quantidade;
+- 2025/2023: **+33,03% em valor e +33,64% em quantidade**.
+
+O valor médio por documento da divisão 56 foi:
+- 2023: R$ 70,39;
+- 2024: R$ 67,17;
+- 2025: R$ 70,07.
+
+**Interpretação limitada:** no benchmark regional, o avanço nominal de 2023 a 2025 da divisão 56 ocorreu junto com crescimento de magnitude semelhante no número de NFC-e, enquanto o valor médio por documento terminou 2025 próximo ao nível de 2023. Isso não prova crescimento real de volume consumido, pois documento fiscal não equivale necessariamente a unidade de refeição ou consumidor e ainda falta deflação específica.
+
+### Rastreabilidade da série
+
+Workflow:
+`.github/workflows/dfe-corede-sector-series-v1.yml`
+
+Execução:
+- run: `36263445903`;
+- job: `108463502982`;
+- commit: `f3c267430d596aecc3209b776d18bf1b25a30a2b`;
+- artifact: `10912264032`;
+- digest: `sha256:67c01e1555bdc609ede426d4c3e2bd52a55eb808ad3ff196be3ea0361b092b2c`.
+
+Google Drive:
+- `SBMI_DFe_COREDE_Fronteira_Oeste_CNAE_2023_2025_NFCe_v001.zip`;
+- ID: `1bmG3wbEWxEBreGa7OznmTs3VDcAT1-Ee`.
+
 ## 4. Interpretação setorial
 
 ### 4.1 Comércio varejista — divisão 47
@@ -167,7 +238,7 @@ O pacote contém o resultado bruto da consulta, resumo e CSV decodificado por di
 
 ## 9. Próximo aprofundamento
 
-1. construir série 2023-2025 do COREDE para divisões prioritárias, principalmente 47 e 56;
+1. manter a série 2023-2025 como benchmark regional e, quando pertinente, ampliá-la historicamente;
 2. manter essa série como **benchmark regional**, nunca como estimativa municipal;
 3. buscar dado oficial agregado `município × CNAE` por solicitação à Receita Estadual;
 4. para Serviços, priorizar NFS-e municipal;

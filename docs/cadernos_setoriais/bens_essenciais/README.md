@@ -213,3 +213,26 @@ Grandes formatos podem competir por preço, promoção, variedade e checkout.
 Vizinhança e especializados podem competir por proximidade, rapidez, disponibilidade e qualidade.
 
 O benchmark de **R$ 234.706.228,14/ano** é ESTIMATIVA MODELADA de alimentação no domicílio e não faturamento observado.
+
+
+## Atualização — dimensão de mercado — 2026-09-26
+
+A demanda residente de alimentação no domicílio permanece **R$ 234.706.228,14/ano**, estimativa POF/RS territorializada e atualizada por preços.
+
+A Receita Estadual passou a fornecer ao projeto um **envelope fiscal municipal observado** por modelo DFe. Em 2025, São Borja registrou **R$ 1.189.327.276,47 em NFC-e**, mas esse total reúne todos os setores emissores e não pode ser interpretado como varejo alimentar ou gasto dos residentes.
+
+A auditoria dos modelos públicos da Receita confirmou:
+- município e setor/CNAE estão expostos em modelos distintos;
+- não foi localizada interseção pública direta `São Borja × CNAE`;
+- não foi localizada interseção pública direta `São Borja × NCM`.
+
+Portanto, permanece proibido ratear o envelope municipal por número de lojas, CNPJs, vínculos ou participação regional.
+
+O Radar do Mercado foi incorporado apenas como taxonomia de produto. O pacote prioritário do setor contém:
+- **1.418 NCM8 CORE** de alimentação no domicílio;
+- **67 NCM8 ADJACENT** de limpeza doméstica;
+- **1.485 NCM8 prioritários** no total.
+
+Essa lista serve para solicitar à Receita Estadual uma extração agregada `São Borja × NCM × valor`. Não é faturamento nem market share.
+
+**Situação corrente:** demanda residente modelada disponível; faturamento setorial municipal observado e market share ainda não defensáveis.

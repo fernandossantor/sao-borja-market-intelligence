@@ -127,7 +127,13 @@ jobs:
               bodyg=await respg.text()
               if respg.status!=200:raise RuntimeError(f"Groups HTTP {respg.status}: {bodyg[:2000]}")
               jg=json.loads(bodyg);dg=jg["results"][0]["result"]["data"];dsg=dg["dsr"]["DS"][0]
-              dmg=(dsg.get("PH") or [{}])[0].get("DM0",[]);dictg=(dsg.get("ValueDicts") or {}).get("D0",[])
+              phg=(dsg.get("PH") or [{}])[0]
+              dmg=phg.get("DM0",[])
+              if not dmg:
+                dmg=next((v for k,v in phg.items() if k.startswith("DM") and isinstance(v,list)),[])
+              if not dmg:
+                dmg=next((v for k,v in dsg.items() if k.startswith("DM") and isinstance(v,list)),[])
+              dictg=(dsg.get("ValueDicts") or {}).get("D0",[])
               prevg=[None];groups=[]
               for er in dmg:
                 itg=iter(er.get("C",[]));Rg=er.get("R",0) or 0
@@ -137,7 +143,7 @@ jobs:
               groups=sorted(set(groups))
               with (OUT/"radar_affinity_groups.csv").open("w",newline="",encoding="utf-8") as fg:
                 wg=csv.writer(fg);wg.writerow(["grupo_afinidade_final"]);wg.writerows([[g] for g in groups])
-              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"detail_window_truncated":len(rawrows)>=10000,"affinity_groups_complete_count":len(groups),"affinity_groups_complete":groups,"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
+              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"detail_window_truncated":len(rawrows)>=10000,"affinity_groups_complete_count":len(groups),"affinity_groups_complete":groups,"group_dsr_keys":list(dsg.keys()),"group_ph_keys":list(phg.keys()),"group_dm_rows":len(dmg),"group_value_dict_size":len(dictg),"group_dm_head":dmg[:5],"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
                 "warning":"Taxonomy only. Radar values are not São Borja values; no municipal dimension was observed.","decoder":"fixed D0-D3 mapping to Select order"}
               (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
               print("SBMI_RADAR_NCM_TAXONOMY_BEGIN");print(json.dumps(summary,ensure_ascii=False,indent=2)[:120000]);print("SBMI_RADAR_NCM_TAXONOMY_END")

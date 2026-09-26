@@ -27,11 +27,11 @@ A prioridade do pacote é a qualidade dos cinco cadernos em Google Docs: profund
 
 ## QA corrente
 
-Drive: `1wqU0Bhy8RpkXuYr3K7BoORqHo6sxtOddFtf-2ZkigZw`
+Drive: `1L-rc6r6IueoalKoAxbCGDZXVZ6O0nBAVPhYTL3IuN5k`
 
-GitHub: `docs/governance/qa_argumentativo_cadernos_20260925_v002.md`
+GitHub: `docs/governance/qa_argumentativo_cadernos_20260925_v003.md`
 
-Status: **APROVADO PARA REVISÃO HUMANA FINAL.**
+Status: **PASSA QA ARGUMENTATIVO, DE RASTREABILIDADE E PRECISÃO; LEITURA LINEAR FINAL PENDENTE.**
 
 ## Padrão editorial
 
@@ -43,9 +43,9 @@ Regra: `evidência → contexto → relação → mecanismo → interpretação 
 
 ## Checkpoint corrente
 
-Drive: `1OOdAizyBUH24nM8X0gz6MrQ7SxEz6W1E65TfRgh7nJQ`
+Drive: `13x9pTcu5_6wZZTEPEMt0TIGXmxpXLhLvBwwLac_U1AE`
 
-GitHub: `docs/caderno_base/checkpoint_20260925_qa_textual_aprofundado_cadernos_v001.md`
+GitHub: `docs/caderno_base/checkpoint_20260925_qa_precisao_cadernos_v002.md`
 
 ## Base técnica
 
@@ -58,7 +58,7 @@ O Caderno-Base v028 permanece read-only.
 
 ## Próxima etapa
 
-Executar leitura humana integrada dos cinco cadernos, removendo somente repetição sem ganho argumentativo, problemas de ritmo, divergências terminológicas, referências incompletas e falhas de sumário/estilo. Não reduzir demonstração ou profundidade para obter concisão artificial.
+Executar leitura linear integrada dos cinco cadernos, removendo somente repetição sem ganho argumentativo, melhorando transições e uniformizando referências/títulos. Não reduzir demonstração ou profundidade para obter concisão artificial. A rodada v003 já removeu números ilustrativos não observados e suavizou formulações causais não demonstradas.
 
 ## Governança
 

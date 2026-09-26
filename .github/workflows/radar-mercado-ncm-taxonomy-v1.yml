@@ -136,9 +136,12 @@ jobs:
               dictg=(dsg.get("ValueDicts") or {}).get("D0",[])
               prevg=[None];groups=[]
               for er in dmg:
-                itg=iter(er.get("C",[]));Rg=er.get("R",0) or 0
-                vg=prevg[0] if Rg&1 else next(itg,None);prevg=[vg]
-                if isinstance(vg,(int,float)) and int(vg)==vg and 0<=int(vg)<len(dictg): vg=dictg[int(vg)]
+                if "G0" in er:
+                  vg=er.get("G0")
+                else:
+                  itg=iter(er.get("C",[]));Rg=er.get("R",0) or 0
+                  vg=prevg[0] if Rg&1 else next(itg,None);prevg=[vg]
+                  if isinstance(vg,(int,float)) and int(vg)==vg and 0<=int(vg)<len(dictg): vg=dictg[int(vg)]
                 if vg is not None and str(vg).strip(): groups.append(str(vg).strip())
               groups=sorted(set(groups))
               with (OUT/"radar_affinity_groups.csv").open("w",newline="",encoding="utf-8") as fg:

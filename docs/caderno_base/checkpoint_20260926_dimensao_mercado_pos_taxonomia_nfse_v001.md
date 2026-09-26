@@ -322,11 +322,16 @@ Não criar share por contagem de lojas/CNPJ ou alocação regional.
 
 ### Enquanto aguarda resposta
 
-Pode-se avançar, sem inventar faturamento, em:
-- especificação de pesquisa de DNR para varejo/AFL;
-- desenho de protocolo voluntário de dados empresariais/POS;
-- definição de indicadores que serão calculados quando os agregados fiscais forem recebidos;
-- fechamento editorial das novas notas metodológicas nos cadernos.
+Já foram concluídos nesta mesma etapa:
+- desenho futuro de pesquisa DNR para varejo/AFL;
+- protocolo voluntário de dados empresariais/POS;
+- templates correspondentes na matriz técnica;
+- atualização dos gates de market share.
+
+Próximos avanços internos possíveis:
+- preparar plano de recrutamento de empresas parceiras, sem iniciar coleta;
+- estruturar scripts de ingestão/QA para os agregados fiscais quando recebidos;
+- fechar versão editorial que incorpore as novas dimensões aos cadernos.
 
 ## 15. Governança
 
@@ -336,3 +341,56 @@ PR #41 deve permanecer:
 - **UNMERGED**.
 
 Nenhuma autorização de merge foi concedida.
+
+
+## 16. Instrumentos preparados para a próxima fase
+
+### Dados empresariais voluntários
+
+Documento:
+`docs/caderno_base/protocolo_dados_empresariais_voluntarios_v001_20260926.md`.
+
+Drive:
+`1ibZebz-f-_Edu_8cNHy6ZTVl3GK_NRoAZYiMpGhYddw`.
+
+Aba:
+`Dados_empresa_template`.
+
+A estrutura define:
+- unidade local;
+- competência;
+- módulo/canal;
+- origem territorial agregada;
+- faturamento bruto;
+- devoluções/cancelamentos;
+- faturamento líquido calculado;
+- transações/documentos;
+- fonte do sistema e conceito de valor.
+
+Objetivo:
+numerador empresarial e calibração, nunca denominador substituto.
+
+### DNR varejo/AFL
+
+Documento:
+`docs/caderno_base/instrumento_dnr_varejo_afl_v001_20260926.md`.
+
+Drive:
+`1F0A47VpgCWK6V1nI7yoXs9R0S5MqMN5oXYW_Mjb6bxw`.
+
+Aba:
+`DNR_intercept_template`.
+
+Status:
+**DESENHO FUTURO / NÃO OPERACIONAL**.
+
+Nenhum tamanho de amostra, coleta ou expansão municipal foi autorizado.
+
+### Market share gates
+
+A aba `Market_share_gates` foi atualizada:
+
+- listas NCM prioritárias agora estão disponíveis para Bens Essenciais, Saúde/Higiene e BNE;
+- protocolo de numerador empresarial está pronto para os cinco setores;
+- Serviços registra explicitamente que a superfície pública NFS-e é insuficiente;
+- todos os cinco setores permanecem **NÃO DEFENSÁVEIS** para market share até obtenção de denominadores/numeradores compatíveis.

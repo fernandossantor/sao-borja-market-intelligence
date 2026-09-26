@@ -365,6 +365,75 @@ jobs:
 
                   counts = Counter(r["grupo_afinidade_final"] for r in uniq)
 
+                  # Join the complete taxonomy to the audited SBMI group crosswalk.
+                  crosswalk_path = Path(
+                      "docs/caderno_base/radar_ncm_crosswalk_cadernos_v001_20260926.md"
+                  )
+                  cross_md = crosswalk_path.read_text(encoding="utf-8")
+                  start = cross_md.index("## 5. Crosswalk completo")
+                  end = cross_md.index("## 6. Decisões por setor")
+                  table_lines = [
+                      line
+                      for line in cross_md[start:end].splitlines()
+                      if line.startswith("| ") and "---" not in line
+                  ]
+                  group_map = {}
+                  for line in table_lines[1:]:
+                      cells = [x.strip() for x in line.split("|")[1:-1]]
+                      if len(cells) < 7:
+                          continue
+                      group_map[cells[0]] = {
+                          "setor_sbmi": cells[1],
+                          "modulo_sbmi": cells[2],
+                          "status_crosswalk": cells[3],
+                          "relacao_pof": cells[4],
+                          "prioridade": cells[5],
+                          "justificativa": cells[6],
+                      }
+                  missing_map = [g for g in groups if g not in group_map]
+                  extra_map = [g for g in group_map if g not in groups]
+                  if missing_map or extra_map:
+                      raise RuntimeError(
+                          f"Crosswalk mismatch missing={missing_map} extra={extra_map}"
+                      )
+
+                  priority_rows = []
+                  for r in uniq:
+                      m = group_map[r["grupo_afinidade_final"]]
+                      if m["prioridade"] != "ALTA":
+                          continue
+                      priority_rows.append(
+                          {
+                              **m,
+                              **r,
+                          }
+                      )
+                  priority_group_count = len(
+                      {r["grupo_afinidade_final"] for r in priority_rows}
+                  )
+                  priority_sector_counts = Counter(
+                      r["setor_sbmi"] for r in priority_rows
+                  )
+
+                  with (
+                      OUT / "radar_ncm_priority_request.csv"
+                  ).open("w", newline="", encoding="utf-8") as fp:
+                      fields = [
+                          "setor_sbmi",
+                          "modulo_sbmi",
+                          "status_crosswalk",
+                          "relacao_pof",
+                          "prioridade",
+                          "grupo_afinidade_final",
+                          "ncm8",
+                          "ncm4",
+                          "codxdescr_ncm8",
+                          "justificativa",
+                      ]
+                      w = csv.DictWriter(fp, fieldnames=fields)
+                      w.writeheader()
+                      w.writerows(priority_rows)
+
                   with (
                       OUT / "radar_ncm_taxonomy_complete.csv"
                   ).open("w", newline="", encoding="utf-8") as f:
@@ -403,6 +472,10 @@ jobs:
                       "group_query_meta": group_meta,
                       "initial_detail_meta": detail_meta,
                       "completion_meta": per_group_meta,
+                      "crosswalk_groups": len(group_map),
+                      "priority_groups": priority_group_count,
+                      "priority_ncm_rows": len(priority_rows),
+                      "priority_ncm_rows_by_sector": dict(sorted(priority_sector_counts.items())),
                       "warning": (
                           "Taxonomy only. No municipal dimension is present in this "
                           "dataset; values from Radar must not be attributed to São Borja."

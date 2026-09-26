@@ -1,5 +1,5 @@
 # 00_LEIA-ME — Pacote Final — São Borja Inteligência Mercadológica
-**Data:** 24/09/2026
+**Atualização editorial:** 25/09/2026
 
 ## Arquitetura do pacote
 
@@ -17,13 +17,13 @@ Planilhas e CSVs são lastro técnico; não substituem os reports.
 ## Publicações principais — Google Docs
 
 - Síntese Executiva Empresarial v003 — `1grYk3RcpB4frb1YQE44Ma1gjK6-5PkclvwrZkJDSg2o`
-- Caderno Geral — Report Empresarial v003 — `1fV2nkRKu4W3-35vTzc4QZ-oUw5oifuXPcd3MKKdhdm0`
-- Bens Essenciais — Report Empresarial v002 — `1aQEWr-g8Tma3zVtm_f8F6xNQQnqVfS7lZ10a6qifk6g`
-- Saúde/Higiene — Report Empresarial v002 — `15hz_KN11m56QTr-4nceDwCnJpE6dn2U9XupH21vjcDM`
-- Bens Não Essenciais — Report Empresarial v002 — `15QdAjkOAYdeZkOZILV1DCbhQ9ze4QQOqTOZTHgMBafM`
-- Alimentação/Serviços — Report Empresarial v002 — `1Qcvr9Y_ptuAuH4Ud4GZmtAq9pMG2ahaxd2tM4POkhW4`
+- Caderno Geral — Report Empresarial v004 — aprofundamento decisório — `13yqwDHKJuEag4I0l7XaUZ_oDIg5lh0UvQsmJWc3H2Co`
+- Bens Essenciais — Report Empresarial v003 — reconstrução argumentativa — `190arYFyxKq_xynAbqU3fGThlpbJiqPXlmqMOrtRHss0`
+- Saúde/Higiene — Report Empresarial v003 — reconstrução argumentativa — `1d141fQT3aTMtHoj5el9FOlR0mXqTgcNp2E7QqV28ZjI`
+- Bens Não Essenciais — Report Empresarial v003 — reconstrução argumentativa — `1uBIiR9pH6wqzIH2T5nO_dRpDEu2Cu-qP3v4cCcs2DDE`
+- Alimentação/Serviços — Report Empresarial v003 — reconstrução argumentativa — `1pyUYH5APuuRR72XZ9Pd1BjpQDcgDQ1yTNActUkium3Y`
 
-**Decisão de entrega:** PDF não é obrigatório. Os cinco Google Docs constituem o formato publicável principal após QA final de formatação. Exportação futura para PDF é opcional.
+**Decisão de entrega:** PDF não é obrigatório. Os cinco Google Docs acima são a camada editorial corrente. Em 25/09/2026 foram reconstruídos/aprofundados para elevar consistência argumentativa, demonstração, rastreabilidade e utilidade decisória. O congelamento definitivo depende de uma última leitura editorial integral. Exportação futura para PDF é opcional.
 
 ## Factsheets v001
 
@@ -33,7 +33,7 @@ Planilhas e CSVs são lastro técnico; não substituem os reports.
 - Bens Não Essenciais — `1mBb623UdAlWfcVADCLtRB7_As4pMD0NXjpZf07-RJRA`
 - Alimentação/Serviços — `1KaU-x5IU_1UYbahTNN8kwYU2ZlQFQ5864iZCaLPczQs`
 
-## Storyboards v001
+## Storyboards v001 — apoio opcional
 
 - Territorial — `1s5MzcfHbXEl4hNnHzjPbzpcxj1HBmQtW7FamyOy2USw`
 - Bens Essenciais — `11riRcFpuP9JF03g82qb3yGFHEQbZFexjj9ueEQBofgA`
@@ -97,6 +97,8 @@ Caderno-Base v028 permanece preservado como antecedente **read-only**.
 - Auditorias esgotadas só reabrem diante de evidência material nova.
 
 ## Ordem de leitura recomendada
+
+**Prioridade editorial atual:** cadernos e raciocínio analítico. Storyboards e gráficos não bloqueiam o fechamento.
 
 **Empresas:** Síntese Executiva → Caderno Setorial → Factsheet → indicadores internos sugeridos.
 

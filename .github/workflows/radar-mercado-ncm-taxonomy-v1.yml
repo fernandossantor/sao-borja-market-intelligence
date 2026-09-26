@@ -94,7 +94,7 @@ jobs:
               assignments={}
               remaining=set(dictkeys)
               for colidx in range(4):
-                vals=[r[colidx] for r in rawrows if r[colidx] is not None][:500]
+                vals=[r[colidx] for r in rawrows if r[colidx] is not None]
                 candidates=[]
                 for dk in list(remaining):
                   dv=dicts[dk]
@@ -115,7 +115,7 @@ jobs:
               for vals in rawrows:
                 dec=[]
                 for i,v in enumerate(vals):
-                  if i in assignments and v is not None: dec.append(dicts[assignments[i]][int(v)])
+                  if i in assignments and v is not None and isinstance(v,(int,float)) and int(v)==v and 0<=int(v)<len(dicts[assignments[i]]): dec.append(dicts[assignments[i]][int(v)])
                   else:dec.append(v)
                 grupo=str(dec[0] or "").strip();ncm8=re.sub(r"\D","",str(dec[1] or "")).zfill(8);ncm4=re.sub(r"\D","",str(dec[2] or "")).zfill(4);descr=str(dec[3] or "").strip()
                 rows.append({"grupo_afinidade_final":grupo,"ncm8":ncm8,"ncm4":ncm4,"codxdescr_ncm8":descr})
@@ -128,7 +128,7 @@ jobs:
               with (OUT/"radar_ncm_taxonomy.csv").open("w",newline="",encoding="utf-8") as f:
                 w=csv.DictWriter(f,fieldnames=["grupo_afinidade_final","ncm8","ncm4","codxdescr_ncm8"]);w.writeheader();w.writerows(uniq)
               counts=Counter(r["grupo_afinidade_final"] for r in uniq)
-              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,
+              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
                 "warning":"Taxonomy only. Radar values are not São Borja values; no municipal dimension was observed."}
               (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
               print("SBMI_RADAR_NCM_TAXONOMY_BEGIN");print(json.dumps(summary,ensure_ascii=False,indent=2)[:120000]);print("SBMI_RADAR_NCM_TAXONOMY_END")

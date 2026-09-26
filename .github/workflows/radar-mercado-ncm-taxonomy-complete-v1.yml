@@ -1,0 +1,430 @@
+name: radar-mercado-ncm-taxonomy-complete-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/radar-mercado-ncm-taxonomy-complete-v1.yml"]
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/radar-mercado-ncm-taxonomy-complete-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Extract complete Radar affinity-group × NCM taxonomy
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/radar_ncm_taxonomy_complete
+          cat > /tmp/q.py <<'PY'
+          from __future__ import annotations
+
+          import asyncio
+          import csv
+          import json
+          import re
+          import uuid
+          from collections import Counter
+          from pathlib import Path
+
+          from playwright.async_api import async_playwright
+
+          OUT = Path("artifacts/radar_ncm_taxonomy_complete")
+          REPORT = "https://app.powerbi.com/view?r=eyJrIjoiYzMxNWUyMDQtYWVjOC00MTcxLWJhN2ItY2NjYTk2MWEwNmNjIiwidCI6IjgzYmQwOTBiLTc1NmUtNGEwMi1hNTEyLWU1ZWEwMmMwMzA0MSJ9"
+          ENTITY = "d_ncms"
+
+          def col(src: str, prop: str):
+              return {
+                  "Column": {
+                      "Expression": {"SourceRef": {"Source": src}},
+                      "Property": prop,
+                  },
+                  "Name": f"{ENTITY}.{prop}",
+              }
+
+          def literal_text(value: str) -> str:
+              # Power BI literals are single-quoted strings; escape apostrophes by doubling.
+              return "'" + value.replace("'", "''") + "'"
+
+          def find_dm(ds: dict):
+              ph = (ds.get("PH") or [{}])[0]
+              dm = ph.get("DM0")
+              if isinstance(dm, list):
+                  return dm
+              for k, v in ph.items():
+                  if k.startswith("DM") and isinstance(v, list):
+                      return v
+              for k, v in ds.items():
+                  if k.startswith("DM") and isinstance(v, list):
+                      return v
+              return []
+
+          def decode_rows(data: dict, ncols: int):
+              ds = data["dsr"]["DS"][0]
+              dm = find_dm(ds)
+              dicts = ds.get("ValueDicts", {}) or {}
+              prev = [None] * ncols
+              rows = []
+
+              for er in dm:
+                  vals = [None] * ncols
+                  has_g = any(f"G{i}" in er for i in range(ncols))
+                  if has_g:
+                      for i in range(ncols):
+                          if f"G{i}" in er:
+                              vals[i] = er[f"G{i}"]
+                          else:
+                              vals[i] = prev[i]
+                  else:
+                      it = iter(er.get("C", []))
+                      R = er.get("R", 0) or 0
+                      for i in range(ncols):
+                          vals[i] = prev[i] if R & (1 << i) else next(it, None)
+
+                  decoded = []
+                  for i, v in enumerate(vals):
+                      dk = f"D{i}"
+                      dv = dicts.get(dk, [])
+                      if (
+                          v is not None
+                          and isinstance(v, (int, float))
+                          and int(v) == v
+                          and 0 <= int(v) < len(dv)
+                      ):
+                          decoded.append(dv[int(v)])
+                      else:
+                          decoded.append(v)
+                  prev = vals
+                  rows.append(decoded)
+
+              return rows, {
+                  "dm_rows": len(dm),
+                  "value_dict_sizes": {k: len(v) for k, v in dicts.items()},
+                  "ds_keys": list(ds.keys()),
+              }
+
+          async def main():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(headless=True)
+                  ctx = await browser.new_context()
+                  page = await ctx.new_page()
+
+                  cap = {}
+                  ev = asyncio.Event()
+
+                  async def onreq(req):
+                      if cap or "querydata" not in req.url.lower():
+                          return
+                      try:
+                          body = req.post_data_json
+                          if isinstance(body, dict) and body.get("queries"):
+                              cap["url"] = req.url
+                              cap["headers"] = await req.all_headers()
+                              cap["body"] = body
+                              ev.set()
+                      except Exception:
+                          pass
+
+                  page.on("request", onreq)
+                  await page.goto(REPORT, wait_until="domcontentloaded", timeout=120000)
+                  await asyncio.wait_for(ev.wait(), 90)
+                  await page.wait_for_timeout(2500)
+
+                  tpl = cap["body"]
+                  model_id = tpl["modelId"]
+                  appctx = tpl["queries"][0].get("ApplicationContext", {})
+                  src = "d"
+                  headers_base = {
+                      k: v
+                      for k, v in cap["headers"].items()
+                      if k.lower()
+                      not in (
+                          "content-length",
+                          "host",
+                          "cookie",
+                          "origin",
+                          "referer",
+                          "user-agent",
+                      )
+                  }
+                  headers_base["content-type"] = "application/json"
+
+                  async def run_query(props, where=None, order=None, count=10000):
+                      semantic = {
+                          "Version": 2,
+                          "From": [{"Name": src, "Entity": ENTITY, "Type": 0}],
+                          "Select": [col(src, prop) for prop in props],
+                      }
+                      if where:
+                          semantic["Where"] = where
+                      if order:
+                          semantic["OrderBy"] = [
+                              {
+                                  "Direction": 1,
+                                  "Expression": {
+                                      "Column": {
+                                          "Expression": {"SourceRef": {"Source": src}},
+                                          "Property": prop,
+                                      }
+                                  },
+                              }
+                              for prop in order
+                          ]
+
+                      cmd = {
+                          "SemanticQueryDataShapeCommand": {
+                              "Query": semantic,
+                              "Binding": {
+                                  "Primary": {
+                                      "Groupings": [
+                                          {"Projections": list(range(len(props)))}
+                                      ]
+                                  },
+                                  "DataReduction": {
+                                      "DataVolume": 6,
+                                      "Primary": {"Window": {"Count": count}},
+                                  },
+                                  "Version": 1,
+                              },
+                              "ExecutionMetricsKind": 1,
+                          }
+                      }
+                      commands = [cmd]
+                      qbody = {
+                          "version": "1.0.0",
+                          "queries": [
+                              {
+                                  "Query": {"Commands": commands},
+                                  "CacheKey": json.dumps(
+                                      {"Commands": commands},
+                                      separators=(",", ":"),
+                                  ),
+                                  "QueryId": "",
+                                  "ApplicationContext": appctx,
+                              }
+                          ],
+                          "cancelQueries": [],
+                          "modelId": model_id,
+                      }
+                      headers = dict(headers_base)
+                      headers["activityid"] = str(uuid.uuid4())
+                      headers["requestid"] = str(uuid.uuid4())
+                      resp = await ctx.request.post(
+                          cap["url"], headers=headers, data=json.dumps(qbody)
+                      )
+                      body = await resp.text()
+                      if resp.status != 200:
+                          raise RuntimeError(f"HTTP {resp.status}: {body[:3000]}")
+                      js = json.loads(body)
+                      data = js["results"][0]["result"]["data"]
+                      return decode_rows(data, len(props))
+
+                  # Complete list of affinity groups.
+                  group_rows, group_meta = await run_query(
+                      ["grupo_afinidade_final"],
+                      order=["grupo_afinidade_final"],
+                      count=1000,
+                  )
+                  groups = sorted(
+                      {
+                          str(r[0]).strip()
+                          for r in group_rows
+                          if r and r[0] is not None and str(r[0]).strip()
+                      }
+                  )
+
+                  # First detail window: fast path for most groups.
+                  props = [
+                      "grupo_afinidade_final",
+                      "ncm8",
+                      "ncm4",
+                      "codxdescr_ncm8",
+                  ]
+                  raw_rows, detail_meta = await run_query(
+                      props,
+                      order=["grupo_afinidade_final", "ncm8"],
+                      count=10000,
+                  )
+
+                  def normalize_detail(rows):
+                      out = []
+                      for dec in rows:
+                          if len(dec) < 4:
+                              continue
+                          grupo = str(dec[0] or "").strip()
+                          ncm8 = re.sub(r"\D", "", str(dec[1] or "")).zfill(8)
+                          ncm4 = re.sub(r"\D", "", str(dec[2] or "")).zfill(4)
+                          descr = str(dec[3] or "").strip()
+                          if grupo and ncm8 and descr:
+                              out.append(
+                                  {
+                                      "grupo_afinidade_final": grupo,
+                                      "ncm8": ncm8,
+                                      "ncm4": ncm4,
+                                      "codxdescr_ncm8": descr,
+                                  }
+                              )
+                      return out
+
+                  rows = normalize_detail(raw_rows)
+                  groups_seen = {r["grupo_afinidade_final"] for r in rows}
+                  missing_groups = [g for g in groups if g not in groups_seen]
+
+                  # Because the 10k detail window truncates alphabetically, retrieve
+                  # every missing group independently. Each group is far below 10k.
+                  per_group_meta = {}
+                  for group in missing_groups:
+                      where = [
+                          {
+                              "Condition": {
+                                  "In": {
+                                      "Expressions": [
+                                          {
+                                              "Column": {
+                                                  "Expression": {
+                                                      "SourceRef": {"Source": src}
+                                                  },
+                                                  "Property": "grupo_afinidade_final",
+                                              }
+                                          }
+                                      ],
+                                      "Values": [
+                                          [
+                                              {
+                                                  "Literal": {
+                                                      "Value": literal_text(group)
+                                                  }
+                                              }
+                                          ]
+                                      ],
+                                  }
+                              }
+                          }
+                      ]
+                      rr, meta = await run_query(
+                          props,
+                          where=where,
+                          order=["ncm8"],
+                          count=10000,
+                      )
+                      nr = normalize_detail(rr)
+                      rows.extend(nr)
+                      per_group_meta[group] = {
+                          **meta,
+                          "normalized_rows": len(nr),
+                      }
+
+                  uniq = []
+                  seen = set()
+                  for r in sorted(
+                      rows,
+                      key=lambda x: (
+                          x["grupo_afinidade_final"],
+                          x["ncm8"],
+                          x["codxdescr_ncm8"],
+                      ),
+                  ):
+                      key = (
+                          r["grupo_afinidade_final"],
+                          r["ncm8"],
+                          r["codxdescr_ncm8"],
+                      )
+                      if key not in seen:
+                          seen.add(key)
+                          uniq.append(r)
+
+                  final_groups = sorted({r["grupo_afinidade_final"] for r in uniq})
+                  still_missing = [g for g in groups if g not in final_groups]
+                  extras = [g for g in final_groups if g not in groups]
+                  if still_missing:
+                      raise RuntimeError(f"Missing groups after completion: {still_missing}")
+                  if extras:
+                      raise RuntimeError(f"Unexpected groups not in domain query: {extras}")
+
+                  invalid_ncm8 = [
+                      r for r in uniq if not re.fullmatch(r"\d{8}", r["ncm8"])
+                  ]
+                  if invalid_ncm8:
+                      raise RuntimeError(
+                          f"Invalid NCM8 after normalization: {invalid_ncm8[:10]}"
+                      )
+
+                  counts = Counter(r["grupo_afinidade_final"] for r in uniq)
+
+                  with (
+                      OUT / "radar_ncm_taxonomy_complete.csv"
+                  ).open("w", newline="", encoding="utf-8") as f:
+                      w = csv.DictWriter(
+                          f,
+                          fieldnames=[
+                              "grupo_afinidade_final",
+                              "ncm8",
+                              "ncm4",
+                              "codxdescr_ncm8",
+                          ],
+                      )
+                      w.writeheader()
+                      w.writerows(uniq)
+
+                  with (
+                      OUT / "radar_affinity_groups_complete.csv"
+                  ).open("w", newline="", encoding="utf-8") as f:
+                      w = csv.writer(f)
+                      w.writerow(["grupo_afinidade_final", "ncm_count"])
+                      for g in groups:
+                          w.writerow([g, counts.get(g, 0)])
+
+                  summary = {
+                      "source": "Receita Estadual RS — Radar do Mercado — public Power BI",
+                      "entity": ENTITY,
+                      "affinity_groups": len(groups),
+                      "initial_detail_rows": len(raw_rows),
+                      "initial_groups_seen": len(groups_seen),
+                      "initial_missing_groups": missing_groups,
+                      "completion_queries": len(missing_groups),
+                      "final_rows": len(uniq),
+                      "final_groups": len(final_groups),
+                      "still_missing_groups": still_missing,
+                      "group_counts": dict(sorted(counts.items())),
+                      "group_query_meta": group_meta,
+                      "initial_detail_meta": detail_meta,
+                      "completion_meta": per_group_meta,
+                      "warning": (
+                          "Taxonomy only. No municipal dimension is present in this "
+                          "dataset; values from Radar must not be attributed to São Borja."
+                      ),
+                  }
+                  (OUT / "summary.json").write_text(
+                      json.dumps(summary, ensure_ascii=False, indent=2),
+                      encoding="utf-8",
+                  )
+                  print("SBMI_RADAR_NCM_COMPLETE_BEGIN")
+                  print(json.dumps(summary, ensure_ascii=False, indent=2)[:120000])
+                  print("SBMI_RADAR_NCM_COMPLETE_END")
+
+                  await browser.close()
+
+          asyncio.run(main())
+          PY
+          python /tmp/q.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-mercado-ncm-taxonomy-complete-v1
+          path: artifacts/radar_ncm_taxonomy_complete/
+          if-no-files-found: error
+          retention-days: 30

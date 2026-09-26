@@ -1,0 +1,175 @@
+name: pof-rs-market-crosswalk-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/pof-rs-market-crosswalk-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pof-rs-market-crosswalk-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build auditable RS POF market crosswalk candidate table
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests openpyxl
+          mkdir -p artifacts/pof_rs_market_crosswalk
+          python - <<'PY'
+          from __future__ import annotations
+          import csv, hashlib, json, re, unicodedata, zipfile
+          from pathlib import Path
+          import requests
+          from openpyxl import load_workbook
+
+          OUT=Path("artifacts/pof_rs_market_crosswalk")
+          INDEX="https://ftp.ibge.gov.br/Orcamentos_Familiares/Pesquisa_de_Orcamentos_Familiares_2017_2018/Primeiros_resultados/tabelas_unidades_da_federacao/"
+          URL=INDEX+"tabelas_unidades_da_federacao_xls_20191108.zip"
+          ZIP=OUT/"tabelas_unidades_da_federacao_xls_20191108.zip"
+          XLSX=OUT/"43RS.xls.xlsx"
+
+          def norm(x):
+              s=unicodedata.normalize("NFKD",str(x or ""))
+              s="".join(ch for ch in s if not unicodedata.combining(ch))
+              return re.sub(r"[^a-zA-Z0-9]+"," ",s).strip().lower()
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI POF RS market crosswalk/1.0","Referer":INDEX})
+          h=hashlib.sha256(); n=0
+          with s.get(URL,stream=True,timeout=(30,300),allow_redirects=True) as r:
+              r.raise_for_status()
+              headers={k:r.headers.get(k) for k in ("content-type","content-length","last-modified","etag")}
+              with ZIP.open("wb") as f:
+                  for chunk in r.iter_content(1024*1024):
+                      if chunk:
+                          f.write(chunk); h.update(chunk); n+=len(chunk)
+          if not zipfile.is_zipfile(ZIP):
+              raise SystemExit("Official POF response is not ZIP")
+          with zipfile.ZipFile(ZIP) as z:
+              XLSX.write_bytes(z.read("43RS.xls.xlsx"))
+
+          targets={
+              "alimentacao_domicilio":"alimentacao no domicilio",
+              "alimentacao_fora_domicilio":"alimentacao fora do domicilio",
+              "higiene_cuidados_pessoais":"higiene e cuidados pessoais",
+              "remedios":"remedios",
+              "mobiliarios_artigos_lar":"mobiliarios e artigos do lar",
+              "eletrodomesticos":"eletrodomesticos",
+              "vestuario":"vestuario",
+              "servicos_pessoais":"servicos pessoais",
+          }
+
+          wb=load_workbook(XLSX,data_only=True,read_only=True)
+          hits=[]
+          family_size_hits=[]
+          header_preview={}
+          for ws in wb.worksheets:
+              preview=[]
+              for ri,row in enumerate(ws.iter_rows(values_only=True),start=1):
+                  vals=list(row)
+                  if ri<=12:
+                      preview.append({"row":ri,"values":vals[:14]})
+                  label=norm(vals[0] if vals else "")
+                  for key,target in targets.items():
+                      if label==target:
+                          nums=[v for v in vals[1:] if isinstance(v,(int,float))]
+                          hits.append({
+                              "key":key,
+                              "sheet":ws.title,
+                              "row":ri,
+                              "label":vals[0],
+                              "total_rs":nums[0] if nums else None,
+                              "numeric_values":nums,
+                          })
+                  rowtext=norm(" | ".join("" if v is None else str(v) for v in vals))
+                  if any(t in rowtext for t in ("tamanho medio das familias","numero medio de pessoas por familia","pessoas por familia")):
+                      family_size_hits.append({"sheet":ws.title,"row":ri,"values":vals[:14]})
+              header_preview[ws.title]=preview
+
+          # Prefer expenditure-value sheets over percentage sheets based on total magnitude.
+          chosen={}
+          for key in targets:
+              candidates=[h for h in hits if h["key"]==key and h["total_rs"] is not None]
+              candidates.sort(key=lambda x:(x["total_rs"], x["sheet"]), reverse=True)
+              if candidates:
+                  chosen[key]=candidates[0]
+
+          rows=[]
+          sector_map={
+              "alimentacao_domicilio":("Bens Essenciais","Alimentação no domicílio","INCLUIR"),
+              "alimentacao_fora_domicilio":("Alimentação Fora do Lar","Alimentação fora do domicílio","INCLUIR"),
+              "higiene_cuidados_pessoais":("Saúde/Higiene/Cuidados Pessoais","Higiene e Cuidados Pessoais","INCLUIR"),
+              "remedios":("Saúde/Higiene/Cuidados Pessoais","Remédios","INCLUIR COMO MÓDULO SEPARADO"),
+              "mobiliarios_artigos_lar":("Bens Não Essenciais","Mobiliários e artigos do lar","INCLUIR COMO MÓDULO"),
+              "eletrodomesticos":("Bens Não Essenciais","Eletrodomésticos","INCLUIR COMO MÓDULO"),
+              "vestuario":("Bens Não Essenciais","Vestuário","INCLUIR COMO MÓDULO"),
+              "servicos_pessoais":("Serviços","Serviços pessoais","SUBMERCADO APENAS — NÃO REPRESENTA SERVIÇOS GERAIS"),
+          }
+          for key,(sector,module,status) in sector_map.items():
+              h=chosen.get(key)
+              rows.append({
+                  "setor_sbmi":sector,
+                  "modulo_sbmi":module,
+                  "status_crosswalk":status,
+                  "pof_key":key,
+                  "pof_sheet":h["sheet"] if h else "",
+                  "pof_row":h["row"] if h else "",
+                  "pof_label":h["label"] if h else "",
+                  "despesa_media_familiar_mensal_rs_2017_2018":h["total_rs"] if h else "",
+                  "natureza":"DADO OBSERVADO POF/RS; ainda não territorializado para São Borja nem atualizado a preços de 2026",
+              })
+
+          with (OUT/"pof_rs_market_crosswalk_candidate_v001.csv").open("w",newline="",encoding="utf-8") as f:
+              w=csv.DictWriter(f,fieldnames=list(rows[0]))
+              w.writeheader(); w.writerows(rows)
+
+          report={
+              "source":"IBGE — POF 2017-2018 — Primeiros resultados — tabelas por Unidade da Federação — Rio Grande do Sul",
+              "download_url":URL,
+              "download_headers":headers,
+              "package_bytes":n,
+              "package_sha256":h.hexdigest() if hasattr(h,"hexdigest") else None,
+              "rs_workbook_sha256":hashlib.sha256(XLSX.read_bytes()).hexdigest(),
+              "chosen":chosen,
+              "all_hits":hits,
+              "family_size_hits":family_size_hits,
+              "header_preview":header_preview,
+              "method_note":"Rows are selected by exact normalized labels. When the same label appears on value and percentage sheets, the candidate with the largest first numeric total is retained as the expenditure-value row. Each candidate must still pass semantic validation before use in a municipal estimate.",
+          }
+          # fix package hash shadowing if needed
+          report["package_sha256"]=hashlib.sha256(ZIP.read_bytes()).hexdigest()
+          (OUT/"pof_rs_market_crosswalk_manifest_v001.json").write_text(json.dumps(report,ensure_ascii=False,indent=2,default=str),encoding="utf-8")
+
+          print("SBMI_POF_CROSSWALK_BEGIN")
+          print(json.dumps({
+              "rows":rows,
+              "family_size_hits":family_size_hits,
+              "header_preview":header_preview,
+              "chosen":chosen,
+          },ensure_ascii=False,indent=2,default=str))
+          print("SBMI_POF_CROSSWALK_END")
+          PY
+
+      - name: Upload POF RS crosswalk package
+        uses: actions/upload-artifact@v4
+        with:
+          name: pof-rs-market-crosswalk-v1
+          path: artifacts/pof_rs_market_crosswalk/
+          if-no-files-found: error
+          retention-days: 30

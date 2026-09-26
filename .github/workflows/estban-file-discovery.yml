@@ -1,0 +1,79 @@
+name: estban-file-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/estban-file-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/estban-file-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install discovery parser dependency
+        run: python -m pip install --quiet beautifulsoup4
+
+      - name: Discover official ESTBAN municipal CSV/ZIP file URLs
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          from bs4 import BeautifulSoup
+
+          outdir=Path("artifacts/estban_file_discovery"); outdir.mkdir(parents=True,exist_ok=True)
+          page="https://www.bcb.gov.br/estatisticas/estatisticabancariamunicipios?modalAberto=baixar-arquivos"
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          r=s.get(page,timeout=60); r.raise_for_status()
+          html=r.text; (outdir/"page.html").write_text(html,encoding="utf-8")
+          soup=BeautifulSoup(html,"html.parser")
+          links=set()
+          for tag in soup.find_all(["a","script","link"]):
+              u=tag.get("href") or tag.get("src")
+              if u: links.add(urljoin("https://www.bcb.gov.br/",u))
+          files=set(re.findall(r'(?:"|\')([^"\']+\.(?:zip|csv)(?:\?[^"\']*)?)(?:"|\')',html,re.I))
+          candidates={urljoin("https://www.bcb.gov.br/",u) for u in files}
+          script_hits=[]
+          for u in sorted(x for x in links if ".js" in x.lower())[:100]:
+              try:
+                  q=s.get(u,timeout=40)
+                  if q.status_code!=200 or len(q.content)>12_000_000: continue
+                  hits=sorted(set(re.findall(r'(?:"|\')([^"\']*(?:ESTBAN|estban)[^"\']*\.(?:zip|csv)(?:\?[^"\']*)?)(?:"|\')',q.text,re.I)))
+                  if hits:
+                      fs=[urljoin("https://www.bcb.gov.br/",h) for h in hits]
+                      candidates.update(fs); script_hits.append({"script":u,"files":fs})
+              except Exception as exc:
+                  script_hits.append({"script":u,"error":repr(exc)})
+          probes=[]
+          for u in sorted(candidates):
+              try:
+                  q=s.head(u,allow_redirects=True,timeout=30)
+                  probes.append({"url":u,"status":q.status_code,"content_type":q.headers.get("content-type"),"content_length":q.headers.get("content-length"),"final_url":q.url})
+              except Exception as exc:
+                  probes.append({"url":u,"error":repr(exc)})
+          out={"page":page,"candidate_files":sorted(candidates),"probes":probes,"script_hits":script_hits}
+          (outdir/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - name: Upload ESTBAN discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: estban-file-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/estban_file_discovery/

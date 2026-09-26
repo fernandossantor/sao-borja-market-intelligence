@@ -1,0 +1,162 @@
+name: radar-mercado-ncm-taxonomy-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/radar-mercado-ncm-taxonomy-v1.yml"]
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/radar-mercado-ncm-taxonomy-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Extract public Radar NCM affinity taxonomy
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/radar_ncm_taxonomy
+          cat > /tmp/q.py <<'PY'
+          import asyncio,csv,json,re,uuid
+          from collections import Counter
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+
+          OUT=Path("artifacts/radar_ncm_taxonomy")
+          REPORT="https://app.powerbi.com/view?r=eyJrIjoiYzMxNWUyMDQtYWVjOC00MTcxLWJhN2ItY2NjYTk2MWEwNmNjIiwidCI6IjgzYmQwOTBiLTc1NmUtNGEwMi1hNTEyLWU1ZWEwMmMwMzA0MSJ9"
+          ENTITY="d_ncms"
+
+          def col(src,p): return {"Column":{"Expression":{"SourceRef":{"Source":src}},"Property":p},"Name":f"{ENTITY}.{p}"}
+
+          async def main():
+            async with async_playwright() as p:
+              b=await p.chromium.launch(headless=True); ctx=await b.new_context(); page=await ctx.new_page()
+              cap={};ev=asyncio.Event()
+              async def onreq(req):
+                if cap or "querydata" not in req.url.lower():return
+                try:
+                  body=req.post_data_json
+                  if isinstance(body,dict) and body.get("queries"):
+                    cap["url"]=req.url; cap["headers"]=await req.all_headers(); cap["body"]=body; ev.set()
+                except:pass
+              page.on("request",onreq)
+              await page.goto(REPORT,wait_until="domcontentloaded",timeout=120000)
+              await asyncio.wait_for(ev.wait(),90); await page.wait_for_timeout(3000)
+
+              tpl=cap["body"]; appctx=tpl["queries"][0].get("ApplicationContext",{}); src="d"
+              semantic={"Version":2,"From":[{"Name":src,"Entity":ENTITY,"Type":0}],
+                "Select":[col(src,"grupo_afinidade_final"),col(src,"ncm8"),col(src,"ncm4"),col(src,"codxdescr_ncm8")],
+                "OrderBy":[
+                  {"Direction":1,"Expression":{"Column":{"Expression":{"SourceRef":{"Source":src}},"Property":"grupo_afinidade_final"}}},
+                  {"Direction":1,"Expression":{"Column":{"Expression":{"SourceRef":{"Source":src}},"Property":"ncm8"}}}
+                ]}
+              cmd={"SemanticQueryDataShapeCommand":{"Query":semantic,
+                "Binding":{"Primary":{"Groupings":[{"Projections":[0,1,2,3]}]},"DataReduction":{"DataVolume":6,"Primary":{"Window":{"Count":10000}}},"Version":1},
+                "ExecutionMetricsKind":1}}
+              commands=[cmd]
+              qbody={"version":"1.0.0","queries":[{"Query":{"Commands":commands},"CacheKey":json.dumps({"Commands":commands},separators=(",",":")),"QueryId":"","ApplicationContext":appctx}],"cancelQueries":[],"modelId":tpl["modelId"]}
+              headers={k:v for k,v in cap["headers"].items() if k.lower() not in ("content-length","host","cookie","origin","referer","user-agent")}
+              headers["content-type"]="application/json";headers["activityid"]=str(uuid.uuid4());headers["requestid"]=str(uuid.uuid4())
+              resp=await ctx.request.post(cap["url"],headers=headers,data=json.dumps(qbody))
+              body=await resp.text()
+              if resp.status!=200:raise RuntimeError(f"HTTP {resp.status}: {body[:2000]}")
+              js=json.loads(body); data=js["results"][0]["result"]["data"]; ds=data["dsr"]["DS"][0]
+              desc=data["descriptor"]["Select"]; dm=(ds.get("PH") or [{}])[0].get("DM0",[]);dicts=ds.get("ValueDicts",{})
+
+              # Map categorical columns to dictionaries via descriptor GroupKeys Calc/Value when possible.
+              mapdict={}
+              for i,d in enumerate(desc):
+                val=d.get("Value")
+                # string group dictionaries appear as G# and ValueDicts D#; infer by categorical order if needed
+              dictkeys=sorted(dicts.keys(),key=lambda x:int(x[1:]) if x[1:].isdigit() else 0)
+              # ncm8/ncm4 may be numeric or string; apply dictionaries only where encoded values index a dict.
+              prev=[None]*4; rawrows=[]
+              for er in dm:
+                it=iter(er.get("C",[]));R=er.get("R",0) or 0;vals=[]
+                for i in range(4):vals.append(prev[i] if R&(1<<i) else next(it,None))
+                prev=vals;rawrows.append(vals)
+
+              # Power BI DSR dictionaries D0..D3 follow the Select projection order
+              # for this four-column categorical query. Fixed mapping avoids swapping
+              # affinity-group labels with NCM descriptions.
+              assignments={i:f"D{i}" for i in range(4) if f"D{i}" in dicts}
+
+              rows=[]
+              for vals in rawrows:
+                dec=[]
+                for i,v in enumerate(vals):
+                  if i in assignments and v is not None and isinstance(v,(int,float)) and int(v)==v and 0<=int(v)<len(dicts[assignments[i]]): dec.append(dicts[assignments[i]][int(v)])
+                  else:dec.append(v)
+                grupo=str(dec[0] or "").strip();ncm8=re.sub(r"\D","",str(dec[1] or "")).zfill(8);ncm4=re.sub(r"\D","",str(dec[2] or "")).zfill(4);descr=str(dec[3] or "").strip()
+                rows.append({"grupo_afinidade_final":grupo,"ncm8":ncm8,"ncm4":ncm4,"codxdescr_ncm8":descr})
+
+              # deduplicate
+              uniq=[];seen=set()
+              for r in rows:
+                key=(r["grupo_afinidade_final"],r["ncm8"],r["codxdescr_ncm8"])
+                if key not in seen:seen.add(key);uniq.append(r)
+              with (OUT/"radar_ncm_taxonomy.csv").open("w",newline="",encoding="utf-8") as f:
+                w=csv.DictWriter(f,fieldnames=["grupo_afinidade_final","ncm8","ncm4","codxdescr_ncm8"]);w.writeheader();w.writerows(uniq)
+              counts=Counter(r["grupo_afinidade_final"] for r in uniq)
+
+              # Independent distinct-group query: validates the complete affinity-group
+              # domain even when the NCM-detail window reaches its 10,000-row cap.
+              semg={"Version":2,"From":[{"Name":src,"Entity":ENTITY,"Type":0}],
+                "Select":[col(src,"grupo_afinidade_final")],
+                "OrderBy":[{"Direction":1,"Expression":{"Column":{"Expression":{"SourceRef":{"Source":src}},"Property":"grupo_afinidade_final"}}}]}
+              cmdg={"SemanticQueryDataShapeCommand":{"Query":semg,
+                "Binding":{"Primary":{"Groupings":[{"Projections":[0]}]},"DataReduction":{"DataVolume":6,"Primary":{"Window":{"Count":1000}}},"Version":1},
+                "ExecutionMetricsKind":1}}
+              commandsg=[cmdg]
+              qbodyg={"version":"1.0.0","queries":[{"Query":{"Commands":commandsg},"CacheKey":json.dumps({"Commands":commandsg},separators=(",",":")),"QueryId":"","ApplicationContext":appctx}],"cancelQueries":[],"modelId":tpl["modelId"]}
+              headersg=dict(headers);headersg["activityid"]=str(uuid.uuid4());headersg["requestid"]=str(uuid.uuid4())
+              respg=await ctx.request.post(cap["url"],headers=headersg,data=json.dumps(qbodyg))
+              bodyg=await respg.text()
+              if respg.status!=200:raise RuntimeError(f"Groups HTTP {respg.status}: {bodyg[:2000]}")
+              jg=json.loads(bodyg);dg=jg["results"][0]["result"]["data"];dsg=dg["dsr"]["DS"][0]
+              phg=(dsg.get("PH") or [{}])[0]
+              dmg=phg.get("DM0",[])
+              if not dmg:
+                dmg=next((v for k,v in phg.items() if k.startswith("DM") and isinstance(v,list)),[])
+              if not dmg:
+                dmg=next((v for k,v in dsg.items() if k.startswith("DM") and isinstance(v,list)),[])
+              dictg=(dsg.get("ValueDicts") or {}).get("D0",[])
+              prevg=[None];groups=[]
+              for er in dmg:
+                if "G0" in er:
+                  vg=er.get("G0")
+                else:
+                  itg=iter(er.get("C",[]));Rg=er.get("R",0) or 0
+                  vg=prevg[0] if Rg&1 else next(itg,None);prevg=[vg]
+                  if isinstance(vg,(int,float)) and int(vg)==vg and 0<=int(vg)<len(dictg): vg=dictg[int(vg)]
+                if vg is not None and str(vg).strip(): groups.append(str(vg).strip())
+              groups=sorted(set(groups))
+              with (OUT/"radar_affinity_groups.csv").open("w",newline="",encoding="utf-8") as fg:
+                wg=csv.writer(fg);wg.writerow(["grupo_afinidade_final"]);wg.writerows([[g] for g in groups])
+              summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"detail_window_truncated":len(rawrows)>=10000,"affinity_groups_complete_count":len(groups),"affinity_groups_complete":groups,"group_dsr_keys":list(dsg.keys()),"group_ph_keys":list(phg.keys()),"group_dm_rows":len(dmg),"group_value_dict_size":len(dictg),"group_dm_head":dmg[:5],"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
+                "warning":"Taxonomy only. Radar values are not São Borja values; no municipal dimension was observed.","decoder":"fixed D0-D3 mapping to Select order"}
+              (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+              print("SBMI_RADAR_NCM_TAXONOMY_BEGIN");print(json.dumps(summary,ensure_ascii=False,indent=2)[:120000]);print("SBMI_RADAR_NCM_TAXONOMY_END")
+              await b.close()
+          asyncio.run(main())
+          PY
+          python /tmp/q.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radar-mercado-ncm-taxonomy-v1
+          path: artifacts/radar_ncm_taxonomy/
+          if-no-files-found: error
+          retention-days: 30

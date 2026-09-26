@@ -1,0 +1,298 @@
+name: federal-public-payroll-aggregate-sao-borja
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/federal-public-payroll-aggregate-sao-borja.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/federal-public-payroll-aggregate-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download audited-period official CGU archives
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/federal_public_payroll
+          BASE='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores'
+          curl -fL --retry 3 --retry-delay 5 --max-time 900             "$BASE/202607_Servidores_SIAPE.zip"             -o artifacts/federal_public_payroll/202607_Servidores_SIAPE.zip
+          curl -fL --retry 3 --retry-delay 5 --max-time 900             "$BASE/202606_Militares.zip"             -o artifacts/federal_public_payroll/202606_Militares.zip
+          sha256sum artifacts/federal_public_payroll/*.zip > artifacts/federal_public_payroll/source_sha256.txt
+
+      - name: Aggregate SIAPE local-unit criteria and military UORG candidates
+        run: |
+          cat > /tmp/agg_federal.py <<'PY'
+          import csv, io, json, re, unicodedata, zipfile
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          ROOT=Path("artifacts/federal_public_payroll")
+
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+
+          def numbr(s):
+              s=str(s or "").strip()
+              if not s: return None
+              s=s.replace(".","").replace(",",".")
+              try: return float(s)
+              except: return None
+
+          def member(zf, contains):
+              xs=[x for x in zf.namelist() if contains.lower() in x.lower() and x.lower().endswith(".csv")]
+              if len(xs)!=1: raise RuntimeError((contains,xs))
+              return xs[0]
+
+          def read_dicts(zf, name):
+              with zf.open(name) as raw:
+                  txt=io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline="")
+                  for row in csv.DictReader(txt,delimiter=";"):
+                      yield row
+
+          rem_cols=[
+              "REMUNERAÇÃO BÁSICA BRUTA (R$)",
+              "GRATIFICAÇÃO NATALINA (R$)",
+              "FÉRIAS (R$)",
+              "OUTRAS REMUNERAÇÕES EVENTUAIS (R$)",
+              "REMUNERAÇÃO APÓS DEDUÇÕES OBRIGATÓRIAS (R$)",
+              "TOTAL DE VERBAS INDENIZATÓRIAS (R$)(*)",
+          ]
+
+          # ---------------- SIAPE ----------------
+          siape=ROOT/"202607_Servidores_SIAPE.zip"
+          with zipfile.ZipFile(siape) as zf:
+              cad_name=member(zf,"Cadastro")
+              rem_name=member(zf,"Remuneracao")
+              selected={}
+              criterion_ids=defaultdict(set)
+              unit_rows=Counter()
+              status_rows=Counter()
+              cross_rows=Counter()
+              row_count=0
+              for row in read_dicts(zf,cad_name):
+                  row_count+=1
+                  uid=(row.get("Id_SERVIDOR_PORTAL") or "").strip()
+                  lot=norm(row.get("UORG_LOTACAO"))
+                  exe=norm(row.get("UORG_EXERCICIO"))
+                  local_lot="SAO BORJA" in lot
+                  local_exe="SAO BORJA" in exe
+                  if not (local_lot or local_exe): continue
+                  criteria=[]
+                  if local_lot: criteria.append("lotacao_explicita")
+                  if local_exe: criteria.append("exercicio_explicito")
+                  criteria.append("uniao_lotacao_ou_exercicio")
+                  for c in criteria:
+                      if uid: criterion_ids[c].add(uid)
+                      status_rows[(c,norm(row.get("SITUACAO_VINCULO")))] += 1
+                  unit_rows[(
+                      "lotacao" if local_lot else "nao_local",
+                      lot,
+                      norm(row.get("ORG_LOTACAO")),
+                      norm(row.get("ORGSUP_LOTACAO")),
+                      norm(row.get("UF_EXERCICIO"))
+                  )]+=1
+                  unit_rows[(
+                      "exercicio" if local_exe else "nao_local_exercicio",
+                      exe,
+                      norm(row.get("ORG_EXERCICIO")),
+                      norm(row.get("ORGSUP_EXERCICIO")),
+                      norm(row.get("UF_EXERCICIO"))
+                  )]+=1
+                  cross_rows[(lot,exe,norm(row.get("ORG_EXERCICIO")),norm(row.get("SITUACAO_VINCULO")),norm(row.get("UF_EXERCICIO")))] += 1
+                  if uid and uid not in selected:
+                      selected[uid]={
+                          "local_lot":local_lot,"local_exe":local_exe,
+                          "lot":lot,"exe":exe,
+                          "org_lot":norm(row.get("ORG_LOTACAO")),
+                          "org_exe":norm(row.get("ORG_EXERCICIO")),
+                          "status":norm(row.get("SITUACAO_VINCULO")),
+                          "uf":norm(row.get("UF_EXERCICIO")),
+                      }
+
+              # Join remuneration exactly once per portal ID.
+              rem_by_id={}
+              rem_rows=0
+              for row in read_dicts(zf,rem_name):
+                  rem_rows+=1
+                  uid=(row.get("Id_SERVIDOR_PORTAL") or "").strip()
+                  if uid not in selected: continue
+                  rem_by_id[uid]={c:numbr(row.get(c)) for c in rem_cols}
+
+          # Aggregate remuneration by criterion and status / organizations.
+          crit_summary=[]
+          for c, ids in sorted(criterion_ids.items()):
+              sums=defaultdict(float); valid=Counter()
+              for uid in ids:
+                  rr=rem_by_id.get(uid,{})
+                  for col in rem_cols:
+                      v=rr.get(col)
+                      if v is not None:
+                          sums[col]+=v; valid[col]+=1
+              crit_summary.append({
+                  "criterion":c,
+                  "unique_portal_ids":len(ids),
+                  "with_remuneration_record":sum(uid in rem_by_id for uid in ids),
+                  **{f"sum__{k}":round(sums[k],2) for k in rem_cols},
+                  **{f"valid__{k}":valid[k] for k in rem_cols},
+              })
+
+          status_summary=defaultdict(lambda:{"ids":set(),"rows":0})
+          org_summary=defaultdict(lambda:{"ids":set(),"rows":0})
+          for uid,rec in selected.items():
+              crits=["uniao_lotacao_ou_exercicio"]
+              if rec["local_lot"]: crits.append("lotacao_explicita")
+              if rec["local_exe"]: crits.append("exercicio_explicito")
+              for c in crits:
+                  status_summary[(c,rec["status"])]["ids"].add(uid)
+                  status_summary[(c,rec["status"])]["rows"]+=1
+                  if rec["local_lot"]:
+                      org_summary[(c,"lotacao",rec["lot"],rec["org_lot"])]["ids"].add(uid)
+                      org_summary[(c,"lotacao",rec["lot"],rec["org_lot"])]["rows"]+=1
+                  if rec["local_exe"]:
+                      org_summary[(c,"exercicio",rec["exe"],rec["org_exe"])]["ids"].add(uid)
+                      org_summary[(c,"exercicio",rec["exe"],rec["org_exe"])]["rows"]+=1
+
+          def add_rem_metrics(d, ids):
+              sums=defaultdict(float); valid=Counter()
+              for uid in ids:
+                  rr=rem_by_id.get(uid,{})
+                  for col in rem_cols:
+                      v=rr.get(col)
+                      if v is not None:
+                          sums[col]+=v; valid[col]+=1
+              for col in rem_cols:
+                  d[f"sum__{col}"]=round(sums[col],2)
+                  d[f"valid__{col}"]=valid[col]
+
+          status_rows_out=[]
+          for (c,st),d in sorted(status_summary.items()):
+              rec={"criterion":c,"situacao_vinculo":st,"cadastro_rows":d["rows"],"unique_portal_ids":len(d["ids"])}
+              add_rem_metrics(rec,d["ids"]); status_rows_out.append(rec)
+
+          org_rows_out=[]
+          for (c,locus,uorg,org),d in sorted(org_summary.items()):
+              rec={"criterion":c,"locus":locus,"uorg":uorg,"org":org,"cadastro_rows":d["rows"],"unique_portal_ids":len(d["ids"])}
+              add_rem_metrics(rec,d["ids"]); org_rows_out.append(rec)
+
+          # ---------------- MILITARES: candidate UORG inventory ----------------
+          military=ROOT/"202606_Militares.zip"
+          with zipfile.ZipFile(military) as zf:
+              cad_name=member(zf,"Cadastro")
+              rem_name=member(zf,"Remuneracao")
+              candidate={}
+              candidate_ids=defaultdict(set)
+              candidate_rows=Counter()
+              mil_rows=0
+              tokens=("RINCAO","CAVALARIA","ENGENHARIA","RC MEC","R C MEC","CIA ENG")
+              for row in read_dicts(zf,cad_name):
+                  mil_rows+=1
+                  if norm(row.get("UF_EXERCICIO"))!="RS": continue
+                  uid=(row.get("Id_SERVIDOR_PORTAL") or "").strip()
+                  vals={
+                      "uorg_lot":norm(row.get("UORG_LOTACAO")),
+                      "uorg_exe":norm(row.get("UORG_EXERCICIO")),
+                      "org_lot":norm(row.get("ORG_LOTACAO")),
+                      "org_exe":norm(row.get("ORG_EXERCICIO")),
+                      "status":norm(row.get("SITUACAO_VINCULO")),
+                  }
+                  hit=any(any(t in vals[k] for t in tokens) for k in ("uorg_lot","uorg_exe"))
+                  if not hit: continue
+                  key=(vals["uorg_lot"],vals["uorg_exe"],vals["org_lot"],vals["org_exe"],vals["status"])
+                  candidate_rows[key]+=1
+                  if uid:
+                      candidate_ids[key].add(uid)
+                      candidate[uid]=vals
+
+              mil_rem={}
+              for row in read_dicts(zf,rem_name):
+                  uid=(row.get("Id_SERVIDOR_PORTAL") or "").strip()
+                  if uid not in candidate: continue
+                  mil_rem[uid]={c:numbr(row.get(c)) for c in rem_cols}
+
+          mil_out=[]
+          for key,nrows in sorted(candidate_rows.items()):
+              ids=candidate_ids[key]
+              rec={
+                  "uorg_lotacao":key[0],"uorg_exercicio":key[1],
+                  "org_lotacao":key[2],"org_exercicio":key[3],
+                  "situacao_vinculo":key[4],
+                  "cadastro_rows":nrows,"unique_portal_ids":len(ids),
+              }
+              sums=defaultdict(float); valid=Counter()
+              for uid in ids:
+                  rr=mil_rem.get(uid,{})
+                  for col in rem_cols:
+                      v=rr.get(col)
+                      if v is not None:
+                          sums[col]+=v; valid[col]+=1
+              for col in rem_cols:
+                  rec[f"sum__{col}"]=round(sums[col],2)
+                  rec[f"valid__{col}"]=valid[col]
+              mil_out.append(rec)
+
+          def write_csv(path, rows):
+              keys=[]
+              for r in rows:
+                  for k in r:
+                      if k not in keys: keys.append(k)
+              with (ROOT/path).open("w",encoding="utf-8",newline="") as f:
+                  w=csv.DictWriter(f,fieldnames=keys); w.writeheader(); w.writerows(rows)
+
+          write_csv("siape_criteria_summary.csv",crit_summary)
+          write_csv("siape_status_summary.csv",status_rows_out)
+          write_csv("siape_local_unit_summary.csv",org_rows_out)
+          write_csv("military_candidate_uorg_summary.csv",mil_out)
+
+          # Cross table without identifiers.
+          cross_out=[{
+              "uorg_lotacao":k[0],"uorg_exercicio":k[1],"org_exercicio":k[2],
+              "situacao_vinculo":k[3],"uf_exercicio":k[4],"cadastro_rows":v
+          } for k,v in sorted(cross_rows.items())]
+          write_csv("siape_lotacao_exercicio_cross.csv",cross_out)
+
+          metadata={
+              "source":"Portal da Transparência / CGU — dados abertos de servidores",
+              "siape_period":"2026-07",
+              "military_period":"2026-06",
+              "territorial_rule_siape_primary":"UORG_EXERCICIO contains SAO BORJA",
+              "territorial_rule_siape_comparison":"UORG_LOTACAO contains SAO BORJA",
+              "siape_cadastro_rows":row_count,
+              "siape_remuneracao_rows":rem_rows,
+              "military_cadastro_rows":mil_rows,
+              "remuneration_fields":rem_cols,
+              "privacy":"No person-level identifiers, names, CPF or individual pay are exported.",
+              "status":"PASS_AGGREGATION_WITH_TERRITORIALIZATION_REVIEW_REQUIRED",
+          }
+          (ROOT/"metadata.json").write_text(json.dumps(metadata,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(metadata,ensure_ascii=False,indent=2))
+          print((ROOT/"siape_criteria_summary.csv").read_text(encoding="utf-8"))
+          print((ROOT/"siape_status_summary.csv").read_text(encoding="utf-8")[:30000])
+          print((ROOT/"military_candidate_uorg_summary.csv").read_text(encoding="utf-8")[:30000])
+          PY
+          python /tmp/agg_federal.py
+
+      - name: Remove official source archives before artifact upload
+        run: rm -f artifacts/federal_public_payroll/*.zip
+
+      - name: Upload aggregate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: federal-public-payroll-sao-borja-aggregate
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/federal_public_payroll/

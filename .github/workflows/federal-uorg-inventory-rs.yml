@@ -1,0 +1,138 @@
+name: federal-uorg-inventory-rs
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/federal-uorg-inventory-rs.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/federal-uorg-inventory-rs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official CGU civil and military personnel archives
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/federal_uorg_inventory_rs
+          BASE='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores'
+          curl -fL --retry 3 --retry-delay 5 --max-time 900 "$BASE/202607_Servidores_SIAPE.zip"             -o artifacts/federal_uorg_inventory_rs/siape.zip
+          curl -fL --retry 3 --retry-delay 5 --max-time 900 "$BASE/202606_Militares.zip"             -o artifacts/federal_uorg_inventory_rs/militares.zip
+          sha256sum artifacts/federal_uorg_inventory_rs/*.zip > artifacts/federal_uorg_inventory_rs/source_sha256.txt
+
+      - name: Build aggregate UORG inventories for RS
+        run: |
+          cat > /tmp/uorg_inventory.py <<'PY'
+          import csv, io, json, zipfile
+          from collections import Counter
+          from pathlib import Path
+
+          ROOT=Path("artifacts/federal_uorg_inventory_rs")
+
+          def rows(zpath):
+              with zipfile.ZipFile(zpath) as zf:
+                  names=[n for n in zf.namelist() if n.lower().endswith("cadastro.csv")]
+                  if len(names)!=1: raise RuntimeError(names)
+                  with zf.open(names[0]) as raw:
+                      txt=io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline="")
+                      yield from csv.DictReader(txt,delimiter=";")
+
+          target_org_terms=(
+              "UNIVERSIDADE FEDERAL DO PAMPA",
+              "INSTITUTO FEDERAL FARROUPILHA",
+              "POLICIA FEDERAL",
+              "POLICIA RODOVIARIA FEDERAL",
+              "INSTITUTO NACIONAL DO SEGURO SOCIAL",
+              "MINISTERIO DA AGRICULTURA",
+              "MINISTERIO DO TRABALHO",
+              "MINISTERIO DA FAZENDA",
+          )
+
+          def norm(s): return " ".join(str(s or "").upper().split())
+
+          civil=Counter()
+          civil_rows=0
+          for r in rows(ROOT/"siape.zip"):
+              if norm(r.get("UF_EXERCICIO"))!="RS": continue
+              org_l=norm(r.get("ORG_LOTACAO")); org_e=norm(r.get("ORG_EXERCICIO"))
+              if not any(t in org_l or t in org_e for t in target_org_terms): continue
+              civil_rows += 1
+              key=(
+                  norm(r.get("COD_UORG_LOTACAO")),norm(r.get("UORG_LOTACAO")),org_l,
+                  norm(r.get("COD_UORG_EXERCICIO")),norm(r.get("UORG_EXERCICIO")),org_e,
+                  norm(r.get("SITUACAO_VINCULO"))
+              )
+              civil[key]+=1
+
+          military=Counter()
+          military_rows=0
+          for r in rows(ROOT/"militares.zip"):
+              if norm(r.get("UF_EXERCICIO"))!="RS": continue
+              military_rows += 1
+              key=(
+                  norm(r.get("COD_UORG_LOTACAO")),norm(r.get("UORG_LOTACAO")),norm(r.get("ORG_LOTACAO")),
+                  norm(r.get("COD_UORG_EXERCICIO")),norm(r.get("UORG_EXERCICIO")),norm(r.get("ORG_EXERCICIO")),
+                  norm(r.get("SITUACAO_VINCULO"))
+              )
+              military[key]+=1
+
+          def write(path,counter):
+              with (ROOT/path).open("w",encoding="utf-8",newline="") as f:
+                  w=csv.writer(f)
+                  w.writerow([
+                    "cod_uorg_lotacao","uorg_lotacao","org_lotacao",
+                    "cod_uorg_exercicio","uorg_exercicio","org_exercicio",
+                    "situacao_vinculo","cadastro_rows"
+                  ])
+                  for k,n in sorted(counter.items(), key=lambda kv:(-kv[1],kv[0])):
+                      w.writerow([*k,n])
+
+          write("civil_target_org_uorg_rs.csv",civil)
+          write("military_all_uorg_rs.csv",military)
+          meta={
+              "source":"Portal da Transparência / CGU — Cadastro de servidores",
+              "civil_period":"2026-07",
+              "military_period":"2026-06",
+              "geography_filter":"UF_EXERCICIO=RS",
+              "civil_target_rows":civil_rows,
+              "military_rs_rows":military_rows,
+              "privacy":"aggregate UORG inventory only; no names, CPF, matrícula or person identifiers exported",
+              "use":"identify local São Borja organizational units not named explicitly by municipality before payroll aggregation"
+          }
+          (ROOT/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          print("--- likely military local-name candidates ---")
+          for k,n in sorted(military.items(), key=lambda kv:-kv[1]):
+              txt=" | ".join(k)
+              if any(t in txt for t in ("RINCAO","CAV","ENG","RC MEC","R C MEC","S BORJA","SAO BORJA","SBA")):
+                  print(n, txt)
+          print("--- likely civil local-name candidates ---")
+          for k,n in sorted(civil.items(), key=lambda kv:-kv[1]):
+              txt=" | ".join(k)
+              if any(t in txt for t in ("SAO BORJA","S BORJA","SBA","CAMPSB")):
+                  print(n, txt)
+          PY
+          python /tmp/uorg_inventory.py
+
+      - name: Remove source archives
+        run: rm -f artifacts/federal_uorg_inventory_rs/*.zip
+
+      - name: Upload aggregate inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: federal-uorg-inventory-rs
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/federal_uorg_inventory_rs/

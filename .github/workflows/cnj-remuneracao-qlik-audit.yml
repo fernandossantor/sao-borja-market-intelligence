@@ -1,0 +1,159 @@
+name: cnj-remuneracao-qlik-audit
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/cnj-remuneracao-qlik-audit.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cnj-remuneracao-qlik-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Audit public CNJ Qlik panel transport and UI structure
+        run: |
+          python - <<'PY'
+          import json, re, subprocess, sys, time, urllib.parse
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/cnj_remuneracao_qlik_audit")
+          OUT.mkdir(parents=True, exist_ok=True)
+          url=("https://paineisanalytics.cnj.jus.br/single/"
+               "?appid=8ccb93ca-848f-4ffe-bf9b-96d57878c4d7"
+               "&sheet=a710d8e5-fddb-4fa7-9098-4dbca30a391a"
+               "&lang=pt-BR&theme=Mix_Theme&opt=ctxmenu,currsel")
+          result={
+            "source":"CNJ — Painel de Remuneração dos Magistrados (QlikSense)",
+            "official_link_source":"Página CNJ Remuneração dos Magistrados",
+            "panel_url":url,
+            "privacy":"Technical/UI audit. No person-level rows or names are persisted.",
+            "http":{},
+            "browser":{},
+            "network":[],
+            "websockets":[],
+            "errors":[]
+          }
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          try:
+            r=s.get(url,timeout=60,allow_redirects=True)
+            result["http"]={
+              "status":r.status_code, "final_url":r.url, "bytes":len(r.content),
+              "content_type":r.headers.get("content-type"),
+              "server":r.headers.get("server")
+            }
+            # structural tokens only, no HTML persisted
+            txt=r.text
+            result["http"]["title"]=(re.search(r'(?is)<title[^>]*>(.*?)</title>',txt).group(1).strip()
+                                     if re.search(r'(?is)<title[^>]*>(.*?)</title>',txt) else None)
+            result["http"]["structural_terms"]={
+              t: bool(re.search(re.escape(t),txt,re.I))
+              for t in ["websocket","engineData","qlik","appid","sheet","export","csv","xlsx"]
+            }
+            scripts=[]
+            for raw in re.findall(r'''<script[^>]+src\s*=\s*["']([^"']+)''',txt,re.I):
+              scripts.append(urllib.parse.urljoin(r.url,raw))
+            result["http"]["scripts"]=sorted(set(scripts))[:80]
+          except Exception as e:
+            result["errors"].append({"stage":"requests","error":repr(e)})
+
+          # Selenium is used only to discover transport/UI metadata.
+          try:
+            subprocess.check_call([sys.executable,"-m","pip","install","-q","selenium"])
+            from selenium import webdriver
+            from selenium.webdriver.chrome.options import Options
+            opts=Options()
+            opts.add_argument("--headless=new")
+            opts.add_argument("--no-sandbox")
+            opts.add_argument("--disable-dev-shm-usage")
+            opts.add_argument("--window-size=1600,1200")
+            opts.set_capability("goog:loggingPrefs", {"performance":"ALL"})
+            driver=webdriver.Chrome(options=opts)
+            driver.set_page_load_timeout(90)
+            driver.get(url)
+            time.sleep(30)
+            title=driver.title
+            current=driver.current_url
+
+            # Keep only likely UI labels / structural words, never raw full body.
+            body=driver.find_element("tag name","body").text
+            lines=[]
+            allowed_terms=(
+              "tribunal","competência","competencia","ano","mês","mes","cargo","lotação","lotacao",
+              "remuneração","remuneracao","subsídio","subsidio","indenização","indenizacao",
+              "nome","magistrado","folha","export","baixar","download","csv","excel","xlsx",
+              "bruto","líquido","liquido","total","filtro","selec"
+            )
+            for line in body.splitlines():
+              st=" ".join(line.split())
+              if st and len(st)<=180 and any(t in st.lower() for t in allowed_terms):
+                # avoid persisting lines that look like a personal-name row
+                if re.search(r'\b\d{1,3}(?:\.\d{3})*,\d{2}\b|R\$|CPF|Matr[ií]cula',st,re.I):
+                  continue
+                lines.append(st)
+            result["browser"]={
+              "title":title,
+              "current_url":current,
+              "body_chars":len(body),
+              "structural_ui_lines":list(dict.fromkeys(lines))[:120]
+            }
+
+            for entry in driver.get_log("performance"):
+              try:
+                msg=json.loads(entry["message"])["message"]
+                method=msg.get("method","")
+                p=msg.get("params",{})
+                if method=="Network.responseReceived":
+                  resp=p.get("response",{})
+                  u=resp.get("url","")
+                  if any(h in u for h in ("paineisanalytics.cnj.jus.br","qlik")):
+                    result["network"].append({
+                      "url":u,"status":resp.get("status"),
+                      "mimeType":resp.get("mimeType"),
+                      "type":p.get("type")
+                    })
+                elif method in ("Network.webSocketCreated","Network.webSocketWillSendHandshakeRequest","Network.webSocketHandshakeResponseReceived"):
+                  u=p.get("url") or p.get("response",{}).get("url")
+                  rec={"method":method}
+                  if u: rec["url"]=u
+                  if p.get("request",{}).get("url"): rec["request_url"]=p["request"]["url"]
+                  result["websockets"].append(rec)
+              except Exception:
+                pass
+            driver.quit()
+            # Deduplicate technical network rows.
+            seen=set(); net=[]
+            for x in result["network"]:
+              key=(x.get("url"),x.get("status"),x.get("mimeType"),x.get("type"))
+              if key not in seen:
+                seen.add(key); net.append(x)
+            result["network"]=net[:400]
+            result["websockets"]=result["websockets"][:100]
+          except Exception as e:
+            result["errors"].append({"stage":"browser","error":repr(e)})
+
+          (OUT/"audit_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(result,ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnj-remuneracao-qlik-audit
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/cnj_remuneracao_qlik_audit/

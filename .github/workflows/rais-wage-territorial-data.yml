@@ -1,0 +1,49 @@
+name: rais-wage-territorial-code-check
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - '.github/workflows/rais-wage-territorial-data.yml'
+      - 'src/sbmi/drive_staging.py'
+      - 'src/sbmi/rais_workers_extract.py'
+      - 'src/sbmi/territorial_wage_*.py'
+      - 'tests/test_drive_staging.py'
+      - 'tests/test_rais_workers_extract.py'
+      - 'tests/test_territorial_wage_estimation.py'
+  workflow_dispatch:
+
+concurrency:
+  group: rais-wage-code-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Verify codebase
+        run: make verify
+
+      - name: Confirm data-execution boundary
+        run: |
+          echo 'No RAIS or RFB microdata are acquired by this workflow.'
+          echo 'Real data execution belongs in the Codespace and stages the project master copies from Google Drive.'
+          echo 'STATUS=RAIS_WAGE_ACTIONS_CODE_ONLY_OK'

@@ -1,0 +1,230 @@
+name: ipca-market-dimension-factor-discovery-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/ipca-market-dimension-factor-discovery-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ipca-market-dimension-factor-discovery-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Discover compatible IPCA classifications and candidate price factors
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests
+          mkdir -p artifacts/ipca_market_dimension
+          python - <<'PY'
+          from __future__ import annotations
+          import csv, json, math, re, unicodedata
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/ipca_market_dimension")
+          BASE="https://apisidra.ibge.gov.br/values"
+          session=requests.Session()
+          session.headers.update({"User-Agent":"SBMI IPCA market dimension audit/1.0"})
+
+          RUN_SCHEMA="v002-specificity"
+
+          TARGETS=[
+              "alimentacao e bebidas",
+              "alimentacao fora do domicilio",
+              "higiene pessoal",
+              "produtos farmaceuticos",
+              "vestuario",
+              "moveis e utensilios",
+              "eletrodomesticos e equipamentos",
+              "servicos pessoais",
+              "artigos de residencia",
+              "saude e cuidados pessoais",
+          ]
+
+          def norm(x):
+              s=unicodedata.normalize("NFKD",str(x or ""))
+              s="".join(ch for ch in s if not unicodedata.combining(ch))
+              return re.sub(r"[^a-zA-Z0-9]+"," ",s).strip().lower()
+
+          def get(url):
+              r=session.get(url,timeout=180)
+              print("GET",url,"STATUS",r.status_code,"BYTES",len(r.content))
+              r.raise_for_status()
+              data=r.json()
+              if not isinstance(data,list) or len(data)<2:
+                  raise RuntimeError(f"Unexpected SIDRA payload: {str(data)[:1000]}")
+              return data
+
+          # Discover category codes on both classification structures.
+          discoveries={}
+          for table,period in [(1419,"201912"),(7060,"202608")]:
+              url=f"{BASE}/t/{table}/n1/all/v/63/p/{period}/c315/all"
+              data=get(url)
+              hits=[]
+              for rec in data[1:]:
+                  for k,v in rec.items():
+                      if not k.endswith("N"):
+                          continue
+                      nv=norm(v)
+                      matched=None
+                      for target in TARGETS:
+                          if nv==target or nv.endswith(" "+target) or target in nv:
+                              matched=target
+                              break
+                      if matched:
+                          prefix=k[:-1]
+                          code=rec.get(prefix+"C")
+                          hits.append({"target":matched,"normalized_label":nv,"label":v,"code":str(code),"name_key":k,"code_key":prefix+"C"})
+              # de-duplicate target/code
+              uniq=[]
+              seen=set()
+              for h in hits:
+                  key=(h["target"],h["code"])
+                  if key not in seen:
+                      seen.add(key); uniq.append(h)
+              discoveries[str(table)]={"url":url,"hits":uniq,"header":data[0]}
+
+          # Build target -> preferred code per table, requiring exact normalized label.
+          maps={}
+          preferred={}
+          for table,info in discoveries.items():
+              by={}
+              for h in info["hits"]:
+                  by.setdefault(h["target"],[]).append(h)
+              maps[table]={target:[h["code"] for h in hs] for target,hs in by.items()}
+              preferred[table]={}
+              for target,hs in by.items():
+                  # Prefer the deepest classification code in the textual label
+                  # (e.g. 1201 over 12; 6101 over 61; 7101 over 71).
+                  ranked=[]
+                  for h in hs:
+                      m=re.match(r"^(\d+)\s",h.get("normalized_label",""))
+                      prefix=m.group(1) if m else ""
+                      ranked.append((len(prefix), int(prefix) if prefix else -1, h))
+                  ranked.sort(key=lambda x:(x[0],x[1]), reverse=True)
+                  preferred[table][target]=ranked[0][2]
+
+          def months(start,end):
+              sy,sm=map(int,(start[:4],start[4:]))
+              ey,em=map(int,(end[:4],end[4:]))
+              out=[]
+              y,m=sy,sm
+              while (y,m)<=(ey,em):
+                  out.append(f"{y:04d}{m:02d}")
+                  m+=1
+                  if m==13: y+=1; m=1
+              return ",".join(out)
+
+          periods_old=months("201801","201912")
+          periods_new=months("202001","202608")
+
+          def fetch_series(table,code,periods):
+              url=f"{BASE}/t/{table}/n1/all/v/63/p/{periods}/c315/{code}"
+              data=get(url)
+              rows=[]
+              for rec in data[1:]:
+                  period=None
+                  # SIDRA usually stores period code in a dimension code field.
+                  for key,val in rec.items():
+                      if key.endswith("C") and re.fullmatch(r"20\d{4}",str(val or "")):
+                          period=str(val); break
+                  if period is None:
+                      # fallback: look at any value
+                      for val in rec.values():
+                          if re.fullmatch(r"20\d{4}",str(val or "")):
+                              period=str(val); break
+                  raw=rec.get("V")
+                  try:
+                      value=float(str(raw).replace(",","."))
+                  except Exception:
+                      continue
+                  rows.append({"period":period,"variation_pct":value})
+              rows=[r for r in rows if r["period"]]
+              rows.sort(key=lambda x:x["period"])
+              return url,rows
+
+          series={}
+          factors=[]
+          for target in TARGETS:
+              old_codes=maps.get("1419",{}).get(target,[])
+              new_codes=maps.get("7060",{}).get(target,[])
+              if not old_codes or not new_codes:
+                  factors.append({"target":target,"status":"MISSING_COMPATIBLE_CODE","old_codes":old_codes,"new_codes":new_codes})
+                  continue
+              old_pref=preferred["1419"][target]
+              new_pref=preferred["7060"][target]
+              old_code=old_pref["code"]; new_code=new_pref["code"]
+              old_url,old=fetch_series(1419,old_code,periods_old)
+              new_url,new=fetch_series(7060,new_code,periods_new)
+              combined=old+new
+              series[target]={"old_code":old_code,"new_code":new_code,"old_url":old_url,"new_url":new_url,"rows":combined}
+              for start in ("201801","201807","201808","201901","202001"):
+                  selected=[r for r in combined if r["period"]>=start and r["period"]<="202606"]
+                  if not selected: continue
+                  factor=math.prod(1+r["variation_pct"]/100 for r in selected)
+                  factors.append({
+                      "target":target,
+                      "status":"CALCULATED",
+                      "start_period":start,
+                      "end_period":"202606",
+                      "months":len(selected),
+                      "factor":factor,
+                      "old_code":old_code,
+                      "new_code":new_code,
+                      "old_label":old_pref["label"],
+                      "new_label":new_pref["label"],
+                  })
+
+          # Compare food-group candidates with the preserved SBMI factor.
+          preserved=1.781742384675
+          for f in factors:
+              if f.get("target")=="alimentacao e bebidas" and f.get("status")=="CALCULATED":
+                  f["preserved_food_factor"]=preserved
+                  f["difference_vs_preserved"]=f["factor"]-preserved
+                  f["relative_difference_pct"]=(f["factor"]/preserved-1)*100
+
+          with (OUT/"ipca_market_dimension_factors_candidate.csv").open("w",newline="",encoding="utf-8") as fp:
+              cols=["target","status","start_period","end_period","months","factor","old_code","new_code","preserved_food_factor","difference_vs_preserved","relative_difference_pct","old_codes","new_codes"]
+              w=csv.DictWriter(fp,fieldnames=cols,extrasaction="ignore")
+              w.writeheader()
+              for row in factors:w.writerow(row)
+
+          report={
+              "source":"IBGE/SIDRA — IPCA",
+              "old_table":1419,
+              "new_table":7060,
+              "variable":63,
+              "classification":315,
+              "discoveries":discoveries,
+              "preferred":preferred,
+              "series":series,
+              "factors":factors,
+              "warning":"Candidate factors only. A category is promoted only after semantic equivalence across the 2019/2020 classification break is audited. The POF reference period spans 2017-2018, so start-month choice is a modeling assumption and must be explicit.",
+          }
+          (OUT/"manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+
+          print("SBMI_IPCA_FACTOR_DISCOVERY_BEGIN")
+          print(json.dumps({"run_schema":RUN_SCHEMA,"discoveries":discoveries,"preferred":preferred,"factors":factors},ensure_ascii=False,indent=2))
+          print("SBMI_IPCA_FACTOR_DISCOVERY_END")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipca-market-dimension-factor-discovery-v1
+          path: artifacts/ipca_market_dimension/
+          if-no-files-found: error
+          retention-days: 30

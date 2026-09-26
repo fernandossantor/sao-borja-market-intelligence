@@ -1,0 +1,61 @@
+name: inss-benefits-zip-layout-audit
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/inss-benefits-zip-layout-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-zip:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inspect remote ZIP central directory
+        run: |
+          python -m pip install --upgrade remotezip requests
+          mkdir -p artifacts
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from remotezip import RemoteZip
+
+          url = "https://armazenamento-dadosabertos.s3.sa-east-1.amazonaws.com/PDA_2025_2027/Grupos_de_dados/Benef%C3%ADcios+emitidos/D.DLK.FRM.000.DADOSABERTOS.EMITIDOS_202607.zip"
+          headers = {"User-Agent": "SBMI remote ZIP layout audit/1.0"}
+          report = {"url": url, "reference_period": "2026-07", "nature": "source_audit_only"}
+          try:
+              with RemoteZip(url, headers=headers) as z:
+                  members = []
+                  for info in z.infolist():
+                      members.append({
+                          "filename": info.filename,
+                          "compress_type": info.compress_type,
+                          "compressed_size": info.compress_size,
+                          "uncompressed_size": info.file_size,
+                          "crc": info.CRC,
+                          "flag_bits": info.flag_bits,
+                      })
+                  report["members"] = members
+                  report["member_count"] = len(members)
+          except Exception as exc:
+              report["error_type"] = type(exc).__name__
+              report["error"] = str(exc)
+          Path("artifacts/inss_202607_zip_layout.json").write_text(
+              json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8"
+          )
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          if "members" not in report:
+              raise SystemExit("Could not inspect remote ZIP layout")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inss-benefits-zip-layout-audit-202607
+          retention-days: 30
+          path: artifacts/

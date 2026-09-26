@@ -162,3 +162,21 @@ Base territorial relacionada:
 - `nfse_sao_borja_especificacao_dados_mercado_v001_20260926.md`.
 
 A matriz é metodológica. Nenhum valor de demanda não residente foi estimado nesta versão.
+
+
+## 10. Atualização — auditoria pública da NFS-e
+
+A superfície pública anônima do portal NFS-e de São Borja foi auditada em 26/09/2026.
+
+Resultado:
+- configuração e contadores estão publicamente acessíveis;
+- não foi localizado agregado monetário por período/item/CNAE/município do tomador;
+- o endpoint público de relatórios é um renderizador genérico, não uma API de dados;
+- portanto, a separação monetária por município do destinatário continua dependente de extração institucional agregada.
+
+Isso **não reduz o potencial analítico da NFS-e**: o layout atual documenta município do destinatário, local da prestação e códigos de tributação. A limitação é de acesso público, não de ausência comprovada dos campos administrativos.
+
+Documento:
+`nfse_sao_borja_endpoints_publicos_auditoria_v001_20260926.md`.
+
+Assim, a prioridade 1 desta matriz permanece inalterada: obter NFS-e agregada com município do destinatário e auditar completude/significado antes de promover qualquer parcela a demanda não residente.

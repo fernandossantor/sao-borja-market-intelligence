@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from public_market_series_curated import build_curated_public_market_series
+from sbmi.public_market_series_curated import build_curated_public_market_series
 
 
 def main() -> None:

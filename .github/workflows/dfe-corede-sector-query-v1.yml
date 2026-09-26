@@ -178,6 +178,65 @@ jobs:
                   }
                   (OUT/"query_result.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
 
+                  # Decode the compact DSR rowset into an auditable CSV.
+                  ds0=result["dsr"]["DS"][0]
+                  dictionaries=ds0.get("ValueDicts",{})
+                  dm0=(ds0.get("PH") or [{}])[0].get("DM0",[])
+                  value_dict=dictionaries.get("D0",[])
+                  previous=[None,None,None,None]
+                  decoded=[]
+                  for erow in dm0:
+                      values=[]
+                      source_values=iter(erow.get("C",[]))
+                      repeat_mask=erow.get("R",0) or 0
+                      for idx in range(4):
+                          if repeat_mask & (1 << idx):
+                              values.append(previous[idx])
+                          else:
+                              values.append(next(source_values,None))
+                      previous=values
+                      code=int(values[0]) if values[0] is not None else None
+                      dict_idx=int(values[1]) if values[1] is not None else None
+                      label=value_dict[dict_idx] if dict_idx is not None and dict_idx < len(value_dict) else None
+                      value=float(values[2] or 0)
+                      qty=float(values[3] or 0)
+                      decoded.append({
+                          "cod_cnae_divisao":code,
+                          "nome_cnae_divisao":label,
+                          "corede":TARGET_COREDE,
+                          "ano":int(TARGET_YEAR),
+                          "modelo_dfe":TARGET_MODEL,
+                          "vlr_total_dfe":round(value,2),
+                          "qtde_dfe":int(qty),
+                          "valor_medio_por_documento":round(value/qty,2) if qty else None,
+                      })
+
+                  total_value=sum(r["vlr_total_dfe"] for r in decoded)
+                  total_qty=sum(r["qtde_dfe"] for r in decoded)
+                  for r in decoded:
+                      r["participacao_valor_corede_pct"]=round((r["vlr_total_dfe"]/total_value*100) if total_value else 0,6)
+                      r["participacao_qtde_corede_pct"]=round((r["qtde_dfe"]/total_qty*100) if total_qty else 0,6)
+
+                  cols=["cod_cnae_divisao","nome_cnae_divisao","corede","ano","modelo_dfe","vlr_total_dfe","qtde_dfe","valor_medio_por_documento","participacao_valor_corede_pct","participacao_qtde_corede_pct"]
+                  with (OUT/"fronteira_oeste_2025_nfce_cnae_divisao.csv").open("w",newline="",encoding="utf-8") as fp:
+                      w=csv.DictWriter(fp,fieldnames=cols)
+                      w.writeheader(); w.writerows(decoded)
+
+                  summary={
+                      "corede":TARGET_COREDE,
+                      "ano":int(TARGET_YEAR),
+                      "modelo_dfe":TARGET_MODEL,
+                      "total_valor":round(total_value,2),
+                      "total_quantidade":int(total_qty),
+                      "divisoes":len(decoded),
+                      "selected":{
+                          str(code):next((r for r in decoded if r["cod_cnae_divisao"]==code),None)
+                          for code in (45,47,55,56,75,86,95,96)
+                      },
+                      "warning":"Regional COREDE benchmark only. Do not use as São Borja market size or allocate municipal DFe by these shares."
+                  }
+                  (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+
                   # Print compact raw DSR for follow-up parsing without exposing headers.
                   print("SBMI_DFE_COREDE_SECTOR_QUERY_BEGIN")
                   print(json.dumps({

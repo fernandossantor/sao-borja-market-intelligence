@@ -41,6 +41,8 @@ jobs:
           session=requests.Session()
           session.headers.update({"User-Agent":"SBMI IPCA market dimension audit/1.0"})
 
+          RUN_SCHEMA="v002-specificity"
+
           TARGETS=[
               "alimentacao e bebidas",
               "alimentacao fora do domicilio",
@@ -217,7 +219,7 @@ jobs:
           (OUT/"manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
 
           print("SBMI_IPCA_FACTOR_DISCOVERY_BEGIN")
-          print(json.dumps({"discoveries":discoveries,"preferred":preferred,"factors":factors},ensure_ascii=False,indent=2))
+          print(json.dumps({"run_schema":RUN_SCHEMA,"discoveries":discoveries,"preferred":preferred,"factors":factors},ensure_ascii=False,indent=2))
           print("SBMI_IPCA_FACTOR_DISCOVERY_END")
           PY
       - uses: actions/upload-artifact@v4

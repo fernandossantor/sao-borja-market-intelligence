@@ -79,10 +79,15 @@ jobs:
                       if not k.endswith("N"):
                           continue
                       nv=norm(v)
-                      if nv in TARGETS:
+                      matched=None
+                      for target in TARGETS:
+                          if nv==target or nv.endswith(" "+target) or target in nv:
+                              matched=target
+                              break
+                      if matched:
                           prefix=k[:-1]
                           code=rec.get(prefix+"C")
-                          hits.append({"target":nv,"label":v,"code":str(code),"name_key":k,"code_key":prefix+"C"})
+                          hits.append({"target":matched,"normalized_label":nv,"label":v,"code":str(code),"name_key":k,"code_key":prefix+"C"})
               # de-duplicate target/code
               uniq=[]
               seen=set()
@@ -100,8 +105,19 @@ jobs:
                   by.setdefault(h["target"],[]).append(h["code"])
               maps[table]=by
 
-          periods_old="201801-201912"
-          periods_new="202001-202608"
+          def months(start,end):
+              sy,sm=map(int,(start[:4],start[4:]))
+              ey,em=map(int,(end[:4],end[4:]))
+              out=[]
+              y,m=sy,sm
+              while (y,m)<=(ey,em):
+                  out.append(f"{y:04d}{m:02d}")
+                  m+=1
+                  if m==13: y+=1; m=1
+              return ",".join(out)
+
+          periods_old=months("201801","201912")
+          periods_new=months("202001","202608")
 
           def fetch_series(table,code,periods):
               url=f"{BASE}/t/{table}/n1/all/v/63/p/{periods}/c315/{code}"

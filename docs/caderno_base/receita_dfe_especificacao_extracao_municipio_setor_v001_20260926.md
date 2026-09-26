@@ -204,7 +204,7 @@ Esta é a rota oficial com maior potencial de transformar os atuais benchmarks d
 
 ## 12. Priorização taxonômica do pedido por NCM
 
-A auditoria do Radar do Mercado identificou **110 grupos de afinidade distintos**. O detalhamento NCM atingiu a janela pública de 10.000 linhas, portanto a lista de grupos foi validada por uma consulta independente à dimensão `grupo_afinidade_final`, mas o projeto **não trata o arquivo de 10.000 linhas como catálogo NCM8 completo**.
+A auditoria do Radar do Mercado identificou **110 grupos de afinidade distintos**. A primeira janela detalhada de 10.000 linhas cobriu 92 grupos; os 18 grupos ausentes foram consultados individualmente e recompostos. O catálogo corrente possui **11.765 associações grupo × NCM8**, cobre os **110 grupos** e não apresenta grupos faltantes após a recomposição.
 
 Para reduzir o volume da primeira extração, recomenda-se priorizar os grupos classificados como **ALTA** no crosswalk setorial. A Receita pode entregar NCM8/NCM4 e o SBMI executar o agrupamento posteriormente; não é necessário que `grupo_afinidade_final` seja um campo oficial da extração.
 
@@ -277,8 +277,11 @@ Se o volume impedir a extração integral, solicitar os NCMs pertencentes aos gr
 Documento de crosswalk:
 `radar_ncm_crosswalk_cadernos_v001_20260926.md`.
 
-Rastreabilidade taxonômica:
-- workflow: `radar-mercado-ncm-taxonomy-v1`;
-- run: `36266057411`;
-- artifact: `10913828012`;
-- Drive: `SBMI_Radar_Mercado_NCM_taxonomia_v001.zip`, ID `1B8MCdhgFU9RcH8VdGwMU_k0RdCQei6e_`.
+Rastreabilidade taxonômica corrente:
+- workflow completo: `radar-mercado-ncm-taxonomy-complete-v1`;
+- run: `36267773156`;
+- artifact: `10914542081`;
+- digest: `sha256:ace7428be2e1b4cdc8c47f8a41eef63da11094b066feaf8a578fa7b158f1d5e3`;
+- Drive: `SBMI_Radar_Mercado_taxonomia_NCM_completa_v001.zip`, ID `1hXk6FCqM4nf3gMwPD5mm-UEoyXfsitlz`.
+
+O catálogo completo permite ao SBMI fornecer, se necessário, a lista exata de NCM8 prioritários em vez de depender apenas dos nomes dos grupos de afinidade.

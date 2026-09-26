@@ -193,10 +193,12 @@ jobs:
                   if any(x is None for x in needed):
                       raise RuntimeError(f"Could not map CNAE columns for {y}: {list(chunk.columns)}")
                   date_raw = chunk[date_col].astype(str).str.strip()
-                  iso_mask = date_raw.str.match(r"^\\d{4}-\\d{2}-\\d{2}$", na=False)
+                  iso_mask = date_raw.str.match(r"^\\d{4}-\\d{2}-\\d{2}", na=False)
                   dt = pd.Series(pd.NaT, index=chunk.index, dtype="datetime64[ns]")
                   dt.loc[iso_mask] = pd.to_datetime(
-                      date_raw.loc[iso_mask], errors="coerce", format="%Y-%m-%d"
+                      date_raw.loc[iso_mask].str.slice(0, 10),
+                      errors="coerce",
+                      format="%Y-%m-%d",
                   )
                   dt.loc[~iso_mask] = pd.to_datetime(
                       date_raw.loc[~iso_mask], errors="coerce", dayfirst=True

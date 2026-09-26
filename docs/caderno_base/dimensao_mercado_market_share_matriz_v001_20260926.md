@@ -67,9 +67,11 @@ Exemplos de fontes potenciais: NFC-e/NF-e, NFS-e/CFS-e, registros de programas p
 
 ### 2.6 Faturamento estimado — FE
 
-Valor obtido por modelo e não por observação integral das vendas.
+Receita empresarial obtida por modelo e não por observação integral das vendas.
 
-Exemplos: POF territorializada e atualizada por preços, intervalos de faturamento de bases privadas, modelos de intensidade econômica. Toda estimativa deve preservar fórmula, hipótese, faixa de incerteza e teste de sensibilidade.
+Exemplos defensáveis podem incluir faixas de faturamento empresarial de bases privadas, extrapolação de dados contábeis amostrais ou modelos calibrados por variáveis empresariais monetárias. Toda estimativa deve preservar fórmula, hipótese, faixa de incerteza e teste de sensibilidade.
+
+**Controle conceitual:** POF territorializada e atualizada por preços estima **demanda residente**, não faturamento empresarial. Ela só poderia integrar um modelo de faturamento se existisse uma ponte empiricamente sustentada entre gasto dos residentes e parcela efetivamente capturada pelas empresas locais. Essa ponte ainda não existe no SBMI.
 
 ### 2.7 Participação de mercado — PM
 
@@ -93,15 +95,17 @@ Sem identificação compatível da origem do consumidor, as duas leituras não d
 | BAIXA | benchmark indireto, modelo privado, extrapolação territorial forte ou incompatibilidade relevante de escopo |
 | NÃO DEFENSÁVEL | contagens estruturais ou qualitativas usadas para inferir faturamento/share sem base monetária |
 
-## 4. Matriz setorial de viabilidade
+## 4. Matriz setorial de viabilidade — estado em 2026-09-26
 
 | Setor | Unidade monetária recomendada | Faturamento empresarial local | Demanda residente | Demanda não residente | Mercado capturado | Faturamento observado | Faturamento estimado | Market share | Confiança atual |
 |---|---|---|---|---|---|---|---|---|---|
-| Bens Essenciais | produto/transação; primeira fronteira monetária = alimentação no domicílio | não observado por setor no projeto | **já modelada** para alimentação no domicílio: R$ 234.706.228,14/ano e R$ 19.558.852,34/mês | não monetizada | não observado | não disponível ainda para o setor completo; DFe municipal é fonte localizada, mas falta cruzamento municipal × setor/produto | **sim**, já existe para alimentação no domicílio via POF/RS + população + preços | não disponível | DR = MÉDIA-ALTA; FET/MC/PM = ainda não defensáveis |
-| Saúde, Higiene e Cuidados Pessoais | produto/transação, separado em medicamentos, higiene, cosméticos, suplementos e demais submercados | não observado | não calculada ainda; **obtível** via POF/RS com crosswalk de itens e atualização de preços | não monetizada | não observado | potencial via NFC-e/NF-e; Farmácia Popular/BNAFAR pode oferecer submercado público observado, sujeito a auditoria de acesso e granularidade | obtível via POF; bases privadas apenas como triangulação | não disponível | DR potencial = MÉDIA; FO parcial potencial = ALTA; PM = não defensável hoje |
-| Bens Não Essenciais | módulos de produto/transação: moda/calçados; móveis/eletro; utilidades/decor; pet etc. | não observado | não calculada; **obtível por módulos** via POF/RS | não monetizada | não observado | potencial via DFe, preferencialmente item/NCM e não apenas CNAE do emissor | obtível por módulos POF; um agregado único exigirá crosswalk e controle de sobreposição | não disponível | módulos DR = MÉDIA; agregado = BAIXA/MÉDIA até fechar taxonomia; PM = não defensável |
-| Serviços | item de serviço/NFS-e; tratar categorias separadamente | não observado monetariamente no projeto | não calculada; POF pode cobrir apenas parte dos serviços às famílias | não monetizada | não observado | **fonte oficial localizada:** sistema municipal NFS-e/CFS-e; valores agregados por atividade precisam ser obtidos com a Prefeitura, respeitando sigilo fiscal | possível para B2C selecionado via POF; PAS/RAIS somente como benchmark/modelo, não como observação local | possível apenas com denominador agregado oficial + numerador empresarial compatível; não disponível hoje | FO potencial = ALTA se obtido por NFS-e agregada; atual = não defensável |
-| Alimentação Fora do Lar | transação de consumo em estabelecimento/delivery; CNAE 56 como estrutura, não como medida monetária | não observado para mercado privado | **obtível** via POF/RS — alimentação fora do domicílio | não monetizada e é lacuna central | não observado | PNAE tem pagamentos B2G observados, mas não representa mercado privado; NFC-e/NF-e é caminho para mercado B2C formal | obtível via POF para residentes; DNR exigirá fonte própria | não disponível | DR potencial = MÉDIA-ALTA; B2G parcial = ALTA; MC/PM privados = não defensáveis hoje |
+| Bens Essenciais | produto/transação; fronteira canônica = alimentação no domicílio | não observado por setor | **R$ 234.706.228,14/ano** — alimentação no domicílio, POF/RS + população + preços | não monetizada | não observado | DFe municipal amplo disponível, mas ainda sem setor/produto | **não calculado**; DR modelada não é faturamento | não disponível | DR = MÉDIA-ALTA; FET/MC/PM ainda não defensáveis |
+| Saúde, Higiene e Cuidados Pessoais | módulos separados: higiene/cuidados, medicamentos e demais submercados | não observado | **Higiene/Cuidados: R$ 57.577.114,03/ano; Remédios: R$ 69.588.767,08/ano; cesta-núcleo = R$ 127.165.881,11/ano** | não monetizada | não observado | potencial via DFe; Farmácia Popular/BNAFAR permanece submercado a auditar | **não calculado**; módulos POF/IPCA são DR | não disponível | DR modular = MÉDIA/MÉDIA-ALTA; PM não defensável |
+| Bens Não Essenciais | módulos: vestuário; mobiliários/artigos do lar; eletrodomésticos; demais categorias depois | não observado | **três módulos = R$ 133.358.137,47/ano**: vestuário R$ 73,13 mi; mobiliários R$ 32,82 mi; eletrodomésticos R$ 27,40 mi | não monetizada | não observado | potencial via DFe, preferencialmente item/NCM | **não calculado**; módulos POF/IPCA são DR | não disponível | DR de três módulos = MÉDIA; agregado total ainda não definido |
+| Serviços | item de serviço/NFS-e; categorias separadas | não observado | **Serviços pessoais = R$ 18.419.423,64/ano**, somente submercado | não monetizada | não observado | NFS-e/CFS-e municipal é rota prioritária; valores agregados ainda não obtidos | **não calculado** | não disponível | submercado POF = MÉDIA; FO potencial alto via NFS-e |
+| Alimentação Fora do Lar | transação de consumo em estabelecimento/delivery | não observado para mercado privado | **R$ 107.390.938,78/ano** — alimentação fora do domicílio, POF/RS + IPCA específico | não monetizada | não observado | DFe municipal amplo disponível sem setor; PNAE é B2G parcial observado | **não calculado**; DR modelada não é faturamento | não disponível | DR = MÉDIA-ALTA; MC/PM privados não defensáveis |
+
+**Nota:** valores de DR são estimativas modeladas a preços aproximados de junho/2026 e não devem ser somados entre setores sem auditoria de sobreposição de categorias.
 
 ## 5. O que já existe no projeto
 
@@ -116,21 +120,29 @@ Sem identificação compatível da origem do consumidor, as duas leituras não d
 ### Saúde/Higiene
 - POM qualitativa n=12;
 - estrutura CNES/RFB e diagnóstico de arenas competitivas;
-- ausência de gasto/ticket/faturamento municipal.
+- POF/IPCA: dois módulos de demanda residente modelados;
+- Higiene e Cuidados Pessoais: **R$ 57.577.114,03/ano**;
+- Remédios: **R$ 69.588.767,08/ano**;
+- cesta-núcleo calculada: **R$ 127.165.881,11/ano**;
+- faturamento municipal permanece não observado.
 
 ### Bens Não Essenciais
 - POM qualitativa n=10;
 - inventário de storefronts e REGIC temática parcial;
-- ausência de gasto monetário local/residente e de faturamento.
+- POF/IPCA: Vestuário **R$ 73.130.722,82/ano**; Mobiliários e artigos do lar **R$ 32.823.271,13/ano**; Eletrodomésticos **R$ 27.404.143,52/ano**;
+- três módulos somam **R$ 133.358.137,47/ano**, sem serem tratados como total do setor;
+- faturamento local permanece não observado.
 
 ### Serviços
 - survey POM n=153 como evidência comportamental descritiva;
 - SINAC/SIMEI e estrutura cadastral;
-- ausência de valores de NFS-e no projeto.
+- POF/IPCA: **Serviços pessoais = R$ 18.419.423,64/ano**, somente como submercado;
+- ausência de valores agregados de NFS-e no projeto.
 
 ### Alimentação Fora do Lar
 - survey POM n=153 como evidência comportamental descritiva;
 - CNAE 56 estrutural;
+- POF/IPCA específico: demanda residente modelada **R$ 107.390.938,78/ano**;
 - pagamentos PNAE CNPJ observados: R$ 869.843,54, dos quais R$ 327.021,02 a fornecedores locais e R$ 542.822,52 a fornecedores externos;
 - contratos de agricultura familiar não são tratados como pagamentos;
 - PNAE permanece como submercado institucional B2G e não é somado ao mercado privado sem definição explícita.
@@ -188,15 +200,31 @@ Só admitir quando:
 - CNES/SINAC/SIMEI como market share;
 - REGIC como volume de vendas.
 
-## 9. Próxima execução recomendada
+## 9. Estado de execução e próxima prioridade
 
-1. ingerir e auditar `DFe Totais Municipio 2023–2026` para São Borja, separando NF-e e NFC-e;
-2. testar o Power BI/arquivos da Receita Estadual para cruzamento `município × CNAE` e procurar possibilidade de `município × NCM`;
-3. construir crosswalk monetário POF → cinco setores, iniciando por Alimentação Fora do Lar e Saúde/Higiene;
-4. preparar especificação de solicitação agregada de NFS-e à Prefeitura: `mês × item LC 116/CNAE × valor bruto × número de notas × município do tomador`, com célula mínima de sigilo;
-5. somente após os itens 1–4 decidir em quais setores existe denominador suficientemente robusto para market share.
+Concluído nesta rodada:
+- DFe Totais Município 2023–2026 ingerido e auditado para São Borja, com NF-e, NFC-e e CT-e separados;
+- crosswalk monetário POF → módulos dos cinco cadernos;
+- fatores IPCA específicos por módulo, com reprodução de controle do fator alimentar canônico;
+- primeira camada de demanda residente modelada para Alimentação Fora do Lar, Saúde/Higiene, três módulos de Bens Não Essenciais e submercado de Serviços pessoais.
+
+Próxima prioridade:
+1. testar/solicitar o cruzamento `São Borja × CNAE × modelo DFe × mês × valor`;
+2. procurar `São Borja × NCM × modelo DFe × mês × valor` para varejos de mix amplo;
+3. preparar especificação de solicitação agregada de NFS-e à Prefeitura: `mês × item LC 116/CNAE × valor bruto × número de notas × município do tomador`, com proteção de sigilo;
+4. auditar Farmácia Popular/BNAFAR como submercado observado de medicamentos;
+5. somente com faturamento monetário territorial-setorial compatível decidir onde market share pode ser calculado.
 
 ## 10. Governança
 
 PR #41 permanece **aberto, draft e sem merge**.  
 Nenhuma integração à `main` está autorizada sem aprovação explícita do usuário.
+
+
+## 11. Artefatos empíricos vinculados
+
+- DFe São Borja: `docs/caderno_base/dfe_sao_borja_envelope_fiscal_v001_20260926.md`.
+- POF crosswalk: `docs/caderno_base/pof_rs_crosswalk_dimensao_mercado_v001_20260926.md`.
+- Demanda residente modular: `docs/caderno_base/demanda_residente_modulos_setoriais_v001_20260926.md`.
+- Planilha técnica Drive: `1tkVQt1N0hrAICehL-w-PRnv3AJGonUYfBhOnFOOvFuI`.
+- Documento metodológico Drive: `1ren1_4KuNFUwj2wKMz4GzOpZq8PG4Jr5-YRNyafA_L8`.

@@ -3,7 +3,7 @@
 **Data da extração:** 2026-09-26  
 **Geografia:** São Borja/RS — código IBGE 4318002  
 **Fonte primária:** Receita Estadual do Rio Grande do Sul — Receita Dados — Documentos Eletrônicos — arquivos `DFe_Totais_Municipio_YYYY.zip`  
-**Período observado:** 2023-01-01 a 2026-09-14  
+**Período observado:** 2018-01-01 a 2026-09-14  
 **Natureza:** dados fiscais observados na fonte + agregações calculadas pelo SBMI.
 
 ## 1. Objetivo
@@ -16,6 +16,11 @@ Este envelope **não é tamanho de mercado** e **não é market share**.
 
 Arquivos oficiais utilizados:
 
+- `DFe_Totais_Municipio_2018.zip`;
+- `DFe_Totais_Municipio_2019.zip`;
+- `DFe_Totais_Municipio_2020.zip`;
+- `DFe_Totais_Municipio_2021.zip`;
+- `DFe_Totais_Municipio_2022.zip`;
 - `DFe_Totais_Municipio_2023.zip`;
 - `DFe_Totais_Municipio_2024.zip`;
 - `DFe_Totais_Municipio_2025.zip`;
@@ -27,7 +32,7 @@ Em cada CSV, o esquema efetivamente observado foi:
 
 Os arquivos foram lidos em `cp1252`, delimitador `;`.
 
-A coluna `dados_atualizados_ate`, descrita na nota técnica pública, **não estava presente nos quatro arquivos baixados nesta execução**. A cobertura temporal do arquivo 2026 alcança 14/09/2026.
+A coluna `dados_atualizados_ate`, descrita na nota técnica pública, **não estava presente nos nove arquivos baixados nesta execução consolidada**. Os anos 2018–2025 cobrem os respectivos anos civis completos; o arquivo 2026 alcança 14/09/2026.
 
 ## 3. Resultados anuais
 
@@ -35,6 +40,21 @@ Os valores abaixo são **somas calculadas pelo SBMI** das linhas diárias oficia
 
 | Ano | Modelo | Quantidade de documentos | Valor dos documentos (R$) | Dias observados |
 |---|---|---:|---:|---:|
+| 2018 | CT-e | 25.342 | 50.499.004,61 | 365 |
+| 2018 | NF-e | 356.500 | 1.751.873.599,30 | 365 |
+| 2018 | NFC-e | 7.807.667 | 546.518.503,49 | 365 |
+| 2019 | CT-e | 24.840 | 60.710.114,25 | 365 |
+| 2019 | NF-e | 382.324 | 1.868.683.046,86 | 365 |
+| 2019 | NFC-e | 8.612.694 | 605.200.984,20 | 365 |
+| 2020 | CT-e | 25.530 | 68.832.729,62 | 366 |
+| 2020 | NF-e | 396.018 | 2.594.269.266,36 | 366 |
+| 2020 | NFC-e | 8.215.913 | 637.979.051,83 | 366 |
+| 2021 | CT-e | 23.591 | 82.123.413,72 | 365 |
+| 2021 | NF-e | 559.179 | 3.429.346.173,38 | 365 |
+| 2021 | NFC-e | 8.609.335 | 744.589.628,55 | 365 |
+| 2022 | CT-e | 25.403 | 103.921.883,75 | 365 |
+| 2022 | NF-e | 606.135 | 3.648.280.848,17 | 365 |
+| 2022 | NFC-e | 9.091.375 | 830.930.267,67 | 365 |
 | 2023 | CT-e | 24.890 | 124.343.891,46 | 365 |
 | 2023 | NF-e | 762.230 | 4.229.579.669,78 | 365 |
 | 2023 | NFC-e | 9.654.535 | 843.874.412,06 | 365 |
@@ -60,6 +80,11 @@ Para NFC-e:
 
 | Ano | Valor médio/documento NFC-e |
 |---|---:|
+| 2018 | R$ 70,00 |
+| 2019 | R$ 70,27 |
+| 2020 | R$ 77,65 |
+| 2021 | R$ 86,49 |
+| 2022 | R$ 91,40 |
 | 2023 | R$ 87,41 |
 | 2024 | R$ 92,06 |
 | 2025 | R$ 96,84 |
@@ -96,14 +121,23 @@ CT-e é preservado na série por fidelidade ao arquivo municipal, mas não integ
 
 ## 6. Comparação temporal restrita
 
-Entre anos completos:
+A série histórica foi ampliada para 2018–2025 em anos completos.
 
-- NFC-e nominal: 2024/2023 = **+23,64%**;
-- quantidade de NFC-e: 2024/2023 = **+17,39%**;
-- NFC-e nominal: 2025/2024 = **+13,99%**;
-- quantidade de NFC-e: 2025/2024 = **+8,36%**.
+Variações nominais anuais da NFC-e calculadas a partir dos totais observados:
 
-Essas variações são **calculadas** e permanecem nominais. Não demonstram crescimento real de consumo porque ainda não foram deflacionadas nem controladas por composição setorial, formalização, mudanças cadastrais ou alterações de emissão.
+| Comparação | Valor NFC-e | Quantidade NFC-e |
+|---|---:|---:|
+| 2019/2018 | +10,74% | +10,31% |
+| 2020/2019 | +5,42% | -4,61% |
+| 2021/2020 | +16,71% | +4,79% |
+| 2022/2021 | +11,59% | +5,60% |
+| 2023/2022 | +1,56% | +6,19% |
+| 2024/2023 | +23,64% | +17,39% |
+| 2025/2024 | +13,99% | +8,36% |
+
+Essas variações são **calculadas** e permanecem nominais. Não demonstram crescimento real de consumo porque ainda precisam ser deflacionadas e controladas por composição setorial, formalização, mudanças cadastrais e alterações de emissão.
+
+O salto de valor/documento em 2020–2022 e a desaceleração nominal em 2023 são fatos descritivos da série fiscal; sua explicação causal não é inferida nesta etapa.
 
 ## 7. Consequência para a dimensão de mercado
 
@@ -121,28 +155,38 @@ Os dados públicos identificados até aqui divulgam município e CNAE em arquivo
 
 ## 8. Rastreabilidade
 
+### Extração original 2023–2026
+
 Workflow:
 `.github/workflows/dfe-sao-borja-market-dimension-v1.yml`
 
-Execução bem-sucedida:
+Execução:
 - push run: `36258514596`;
 - job: `108449749903`;
-- commit do extrator: `b6f42c8d9622c445ce888a760eab238610402d6c`.
-
-Artifact GitHub:
-- ID: `10911616371`;
+- commit do extrator: `b6f42c8d9622c445ce888a760eab238610402d6c`;
+- artifact: `10911616371`;
 - digest: `sha256:e69c6550e9a9617a2161aa1816d2cd7b3fc9aed975ff8489b5cf282fd628c146`.
 
-SHA-256 dos pacotes oficiais baixados nesta execução:
-
-- 2023: `dd9d3c006254a2676c4057b6be0f4f0c8eb507b1eefa21848db915903a63ff83`;
-- 2024: `54ff8c70670a4cad739ead7e86af0d490514552a7498a6b25e95ad95c6f08458`;
-- 2025: `3a87f1d51e76a1fb1a6019047dd5e1f67378b9865ac4b9f5e0cbbcec48e70944`;
-- 2026: `056fb082f3719ca60d7a1ba21ccaa9c153a390ff18f11d39908543b4afabbfa4`.
-
-Google Drive — pacote preservado:
+Drive:
 - `SBMI_DFe_Sao_Borja_2023_2026_v001.zip`;
 - ID: `1-lhcCTLyRYsySFrByBAHD4o7tuGahyS4`.
+
+### Série pública ampliada 2018–2026
+
+Workflow:
+`.github/workflows/download-public-series-bulk-v1.yml`
+
+Execução:
+- run: `36275562165`;
+- commit: `2d3c7decd30141cceb81064513dc51b71bdc46a1`;
+- artifact DFe município: `10916617398`;
+- digest: `sha256:450a1131cd6ceb7d1dd8dd30dbd722eba042e4e25e1b9b5b30129ecc32b873aa`.
+
+Drive:
+- `SBMI_DFe_Municipio_2018_2026_v001.zip`;
+- ID: `1DuirpWKYP4Pwu8qxyEU_B6le0MXnfD-j`.
+
+A série ampliada foi obtida diretamente dos mesmos padrões oficiais de URL, preservando os arquivos anuais originais sem transformação.
 
 ## 9. Próxima etapa
 

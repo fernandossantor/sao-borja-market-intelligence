@@ -89,27 +89,10 @@ jobs:
                 for i in range(4):vals.append(prev[i] if R&(1<<i) else next(it,None))
                 prev=vals;rawrows.append(vals)
 
-              # Determine dictionary assignment by testing each categorical column against dictionary index bounds
-              # and favoring stable decoded text patterns.
-              assignments={}
-              remaining=set(dictkeys)
-              for colidx in range(4):
-                vals=[r[colidx] for r in rawrows if r[colidx] is not None]
-                candidates=[]
-                for dk in list(remaining):
-                  dv=dicts[dk]
-                  if vals and all(isinstance(v,(int,float)) and int(v)==v and 0<=int(v)<len(dv) for v in vals):
-                    sample=[str(dv[int(v)]) for v in vals[:50]]
-                    score=0
-                    if colidx==0: score=sum(bool(re.search(r"[A-Za-zÀ-ÿ]",x)) for x in sample)
-                    elif colidx==1: score=sum(bool(re.fullmatch(r"\d{8}",re.sub(r"\D","",x))) for x in sample)
-                    elif colidx==2: score=sum(bool(re.fullmatch(r"\d{4}",re.sub(r"\D","",x))) for x in sample)
-                    else: score=sum((" - " in x or len(x)>12) for x in sample)
-                    candidates.append((score,dk))
-                if candidates:
-                  candidates.sort(reverse=True)
-                  score,dk=candidates[0]
-                  if score>0:assignments[colidx]=dk;remaining.remove(dk)
+              # Power BI DSR dictionaries D0..D3 follow the Select projection order
+              # for this four-column categorical query. Fixed mapping avoids swapping
+              # affinity-group labels with NCM descriptions.
+              assignments={i:f"D{i}" for i in range(4) if f"D{i}" in dicts}
 
               rows=[]
               for vals in rawrows:
@@ -129,7 +112,7 @@ jobs:
                 w=csv.DictWriter(f,fieldnames=["grupo_afinidade_final","ncm8","ncm4","codxdescr_ncm8"]);w.writeheader();w.writerows(uniq)
               counts=Counter(r["grupo_afinidade_final"] for r in uniq)
               summary={"rows":len(uniq),"categories":len(counts),"category_counts":dict(sorted(counts.items())),"dictionary_assignments":assignments,"raw_rows":len(rawrows),"value_dict_sizes":{k:len(v) for k,v in dicts.items()},
-                "warning":"Taxonomy only. Radar values are not São Borja values; no municipal dimension was observed."}
+                "warning":"Taxonomy only. Radar values are not São Borja values; no municipal dimension was observed.","decoder":"fixed D0-D3 mapping to Select order"}
               (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
               print("SBMI_RADAR_NCM_TAXONOMY_BEGIN");print(json.dumps(summary,ensure_ascii=False,indent=2)[:120000]);print("SBMI_RADAR_NCM_TAXONOMY_END")
               await b.close()

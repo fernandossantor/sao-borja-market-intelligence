@@ -107,10 +107,15 @@ jobs:
               maps[table]={target:[h["code"] for h in hs] for target,hs in by.items()}
               preferred[table]={}
               for target,hs in by.items():
-                  def specificity(h):
+                  # Prefer the deepest classification code in the textual label
+                  # (e.g. 1201 over 12; 6101 over 61; 7101 over 71).
+                  ranked=[]
+                  for h in hs:
                       m=re.match(r"^(\d+)\s",h.get("normalized_label",""))
-                      return (len(m.group(1)) if m else 0, m.group(1) if m else "")
-                  preferred[table][target]=sorted(hs,key=specificity,reverse=True)[0]
+                      prefix=m.group(1) if m else ""
+                      ranked.append((len(prefix), int(prefix) if prefix else -1, h))
+                  ranked.sort(key=lambda x:(x[0],x[1]), reverse=True)
+                  preferred[table][target]=ranked[0][2]
 
           def months(start,end):
               sy,sm=map(int,(start[:4],start[4:]))
@@ -212,7 +217,7 @@ jobs:
           (OUT/"manifest.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
 
           print("SBMI_IPCA_FACTOR_DISCOVERY_BEGIN")
-          print(json.dumps({"discoveries":discoveries,"factors":factors},ensure_ascii=False,indent=2))
+          print(json.dumps({"discoveries":discoveries,"preferred":preferred,"factors":factors},ensure_ascii=False,indent=2))
           print("SBMI_IPCA_FACTOR_DISCOVERY_END")
           PY
       - uses: actions/upload-artifact@v4

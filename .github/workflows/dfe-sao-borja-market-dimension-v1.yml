@@ -73,11 +73,11 @@ jobs:
               raise UnicodeDecodeError("unknown", b"", 0, 1, "no supported encoding")
 
           def sniff_delimiter(text: str) -> str:
-              sample = "\n".join(text.splitlines()[:20])
-              try:
-                  return csv.Sniffer().sniff(sample, delimiters=";,\t|").delimiter
-              except csv.Error:
-                  return ";"
+              first = text.splitlines()[0] if text.splitlines() else ""
+              candidates = [";", "\t", "|", ","]
+              counts = {d: first.count(d) for d in candidates}
+              best = max(candidates, key=lambda d: counts[d])
+              return best if counts[best] > 0 else ";"
 
           def parse_number(raw: str) -> float:
               s = str(raw or "").strip().replace("\xa0", "").replace("R$", "").replace(" ", "")
@@ -224,6 +224,14 @@ jobs:
               manifest["years"][str(year)] = year_info
 
           if not daily:
+              print("SBMI_DFE_DIAGNOSTIC_NO_TARGET")
+              print(json.dumps({
+                  "years": {
+                      y: {
+                          "members": x["members"],
+                      } for y, x in manifest["years"].items()
+                  }
+              }, ensure_ascii=False, indent=2)[:150000])
               raise SystemExit("No São Borja rows found")
 
           daily.sort(key=lambda r: (r["data"], r["modelo"]))

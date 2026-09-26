@@ -173,3 +173,25 @@ Fonte oficial:
 **Interpretação:** há evidência documental de que a infraestrutura administrativa foi especificada para produzir relatórios fiscais úteis ao recorte proposto. Isso aumenta a viabilidade técnica da solicitação, mas não prova que todos os campos solicitados estejam hoje disponíveis em uma única exportação.
 
 A LDO/LOA municipal também publica arrecadação/previsão de ISS como receita tributária. Esse dado pode futuramente funcionar como **controle de consistência fiscal**, porém não deve ser convertido em faturamento de serviços dividindo-se o ISS por uma alíquota arbitrária, pois as alíquotas, bases, retenções, regimes e local de incidência são heterogêneos.
+
+
+## 13. Controle fiscal auxiliar — arrecadação de ISS
+
+A metodologia de cálculo das receitas da LOA 2026, emitida em 01/12/2025 pelo Município, informa para a rubrica agregada **Imposto sobre Serviços de Qualquer Natureza — ISSQN**:
+
+| Referência | Valor arrecadado |
+|---|---:|
+| 2023 | R$ 15.171.513,67 |
+| 2024 | R$ 17.461.817,14 |
+| 2025* | R$ 18.225.601,93 |
+
+`* valor constante no demonstrativo emitido em 01/12/2025; não tratar como fechamento definitivo de 2025 sem confirmação posterior.`
+
+O mesmo demonstrativo registra previsão atualizada de **R$ 18.556.000,00** para 2025 e projeção de **R$ 20.895.000,00** para 2026.
+
+Fonte oficial:
+- https://www.saoborja.rs.gov.br/images/LOA2026/28_-_METODOLOGIA_DE_CLCULO_DAS_RECEITAS.pdf
+
+**Uso correto:** controle de consistência fiscal para uma futura extração de NFS-e/ISS.
+
+**Uso incorreto:** dividir o ISS arrecadado por uma alíquota única para estimar faturamento de serviços. A arrecadação agrega principal, multas/juros e dívida ativa, e o universo de serviços possui alíquotas, regimes, retenções, bases e locais de incidência heterogêneos. Portanto, ISS arrecadado não é proxy defensável de faturamento empresarial.

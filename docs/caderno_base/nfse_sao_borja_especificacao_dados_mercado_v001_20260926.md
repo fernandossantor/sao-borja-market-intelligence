@@ -140,3 +140,36 @@ Esta fonte, se obtida, será classificada como:
 - cobertura: operações documentadas pelo sistema municipal conforme legislação e regras operacionais vigentes.
 
 Ela substituirá proxies estruturais como SINAC/SIMEI para perguntas de dimensão monetária, sem invalidar o uso desses cadastros para caracterização da oferta.
+
+
+## 12. Evidência pública adicional de viabilidade operacional
+
+Consulta ao portal público do ISS/NFS-e de São Borja em 2026-09-26 mostrou contadores de:
+
+- **6.900 empresas autorizadas a emitir NFS-e**;
+- **4.222.101 NFS-e emitidas**.
+
+Fonte oficial:
+- https://nfse.saoborja.rs.gov.br/portal/
+
+**Classificação:** DADO OBSERVADO NO PORTAL, sem período explícito associado ao contador.
+
+Esses números **não são utilizados como dimensão de mercado**:
+- o total de empresas não é proxy de faturamento;
+- o total de notas é acumulado e não informa período, valor, situação/cancelamento ou item de serviço;
+- contagem de documentos não equivale a receita.
+
+A utilidade dos contadores é apenas confirmar que o sistema municipal possui escala transacional suficiente para uma extração agregada relevante.
+
+Também foi localizada especificação técnica municipal do sistema de gestão fiscal que exige, entre outras funcionalidades, relatórios sobre:
+- empresas tomadoras de serviços e retenções;
+- cancelamentos de NFS-e;
+- ISS variável;
+- local de tributação em outro município.
+
+Fonte oficial:
+- https://www.saoborja.rs.gov.br/images/conteudo/Licitacoes/2022/PRE8422anexoIIretif.pdf
+
+**Interpretação:** há evidência documental de que a infraestrutura administrativa foi especificada para produzir relatórios fiscais úteis ao recorte proposto. Isso aumenta a viabilidade técnica da solicitação, mas não prova que todos os campos solicitados estejam hoje disponíveis em uma única exportação.
+
+A LDO/LOA municipal também publica arrecadação/previsão de ISS como receita tributária. Esse dado pode futuramente funcionar como **controle de consistência fiscal**, porém não deve ser convertido em faturamento de serviços dividindo-se o ISS por uma alíquota arbitrária, pois as alíquotas, bases, retenções, regimes e local de incidência são heterogêneos.

@@ -693,14 +693,15 @@ def build_curated_public_market_series(
     catalog.to_csv(target / "series_catalog_v001.csv", index=False, encoding="utf-8")
 
     validation_rows = [
-        _validation_row("taxonomy_ncm8_unique", dim_ncm["ncm8"].nunique(), dim_ncm["ncm8"].nunique() == 11765, "Taxonomia canônica esperada: 11.765 NCM8."),
+        _validation_row("taxonomy_ncm8_unique", dim_ncm["ncm8"].nunique(), dim_ncm["ncm8"].nunique() == 13829, "Taxonomia canônica corrigida: 13.829 NCM8 após completar o grupo de fronteira da janela de 10 mil linhas."),
         _validation_row("taxonomy_groups", dim_ncm["grupo_afinidade_final"].nunique(), dim_ncm["grupo_afinidade_final"].nunique() == 110, "Universo canônico do Radar: 110 grupos."),
+        _validation_row("taxonomy_quimicos_organicos_ncm8", int(dim_ncm.loc[dim_ncm["grupo_afinidade_final"].eq("Químicos Orgânicos"), "ncm8"].nunique()), int(dim_ncm.loc[dim_ncm["grupo_afinidade_final"].eq("Químicos Orgânicos"), "ncm8"].nunique()) == 2302, "Controle do grupo de fronteira corrigido; impede regressão da truncagem na janela de 10 mil linhas."),
         _validation_row("radar_composition_files", comp_meta["files"], comp_meta["files"] == 26, "Cobertura esperada: 2024-07 a 2026-08."),
         _validation_row("radar_composition_taxonomy_coverage_pct", f"{comp_meta['taxonomy_row_coverage_pct']:.6f}", comp_meta["taxonomy_row_coverage_pct"] > 95.0, "Cobertura de linhas deve permanecer acima de 95%; ausências são inventariadas separadamente."),
-        _validation_row("radar_composition_unmapped_ncm8", len(comp_unmapped), len(comp_unmapped) == 2200, "NCM8 presentes na Composição e ausentes do catálogo canônico de 110 grupos."),
+        _validation_row("radar_composition_unmapped_ncm8", len(comp_unmapped), len(comp_unmapped) == 1074, "NCM8 residuais presentes na Composição e ausentes do catálogo corrigido; a maior parte do valor do gap anterior era truncagem do grupo Químicos Orgânicos."),
         _validation_row("radar_export_files", exp_meta["files"], exp_meta["files"] == 26, "Cobertura esperada: 2024-07 a 2026-08."),
         _validation_row("radar_export_taxonomy_coverage_pct", f"{exp_meta['taxonomy_row_coverage_pct']:.6f}", exp_meta["taxonomy_row_coverage_pct"] > 99.0, "Cobertura de linhas deve permanecer acima de 99%; ausências são inventariadas separadamente."),
-        _validation_row("radar_export_unmapped_ncm8", len(exp_unmapped), len(exp_unmapped) == 126, "NCM8 presentes nas Exportações e ausentes do catálogo canônico de 110 grupos."),
+        _validation_row("radar_export_unmapped_ncm8", len(exp_unmapped), len(exp_unmapped) == 0, "Após correção da taxonomia, todos os NCM8 observados nas Exportações estão mapeados."),
         _validation_row("portfolio_rows", portfolio_meta["rows"], portfolio_meta["rows"] == 1900, "Snapshot auditado do Portfólio."),
         _validation_row("portfolio_taxonomy_coverage_pct", f"{portfolio_meta['mapped_ncm8_pct']:.6f}", portfolio_meta["mapped_ncm8_pct"] > 98.0, "Cobertura conhecida ~98,81%."),
         _validation_row("cesta_months", cesta_meta["months"], cesta_meta["months"] == 66, "2021-01 a 2026-06."),

@@ -22,7 +22,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       SOURCE_RUN_ID: "36277254947"
       SOURCE_ARTIFACT: "sbmi-public-market-series-v1"
-      TAXONOMY_RUN_ID: "36267773156"
+      TAXONOMY_RUN_ID: "36326001762"
       TAXONOMY_ARTIFACT: "radar-mercado-ncm-taxonomy-complete-v1"
       EXECUTION_ID: "public-market-series-curated-v001"
     steps:

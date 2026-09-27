@@ -95,3 +95,25 @@ def test_taxonomy_gap_ncm29_handles_empty_prefix() -> None:
     assert meta["ncm8"] == 0
     assert meta["value"] == 0.0
     assert meta["ncm8_to_99pct_value"] == 0
+
+
+def test_taxonomy_gap_ncm29_zero_published_value_is_not_ranked() -> None:
+    frame = pd.DataFrame(
+        {
+            "series": ["radar_composicao_mercado"] * 2,
+            "ncm8": ["29309000", "29369200"],
+            "first_month": ["2024-07", "2024-07"],
+            "last_month": ["2025-08", "2025-08"],
+            "rows": [6, 3],
+            "rows_corte_sigilo": [6, 3],
+            "metrica_valor": ["vlr_nominal_publicado_nao_sigilo"] * 2,
+            "valor_publicado": [0.0, 0.0],
+        }
+    )
+    detail, meta = build_taxonomy_gap_ncm29(frame)
+    assert len(detail) == 2
+    assert detail["pct_valor_prefixo29"].eq(0.0).all()
+    assert detail["pct_acumulado_prefixo29"].eq(0.0).all()
+    assert meta["value"] == 0.0
+    assert meta["ncm8_to_50pct_value"] == 0
+    assert meta["ncm8_to_99pct_value"] == 0

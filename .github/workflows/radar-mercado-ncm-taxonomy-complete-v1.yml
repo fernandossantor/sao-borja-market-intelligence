@@ -284,10 +284,23 @@ jobs:
                   groups_seen = {r["grupo_afinidade_final"] for r in rows}
                   missing_groups = [g for g in groups if g not in groups_seen]
 
-                  # Because the 10k detail window truncates alphabetically, retrieve
-                  # every missing group independently. Each group is far below 10k.
+                  # A fixed 10k window can truncate *inside* the last affinity group.
+                  # Retrieving only groups absent from the first window is therefore
+                  # insufficient: the boundary group may be partially present and
+                  # still look "seen". Re-query it independently whenever the first
+                  # detail window hits the cap, then deduplicate the combined result.
+                  detail_window_truncated = len(raw_rows) >= 10000
+                  boundary_group = (
+                      rows[-1]["grupo_afinidade_final"]
+                      if detail_window_truncated and rows
+                      else None
+                  )
+                  completion_groups = list(missing_groups)
+                  if boundary_group and boundary_group not in completion_groups:
+                      completion_groups.append(boundary_group)
+
                   per_group_meta = {}
-                  for group in missing_groups:
+                  for group in completion_groups:
                       where = [
                           {
                               "Condition": {
@@ -457,14 +470,46 @@ jobs:
                       for g in groups:
                           w.writerow([g, counts.get(g, 0)])
 
+                  initial_boundary_rows = (
+                      sum(
+                          1
+                          for r in rows
+                          if r["grupo_afinidade_final"] == boundary_group
+                      )
+                      if boundary_group
+                      else 0
+                  )
+                  completed_boundary_rows = (
+                      int(
+                          per_group_meta.get(boundary_group, {}).get(
+                              "normalized_rows", 0
+                          )
+                      )
+                      if boundary_group
+                      else 0
+                  )
+                  if detail_window_truncated and boundary_group not in per_group_meta:
+                      raise RuntimeError(
+                          "Detail window reached 10k but boundary group was not "
+                          "independently completed"
+                      )
+
                   summary = {
                       "source": "Receita Estadual RS — Radar do Mercado — public Power BI",
                       "entity": ENTITY,
                       "affinity_groups": len(groups),
                       "initial_detail_rows": len(raw_rows),
+                      "detail_window_truncated": detail_window_truncated,
+                      "boundary_group": boundary_group,
+                      "initial_boundary_rows": initial_boundary_rows,
+                      "completed_boundary_rows": completed_boundary_rows,
+                      "boundary_rows_recovered": max(
+                          completed_boundary_rows - initial_boundary_rows, 0
+                      ),
                       "initial_groups_seen": len(groups_seen),
                       "initial_missing_groups": missing_groups,
-                      "completion_queries": len(missing_groups),
+                      "completion_groups": completion_groups,
+                      "completion_queries": len(completion_groups),
                       "final_rows": len(uniq),
                       "final_groups": len(final_groups),
                       "still_missing_groups": still_missing,

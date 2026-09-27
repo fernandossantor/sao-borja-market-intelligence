@@ -352,18 +352,26 @@ def build_taxonomy_gap_ncm29(
     total_composition_gap = float(
         frame.loc[frame["series"].eq("radar_composicao_mercado"), "valor_publicado"].sum()
     )
-    composition["pct_valor_prefixo29"] = (
-        composition["valor_publicado"] / total_prefix29 * 100.0
-    )
+    if total_prefix29 > 0:
+        composition["pct_valor_prefixo29"] = (
+            composition["valor_publicado"] / total_prefix29 * 100.0
+        )
+        composition["pct_acumulado_prefixo29"] = composition[
+            "pct_valor_prefixo29"
+        ].cumsum()
+    else:
+        composition["pct_valor_prefixo29"] = 0.0
+        composition["pct_acumulado_prefixo29"] = 0.0
     composition["pct_valor_gap_composicao"] = (
         composition["valor_publicado"] / total_composition_gap * 100.0
+        if total_composition_gap > 0
+        else 0.0
     )
-    composition["pct_acumulado_prefixo29"] = composition[
-        "pct_valor_prefixo29"
-    ].cumsum()
     composition["ordem_prioridade_valor"] = composition.index + 1
 
     def count_to_threshold(threshold: float) -> int:
+        if total_prefix29 <= 0:
+            return 0
         reached = composition.index[
             composition["pct_acumulado_prefixo29"].ge(threshold)
         ]
@@ -510,12 +518,18 @@ def build_public_market_series_analysis(
             "O residual monetário é dominado por códigos prefixados 00, tratados como exceção de qualidade e não imputados.",
         ),
         _validation_row(
-            "gap_prefix29_eliminated",
+            "gap_prefix29_residual_ncm8",
             gap_meta["composition_prefix29_ncm8"],
-            gap_meta["composition_prefix29_ncm8"] == 0
-            and gap_ncm29_meta["ncm8"] == 0
+            gap_meta["composition_prefix29_ncm8"] == 6
+            and gap_ncm29_meta["ncm8"] == 6,
+            "Seis códigos NCM29 residuais permanecem fora do catálogo corrigido; todos aparecem somente sob corte de sigilo.",
+        ),
+        _validation_row(
+            "gap_prefix29_published_value_eliminated",
+            round(gap_meta["composition_prefix29_value"], 2),
+            round(gap_meta["composition_prefix29_value"], 2) == 0.0
             and round(gap_ncm29_meta["value"], 2) == 0.0,
-            "A lacuna artificial no NCM 29 deve desaparecer após completar o grupo de fronteira Químicos Orgânicos.",
+            "Após completar Químicos Orgânicos, o gap NCM29 não possui valor publicado não suprimido; sigilo não deve ser interpretado como zero econômico.",
         ),
     ]
     validation = pd.DataFrame(validations)

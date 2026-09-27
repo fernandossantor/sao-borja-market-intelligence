@@ -1,0 +1,94 @@
+name: federal-police-uorg-inventory
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/federal-police-uorg-inventory.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/federal-police-uorg-inventory.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official CGU SIAPE archive
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/federal_police_uorg_inventory
+          URL='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores/202607_Servidores_SIAPE.zip'
+          curl -fL --retry 3 --retry-delay 5 --max-time 900 "$URL"             -o artifacts/federal_police_uorg_inventory/siape.zip
+          sha256sum artifacts/federal_police_uorg_inventory/siape.zip > artifacts/federal_police_uorg_inventory/source_sha256.txt
+
+      - name: Aggregate police organizational units nationwide
+        run: |
+          python - <<'PY'
+          import csv,io,json,re,unicodedata,zipfile
+          from collections import Counter
+          from pathlib import Path
+          root=Path("artifacts/federal_police_uorg_inventory")
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+
+          ctr=Counter(); uf=Counter()
+          with zipfile.ZipFile(root/"siape.zip") as zf:
+              name=[x for x in zf.namelist() if x.lower().endswith("cadastro.csv")][0]
+              with zf.open(name) as raw:
+                  rd=csv.DictReader(io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline=""),delimiter=";")
+                  for r in rd:
+                      ol=norm(r.get("ORG_LOTACAO")); oe=norm(r.get("ORG_EXERCICIO"))
+                      osup=norm(r.get("ORGSUP_EXERCICIO"))
+                      txt=" | ".join((ol,oe,osup))
+                      if not any(t in txt for t in ("POLICIA FEDERAL","POLICIA RODOVIARIA FEDERAL","DEP POLICIA FEDERAL","DEP POLICIA RODOVIARIA FEDERAL")):
+                          continue
+                      uf[norm(r.get("UF_EXERCICIO"))]+=1
+                      key=(norm(r.get("COD_UORG_LOTACAO")),norm(r.get("UORG_LOTACAO")),ol,
+                           norm(r.get("COD_UORG_EXERCICIO")),norm(r.get("UORG_EXERCICIO")),oe,
+                           norm(r.get("UF_EXERCICIO")),norm(r.get("SITUACAO_VINCULO")))
+                      ctr[key]+=1
+
+          with (root/"uorg_inventory.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f)
+              w.writerow(["cod_uorg_lotacao","uorg_lotacao","org_lotacao","cod_uorg_exercicio","uorg_exercicio","org_exercicio","uf_exercicio","situacao_vinculo","rows"])
+              for k,n in sorted(ctr.items(),key=lambda x:(-x[1],x[0])): w.writerow([*k,n])
+          with (root/"uf_counts.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(["uf_exercicio","rows"]); w.writerows(sorted(uf.items(),key=lambda x:-x[1]))
+          cands=[]
+          for k,n in ctr.items():
+              txt=" | ".join(k)
+              if any(t in txt for t in ("SAO BORJA","S BORJA","SBA","BORJA")):
+                  cands.append([*k,n])
+          with (root/"sao_borja_candidates.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f)
+              w.writerow(["cod_uorg_lotacao","uorg_lotacao","org_lotacao","cod_uorg_exercicio","uorg_exercicio","org_exercicio","uf_exercicio","situacao_vinculo","rows"])
+              w.writerows(sorted(cands,key=lambda x:-x[-1]))
+          meta={"source":"Portal da Transparência/CGU SIAPE 2026-07","total_police_rows":sum(ctr.values()),"candidate_rows":sum(x[-1] for x in cands),"privacy":"aggregate only"}
+          (root/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          print((root/"uf_counts.csv").read_text(encoding="utf-8")[:10000])
+          print((root/"sao_borja_candidates.csv").read_text(encoding="utf-8")[:50000])
+          PY
+
+      - name: Remove source
+        run: rm -f artifacts/federal_police_uorg_inventory/siape.zip
+
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: federal-police-uorg-inventory
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/federal_police_uorg_inventory/

@@ -1,0 +1,104 @@
+name: dfe-corede-sector-audit-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dfe-corede-sector-audit-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dfe-corede-sector-audit-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download and inspect DFe Totais Corede
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests
+          mkdir -p artifacts/dfe_corede_sector
+          python - <<'PY'
+          from __future__ import annotations
+          import csv, io, json, re, unicodedata, zipfile, hashlib
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/dfe_corede_sector")
+          URL="https://receitadados.sefaz.rs.gov.br/Arquivos/DFe_Totais_Corede.zip"
+          ZIP=OUT/"DFe_Totais_Corede.zip"
+
+          r=requests.get(URL,timeout=300,headers={"User-Agent":"SBMI DFe Corede audit/1.0"})
+          r.raise_for_status()
+          ZIP.write_bytes(r.content)
+          if not zipfile.is_zipfile(ZIP):
+              raise SystemExit("official Corede response is not ZIP")
+
+          def decode(b):
+              for enc in ("utf-8-sig","utf-8","cp1252","latin1"):
+                  try:return b.decode(enc),enc
+                  except UnicodeDecodeError:pass
+              raise RuntimeError("decode failed")
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(ch for ch in s if not unicodedata.combining(ch))
+              return re.sub(r"[^A-Za-z0-9]+"," ",s).strip().upper()
+
+          out={"url":URL,"sha256":hashlib.sha256(r.content).hexdigest(),"bytes":len(r.content),"members":[]}
+          frontier=[]
+          with zipfile.ZipFile(ZIP) as z:
+              for info in z.infolist():
+                  if info.is_dir(): continue
+                  text,enc=decode(z.read(info.filename))
+                  first=text.splitlines()[0] if text.splitlines() else ""
+                  delim=max([";","\t","|",","],key=lambda d:first.count(d))
+                  reader=csv.DictReader(io.StringIO(text),delimiter=delim)
+                  fields=reader.fieldnames or []
+                  rows_sample=[]
+                  matched=0
+                  for i,row in enumerate(reader):
+                      if i<5: rows_sample.append(row)
+                      joined=" | ".join(str(v or "") for v in row.values())
+                      if "FRONTEIRA OESTE" in norm(joined):
+                          matched+=1
+                          if len(frontier)<100:
+                              frontier.append(row)
+                  out["members"].append({
+                      "name":info.filename,
+                      "size":info.file_size,
+                      "encoding":enc,
+                      "delimiter":delim,
+                      "fields":fields,
+                      "sample":rows_sample,
+                      "fronteira_oeste_rows":matched,
+                  })
+
+          (OUT/"manifest.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          if frontier:
+              cols=sorted({k for row in frontier for k in row})
+              with (OUT/"fronteira_oeste_sample.csv").open("w",newline="",encoding="utf-8") as f:
+                  w=csv.DictWriter(f,fieldnames=cols)
+                  w.writeheader(); w.writerows(frontier)
+
+          print("SBMI_DFE_COREDE_AUDIT_BEGIN")
+          print(json.dumps({"manifest":out,"fronteira_oeste_sample":frontier[:10]},ensure_ascii=False,indent=2)[:120000])
+          print("SBMI_DFE_COREDE_AUDIT_END")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dfe-corede-sector-audit-v1
+          path: artifacts/dfe_corede_sector/
+          if-no-files-found: error
+          retention-days: 30

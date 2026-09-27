@@ -1,0 +1,62 @@
+name: bcb-hub-page-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/bcb-hub-page-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bcb-hub-page-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve BCB page routes through official hub page endpoint
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import requests
+          OUT=Path("artifacts/bcb_hub_page_discovery"); OUT.mkdir(parents=True,exist_ok=True)
+          base="https://www.bcb.gov.br/api/servico/sitebcb/hub/Pagina"
+          tipos=[
+            "estatisticabancariamunicipios",
+            "estatisticas/estatisticabancariamunicipios",
+            "/estatisticas/estatisticabancariamunicipios",
+            "micrrural",
+            "estabilidadefinanceira/micrrural",
+            "/estabilidadefinanceira/micrrural",
+          ]
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit","Accept":"application/json"})
+          out=[]
+          for tipo in tipos:
+            try:
+              r=s.get(base,params={"tipo":tipo},timeout=60)
+              rec={"tipo":tipo,"status":r.status_code,"url":r.url}
+              if r.status_code==200:
+                try: rec["json"]=r.json()
+                except Exception: rec["text"]=r.text[:20000]
+              else: rec["text"]=r.text[:2000]
+            except Exception as exc:
+              rec={"tipo":tipo,"error":repr(exc)}
+            out.append(rec)
+          (OUT/"hub_page.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:100000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bcb-hub-page-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/bcb_hub_page_discovery/

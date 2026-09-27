@@ -1,0 +1,73 @@
+name: ipca-monthly-index-audit
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/ipca-monthly-index-audit.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ipca-monthly-index-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download official IPCA monthly number-index from SIDRA
+        run: |
+          python - <<'PY'
+          import csv, json, requests
+          from pathlib import Path
+
+          OUT=Path("artifacts/ipca_monthly_index")
+          OUT.mkdir(parents=True, exist_ok=True)
+          url="https://apisidra.ibge.gov.br/values/t/1737/n1/all/v/2266/p/all/d/v2266%2013"
+          r=requests.get(url, timeout=90, headers={"User-Agent":"SBMI audit"})
+          r.raise_for_status()
+          data=r.json()
+          if not isinstance(data,list) or len(data)<2:
+              raise RuntimeError(f"Unexpected SIDRA response: {str(data)[:500]}")
+          header=data[0]
+          rows=[]
+          for rec in data[1:]:
+              period=rec.get("D3C") or rec.get("Mês (Código)") or rec.get("Mes (Código)")
+              val=rec.get("V")
+              if not period or int(period)<201301:
+                  continue
+              try:
+                  num=float(str(val).replace(",","."))
+              except Exception:
+                  continue
+              rows.append({"period":str(period),"ipca_index":num})
+          rows.sort(key=lambda x:x["period"])
+          if not rows or rows[-1]["period"] < "202608":
+              raise RuntimeError(f"Latest IPCA period too old: {rows[-1] if rows else None}")
+          with (OUT/"ipca_monthly_index_2013_2026.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=["period","ipca_index"])
+              w.writeheader(); w.writerows(rows)
+          meta={
+              "source":"IBGE/SIDRA — tabela 1737 — IPCA número-índice (base dez/1993=100)",
+              "variable":2266,
+              "endpoint":url,
+              "coverage":[rows[0]["period"],rows[-1]["period"]],
+              "rows":len(rows),
+              "use":"Deflacionamento mensal proxy de fluxos monetários do SBMI; IPCA não é deflator específico do crédito rural."
+          }
+          (OUT/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"meta":meta,"tail":rows[-6:]},ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ipca-monthly-index-2013-2026
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/ipca_monthly_index/

@@ -1,0 +1,58 @@
+name: mapa-empresas-series-2026
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/mapa-empresas-series-2026.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/mapa-empresas-series-2026.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official MEMP Mapa de Empresas monthly workbooks
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/mapa_empresas_series_2026
+          curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 300 \
+            'https://www.gov.br/memp/pt-br/acesso-a-informacao/dados-abertos/06_arquivodados_mai26-mapa-de-empresas-v2.xlsx/@@download/file' \
+            -o artifacts/mapa_empresas_series_2026/2026-05_mapa_empresas.xlsx
+          curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 300 \
+            'https://www.gov.br/memp/pt-br/acesso-a-informacao/dados-abertos/06_arquivodados_jun26-mapa-de-empresas.xlsx/@@download/file' \
+            -o artifacts/mapa_empresas_series_2026/2026-06_mapa_empresas.xlsx
+          curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 300 \
+            'https://www.gov.br/memp/pt-br/acesso-a-informacao/dados-abertos/07_arquivodados_jul26-mapa-de-empresas.xlsx/@@download/file' \
+            -o artifacts/mapa_empresas_series_2026/2026-07_mapa_empresas.xlsx
+          sha256sum artifacts/mapa_empresas_series_2026/*.xlsx > artifacts/mapa_empresas_series_2026/source_sha256.txt
+          file artifacts/mapa_empresas_series_2026/*.xlsx
+          ls -lh artifacts/mapa_empresas_series_2026/*.xlsx
+          cat > artifacts/mapa_empresas_series_2026/source.json <<'JSON'
+          {
+            "source": "MEMP/DREI — Repositório de Dados Abertos — Mapa de Empresas",
+            "periods": ["2026-05", "2026-06", "2026-07"],
+            "update_frequency": "monthly",
+            "purpose": "Build an auditable short municipal series for openings, closures and active enterprise stock."
+          }
+          JSON
+
+      - name: Upload official workbooks
+        uses: actions/upload-artifact@v4
+        with:
+          name: mapa-empresas-series-2026
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mapa_empresas_series_2026/

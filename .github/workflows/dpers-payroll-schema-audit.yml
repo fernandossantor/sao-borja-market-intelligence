@@ -1,0 +1,110 @@
+name: dpers-payroll-schema-audit
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dpers-payroll-schema-audit.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dpers-payroll-schema-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit official DPERS active payroll CSV schemas for Jul 2026
+        run: |
+          python - <<'PY'
+          import csv, io, json, re, unicodedata, urllib3
+          from pathlib import Path
+          import requests
+
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+          OUT=Path("artifacts/dpers_payroll_schema_202607")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          urls={
+            "servidores_ativos":"https://transparencia.defensoria.rs.def.br/reports/cc/2026/07/cc_servidores_ativos_detalhe.csv",
+            "defensores_ativos":"https://transparencia.defensoria.rs.def.br/reports/cc/2026/07/cc_defensores_ativos_detalhe.csv",
+          }
+
+          def norm(x):
+              x=unicodedata.normalize("NFKD",str(x or ""))
+              x="".join(c for c in x if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",x).strip().upper()
+
+          report={}
+          for group,url in urls.items():
+              r=s.get(url,timeout=90,verify=False)
+              rec={"url":url,"status":r.status_code,"bytes":len(r.content)}
+              if r.status_code!=200:
+                  rec["error"]=r.text[:500]
+                  report[group]=rec
+                  continue
+              raw=r.content
+              # Public CSV only: raw file preserved for audit artifact, never committed.
+              (OUT/f"{group}.csv").write_bytes(raw)
+              txt=None
+              for enc in ("utf-8-sig","utf-8","latin-1"):
+                  try:
+                      txt=raw.decode(enc); rec["encoding"]=enc; break
+                  except UnicodeDecodeError:
+                      pass
+              if txt is None:
+                  rec["error"]="Could not decode CSV"; report[group]=rec; continue
+              sample=txt[:20000]
+              try:
+                  dialect=csv.Sniffer().sniff(sample,delimiters=";,\t|")
+                  delim=dialect.delimiter
+              except Exception:
+                  delim=";"
+              rows=list(csv.DictReader(io.StringIO(txt),delimiter=delim))
+              headers=list(rows[0].keys()) if rows else []
+              rec["delimiter"]=delim
+              rec["rows"]=len(rows)
+              rec["headers"]=headers
+              rec["sao_borja_hits_by_column"]={}
+              rec["candidate_money_columns"]=[]
+              rec["candidate_territorial_columns"]=[]
+              for h in headers:
+                  nh=norm(h)
+                  hits=sum(1 for row in rows if "SAO BORJA" in norm(row.get(h)))
+                  if hits: rec["sao_borja_hits_by_column"][h]=hits
+                  if any(k in nh for k in ("LOTAC","COMARCA","MUNICIP","CIDADE","UNIDADE","LOCAL","SEDE","ORGAO")):
+                      rec["candidate_territorial_columns"].append(h)
+                  if any(k in nh for k in ("REMUN","VENC","BRUTO","TOTAL","SUBSID","LIQUID","RENDIMENT","CREDITO")):
+                      rec["candidate_money_columns"].append(h)
+              # Aggregate only structural counts for records matching São Borja anywhere.
+              match_rows=[row for row in rows if any("SAO BORJA" in norm(v) for v in row.values())]
+              rec["rows_with_sao_borja_anywhere"]=len(match_rows)
+              # No names, matrícula, CPF or row-level values are exported.
+              report[group]=rec
+
+          meta={
+            "source":"Defensoria Pública do Estado do Rio Grande do Sul — Portal da Transparência — Folha de pagamento",
+            "period":"2026-07",
+            "scope":"active public defenders and active staff",
+            "privacy":"Artifact contains source CSV files for private audit, but summary exports only schema and aggregate counts; no person-level data are committed.",
+            "promotion_rule":"No payroll value is promoted until an explicit territorial field and the correct gross-remuneration concept are identified.",
+            "report":report
+          }
+          (OUT/"schema_summary.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dpers-payroll-schema-202607
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/dpers_payroll_schema_202607/

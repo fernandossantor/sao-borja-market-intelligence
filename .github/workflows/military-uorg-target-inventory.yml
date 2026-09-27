@@ -1,0 +1,98 @@
+name: military-uorg-target-inventory
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/military-uorg-target-inventory.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/military-uorg-target-inventory.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official CGU military archive
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/military_uorg_target_inventory
+          URL='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores/202606_Militares.zip'
+          curl -fL --retry 3 --retry-delay 5 --max-time 900 "$URL"             -o artifacts/military_uorg_target_inventory/militares.zip
+          sha256sum artifacts/military_uorg_target_inventory/militares.zip > artifacts/military_uorg_target_inventory/source_sha256.txt
+
+      - name: Inventory organizational names likely related to São Borja units
+        run: |
+          python - <<'PY'
+          import csv,io,json,re,unicodedata,zipfile
+          from collections import Counter
+          from pathlib import Path
+
+          root=Path("artifacts/military_uorg_target_inventory")
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+
+          uf=Counter(); orgs=Counter(); candidates=Counter()
+          with zipfile.ZipFile(root/"militares.zip") as zf:
+              name=[n for n in zf.namelist() if n.lower().endswith("cadastro.csv")][0]
+              with zf.open(name) as raw:
+                  rd=csv.DictReader(io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline=""),delimiter=";")
+                  for r in rd:
+                      uf[norm(r.get("UF_EXERCICIO"))]+=1
+                      orgs[(norm(r.get("ORG_LOTACAO")),norm(r.get("ORG_EXERCICIO")))] += 1
+                      fields=[
+                          norm(r.get("UORG_LOTACAO")), norm(r.get("UORG_EXERCICIO")),
+                          norm(r.get("ORG_LOTACAO")), norm(r.get("ORG_EXERCICIO")),
+                      ]
+                      txt=" | ".join(fields)
+                      tokens=(
+                          "SAO BORJA","S BORJA","S. BORJA","SBA",
+                          "RINCAO","COUDELARIA",
+                          "2 RC MEC","2º RC MEC","2 R C MEC","REGIMENTO DE CAVALARIA",
+                          "1 CIA ENG","1A CIA ENG","COMPANHIA DE ENGENHARIA",
+                          "ENGENHARIA DE COMBATE"
+                      )
+                      if any(t in txt for t in tokens):
+                          key=(
+                              norm(r.get("COD_UORG_LOTACAO")),norm(r.get("UORG_LOTACAO")),norm(r.get("ORG_LOTACAO")),
+                              norm(r.get("COD_UORG_EXERCICIO")),norm(r.get("UORG_EXERCICIO")),norm(r.get("ORG_EXERCICIO")),
+                              norm(r.get("UF_EXERCICIO")),norm(r.get("SITUACAO_VINCULO"))
+                          )
+                          candidates[key]+=1
+
+          with (root/"uf_exercicio_counts.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(["uf_exercicio","rows"]); w.writerows(sorted(uf.items(),key=lambda x:-x[1]))
+          with (root/"candidate_uorgs.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(["cod_uorg_lotacao","uorg_lotacao","org_lotacao","cod_uorg_exercicio","uorg_exercicio","org_exercicio","uf_exercicio","situacao_vinculo","rows"])
+              for k,n in sorted(candidates.items(),key=lambda x:(-x[1],x[0])): w.writerow([*k,n])
+          with (root/"org_pairs.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(["org_lotacao","org_exercicio","rows"]); w.writerows([[*k,n] for k,n in sorted(orgs.items(),key=lambda x:-x[1])[:500]])
+          meta={"source":"Portal da Transparência/CGU — Militares 2026-06","candidate_rows":sum(candidates.values()),"privacy":"aggregate only","status":"DISCOVERY"}
+          (root/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          print((root/"uf_exercicio_counts.csv").read_text(encoding="utf-8")[:10000])
+          print((root/"candidate_uorgs.csv").read_text(encoding="utf-8")[:50000])
+          PY
+
+      - name: Remove source
+        run: rm -f artifacts/military_uorg_target_inventory/militares.zip
+
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: military-uorg-target-inventory
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/military_uorg_target_inventory/

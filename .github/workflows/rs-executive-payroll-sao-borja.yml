@@ -1,0 +1,177 @@
+name: rs-executive-payroll-sao-borja
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/rs-executive-payroll-sao-borja.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rs-executive-payroll-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official RS Executive personnel open-data archive
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/rs_executive_payroll_202607
+          URL='https://arquivostransparencia.sefaz.rs.gov.br/DadosAbertos/Pessoal%20do%20Poder%20Executivo%20%28Gov-RS%29-202607.zip'
+          curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 900 "$URL"             -o artifacts/rs_executive_payroll_202607/pessoal_rs_202607.zip
+          sha256sum artifacts/rs_executive_payroll_202607/pessoal_rs_202607.zip > artifacts/rs_executive_payroll_202607/source_sha256.txt
+          ls -lh artifacts/rs_executive_payroll_202607/pessoal_rs_202607.zip
+
+      - name: Inspect layout and aggregate explicit São Borja territorial matches
+        run: |
+          cat > /tmp/rs_payroll.py <<'PY'
+          import csv, io, json, re, unicodedata, zipfile
+          from collections import Counter, defaultdict
+          from pathlib import Path
+
+          OUT=Path("artifacts/rs_executive_payroll_202607")
+          ZIP=OUT/"pessoal_rs_202607.zip"
+
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+
+          def numbr(s):
+              s=str(s or "").strip()
+              if not s: return None
+              # conservative BR/US parser
+              if "," in s and "." in s:
+                  if s.rfind(",") > s.rfind("."):
+                      s=s.replace(".","").replace(",",".")
+                  else:
+                      s=s.replace(",","")
+              elif "," in s:
+                  s=s.replace(".","").replace(",",".")
+              try:return float(s)
+              except:return None
+
+          members=[]
+          file_summaries=[]
+          aggregate_rows=[]
+          with zipfile.ZipFile(ZIP) as zf:
+              for name in zf.namelist():
+                  info=zf.getinfo(name)
+                  members.append({"name":name,"size":info.file_size})
+                  if not name.lower().endswith((".csv",".txt")):
+                      continue
+
+                  with zf.open(name) as raw:
+                      sample=raw.read(200000)
+                  # detect encoding/separator
+                  enc="utf-8-sig"
+                  try: text=sample.decode(enc)
+                  except UnicodeDecodeError:
+                      enc="latin-1"; text=sample.decode(enc,errors="replace")
+                  first=text.splitlines()[0] if text.splitlines() else ""
+                  sep=";" if first.count(";")>=first.count(",") else ","
+
+                  with zf.open(name) as raw:
+                      txt=io.TextIOWrapper(raw,encoding=enc,errors="replace",newline="")
+                      rd=csv.DictReader(txt,delimiter=sep)
+                      fields=rd.fieldnames or []
+                      loc_cols=[c for c in fields if any(t in norm(c) for t in (
+                          "MUNIC","CIDADE","LOCAL","LOTAC","UNIDADE","ESTAB","ORGAO","ÓRGÃO","SECRETARIA","REGIAO","REGIÃO"
+                      ))]
+                      rem_cols=[c for c in fields if any(t in norm(c) for t in (
+                          "REMUN","VENC","BRUTO","LIQUID","SALAR","TOTAL PROVENT","TOTAL VANTAG","VALOR"
+                      ))]
+                      status_cols=[c for c in fields if any(t in norm(c) for t in (
+                          "SITUAC","ATIVO","VINCULO","VÍNCULO"
+                      ))]
+                      rows=matches=0
+                      match_by_col=Counter()
+                      loc_values=defaultdict(Counter)
+                      rem_sums=defaultdict(float)
+                      rem_valid=Counter()
+                      status_values=Counter()
+                      org_values=Counter()
+
+                      for row in rd:
+                          rows+=1
+                          hits=[]
+                          for c in loc_cols:
+                              v=norm(row.get(c,""))
+                              if "SAO BORJA" in v:
+                                  hits.append((c,v))
+                          if not hits:
+                              continue
+                          matches+=1
+                          for c,v in hits:
+                              match_by_col[c]+=1
+                              if len(loc_values[c])<300 or v in loc_values[c]:
+                                  loc_values[c][v]+=1
+                          for c in status_cols:
+                              status_values[(c,norm(row.get(c,"")))] += 1
+                          for c in fields:
+                              nc=norm(c)
+                              if "ORGAO" in nc or "ÓRGÃO" in nc or "SECRETARIA" in nc:
+                                  v=norm(row.get(c,""))
+                                  if v: org_values[(c,v)] += 1
+                          for c in rem_cols:
+                              v=numbr(row.get(c))
+                              if v is not None:
+                                  rem_sums[c]+=v; rem_valid[c]+=1
+
+                      rec={
+                          "member":name,"encoding":enc,"separator":sep,"rows":rows,
+                          "columns":fields,"location_like_columns":loc_cols,
+                          "remuneration_like_columns":rem_cols,"status_like_columns":status_cols,
+                          "explicit_sao_borja_matches":matches,
+                          "match_by_column":dict(match_by_col),
+                          "matched_location_values":{c:dict(v.most_common(300)) for c,v in loc_values.items()},
+                          "status_values_for_matches":{f"{c}={v}":n for (c,v),n in status_values.most_common(300)},
+                          "org_values_for_matches":{f"{c}={v}":n for (c,v),n in org_values.most_common(500)},
+                          "remuneration_sums_for_matches":{
+                              c:{"valid_rows":rem_valid[c],"sum":round(rem_sums[c],2)}
+                              for c in rem_sums
+                          }
+                      }
+                      file_summaries.append(rec)
+                      aggregate_rows.append([
+                          name,rows,matches,
+                          " | ".join(loc_cols)," | ".join(rem_cols)," | ".join(status_cols)
+                      ])
+
+          meta={
+              "source":"Portal da Transparência do Estado do Rio Grande do Sul — Dados Abertos — Pessoal do Poder Executivo (Gov-RS)",
+              "period":"2026-07",
+              "geography":"São Borja/RS via explicit text match in territorial/organizational columns",
+              "source_url":"https://arquivostransparencia.sefaz.rs.gov.br/DadosAbertos/Pessoal%20do%20Poder%20Executivo%20%28Gov-RS%29-202607.zip",
+              "members":members,
+              "files":file_summaries,
+              "privacy":"No names, CPF, matrícula or person-level rows are exported; only aggregate counts, categories and sums.",
+              "status":"DISCOVERY_AGGREGATION",
+          }
+          (OUT/"discovery.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          with (OUT/"summary.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(["member","rows","explicit_sao_borja_matches","location_like_columns","remuneration_like_columns","status_like_columns"]); w.writerows(aggregate_rows)
+          print(json.dumps(meta,ensure_ascii=False,indent=2)[:120000])
+          PY
+          python /tmp/rs_payroll.py
+
+      - name: Remove source archive before upload
+        run: rm -f artifacts/rs_executive_payroll_202607/pessoal_rs_202607.zip
+
+      - name: Upload aggregate discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: rs-executive-payroll-sao-borja-202607
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/rs_executive_payroll_202607/

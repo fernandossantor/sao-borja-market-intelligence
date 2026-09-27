@@ -1,0 +1,105 @@
+name: rs-executive-payroll-active-sao-borja
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/rs-executive-payroll-active-sao-borja.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rs-executive-payroll-active-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official RS Executive personnel open-data archive
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/rs_executive_payroll_active_202607
+          URL='https://arquivostransparencia.sefaz.rs.gov.br/DadosAbertos/Pessoal%20do%20Poder%20Executivo%20%28Gov-RS%29-202607.zip'
+          curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 900 "$URL" -o artifacts/rs_executive_payroll_active_202607/source.zip
+          sha256sum artifacts/rs_executive_payroll_active_202607/source.zip > artifacts/rs_executive_payroll_active_202607/source_sha256.txt
+
+      - name: Aggregate active São Borja records by organ and bond type
+        run: |
+          python - <<'PY'
+          import csv, io, json, re, unicodedata, zipfile
+          from collections import defaultdict
+          from pathlib import Path
+
+          OUT=Path('artifacts/rs_executive_payroll_active_202607')
+          ZIP=OUT/'source.zip'
+          def norm(s):
+              s=unicodedata.normalize('NFKD',str(s or ''))
+              s=''.join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r'\s+',' ',s).strip().upper()
+          def num(s):
+              s=str(s or '').strip()
+              if not s: return None
+              if ',' in s and '.' in s:
+                  s=s.replace('.','').replace(',','.') if s.rfind(',')>s.rfind('.') else s.replace(',','')
+              elif ',' in s: s=s.replace('.','').replace(',','.')
+              try: return float(s)
+              except: return None
+
+          total={'rows':0,'gross':0.0,'net':0.0,'gross_valid':0,'net_valid':0}
+          org=defaultdict(lambda:{'rows':0,'gross':0.0,'net':0.0,'gross_valid':0,'net_valid':0})
+          bond=defaultdict(lambda:{'rows':0,'gross':0.0,'net':0.0,'gross_valid':0,'net_valid':0})
+          with zipfile.ZipFile(ZIP) as zf:
+              names=[n for n in zf.namelist() if n.lower().endswith('.csv')]
+              if len(names)!=1: raise RuntimeError(names)
+              with zf.open(names[0]) as raw:
+                  txt=io.TextIOWrapper(raw,encoding='latin-1',errors='replace',newline='')
+                  rd=csv.DictReader(txt,delimiter=';')
+                  for r in rd:
+                      if norm(r.get('Municipio'))!='SAO BORJA': continue
+                      if norm(r.get('Situacao'))!='ATIVO': continue
+                      g=num(r.get('Vlr_Bruto')); n=num(r.get('Vlr_Liquido'))
+                      total['rows']+=1
+                      if g is not None: total['gross']+=g; total['gross_valid']+=1
+                      if n is not None: total['net']+=n; total['net_valid']+=1
+                      for bucket,key in ((org,norm(r.get('Orgao'))),(bond,norm(r.get('Tipo_Vinculo')))):
+                          d=bucket[key]; d['rows']+=1
+                          if g is not None: d['gross']+=g; d['gross_valid']+=1
+                          if n is not None: d['net']+=n; d['net_valid']+=1
+          for d in [total,*org.values(),*bond.values()]:
+              d['gross']=round(d['gross'],2); d['net']=round(d['net'],2)
+
+          def write(path,bucket,keyname):
+              with (OUT/path).open('w',encoding='utf-8',newline='') as f:
+                  w=csv.writer(f); w.writerow([keyname,'active_rows','gross_sum','net_sum','gross_valid','net_valid'])
+                  for k,d in sorted(bucket.items(), key=lambda kv:(-kv[1]['gross'],kv[0])):
+                      w.writerow([k,d['rows'],d['gross'],d['net'],d['gross_valid'],d['net_valid']])
+          write('by_org.csv',org,'orgao'); write('by_bond.csv',bond,'tipo_vinculo')
+          meta={
+            'source':'Portal da Transparência do Estado do Rio Grande do Sul — Dados Abertos — Pessoal do Poder Executivo (Gov-RS)',
+            'period':'2026-07','geography':'São Borja/RS','filter':'Municipio=SAO BORJA AND Situacao=ATIVO',
+            'active_total':total,'nature':'observed administrative records','privacy':'aggregate only; no person-level output',
+            'limitation':'Executive branch only. Does not include Judiciary, MP, Defensoria, TCE, Legislature or federal public employment. Municipality field is administrative payroll location, not proof of worker residence.'
+          }
+          (OUT/'metadata.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          print((OUT/'by_org.csv').read_text(encoding='utf-8'))
+          PY
+
+      - name: Remove source archive before upload
+        run: rm -f artifacts/rs_executive_payroll_active_202607/source.zip
+
+      - name: Upload aggregate artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rs-executive-payroll-active-sao-borja-202607
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/rs_executive_payroll_active_202607/

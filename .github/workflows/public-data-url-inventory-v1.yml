@@ -1,0 +1,126 @@
+name: public-data-url-inventory-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/public-data-url-inventory-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inventory public URL patterns
+        run: |
+          python -m pip install --quiet requests
+          mkdir -p artifacts/public_url_inventory
+          python - <<'PY'
+          import csv, json, requests, re
+          from pathlib import Path
+
+          OUT=Path("artifacts/public_url_inventory")
+          session=requests.Session()
+          session.headers.update({"User-Agent":"SBMI public data inventory/1.0"})
+
+          urls=[]
+          # Static Radar taxonomy
+          urls.append(("radar_portfolio_ncm_setor","static",None,None,
+                       "https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/Portfolio_NCMs_Setor.csv"))
+
+          # Monthly Radar files
+          for y in range(2018, 2027):
+              max_m = 9 if y == 2026 else 12
+              for m in range(1, max_m+1):
+                  urls.append(("radar_composicao_mercado","monthly",y,m,
+                    f"https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/Composicao_de_Mercado_{m:02d}_{y}.csv"))
+                  urls.append(("radar_exportacoes_ncm","monthly",y,m,
+                    f"https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/Exportacoes_NCM_{m:02d}_{y}.csv"))
+
+          # Annual DFe files
+          for y in range(2018, 2027):
+              urls.append(("dfe_municipio","annual",y,None,
+                f"https://receitadados.sefaz.rs.gov.br/Arquivos/DFe_Totais_Municipio_{y}.zip"))
+              urls.append(("dfe_cnae_classe","annual",y,None,
+                f"https://receitadados.sefaz.rs.gov.br/Arquivos/DFe_Totais_CNAE_Classe_{y}.zip"))
+
+          rows=[]
+          for typ,freq,y,m,url in urls:
+              rec={"tipo":typ,"frequencia":freq,"ano":y,"mes":m,"url":url,
+                   "status":None,"content_type":None,"content_length":None,
+                   "first_bytes":None,"error":None}
+              try:
+                  r=session.get(url, stream=True, timeout=20, allow_redirects=True)
+                  rec["status"]=r.status_code
+                  rec["content_type"]=r.headers.get("content-type")
+                  rec["content_length"]=r.headers.get("content-length")
+                  if r.status_code==200:
+                      chunk=next(r.iter_content(chunk_size=512), b"")
+                      rec["first_bytes"]=chunk[:80].hex()
+                  r.close()
+              except Exception as e:
+                  rec["error"]=repr(e)
+              rows.append(rec)
+
+          with (OUT/"url_inventory.csv").open("w",newline="",encoding="utf-8") as f:
+              w=csv.DictWriter(f,fieldnames=rows[0].keys())
+              w.writeheader(); w.writerows(rows)
+
+          available=[r for r in rows if r["status"]==200]
+          by_type={}
+          for typ in sorted({r["tipo"] for r in rows}):
+              rr=[r for r in available if r["tipo"]==typ]
+              by_type[typ]={
+                  "available_count":len(rr),
+                  "first":min([(r["ano"] or 0,r["mes"] or 0) for r in rr], default=None),
+                  "last":max([(r["ano"] or 0,r["mes"] or 0) for r in rr], default=None),
+                  "periods":[f'{r["ano"]}-{r["mes"]:02d}' if r["mes"] else str(r["ano"] or "static") for r in rr]
+              }
+
+          # Download static portfolio + current export sample for schema inspection.
+          downloads=[
+              ("Portfolio_NCMs_Setor.csv","https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/Portfolio_NCMs_Setor.csv"),
+              ("Exportacoes_NCM_08_2026.csv","https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos/Exportacoes_NCM_08_2026.csv"),
+          ]
+          schema={}
+          for name,url in downloads:
+              try:
+                  r=session.get(url,timeout=120)
+                  if r.status_code==200:
+                      p=OUT/name
+                      p.write_bytes(r.content)
+                      raw=r.content[:200000]
+                      text=None
+                      enc=None
+                      for e in ("utf-8-sig","utf-8","latin1","cp1252"):
+                          try:
+                              text=raw.decode(e); enc=e; break
+                          except: pass
+                      if text is not None:
+                          first_lines=text.splitlines()[:5]
+                          schema[name]={"bytes":len(r.content),"encoding_guess":enc,"head":first_lines}
+                  else:
+                      schema[name]={"status":r.status_code}
+              except Exception as e:
+                  schema[name]={"error":repr(e)}
+
+          summary={"available_by_type":by_type,"schema_samples":schema}
+          (OUT/"summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print("SBMI_PUBLIC_URL_INVENTORY_BEGIN")
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          print("SBMI_PUBLIC_URL_INVENTORY_END")
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: public-data-url-inventory-v1
+          path: artifacts/public_url_inventory/
+          if-no-files-found: error
+          retention-days: 30

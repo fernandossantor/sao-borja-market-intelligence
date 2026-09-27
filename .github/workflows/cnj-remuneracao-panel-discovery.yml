@@ -1,0 +1,134 @@
+name: cnj-remuneracao-panel-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/cnj-remuneracao-panel-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cnj-remuneracao-panel-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover official CNJ magistrates remuneration panel routes
+        run: |
+          python - <<'PY'
+          import json, re, urllib.parse
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/cnj_remuneracao_panel_discovery")
+          OUT.mkdir(parents=True, exist_ok=True)
+
+          pages=[
+            "https://www.cnj.jus.br/transparencia-cnj/remuneracao-dos-magistrados/",
+            "https://www.cnj.jus.br/poder-judiciario/consultas-publicas/aperfeicoamento-do-painel-de-remuneracao-dos-magistrados/",
+          ]
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          summary={
+            "source":"Conselho Nacional de Justiça — Remuneração dos Magistrados",
+            "goal":"Identify the official public panel/embed route and reproducible download/query routes without persisting person-level data.",
+            "privacy":"Technical discovery only. No person-level payroll rows are retained.",
+            "pages":[],
+            "candidate_urls":[],
+            "script_hits":[],
+            "errors":[]
+          }
+          candidates=set()
+          terms=("qlik","sense","remunera","magistr","painel","app","iframe","embed","sheet","download","csv","xlsx","json","api")
+
+          for pi,page in enumerate(pages):
+            rec={"url":page}
+            try:
+              r=s.get(page,timeout=60,allow_redirects=True)
+              rec.update(status=r.status_code, final_url=r.url, bytes=len(r.content), content_type=r.headers.get("content-type"))
+              html=r.text
+              (OUT/f"page_{pi}.html").write_text(html,encoding="utf-8",errors="ignore")
+              for raw in re.findall(r'''(?is)<iframe[^>]+src\s*=\s*["']([^"']+)''',html):
+                candidates.add(urllib.parse.urljoin(r.url,raw))
+              for raw in re.findall(r'''(?is)<(?:a|script)[^>]+(?:href|src)\s*=\s*["']([^"']+)''',html):
+                u=urllib.parse.urljoin(r.url,raw)
+                if any(t in u.lower() for t in terms):
+                  candidates.add(u)
+              for raw in re.findall(r'https?://[^"\'\s<>]+',html):
+                if any(t in raw.lower() for t in terms):
+                  candidates.add(raw)
+              snippets=[]
+              for m in re.finditer("|".join(re.escape(t) for t in terms),html,re.I):
+                snippets.append(html[max(0,m.start()-500):min(len(html),m.end()+1200)])
+                if len(snippets)>=80: break
+              rec["snippets"]=snippets
+              scripts=[urllib.parse.urljoin(r.url,x) for x in re.findall(r'''<script[^>]+src\s*=\s*["']([^"']+)''',html,re.I)]
+              rec["scripts"]=sorted(set(scripts))
+              for idx,u in enumerate(rec["scripts"][:100]):
+                try:
+                  rr=s.get(u,timeout=35)
+                  if rr.status_code==200 and len(rr.content)<=8_000_000:
+                    txt=rr.text
+                    if any(t in txt.lower() for t in terms):
+                      found=set(re.findall(r'https?://[^"\'\s<>]+',txt))
+                      found.update(re.findall(r'''["']([^"']*(?:qlik|remunera|magistr|painel|embed|api|csv|xlsx|json)[^"']*)["']''',txt,re.I))
+                      useful=sorted(x for x in found if any(t in x.lower() for t in terms))
+                      if useful:
+                        summary["script_hits"].append({"url":u,"status":rr.status_code,"routes":useful[:250]})
+                        for x in useful:
+                          try:
+                            candidates.add(urllib.parse.urljoin(u,x))
+                          except Exception:
+                            pass
+                except Exception as e:
+                  summary["errors"].append({"url":u,"error":repr(e)})
+            except Exception as e:
+              rec["error"]=repr(e)
+              summary["errors"].append({"url":page,"error":repr(e)})
+            summary["pages"].append(rec)
+
+          # Probe only technical candidate endpoints, not person-level queries.
+          probes=[]
+          for u in sorted(candidates):
+            if not u.startswith(("http://","https://")):
+              continue
+            if len(probes)>=120: break
+            try:
+              rr=s.get(u,timeout=35,allow_redirects=True)
+              probes.append({
+                "url":u, "status":rr.status_code, "final_url":rr.url,
+                "content_type":rr.headers.get("content-type"),
+                "bytes":len(rr.content),
+                "title": (re.search(r'(?is)<title[^>]*>(.*?)</title>',rr.text).group(1).strip() if re.search(r'(?is)<title[^>]*>(.*?)</title>',rr.text) else None)
+              })
+            except Exception as e:
+              probes.append({"url":u,"error":repr(e)})
+          summary["candidate_urls"]=sorted(candidates)
+          summary["probes"]=probes
+
+          (OUT/"discovery_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({
+            "pages":[{k:v for k,v in x.items() if k!="snippets" and k!="scripts"} for x in summary["pages"]],
+            "candidate_urls":summary["candidate_urls"][:120],
+            "script_hits":summary["script_hits"][:40],
+            "probes":summary["probes"][:120],
+            "errors":summary["errors"][:30]
+          },ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnj-remuneracao-panel-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/cnj_remuneracao_panel_discovery/

@@ -1,0 +1,263 @@
+name: download-market-dimension-public-series-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/download-market-dimension-public-series-v1.yml"]
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/download-market-dimension-public-series-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --quiet requests pandas
+
+      - name: Probe, download and curate required public series
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/public_series/{raw_radar,raw_cesta,curated_dfe_municipio,curated_dfe_cnae,meta}
+          cat > /tmp/download_series.py <<'PY'
+          from __future__ import annotations
+
+          import csv
+          import hashlib
+          import io
+          import json
+          import re
+          import zipfile
+          from pathlib import Path
+
+          import pandas as pd
+          import requests
+
+          OUT = Path("artifacts/public_series")
+          MANIFEST = []
+          session = requests.Session()
+          session.headers.update({"User-Agent": "SBMI public-data archival workflow/1.0"})
+
+          YEARS = range(2018, 2027)
+          MONTHS_BY_YEAR = {
+              y: range(1, 13) if y < 2026 else range(1, 10)
+              for y in YEARS
+          }
+
+          def sha256_bytes(b: bytes) -> str:
+              return hashlib.sha256(b).hexdigest()
+
+          def fetch(url: str, series: str, period: str):
+              try:
+                  r = session.get(url, timeout=120)
+                  status = r.status_code
+                  body = r.content
+                  ctype = r.headers.get("content-type", "")
+                  valid = status == 200 and len(body) > 0 and not body[:200].lstrip().lower().startswith(b"<!doctype html")
+                  MANIFEST.append({
+                      "series": series,
+                      "period": period,
+                      "url": url,
+                      "http_status": status,
+                      "available": int(valid),
+                      "bytes": len(body) if valid else 0,
+                      "sha256": sha256_bytes(body) if valid else "",
+                      "content_type": ctype,
+                  })
+                  return body if valid else None
+              except Exception as exc:
+                  MANIFEST.append({
+                      "series": series,
+                      "period": period,
+                      "url": url,
+                      "http_status": "ERROR",
+                      "available": 0,
+                      "bytes": 0,
+                      "sha256": "",
+                      "content_type": "",
+                      "error": repr(exc),
+                  })
+                  return None
+
+          # 1) Radar do Mercado: composition + exports, all available months.
+          radar_base = "https://arquivosradar.sefaz.rs.gov.br/RadarMercadoGaucho/Dados_Abertos"
+          for y in YEARS:
+              for m in MONTHS_BY_YEAR[y]:
+                  mm = f"{m:02d}"
+                  for stem, series in [
+                      ("Composicao_de_Mercado", "radar_composicao_mercado"),
+                      ("Exportacoes_NCM", "radar_exportacoes_ncm"),
+                  ]:
+                      url = f"{radar_base}/{stem}_{mm}_{y}.csv"
+                      b = fetch(url, series, f"{y}-{mm}")
+                      if b:
+                          (OUT / "raw_radar" / f"{stem}_{mm}_{y}.csv").write_bytes(b)
+
+          # Portfolio is static.
+          url = f"{radar_base}/Portfolio_NCMs_Setor.csv"
+          b = fetch(url, "radar_portfolio_ncm_setor", "current")
+          if b:
+              (OUT / "raw_radar" / "Portfolio_NCMs_Setor.csv").write_bytes(b)
+
+          # 2) Cesta de Alimentos: monthly all COREDE by year.
+          cesta_base = "https://arquivosradar.sefaz.rs.gov.br/CestaAlimentos/Mensal_Todas"
+          for y in YEARS:
+              url = f"{cesta_base}/public_dados_mensais_{y}.csv"
+              b = fetch(url, "cesta_alimentos_mensal_todas", str(y))
+              if b:
+                  (OUT / "raw_cesta" / f"public_dados_mensais_{y}.csv").write_bytes(b)
+
+          # Helpers for zipped DFe.
+          dfe_base = "https://receitadados.sefaz.rs.gov.br/Arquivos"
+
+          def first_csv_from_zip(b: bytes):
+              z = zipfile.ZipFile(io.BytesIO(b))
+              names = [n for n in z.namelist() if n.lower().endswith(".csv")]
+              if not names:
+                  raise RuntimeError(f"ZIP without CSV: {z.namelist()[:20]}")
+              return z.read(names[0]), names[0]
+
+          def read_chunks(csv_bytes: bytes):
+              last = None
+              for enc in ("cp1252", "latin1", "utf-8-sig", "utf-8"):
+                  try:
+                      # Probe header first.
+                      pd.read_csv(io.BytesIO(csv_bytes), sep=";", encoding=enc, nrows=2)
+                      return pd.read_csv(io.BytesIO(csv_bytes), sep=";", encoding=enc, chunksize=150000, low_memory=False)
+                  except Exception as exc:
+                      last = exc
+              raise last
+
+          # 3) DFe Totais Município: only São Borja rows, all available years.
+          mun_parts = []
+          for y in YEARS:
+              url = f"{dfe_base}/DFe_Totais_Municipio_{y}.zip"
+              b = fetch(url, "dfe_totais_municipio", str(y))
+              if not b:
+                  continue
+              csv_bytes, source_name = first_csv_from_zip(b)
+              rows = []
+              for chunk in read_chunks(csv_bytes):
+                  cols = {c.lower(): c for c in chunk.columns}
+                  code_col = next((c for lc,c in cols.items() if "cod_municipio" in lc), None)
+                  name_col = next((c for lc,c in cols.items() if "nome_municipio" in lc), None)
+                  mask = pd.Series(False, index=chunk.index)
+                  if code_col:
+                      mask |= chunk[code_col].astype(str).str.replace(r"\.0$", "", regex=True).eq("4318002")
+                  if name_col:
+                      mask |= chunk[name_col].astype(str).str.normalize("NFKD").str.encode("ascii", errors="ignore").str.decode("ascii").str.lower().eq("sao borja")
+                  sub = chunk.loc[mask].copy()
+                  if len(sub):
+                      sub["source_year"] = y
+                      rows.append(sub)
+              if rows:
+                  df = pd.concat(rows, ignore_index=True)
+                  outp = OUT / "curated_dfe_municipio" / f"DFe_Sao_Borja_{y}.csv"
+                  df.to_csv(outp, index=False)
+                  mun_parts.append(df)
+          if mun_parts:
+              allmun = pd.concat(mun_parts, ignore_index=True)
+              allmun.to_csv(OUT / "curated_dfe_municipio" / "DFe_Sao_Borja_serie_completa.csv", index=False)
+
+          # 4) DFe Totais CNAE Classe: reduce daily state file to monthly class × model.
+          cnae_parts = []
+          for y in YEARS:
+              url = f"{dfe_base}/DFe_Totais_CNAE_Classe_{y}.zip"
+              b = fetch(url, "dfe_totais_cnae_classe", str(y))
+              if not b:
+                  continue
+              csv_bytes, source_name = first_csv_from_zip(b)
+              aggs = []
+              for chunk in read_chunks(csv_bytes):
+                  lower = {c.lower(): c for c in chunk.columns}
+                  date_col = next((c for lc,c in lower.items() if "dt_emissao" in lc or lc == "data"), None)
+                  model_col = next((c for lc,c in lower.items() if "modelo" in lc), None)
+                  cnae_code_col = next((c for lc,c in lower.items() if ("cnae" in lc and ("cod" in lc or "classe" in lc)) and "descr" not in lc), None)
+                  if cnae_code_col is None:
+                      cnae_code_col = next((c for lc,c in lower.items() if "cnae" in lc and "descr" not in lc), None)
+                  cnae_desc_col = next((c for lc,c in lower.items() if "cnae" in lc and ("descr" in lc or "nome" in lc)), None)
+                  qty_col = next((c for lc,c in lower.items() if "qtde" in lc or "quant" in lc), None)
+                  val_col = next((c for lc,c in lower.items() if ("vlr" in lc or "valor" in lc) and "medio" not in lc), None)
+                  needed = [date_col, model_col, cnae_code_col, qty_col, val_col]
+                  if any(x is None for x in needed):
+                      raise RuntimeError(f"Could not map CNAE columns for {y}: {list(chunk.columns)}")
+                  date_raw = chunk[date_col].astype(str).str.strip()
+                  iso_mask = date_raw.str.match(r"^\d{4}-\d{2}-\d{2}", na=False)
+                  dt = pd.Series(pd.NaT, index=chunk.index, dtype="datetime64[ns]")
+                  dt.loc[iso_mask] = pd.to_datetime(
+                      date_raw.loc[iso_mask].str.slice(0, 10),
+                      errors="coerce",
+                      format="%Y-%m-%d",
+                  )
+                  dt.loc[~iso_mask] = pd.to_datetime(
+                      date_raw.loc[~iso_mask], errors="coerce", dayfirst=True
+                  )
+                  temp = pd.DataFrame({
+                      "ano_mes": dt.dt.to_period("M").astype(str),
+                      "modelo_dfe": chunk[model_col].astype(str),
+                      "cod_cnae_classe": chunk[cnae_code_col].astype(str),
+                      "descricao_cnae": chunk[cnae_desc_col].astype(str) if cnae_desc_col else "",
+                      "qtde_dfe": pd.to_numeric(chunk[qty_col], errors="coerce").fillna(0),
+                      "vlr_total_dfe": pd.to_numeric(chunk[val_col].astype(str).str.replace(".", "", regex=False).str.replace(",", ".", regex=False), errors="coerce").fillna(0),
+                  })
+                  g = temp.groupby(["ano_mes","modelo_dfe","cod_cnae_classe","descricao_cnae"], dropna=False, as_index=False)[["qtde_dfe","vlr_total_dfe"]].sum()
+                  aggs.append(g)
+              if aggs:
+                  df = pd.concat(aggs, ignore_index=True)
+                  df = df.groupby(["ano_mes","modelo_dfe","cod_cnae_classe","descricao_cnae"], dropna=False, as_index=False)[["qtde_dfe","vlr_total_dfe"]].sum()
+                  df["source_year"] = y
+                  df.to_csv(OUT / "curated_dfe_cnae" / f"DFe_CNAE_Classe_mensal_{y}.csv", index=False)
+                  cnae_parts.append(df)
+          if cnae_parts:
+              allc = pd.concat(cnae_parts, ignore_index=True)
+              allc.to_csv(OUT / "curated_dfe_cnae" / "DFe_CNAE_Classe_mensal_serie_completa.csv", index=False)
+
+          # Manifest and compact inventory.
+          mdf = pd.DataFrame(MANIFEST)
+          mdf.to_csv(OUT / "meta" / "manifest.csv", index=False)
+          summary = {
+              "available_by_series": (
+                  mdf.loc[mdf["available"] == 1].groupby("series")["period"].apply(list).to_dict()
+                  if len(mdf) else {}
+              ),
+              "counts_available": (
+                  mdf.groupby("series")["available"].sum().astype(int).to_dict()
+                  if len(mdf) else {}
+              ),
+              "notes": {
+                  "dfe_municipio": "Only São Borja rows retained; source URL and SHA256 preserved in manifest.",
+                  "dfe_cnae_classe": "Statewide daily source reduced to monthly CNAE class × DFe model; source URL and SHA256 preserved.",
+                  "radar": "Raw public monthly files retained for composition/export taxonomy analysis.",
+                  "cesta": "Raw annual monthly-by-COREDE files retained.",
+              },
+          }
+          (OUT / "meta" / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+          print("SBMI_PUBLIC_SERIES_BEGIN")
+          print(json.dumps(summary, ensure_ascii=False, indent=2)[:120000])
+          print("SBMI_PUBLIC_SERIES_END")
+          PY
+
+          python /tmp/download_series.py
+
+      - name: Package
+        run: |
+          cd artifacts
+          zip -qr SBMI_public_market_series_v001.zip public_series
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-public-market-series-v1
+          path: artifacts/SBMI_public_market_series_v001.zip
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,122 @@
+name: rais-2021-sao-borja-sector
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/rais-2021-sao-borja-sector.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official RAIS 2021 tables
+        run: |
+          mkdir -p artifacts/rais_2021_sao_borja
+          URL='https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/acoes-e-programas/programas-projetos-acoes-obras-e-atividades/estatisticas-trabalho/rais/3-tabelas.xlsx'
+          curl --fail --location --retry 4 --retry-delay 5 "$URL" -o artifacts/rais_2021_sao_borja/3-tabelas.xlsx
+          sha256sum artifacts/rais_2021_sao_borja/3-tabelas.xlsx | tee artifacts/rais_2021_sao_borja/source_sha256.txt
+          stat -c '%s' artifacts/rais_2021_sao_borja/3-tabelas.xlsx | tee artifacts/rais_2021_sao_borja/source_bytes.txt
+
+      - name: Extract São Borja rows and header context with stdlib XLSX reader
+        run: |
+          cat > /tmp/read_xlsx.py <<'PY'
+          import json, re, unicodedata, zipfile
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          SRC=Path("artifacts/rais_2021_sao_borja/3-tabelas.xlsx")
+          OUT=SRC.parent
+          NS={"m":"http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+              "r":"http://schemas.openxmlformats.org/officeDocument/2006/relationships",
+              "pr":"http://schemas.openxmlformats.org/package/2006/relationships"}
+
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s.upper()).strip()
+
+          def colnum(ref):
+              letters=re.match(r"([A-Z]+)",ref).group(1)
+              n=0
+              for ch in letters: n=n*26+ord(ch)-64
+              return n
+
+          with zipfile.ZipFile(SRC) as z:
+              shared=[]
+              if "xl/sharedStrings.xml" in z.namelist():
+                  root=ET.fromstring(z.read("xl/sharedStrings.xml"))
+                  for si in root.findall("m:si",NS):
+                      shared.append("".join(t.text or "" for t in si.findall(".//m:t",NS)))
+
+              wb=ET.fromstring(z.read("xl/workbook.xml"))
+              rels=ET.fromstring(z.read("xl/_rels/workbook.xml.rels"))
+              relmap={r.attrib["Id"]:r.attrib["Target"] for r in rels}
+              sheets=[]
+              for s in wb.find("m:sheets",NS):
+                  rid=s.attrib["{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"]
+                  target=relmap[rid]
+                  if not target.startswith("xl/"): target="xl/"+target.lstrip("/")
+                  sheets.append((s.attrib["name"],target))
+
+              all_matches=[]
+              manifest=[]
+              for name,target in sheets:
+                  root=ET.fromstring(z.read(target))
+                  rows=[]
+                  for row in root.findall(".//m:sheetData/m:row",NS):
+                      vals={}
+                      maxcol=0
+                      for c in row.findall("m:c",NS):
+                          ref=c.attrib.get("r","A1")
+                          maxcol=max(maxcol,colnum(ref))
+                          typ=c.attrib.get("t")
+                          v=c.find("m:v",NS)
+                          if typ=="s" and v is not None:
+                              val=shared[int(v.text)]
+                          elif typ=="inlineStr":
+                              val="".join(t.text or "" for t in c.findall(".//m:t",NS))
+                          elif v is not None:
+                              val=v.text or ""
+                          else:
+                              val=""
+                          vals[ref]=val
+                      rows.append((int(row.attrib["r"]),vals,maxcol))
+                  manifest.append({"sheet":name,"rows":len(rows)})
+                  for idx,(rnum,vals,maxcol) in enumerate(rows):
+                      joined=" | ".join(str(v) for v in vals.values())
+                      if "SAO BORJA" in norm(joined):
+                          context=[]
+                          for rr,vv,mc in rows[max(0,idx-10):idx+2]:
+                              context.append({"row":rr,"cells":vv})
+                          all_matches.append({"sheet":name,"match_row":rnum,"cells":vals,"context":context})
+
+              (OUT/"workbook_manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding="utf-8")
+              (OUT/"sao_borja_matches.json").write_text(json.dumps(all_matches,ensure_ascii=False,indent=2),encoding="utf-8")
+              print("--- workbook manifest ---")
+              print(json.dumps(manifest,ensure_ascii=False,indent=2))
+              print("--- São Borja matches ---")
+              print(json.dumps(all_matches,ensure_ascii=False,indent=2))
+              if not all_matches:
+                  raise SystemExit("No São Borja match found")
+          PY
+          python /tmp/read_xlsx.py
+
+      - name: Remove source workbook before artifact upload
+        run: rm -f artifacts/rais_2021_sao_borja/3-tabelas.xlsx
+
+      - name: Upload extraction artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rais-2021-sao-borja-sector-v001
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/rais_2021_sao_borja/

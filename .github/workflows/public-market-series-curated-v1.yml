@@ -1,0 +1,83 @@
+name: public-market-series-curated-v1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/sbmi/public_market_series_curated.py"
+      - "src/sbmi/public_market_series_curated_cli.py"
+      - "tests/test_public_market_series_curated.py"
+      - ".github/workflows/public-market-series-curated-v1.yml"
+      - "docs/caderno_base/radar_ncm_crosswalk_cadernos_v001_20260926.md"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  curate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN_ID: "36277254947"
+      SOURCE_ARTIFACT: "sbmi-public-market-series-v1"
+      TAXONOMY_RUN_ID: "36326001762"
+      TAXONOMY_ARTIFACT: "radar-mercado-ncm-taxonomy-complete-v1"
+      EXECUTION_ID: "public-market-series-curated-v001"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install package
+        run: python -m pip install -e .
+
+      - name: Download audited source artifact
+        run: |
+          mkdir -p input/public
+          gh run download "$SOURCE_RUN_ID" -n "$SOURCE_ARTIFACT" -D input/public
+          SOURCE_ZIP="$(find input/public -type f -name 'SBMI_public_market_series_v001.zip' | head -n 1)"
+          test -n "$SOURCE_ZIP"
+          mkdir -p work/source
+          unzip -q "$SOURCE_ZIP" -d work/source
+          test -d work/source/public_series
+
+      - name: Download canonical Radar NCM taxonomy
+        run: |
+          mkdir -p input/taxonomy
+          gh run download "$TAXONOMY_RUN_ID" -n "$TAXONOMY_ARTIFACT" -D input/taxonomy
+          TAXONOMY_CSV="$(find input/taxonomy -type f -name 'radar_ncm_taxonomy_complete.csv' | head -n 1)"
+          test -n "$TAXONOMY_CSV"
+          echo "TAXONOMY_CSV=$TAXONOMY_CSV" >> "$GITHUB_ENV"
+
+      - name: Build curated normalized layer
+        run: |
+          python -m sbmi.public_market_series_curated_cli \
+            --public-series-root work/source/public_series \
+            --taxonomy-csv "$TAXONOMY_CSV" \
+            --crosswalk-md docs/caderno_base/radar_ncm_crosswalk_cadernos_v001_20260926.md \
+            --output-dir out/public_market_series_curated_v001 \
+            --execution-id "$EXECUTION_ID" \
+            --source-run-id "$SOURCE_RUN_ID" \
+            --taxonomy-run-id "$TAXONOMY_RUN_ID"
+
+      - name: Package and checksum
+        run: |
+          cd out
+          zip -qr SBMI_public_market_series_curated_v001.zip public_market_series_curated_v001
+          sha256sum SBMI_public_market_series_curated_v001.zip > SBMI_public_market_series_curated_v001.sha256
+          cat public_market_series_curated_v001/validation.csv
+          cat public_market_series_curated_v001/summary.json
+
+      - name: Upload curated artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbmi-public-market-series-curated-v1
+          path: |
+            out/SBMI_public_market_series_curated_v001.zip
+            out/SBMI_public_market_series_curated_v001.sha256
+          if-no-files-found: error
+          retention-days: 30

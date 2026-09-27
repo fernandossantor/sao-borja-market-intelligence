@@ -1,0 +1,201 @@
+name: cnj-remuneracao-qlik-engine-schema
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/cnj-remuneracao-qlik-engine-schema.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cnj-remuneracao-qlik-engine-schema.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read public CNJ Qlik Engine schema only
+        run: |
+          python - <<'PY'
+          import base64, hashlib, json, os, socket, ssl, struct, uuid
+          from pathlib import Path
+
+          OUT=Path("artifacts/cnj_remuneracao_qlik_engine_schema")
+          OUT.mkdir(parents=True,exist_ok=True)
+          appid="8ccb93ca-848f-4ffe-bf9b-96d57878c4d7"
+          host="paineisanalytics.cnj.jus.br"
+          result={
+            "source":"CNJ — Painel de Remuneração dos Magistrados (QlikSense)",
+            "appid":appid,
+            "purpose":"Retrieve application schema/field names only. No field values or person-level records are requested.",
+            "attempts":[],
+            "field_names":[],
+            "errors":[]
+          }
+
+          class WS:
+            def __init__(self,host,path,protocol=None,timeout=35):
+              self.sock=ssl.create_default_context().wrap_socket(
+                socket.create_connection((host,443),timeout=timeout),
+                server_hostname=host
+              )
+              self.sock.settimeout(timeout)
+              key=base64.b64encode(os.urandom(16)).decode()
+              headers=[
+                f"GET {path} HTTP/1.1",
+                f"Host: {host}",
+                "Upgrade: websocket",
+                "Connection: Upgrade",
+                f"Sec-WebSocket-Key: {key}",
+                "Sec-WebSocket-Version: 13",
+                f"Origin: https://{host}",
+              ]
+              if protocol:
+                headers.append(f"Sec-WebSocket-Protocol: {protocol}")
+              req="\r\n".join(headers)+"\r\n\r\n"
+              self.sock.sendall(req.encode())
+              buf=b""
+              while b"\r\n\r\n" not in buf:
+                part=self.sock.recv(4096)
+                if not part: break
+                buf+=part
+                if len(buf)>65536: break
+              head=buf.split(b"\r\n\r\n",1)[0].decode("latin1","replace")
+              self.handshake=head
+              status=head.split("\r\n",1)[0] if head else ""
+              if " 101 " not in status:
+                raise RuntimeError(f"WebSocket handshake failed: {status}; headers={head[:2000]}")
+              accept=None
+              for line in head.split("\r\n")[1:]:
+                if line.lower().startswith("sec-websocket-accept:"):
+                  accept=line.split(":",1)[1].strip()
+              expected=base64.b64encode(hashlib.sha1((key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest()).decode()
+              if accept and accept!=expected:
+                raise RuntimeError("Bad Sec-WebSocket-Accept")
+              self.buf=buf.split(b"\r\n\r\n",1)[1] if b"\r\n\r\n" in buf else b""
+
+            def _readn(self,n):
+              out=b""
+              if self.buf:
+                take=min(n,len(self.buf)); out=self.buf[:take]; self.buf=self.buf[take:]
+              while len(out)<n:
+                p=self.sock.recv(n-len(out))
+                if not p: raise EOFError("socket closed")
+                out+=p
+              return out
+
+            def send_text(self,text):
+              payload=text.encode()
+              fin_opcode=0x81
+              maskbit=0x80
+              n=len(payload)
+              if n<126:
+                hdr=bytes([fin_opcode,maskbit|n])
+              elif n<65536:
+                hdr=bytes([fin_opcode,maskbit|126])+struct.pack("!H",n)
+              else:
+                hdr=bytes([fin_opcode,maskbit|127])+struct.pack("!Q",n)
+              mask=os.urandom(4)
+              masked=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+              self.sock.sendall(hdr+mask+masked)
+
+            def recv_text(self):
+              chunks=[]
+              while True:
+                b1,b2=self._readn(2)
+                fin=(b1>>7)&1; opcode=b1&0x0f
+                masked=(b2>>7)&1; n=b2&0x7f
+                if n==126: n=struct.unpack("!H",self._readn(2))[0]
+                elif n==127: n=struct.unpack("!Q",self._readn(8))[0]
+                mask=self._readn(4) if masked else None
+                payload=self._readn(n) if n else b""
+                if masked and mask:
+                  payload=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+                if opcode==0x8: raise EOFError("server closed websocket")
+                if opcode==0x9:
+                  self._send_control(0xA,payload); continue
+                if opcode in (0x1,0x0):
+                  chunks.append(payload)
+                  if fin: return b"".join(chunks).decode("utf-8","replace")
+                elif opcode==0xA:
+                  continue
+
+            def _send_control(self,opcode,payload=b""):
+              mask=os.urandom(4); n=len(payload)
+              hdr=bytes([0x80|opcode,0x80|n])
+              masked=bytes(b ^ mask[i%4] for i,b in enumerate(payload))
+              self.sock.sendall(hdr+mask+masked)
+
+            def close(self):
+              try: self._send_control(0x8,b"")
+              except Exception: pass
+              try: self.sock.close()
+              except Exception: pass
+
+          def rpc(ws,method,handle,params,rid):
+            ws.send_text(json.dumps({"jsonrpc":"2.0","id":rid,"method":method,"handle":handle,"params":params}))
+            for _ in range(200):
+              msg=json.loads(ws.recv_text())
+              if msg.get("id")==rid:
+                return msg
+            raise RuntimeError("RPC response not found")
+
+          protocols=[None,"qlik-json-protocol"]
+          for protocol in protocols:
+            identity=str(uuid.uuid4())
+            path=f"/app/{appid}?identity={identity}"
+            rec={"path":path,"protocol":protocol}
+            try:
+              ws=WS(host,path,protocol=protocol)
+              rec["handshake_status"]=ws.handshake.split("\r\n",1)[0]
+              opened=rpc(ws,"OpenDoc",-1,[appid,"","","",False],1)
+              rec["open_doc_error"]=opened.get("error")
+              h=(opened.get("result",{}).get("qReturn",{}) or {}).get("qHandle")
+              rec["doc_handle"]=h
+              if h:
+                prop={
+                  "qInfo":{"qType":"SBMI_FieldList"},
+                  "qFieldListDef":{
+                    "qShowSystem":False,
+                    "qShowHidden":False,
+                    "qShowSemantic":True,
+                    "qShowSrcTables":True
+                  }
+                }
+                created=rpc(ws,"CreateSessionObject",h,[prop],2)
+                rec["create_error"]=created.get("error")
+                oh=(created.get("result",{}).get("qReturn",{}) or {}).get("qHandle")
+                rec["object_handle"]=oh
+                if oh:
+                  layout=rpc(ws,"GetLayout",oh,[],3)
+                  rec["layout_error"]=layout.get("error")
+                  items=(layout.get("result",{}).get("qLayout",{}).get("qFieldList",{}) or {}).get("qItems",[])
+                  fields=[x.get("qName") for x in items if x.get("qName")]
+                  result["field_names"]=fields
+                  rec["field_count"]=len(fields)
+              ws.close()
+              result["attempts"].append(rec)
+              if result["field_names"]: break
+            except Exception as e:
+              rec["error"]=repr(e)
+              result["attempts"].append(rec)
+
+          (OUT/"schema_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnj-remuneracao-qlik-engine-schema
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/cnj_remuneracao_qlik_engine_schema/

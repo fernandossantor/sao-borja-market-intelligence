@@ -1,0 +1,69 @@
+name: inss-benefits-layout-sample
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/inss-benefits-layout-sample.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-layout:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inspect first logical records from official INSS ZIP
+        run: |
+          python -m pip install --upgrade remotezip requests
+          mkdir -p artifacts
+          python - <<'PY'
+          import csv
+          import io
+          import json
+          from pathlib import Path
+          from remotezip import RemoteZip
+
+          url = "https://armazenamento-dadosabertos.s3.sa-east-1.amazonaws.com/PDA_2025_2027/Grupos_de_dados/Benef%C3%ADcios+emitidos/D.DLK.FRM.000.DADOSABERTOS.EMITIDOS_202607.zip"
+          report = {"source": "INSS/SUIBE Benefícios Emitidos Julho 2026", "url": url}
+          with RemoteZip(url, headers={"User-Agent": "SBMI INSS layout sample/1.0"}) as z:
+              info = z.infolist()[0]
+              report["member"] = info.filename
+              with z.open(info) as raw:
+                  text = io.TextIOWrapper(raw, encoding="utf-8-sig", errors="replace", newline="")
+                  lines = []
+                  for _ in range(8):
+                      line = text.readline()
+                      if not line:
+                          break
+                      lines.append(line.rstrip("\r\n"))
+          report["sample_lines"] = []
+          for idx, line in enumerate(lines):
+              entry = {
+                  "index": idx,
+                  "length": len(line),
+                  "comma_count": line.count(","),
+                  "semicolon_count": line.count(";"),
+                  "pipe_count": line.count("|"),
+                  "tab_count": line.count("\t"),
+                  "prefix_repr": repr(line[:500]),
+              }
+              for name, delim in [("comma", ","), ("semicolon", ";"), ("pipe", "|"), ("tab", "\t")]:
+                  try:
+                      entry[f"{name}_fields"] = len(next(csv.reader([line], delimiter=delim)))
+                  except Exception as exc:
+                      entry[f"{name}_error"] = str(exc)
+              report["sample_lines"].append(entry)
+          Path("artifacts/inss_202607_layout_sample.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+          print(json.dumps(report, ensure_ascii=False, indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inss-202607-layout-sample
+          path: artifacts/
+          retention-days: 30

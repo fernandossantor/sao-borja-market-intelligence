@@ -1,0 +1,47 @@
+name: cnj-remuneracao-template-schema
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/cnj-remuneracao-template-schema.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/cnj-remuneracao-template-schema.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit official CNJ standard remuneration workbook
+        run: |
+          set -euo pipefail
+          OUT=artifacts/cnj_remuneracao_template_schema
+          mkdir -p "$OUT"
+          URL="https://www.cnj.jus.br/wp-content/uploads/2017/11/becada0200f03cb5a129ce57513f8ff3.xls"
+          curl -L --fail --connect-timeout 20 --max-time 60 -A "Mozilla/5.0 SBMI territorial audit" "$URL" -o "$OUT/modelo.xls"
+          file "$OUT/modelo.xls" | tee "$OUT/file_type.txt"
+          {
+            echo "SOURCE=$URL"
+            echo "BYTES=$(wc -c < "$OUT/modelo.xls")"
+            echo "--- UTF16LE strings likely to be workbook labels ---"
+            strings -el "$OUT/modelo.xls" | grep -E -i 'nome|tribunal|cargo|lot|comarca|unidade|m[eê]s|ano|subs[ií]dio|remun|inden|vantagem|retro|total|cpf|matr|benef|f[eé]rias|13|abono|desconto|l[ií]quido|bruto' | head -n 300 || true
+            echo "--- ASCII strings likely to be workbook labels ---"
+            strings "$OUT/modelo.xls" | grep -E -i 'nome|tribunal|cargo|lot|comarca|unidade|mes|ano|subsid|remun|inden|vantagem|retro|total|cpf|matr|benef|ferias|abono|desconto|liquido|bruto' | head -n 300 || true
+          } | tee "$OUT/schema_strings.txt"
+          rm "$OUT/modelo.xls"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cnj-remuneracao-template-schema
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/cnj_remuneracao_template_schema/

@@ -1,0 +1,93 @@
+name: dpers-payroll-summary-202607
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dpers-payroll-summary-202607.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dpers-payroll-summary-202607.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official DPERS July 2026 summary payroll CSVs
+        run: |
+          python - <<'PY'
+          import csv, io, json
+          from pathlib import Path
+          import requests, urllib3
+
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+          OUT=Path("artifacts/dpers_payroll_summary_202607")
+          OUT.mkdir(parents=True,exist_ok=True)
+
+          urls={
+            "defensores_ativos":"https://transparencia.defensoria.rs.def.br/reports/cc/2026/07/cc_defensores_ativos.csv",
+            "servidores_ativos":"https://transparencia.defensoria.rs.def.br/reports/cc/2026/07/cc_servidores_ativos.csv",
+          }
+
+          report={}
+          for group,url in urls.items():
+              r=requests.get(url,timeout=60,verify=False,headers={"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+              rec={"url":url,"status":r.status_code,"bytes":len(r.content)}
+              if r.status_code != 200:
+                  rec["error"]=r.text[:500]
+                  report[group]=rec
+                  continue
+              raw=r.content
+              (OUT/f"{group}.csv").write_bytes(raw)
+              text=None
+              for enc in ("utf-8-sig","utf-8","latin-1"):
+                  try:
+                      text=raw.decode(enc)
+                      rec["encoding"]=enc
+                      break
+                  except UnicodeDecodeError:
+                      pass
+              if text is None:
+                  rec["error"]="decode failed"
+                  report[group]=rec
+                  continue
+              try:
+                  dialect=csv.Sniffer().sniff(text[:20000],delimiters=";,\t|")
+                  delim=dialect.delimiter
+              except Exception:
+                  delim=","
+              rows=list(csv.reader(io.StringIO(text),delimiter=delim))
+              rec["delimiter"]=delim
+              rec["rows_excluding_header"]=max(0,len(rows)-1)
+              rec["headers"]=rows[0] if rows else []
+              report[group]=rec
+
+          meta={
+            "source":"Defensoria Pública do Estado do Rio Grande do Sul — Portal da Transparência",
+            "period":"2026-07",
+            "dataset":"summary payroll CSVs for active defenders and active staff",
+            "privacy":"Raw public payroll CSVs are retained only in the private workflow artifact for audit. No row-level values or names are printed or committed.",
+            "purpose":"Obtain the official summary-category payroll layout (remuneration, FG/GD, temporal advantages, indemnities, discounts and net) for later local-roster reconciliation outside the repository.",
+            "report":report
+          }
+          (OUT/"summary_schema.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          safe=dict(meta)
+          print(json.dumps(safe,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dpers-payroll-summary-202607
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/dpers_payroll_summary_202607/

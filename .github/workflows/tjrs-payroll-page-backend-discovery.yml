@@ -1,0 +1,133 @@
+name: tjrs-payroll-page-backend-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/tjrs-payroll-page-backend-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tjrs-payroll-page-backend-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover backend used by official TJRS payroll page
+        run: |
+          python - <<'PY'
+          import json, re, urllib.parse
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/tjrs_payroll_page_backend_discovery")
+          OUT.mkdir(parents=True,exist_ok=True)
+          page="https://www.tjrs.jus.br/novo/institucional/transparencia/transparencia-e-prestacao-de-contas/gestao-de-pessoas/folha-de-pagamento-de-pessoal-consolidada/"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          result={
+            "source":"Tribunal de Justiça do Estado do Rio Grande do Sul — Folha de Pagamento de Pessoal Consolidada",
+            "page":page,
+            "privacy":"Discovery only. No person-level payroll rows are requested or retained.",
+            "goal":"Identify the official request route used by the period/type payroll filter and whether the returned report exposes Local de Origem or another territorial field.",
+            "scripts":[],
+            "inline_hits":[],
+            "script_hits":[],
+            "candidate_urls":[],
+            "errors":[]
+          }
+
+          r=s.get(page,timeout=60)
+          result["page_status"]=r.status_code
+          result["page_bytes"]=len(r.content)
+          result["page_final_url"]=r.url
+          r.raise_for_status()
+          html=r.text
+          (OUT/"payroll_page.html").write_text(html,encoding="utf-8",errors="ignore")
+
+          terms=("folha","pagamento","remuner","anexo","cnj","rhe","ajax","api","csv","xlsx","pdf","local de origem","local_origem","origem","competencia","competência")
+          # Forms and inline attributes
+          for m in re.finditer(r'(?is)<form\b.*?</form>',html):
+              frag=m.group(0)
+              if any(t in frag.lower() for t in terms):
+                  result["inline_hits"].append(frag[:12000])
+
+          # Inline script snippets around relevant terms
+          for m in re.finditer("|".join(re.escape(t) for t in terms),html,re.I):
+              frag=html[max(0,m.start()-600):min(len(html),m.end()+1400)]
+              if frag not in result["inline_hits"]:
+                  result["inline_hits"].append(frag)
+              if len(result["inline_hits"])>=80:
+                  break
+
+          scripts=[]
+          for raw in re.findall(r'''<script[^>]+src\s*=\s*["']([^"']+)''',html,re.I):
+              u=urllib.parse.urljoin(r.url,raw)
+              if u.startswith(("http://","https://")):
+                  scripts.append(u)
+          result["scripts"]=sorted(set(scripts))
+
+          # Extract URLs already present in HTML.
+          urls=set(re.findall(r'https?://[^"\'\s<>]+',html))
+          rels=re.findall(r'''(?i)(?:url|endpoint|action|ajaxurl|apiurl|src|href)\s*[:=]\s*["']([^"'#]+)''',html)
+          for raw in rels:
+              try:
+                  u=urllib.parse.urljoin(r.url,raw)
+              except Exception:
+                  continue
+              if u.startswith(("http://","https://")):
+                  urls.add(u)
+          result["candidate_urls"]=sorted(u for u in urls if any(t in u.lower() for t in ("folha","pagamento","transpar","ajax","api","relatorio","relatório","rhe","cnj")) )[:500]
+
+          # Download site-local JS and search it for payroll/backend hints.
+          for idx,u in enumerate(result["scripts"][:120]):
+              try:
+                  rr=s.get(u,timeout=45)
+                  rec={"url":u,"status":rr.status_code,"bytes":len(rr.content),"content_type":rr.headers.get("content-type")}
+                  if rr.status_code==200 and len(rr.content)<=8_000_000:
+                      txt=rr.text
+                      hits=[]
+                      for m in re.finditer("|".join(re.escape(t) for t in terms),txt,re.I):
+                          hits.append(txt[max(0,m.start()-500):min(len(txt),m.end()+1200)])
+                          if len(hits)>=30: break
+                      if hits:
+                          rec["hits"]=hits
+                          # Extract likely request URLs/routes.
+                          found=set(re.findall(r'https?://[^"\'\s<>]+',txt))
+                          found.update(re.findall(r'''["']([^"']*(?:folha|pagamento|remuner|relatorio|relatório|ajax|api)[^"']*)["']''',txt,re.I))
+                          rec["candidate_routes"]=sorted(found)[:300]
+                          (OUT/f"script_{idx:03d}.txt").write_text(txt,encoding="utf-8",errors="ignore")
+                          result["script_hits"].append(rec)
+              except Exception as e:
+                  result["errors"].append({"url":u,"error":repr(e)})
+
+          # Preserve only technical discovery material in summary.
+          (OUT/"discovery_summary.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({
+              "page_status":result.get("page_status"),
+              "page_bytes":result.get("page_bytes"),
+              "script_count":len(result["scripts"]),
+              "inline_hit_count":len(result["inline_hits"]),
+              "script_hit_count":len(result["script_hits"]),
+              "candidate_urls":result["candidate_urls"][:80],
+              "script_hit_summaries":[{"url":x["url"],"status":x["status"],"candidate_routes":x.get("candidate_routes",[])[:60]} for x in result["script_hits"][:30]],
+              "errors":result["errors"][:20]
+          },ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tjrs-payroll-page-backend-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/tjrs_payroll_page_backend_discovery/

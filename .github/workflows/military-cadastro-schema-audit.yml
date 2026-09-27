@@ -1,0 +1,96 @@
+name: military-cadastro-schema-audit
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/military-cadastro-schema-audit.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/military-cadastro-schema-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit official CGU military cadastro schema
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/military_cadastro_schema
+          URL='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores/202606_Militares.zip'
+          curl -fL --retry 3 --retry-delay 5 --max-time 900 "$URL" -o /tmp/militares.zip
+          sha256sum /tmp/militares.zip > artifacts/military_cadastro_schema/source_sha256.txt
+          python - <<'PY'
+          import csv,io,json,re,unicodedata,zipfile
+          from collections import Counter,defaultdict
+          from pathlib import Path
+
+          out=Path("artifacts/military_cadastro_schema")
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+
+          with zipfile.ZipFile("/tmp/militares.zip") as zf:
+              name=[n for n in zf.namelist() if n.lower().endswith("cadastro.csv")][0]
+              with zf.open(name) as raw:
+                  rd=csv.DictReader(io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline=""),delimiter=";")
+                  headers=rd.fieldnames or []
+                  structural=[h for h in headers if (
+                      h.startswith("COD_UORG_") or h.startswith("UORG_") or
+                      h.startswith("COD_ORG_") or h.startswith("ORG_") or
+                      h.startswith("COD_ORGSUP_") or h.startswith("ORGSUP_") or
+                      h=="UF_EXERCICIO"
+                  )]
+                  counts={h:Counter() for h in structural}
+                  total=0
+                  for r in rd:
+                      total+=1
+                      # no person-level data retained: only structural value frequencies
+                      for h in structural:
+                          v=norm(r.get(h))
+                          if v: counts[h][v]+=1
+
+          safe={}
+          for h,c in counts.items():
+              safe[h]=[{"value":v,"rows":n} for v,n in c.most_common(300)]
+          # Search all aggregated structural values for potential São Borja / local military nomenclature.
+          tokens=("SAO BORJA","S BORJA","BORJA","2 RC MEC","2 R C MEC","REGIMENTO DE CAVALARIA",
+                  "RINCAO","COUDELARIA","COMPANHIA DE ENGENHARIA","ENGENHARIA DE COMBATE")
+          hits=[]
+          for h,vals in safe.items():
+              for rec in vals:
+                  if any(t in rec["value"] for t in tokens):
+                      hits.append({"field":h,**rec})
+          meta={
+              "source":"Portal da Transparência/CGU — Militares 2026-06",
+              "cadastro_member":name,
+              "cadastro_rows":total,
+              "all_headers":headers,
+              "structural_headers":structural,
+              "candidate_hits":hits,
+              "privacy":"Only headers and aggregated structural value counts are exported; no names, CPF, identifiers or individual remuneration."
+          }
+          (out/"schema_summary.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          with (out/"structural_value_counts.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.writer(f); w.writerow(["field","value","rows"])
+              for h,vals in safe.items():
+                  for rec in vals: w.writerow([h,rec["value"],rec["rows"]])
+          print(json.dumps(meta,ensure_ascii=False,indent=2)[:60000])
+          PY
+          rm -f /tmp/militares.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: military-cadastro-schema-audit
+          retention-days: 1
+          if-no-files-found: error
+          path: artifacts/military_cadastro_schema/

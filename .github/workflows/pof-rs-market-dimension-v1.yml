@@ -1,0 +1,131 @@
+name: pof-rs-market-dimension-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/pof-rs-market-dimension-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/pof-rs-market-dimension-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download official POF RS workbook and inspect market-dimension tables
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests openpyxl
+          mkdir -p artifacts/pof_rs_market_dimension
+          python - <<'PY'
+          from __future__ import annotations
+          import hashlib, json, re, unicodedata, zipfile
+          from pathlib import Path
+          import requests
+          from openpyxl import load_workbook
+
+          OUT=Path("artifacts/pof_rs_market_dimension")
+          INDEX="https://ftp.ibge.gov.br/Orcamentos_Familiares/Pesquisa_de_Orcamentos_Familiares_2017_2018/Primeiros_resultados/tabelas_unidades_da_federacao/"
+          URL=INDEX+"tabelas_unidades_da_federacao_xls_20191108.zip"
+          ZIP=OUT/"tabelas_unidades_da_federacao_xls_20191108.zip"
+          XLSX=OUT/"43RS.xls.xlsx"
+
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI POF RS market dimension/1.0","Referer":INDEX})
+          h=hashlib.sha256(); n=0
+          with s.get(URL,stream=True,timeout=(30,300),allow_redirects=True) as r:
+              r.raise_for_status()
+              headers={k:r.headers.get(k) for k in ("content-type","content-length","last-modified","etag")}
+              with ZIP.open("wb") as f:
+                  for chunk in r.iter_content(1024*1024):
+                      if chunk:
+                          f.write(chunk); h.update(chunk); n+=len(chunk)
+          if not zipfile.is_zipfile(ZIP):
+              raise SystemExit("POF official package is not ZIP")
+          with zipfile.ZipFile(ZIP) as z:
+              members=z.namelist()
+              if "43RS.xls.xlsx" not in members:
+                  raise SystemExit("43RS.xls.xlsx not found")
+              XLSX.write_bytes(z.read("43RS.xls.xlsx"))
+
+          def norm(x):
+              s=unicodedata.normalize("NFKD",str(x or ""))
+              s="".join(ch for ch in s if not unicodedata.combining(ch))
+              return re.sub(r"\s+"," ",s).strip().lower()
+
+          keywords=[
+              "fora do domicilio",
+              "higiene e cuidados pessoais",
+              "assistencia a saude",
+              "remedios",
+              "medicamentos",
+              "vestuario",
+              "calcados",
+              "eletrodomesticos",
+              "mobiliarios e artigos do lar",
+              "servicos pessoais",
+              "alimentacao",
+          ]
+
+          wb=load_workbook(XLSX,data_only=True,read_only=True)
+          hits=[]
+          sheet_meta=[]
+          for ws in wb.worksheets:
+              sheet_meta.append({"sheet":ws.title,"max_row":ws.max_row,"max_column":ws.max_column})
+              values=[]
+              for row in ws.iter_rows():
+                  vals=[c.value for c in row]
+                  values.append(vals)
+              for ri,row in enumerate(values, start=1):
+                  row_text=" | ".join("" if v is None else str(v) for v in row)
+                  nr=norm(row_text)
+                  ks=[k for k in keywords if k in nr]
+                  if not ks: continue
+                  r0=max(1,ri-3); r1=min(len(values),ri+5)
+                  context=[]
+                  for rr in range(r0,r1+1):
+                      trimmed=values[rr-1][:min(ws.max_column,20)]
+                      context.append({"row":rr,"values":trimmed})
+                  hits.append({"sheet":ws.title,"row":ri,"keywords":ks,"context":context})
+
+          report={
+              "source":"IBGE — POF 2017-2018 — Primeiros resultados — tabelas por Unidade da Federação — Rio Grande do Sul",
+              "source_index":INDEX,
+              "download_url":URL,
+              "download_headers":headers,
+              "package_bytes":n,
+              "package_sha256":h.hexdigest(),
+              "rs_sha256":hashlib.sha256(XLSX.read_bytes()).hexdigest(),
+              "sheet_count":len(wb.sheetnames),
+              "sheets":sheet_meta,
+              "keywords":keywords,
+              "hits":hits,
+              "note":"Inspection only. No market-size estimate is promoted from keyword matching without a table-specific semantic validation.",
+          }
+          (OUT/"inspection.json").write_text(json.dumps(report,ensure_ascii=False,indent=2,default=str),encoding="utf-8")
+          print("POF_RS_MARKET_HITS_BEGIN")
+          print(json.dumps({"sheet_count":report["sheet_count"],"hit_count":len(hits),"hits":hits[:120]},ensure_ascii=False,indent=2,default=str))
+          print("POF_RS_MARKET_HITS_END")
+          PY
+
+      - name: Upload official RS POF workbook and inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: pof-rs-market-dimension-v1
+          path: artifacts/pof_rs_market_dimension/
+          if-no-files-found: error
+          retention-days: 30

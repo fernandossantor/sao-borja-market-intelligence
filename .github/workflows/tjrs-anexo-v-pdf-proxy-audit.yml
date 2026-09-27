@@ -1,0 +1,94 @@
+name: tjrs-anexo-v-pdf-proxy-audit
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/tjrs-anexo-v-pdf-proxy-audit.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/tjrs-anexo-v-pdf-proxy-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch official TJRS Anexo V PDF through Jina Reader and summarize São Borja
+        shell: bash
+        run: |
+          set -u
+          mkdir -p artifacts/tjrs_anexo_v_pdf_proxy_audit
+
+          python - <<'PY'
+          import json, re, unicodedata
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/tjrs_anexo_v_pdf_proxy_audit")
+          official="https://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.pdf"
+          urls=[
+              "https://r.jina.ai/http://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.pdf",
+              "https://r.jina.ai/https://www.tjrs.jus.br/static/2026/08/2026-07-relacao-de-membros-da-magistratura-e-demais-agentes-publicos.pdf",
+          ]
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          report={"official_source":official,"period":"2026-07","attempts":[],"status":"not_recovered"}
+
+          txt=None
+          used=None
+          for u in urls:
+              try:
+                  r=s.get(u,timeout=120)
+                  report["attempts"].append({"url":u,"status":r.status_code,"bytes":len(r.content),"content_type":r.headers.get("content-type")})
+                  if r.status_code==200 and len(r.content)>10000:
+                      t=r.text
+                      if "CNJ" in t and "Lotação" in t and ("São Borja" in t or "Sao Borja" in t):
+                          txt=t
+                          used=u
+                          break
+              except Exception as e:
+                  report["attempts"].append({"url":u,"error":repr(e)})
+
+          if txt is None:
+              (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps(report,ensure_ascii=False,indent=2))
+              raise SystemExit(0)
+
+          (OUT/"reader_output.txt").write_text(txt,encoding="utf-8")
+          # Count exact textual occurrences only; this is a diagnostic, not canonical roster count.
+          occ=[m.start() for m in re.finditer(r"São Borja|Sao Borja",txt,re.I)]
+          snippets=[]
+          for pos in occ[:200]:
+              frag=txt[max(0,pos-500):min(len(txt),pos+800)]
+              # redact any long numeric identifiers and likely personal-name material from summary
+              snippets.append(re.sub(r"\b\d{6,}\b","[ID]",frag))
+          report.update({
+              "status":"recovered_text",
+              "transport_url":used,
+              "text_chars":len(txt),
+              "sao_borja_text_occurrences":len(occ),
+              "privacy":"Full reader output stays only in short-lived artifact. Summary does not persist names or employee identifiers.",
+              "note":"Text occurrence count is diagnostic only and must not be treated as a canonical count of people."
+          })
+          (OUT/"summary.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+          # Store context snippets only in private artifact, not stdout.
+          (OUT/"sao_borja_contexts.txt").write_text("\n\n---\n\n".join(snippets),encoding="utf-8")
+          print(json.dumps(report,ensure_ascii=False,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tjrs-anexo-v-pdf-proxy-audit
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/tjrs_anexo_v_pdf_proxy_audit/

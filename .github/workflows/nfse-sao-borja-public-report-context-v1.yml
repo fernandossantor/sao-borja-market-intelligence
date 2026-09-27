@@ -1,0 +1,83 @@
+name: nfse-sao-borja-public-report-context-v1
+
+on:
+  push:
+    branches: [feature/cnpj-territorial-control-v1]
+    paths: [".github/workflows/nfse-sao-borja-public-report-context-v1.yml"]
+  pull_request:
+    branches: [main]
+    paths: [".github/workflows/nfse-sao-borja-public-report-context-v1.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Inspect public endpoint references in portal bundle
+        run: |
+          set -euo pipefail
+          python -m pip install --quiet requests
+          mkdir -p artifacts/nfse_public_report_context
+          python - <<'PY'
+          from __future__ import annotations
+          import json,re
+          from pathlib import Path
+          import requests
+
+          OUT=Path("artifacts/nfse_public_report_context")
+          URL="https://nfse.saoborja.rs.gov.br/portal/app.js"
+          targets=[
+            "/services/relatorios/public/relatorioTela/requisitar",
+            "/services/gpi/public/orc/receitas",
+            "/services/cadastros/public/consulta/qtdEmitentesNFSe",
+            "/services/nfse/public/consulta/qtdNotasEmitidas",
+          ]
+          s=requests.Session()
+          s.headers.update({"User-Agent":"SBMI public NFS-e bundle audit/1.0"})
+          r=s.get(URL,timeout=120)
+          r.raise_for_status()
+          txt=r.text
+          result={"url":URL,"status":r.status_code,"bytes":len(r.content),"targets":{}}
+          for target in targets:
+              hits=[]
+              start=0
+              while True:
+                  i=txt.find(target,start)
+                  if i<0: break
+                  hits.append({
+                    "index":i,
+                    "context":txt[max(0,i-2500):min(len(txt),i+3500)]
+                  })
+                  start=i+len(target)
+              result["targets"][target]=hits
+          # Also capture symbols near the generic public report endpoint.
+          pats=[
+             r'.{0,1500}relatorioTela.{0,2500}',
+             r'.{0,1500}requisitar.{0,2500}',
+             r'.{0,1500}getRelatorio.{0,2500}',
+          ]
+          result["regex_contexts"]=[]
+          for pat in pats:
+              for m in re.finditer(pat,txt,re.I|re.S):
+                  result["regex_contexts"].append(m.group(0)[:5000])
+                  if len(result["regex_contexts"])>=30: break
+              if len(result["regex_contexts"])>=30: break
+          (OUT/"context.json").write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding="utf-8")
+          print("SBMI_NFSE_PUBLIC_REPORT_CONTEXT_BEGIN")
+          print(json.dumps(result,ensure_ascii=False,indent=2)[:120000])
+          print("SBMI_NFSE_PUBLIC_REPORT_CONTEXT_END")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nfse-sao-borja-public-report-context-v1
+          path: artifacts/nfse_public_report_context/
+          if-no-files-found: error
+          retention-days: 30

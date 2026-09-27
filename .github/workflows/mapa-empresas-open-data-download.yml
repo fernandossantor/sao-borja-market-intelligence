@@ -1,0 +1,50 @@
+name: mapa-empresas-open-data-download
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/mapa-empresas-open-data-download.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/mapa-empresas-open-data-download.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  download:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official Mapa de Empresas May 2026 workbook
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/mapa_empresas_open_data
+          URL='https://www.gov.br/memp/pt-br/acesso-a-informacao/dados-abertos/06_arquivodados_mai26-mapa-de-empresas-v2.xlsx/@@download/file'
+          curl -fL --retry 3 --retry-delay 5 --connect-timeout 20 --max-time 300 "$URL"             -o artifacts/mapa_empresas_open_data/mapa_empresas_maio2026.xlsx
+          sha256sum artifacts/mapa_empresas_open_data/mapa_empresas_maio2026.xlsx > artifacts/mapa_empresas_open_data/source_sha256.txt
+          file artifacts/mapa_empresas_open_data/mapa_empresas_maio2026.xlsx
+          ls -lh artifacts/mapa_empresas_open_data/mapa_empresas_maio2026.xlsx
+          cat > artifacts/mapa_empresas_open_data/source.json <<'JSON'
+          {
+            "source": "Ministério do Empreendedorismo, da Microempresa e da Empresa de Pequeno Porte — Mapa de Empresas — Dados Abertos",
+            "period_label": "maio de 2026",
+            "url": "https://www.gov.br/memp/pt-br/acesso-a-informacao/dados-abertos/06_arquivodados_mai26-mapa-de-empresas-v2.xlsx/@@download/file",
+            "use": "Auditar se o arquivo aberto contém recorte municipal utilizável para aberturas, baixas e estoque de São Borja."
+          }
+          JSON
+
+      - name: Upload official workbook
+        uses: actions/upload-artifact@v4
+        with:
+          name: mapa-empresas-open-data-maio2026
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mapa_empresas_open_data/

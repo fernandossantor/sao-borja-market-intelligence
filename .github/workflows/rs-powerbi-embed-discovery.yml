@@ -1,0 +1,90 @@
+name: rs-powerbi-embed-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/rs-powerbi-embed-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rs-powerbi-embed-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inspect RS PowerBI embed loader and open-data report identifiers
+        run: |
+          python - <<'PY'
+          import json,re
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+
+          outdir=Path("artifacts/rs_powerbi_embed_discovery"); outdir.mkdir(parents=True,exist_ok=True)
+          base="https://www.transparencia.rs.gov.br"
+          page=base+"/dados-abertos/dados-transparencia-rs/dados/"
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          r=s.get(page,timeout=60); r.raise_for_status()
+          html=r.text
+          (outdir/"page.html").write_text(html,encoding="utf-8")
+
+          load_calls=re.findall(r"loadReport\(([^;]+)\);",html)
+          script_urls=[]
+          for src in re.findall(r'<script[^>]+src=["\']([^"\']+)["\']',html,re.I):
+              script_urls.append(urljoin(base+"/",src))
+
+          scripts=[]
+          for u in script_urls:
+              if "transparencia.rs.gov.br" not in u: continue
+              try:
+                  q=s.get(u,timeout=60)
+                  if q.status_code!=200 or len(q.content)>10_000_000: continue
+                  text=q.text
+                  fname=re.sub(r'[^A-Za-z0-9._-]+','_',u.split('/')[-1].split('?')[0] or "script.js")
+                  (outdir/fname).write_text(text,encoding="utf-8")
+                  hits=[]
+                  for pattern in [
+                      r'function\s+loadReport\s*\([^)]*\)\s*\{',
+                      r'loadReport\s*=\s*function\s*\([^)]*\)\s*\{',
+                      r'url\s*:\s*["\']([^"\']+)["\']',
+                      r'\$\.ajax\s*\(\s*\{[^}]{0,1500}\}',
+                      r'fetch\s*\(\s*["\']([^"\']+)["\']',
+                      r'axios\.[A-Za-z]+\s*\(\s*["\']([^"\']+)["\']',
+                      r'["\'](/[^"\']*(?:PowerBI|powerbi|Report|report|embed|token)[^"\']*)["\']',
+                  ]:
+                      for m in re.finditer(pattern,text,re.I|re.S):
+                          hits.append(m.group(0)[:3000])
+                  if hits:
+                      scripts.append({"url":u,"hits":hits[:300]})
+              except Exception as exc:
+                  scripts.append({"url":u,"error":repr(exc)})
+
+          out={
+            "page":page,
+            "loadReport_calls":load_calls,
+            "local_script_urls":[u for u in script_urls if "transparencia.rs.gov.br" in u],
+            "script_hits":scripts,
+            "note":"The open-data page embeds a PowerBI report. This artifact only discovers the portal's own embed configuration and backend routes; no private token is persisted."
+          }
+          (outdir/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:150000])
+          PY
+
+      - name: Upload discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: rs-powerbi-embed-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/rs_powerbi_embed_discovery/

@@ -1,0 +1,119 @@
+from __future__ import annotations
+
+import pandas as pd
+
+from sbmi.public_market_series_analysis import (
+    build_dfe_monthly_panel,
+    build_taxonomy_gap_ncm29,
+    build_taxonomy_gap_prefix,
+)
+
+
+def test_dfe_monthly_panel_marks_partial_month_and_yoy() -> None:
+    rows = []
+    for year in [2024, 2025, 2026]:
+        for month in [1, 2]:
+            rows.append(
+                {
+                    "ano_mes": f"{year}-{month:02d}",
+                    "modelo_dfe": "NFC-e",
+                    "qtde_dfe": 100 * (year - 2023),
+                    "vlr_total_dfe": 1000.0 * (year - 2023),
+                    "periodo_parcial": False,
+                }
+            )
+    rows.append(
+        {
+            "ano_mes": "2026-09",
+            "modelo_dfe": "NFC-e",
+            "qtde_dfe": 50,
+            "vlr_total_dfe": 500.0,
+            "periodo_parcial": True,
+        }
+    )
+    frame = pd.DataFrame(rows)
+    panel = build_dfe_monthly_panel(frame)
+    jan_2026 = panel.loc[panel["ano_mes"].eq("2026-01")].iloc[0]
+    assert round(jan_2026["qtde_yoy_pct"], 6) == 50.0
+    sep_2026 = panel.loc[panel["ano_mes"].eq("2026-09")].iloc[0]
+    assert sep_2026["status_comparabilidade"] == "mes_parcial"
+    assert pd.isna(sep_2026["qtde_yoy_pct"])
+    assert pd.isna(sep_2026["indice_qtde_base_media_2024"])
+
+
+def test_taxonomy_gap_prefix_does_not_impute_groups() -> None:
+    frame = pd.DataFrame(
+        {
+            "series": ["radar_composicao_mercado"] * 3,
+            "ncm8": ["29000001", "29000002", "61000001"],
+            "rows": [10, 20, 5],
+            "valor_publicado": [100.0, 200.0, 10.0],
+        }
+    )
+    summary, meta = build_taxonomy_gap_prefix(frame)
+    row29 = summary.loc[summary["prefixo2"].eq("29")].iloc[0]
+    assert row29["ncm8_unicos"] == 2
+    assert round(meta["composition_prefix29_pct_unmapped_value"], 6) == round(300 / 310 * 100, 6)
+
+def test_taxonomy_gap_ncm29_prioritizes_value_without_classification() -> None:
+    frame = pd.DataFrame(
+        {
+            "series": ["radar_composicao_mercado"] * 4,
+            "ncm8": ["29000001", "29000002", "29000003", "61000001"],
+            "first_month": ["2024-07"] * 4,
+            "last_month": ["2026-08"] * 4,
+            "rows": [10, 20, 30, 5],
+            "rows_corte_sigilo": [0, 1, 2, 0],
+            "metrica_valor": ["vlr_nominal_publicado_nao_sigilo"] * 4,
+            "valor_publicado": [600.0, 300.0, 100.0, 500.0],
+        }
+    )
+    detail, meta = build_taxonomy_gap_ncm29(frame)
+    assert detail["ncm8"].tolist() == ["29000001", "29000002", "29000003"]
+    assert round(detail.iloc[0]["pct_valor_prefixo29"], 6) == 60.0
+    assert round(detail.iloc[1]["pct_acumulado_prefixo29"], 6) == 90.0
+    assert meta["ncm8"] == 3
+    assert meta["ncm8_to_80pct_value"] == 2
+    assert "setor" not in detail.columns
+
+
+def test_taxonomy_gap_ncm29_handles_empty_prefix() -> None:
+    frame = pd.DataFrame(
+        {
+            "series": ["radar_composicao_mercado", "radar_composicao_mercado"],
+            "ncm8": ["00000000", "61001300"],
+            "first_month": ["2024-07", "2024-07"],
+            "last_month": ["2026-08", "2026-08"],
+            "rows": [80, 6],
+            "rows_corte_sigilo": [50, 5],
+            "metrica_valor": ["vlr_nominal_publicado_nao_sigilo"] * 2,
+            "valor_publicado": [2041248.0, 15717.0],
+        }
+    )
+    detail, meta = build_taxonomy_gap_ncm29(frame)
+    assert detail.empty
+    assert meta["ncm8"] == 0
+    assert meta["value"] == 0.0
+    assert meta["ncm8_to_99pct_value"] == 0
+
+
+def test_taxonomy_gap_ncm29_zero_published_value_is_not_ranked() -> None:
+    frame = pd.DataFrame(
+        {
+            "series": ["radar_composicao_mercado"] * 2,
+            "ncm8": ["29309000", "29369200"],
+            "first_month": ["2024-07", "2024-07"],
+            "last_month": ["2025-08", "2025-08"],
+            "rows": [6, 3],
+            "rows_corte_sigilo": [6, 3],
+            "metrica_valor": ["vlr_nominal_publicado_nao_sigilo"] * 2,
+            "valor_publicado": [0.0, 0.0],
+        }
+    )
+    detail, meta = build_taxonomy_gap_ncm29(frame)
+    assert len(detail) == 2
+    assert detail["pct_valor_prefixo29"].eq(0.0).all()
+    assert detail["pct_acumulado_prefixo29"].eq(0.0).all()
+    assert meta["value"] == 0.0
+    assert meta["ncm8_to_50pct_value"] == 0
+    assert meta["ncm8_to_99pct_value"] == 0

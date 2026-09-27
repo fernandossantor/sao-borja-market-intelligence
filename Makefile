@@ -9,6 +9,7 @@
 .PHONY: snapshot-base-territorial-demography-census-series
 .PHONY: snapshot-base-territorial-economy-gdp-series
 .PHONY: build-base-territorial-business-employment-series
+.PHONY: build-base-territorial-cnpj-control
 .PHONY: build-base-territorial-education-series
 .PHONY: build-base-territorial-public-finance-series
 .PHONY: snapshot-base-territorial-siconfi-dca
@@ -21,6 +22,10 @@ EXECUTION_TIMESTAMP = $(shell date -u +%Y%m%d-%H%M%S)
 PUBLIC_FINANCE_SOURCE_DIR ?= .data/snapshots/web/complementary_source_values/complementary-source-values-20260729-220618/sebrae_observatorio_profile
 SICONFI_DCA_SNAPSHOT_ID ?= siconfi-dca-4318002-2019-2025-$(EXECUTION_TIMESTAMP)
 SICONFI_DCA_SNAPSHOT_DIR ?=
+CNPJ_ESTABLISHMENTS_DIR ?=
+CNPJ_COMPANIES_DIR ?=
+CNPJ_MUNICIPALITIES_ZIP ?=
+CNPJ_EXECUTION_ID ?= cnpj-territorial-control-$(EXECUTION_TIMESTAMP)
 CANONICAL_SERIES_BASE_ROOT ?=
 CANONICAL_DEMOGRAPHY_HISTORICAL_PATH ?=
 CANONICAL_DEMOGRAPHY_CENSUS_PATH ?=
@@ -154,6 +159,19 @@ snapshot-base-territorial-economy-gdp-series:
 
 build-base-territorial-business-employment-series:
 	python -m sbmi.business_employment_series_cli
+
+build-base-territorial-cnpj-control:
+	test -n "$(CNPJ_ESTABLISHMENTS_DIR)" || \
+		(printf '%s\n' 'CNPJ_ESTABLISHMENTS_DIR is required' >&2; exit 2)
+	test -n "$(CNPJ_COMPANIES_DIR)" || \
+		(printf '%s\n' 'CNPJ_COMPANIES_DIR is required' >&2; exit 2)
+	test -n "$(CNPJ_MUNICIPALITIES_ZIP)" || \
+		(printf '%s\n' 'CNPJ_MUNICIPALITIES_ZIP is required' >&2; exit 2)
+	python -m sbmi.cnpj_territorial_control_cli \
+		--establishments-dir $(CNPJ_ESTABLISHMENTS_DIR) \
+		--companies-dir $(CNPJ_COMPANIES_DIR) \
+		--municipalities-zip $(CNPJ_MUNICIPALITIES_ZIP) \
+		--execution-id $(CNPJ_EXECUTION_ID)
 
 build-base-territorial-education-series:
 	python -m sbmi.education_series_cli

@@ -1,0 +1,95 @@
+name: rs-executive-payroll-open-data-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/rs-executive-payroll-open-data-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rs-executive-payroll-open-data-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install discovery parser dependency
+        run: python -m pip install --quiet beautifulsoup4
+
+      - name: Inspect Transparência RS open-data page and linked scripts
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          from bs4 import BeautifulSoup
+
+          outdir=Path("artifacts/rs_payroll_open_data_discovery")
+          outdir.mkdir(parents=True,exist_ok=True)
+          base="https://www.transparencia.rs.gov.br"
+          page=base+"/dados-abertos/dados-transparencia-rs/dados/"
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit","Accept":"text/html,*/*"})
+          r=s.get(page,timeout=60); r.raise_for_status()
+          html=r.text
+          (outdir/"page.html").write_text(html,encoding="utf-8")
+          soup=BeautifulSoup(html,"html.parser")
+
+          links=[]
+          for tag in soup.find_all(["a","script","link"]):
+              u=tag.get("href") or tag.get("src")
+              if not u: continue
+              links.append(urljoin(page,u))
+          links=sorted(set(links))
+
+          candidates=[]
+          pat=re.compile(r"(csv|xlsx|download|arquivo|dados-abertos|api|pessoal|servid|folha)",re.I)
+          for u in links:
+              if pat.search(u): candidates.append({"source":"page-link","url":u})
+
+          js_urls=[u for u in links if ".js" in u.lower()]
+          script_hits=[]
+          for u in js_urls[:80]:
+              try:
+                  q=s.get(u,timeout=40)
+                  if q.status_code!=200 or len(q.content)>8_000_000: continue
+                  txt=q.text
+                  hits=sorted(set(re.findall(r'(?:"|\')(https?://[^"\']+|/[^"\']*(?:api|download|arquivo|csv|xlsx|dados-abertos|pessoal|servid)[^"\']*)(?:"|\')',txt,re.I)))
+                  if hits:
+                      script_hits.append({"script":u,"hits":[urljoin(base,h) if h.startswith("/") else h for h in hits[:300]]})
+              except Exception as exc:
+                  script_hits.append({"script":u,"error":repr(exc)})
+
+          text_hits=sorted(set(re.findall(r'https?://[^"\'<>\s]+',html)))
+          out={
+              "source":"Portal da Transparência do Estado do Rio Grande do Sul",
+              "page":page,
+              "http_status":r.status_code,
+              "links_count":len(links),
+              "candidate_links":candidates,
+              "script_hits":script_hits,
+              "absolute_urls_in_html":[u for u in text_hits if pat.search(u)][:500],
+              "method_note":"Discovery only. No payroll amount is published until the official file layout, period, active-status field and territorial unit field are audited.",
+          }
+          (outdir/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:100000])
+          PY
+
+      - name: Upload discovery artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rs-executive-payroll-open-data-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/rs_payroll_open_data_discovery/

@@ -1,0 +1,157 @@
+name: dfe-powerbi-schema-discovery-v1
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/dfe-powerbi-schema-discovery-v1.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/dfe-powerbi-schema-discovery-v1.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright requests beautifulsoup4
+          python -m playwright install --with-deps chromium >/dev/null
+      - name: Inspect public DFe PowerBI schema without persisting tokens
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/dfe_powerbi_schema
+          cat > /tmp/discover.py <<'PY'
+          from __future__ import annotations
+          import asyncio, json, re
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          from bs4 import BeautifulSoup
+          from playwright.async_api import async_playwright
+
+          OUT=Path("artifacts/dfe_powerbi_schema")
+          PAGE="https://receitadados.sefaz.rs.gov.br/paineis/documentos-eletronicos/"
+          sess=requests.Session()
+          sess.headers.update({"User-Agent":"Mozilla/5.0 SBMI DFe schema audit"})
+          html=sess.get(PAGE,timeout=60).text
+          soup=BeautifulSoup(html,"html.parser")
+          iframes=[urljoin(PAGE,x.get("src")) for x in soup.find_all("iframe") if x.get("src") and "powerbi.com" in x.get("src")]
+          print("IFRAME_COUNT",len(iframes))
+          for i,u in enumerate(iframes):
+              print("IFRAME",i,u.split("?")[0], "TOKEN_PARAM_REDACTED")
+
+          # The page presents 10 visualizations in order:
+          labels=["NFCe","Quantidade","Valor","Impacto BR Covid","Quantidade - Região","Valor - Região","Quantidade - Setor","Valor - setor","Quantidade - Município","Valor - Município"]
+          targets=[]
+          for i,u in enumerate(iframes):
+              targets.append({"index":i,"label":labels[i] if i<len(labels) else f"iframe_{i}","url":u})
+
+          def scrub(s:str)->str:
+              s=re.sub(r'Bearer\s+[A-Za-z0-9._~+/=-]+','Bearer <REDACTED>',s,flags=re.I)
+              s=re.sub(r'("(?:accessToken|token|embedToken)"\s*:\s*")[^"]+(")',r'\1<REDACTED>\2',s,flags=re.I)
+              # redact public report query token in persisted URLs while keeping host/path
+              s=re.sub(r'(https://app\.powerbi\.com/view\?r=)[A-Za-z0-9%_=.-]+',r'\1<REDACTED>',s)
+              return s
+
+          async def inspect_one(browser,item):
+              page=await browser.new_page(viewport={"width":1600,"height":1000})
+              records=[]
+              async def handle(resp):
+                  low=resp.url.lower()
+                  if not any(k in low for k in ("modelsandexploration","metadata","conceptualschema","querydata","explore")):
+                      return
+                  rec={"url":resp.url.split("?")[0],"status":resp.status,"content_type":resp.headers.get("content-type")}
+                  try:
+                      body=await resp.text()
+                      body=scrub(body)
+                      # Keep schema/metadata fully up to a safe bound; queryData only diagnostic head.
+                      limit=400000 if any(k in low for k in ("modelsandexploration","metadata","conceptualschema")) else 50000
+                      rec["body_head"]=body[:limit]
+                      rec["body_len"]=len(body)
+                  except Exception as exc:
+                      rec["error"]=repr(exc)
+                  records.append(rec)
+              page.on("response",handle)
+              try:
+                  await page.goto(item["url"],wait_until="domcontentloaded",timeout=120000)
+                  await page.wait_for_timeout(18000)
+                  bodytxt=await page.locator("body").inner_text(timeout=10000)
+              except Exception as exc:
+                  bodytxt=f"ERROR {exc!r}"
+              await page.close()
+              blob="\n".join(r.get("body_head","") for r in records)
+              terms={}
+              for t in ("municipio","município","cnae","ncm","modelo_dfe","nf-e","nfc-e","valor","quantidade","setor","classe"):
+                  terms[t]=len(re.findall(re.escape(t),blob,flags=re.I))
+              # extract likely schema names around target terms
+              snippets=[]
+              for m in re.finditer(r'(?i)(municip.{0,3}|cnae|ncm|setor|classe|valor|quantidade)',blob):
+                  a=max(0,m.start()-160); b=min(len(blob),m.end()+240)
+                  sn=blob[a:b].replace("\n"," ")
+                  if sn not in snippets:
+                      snippets.append(sn)
+                  if len(snippets)>=80: break
+              return {
+                  "index":item["index"],
+                  "label":item["label"],
+                  "public_url":"https://app.powerbi.com/view?r=<REDACTED>",
+                  "response_count":len(records),
+                  "terms":terms,
+                  "schema_snippets":snippets,
+                  "responses":records,
+                  "body_text_head":scrub(bodytxt[:30000]),
+              }
+
+          async def main():
+              results=[]
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  # focus on last four (setor and municipio), plus first overview.
+                  selection=[x for x in targets if x["index"] in (0,6,7,8,9)]
+                  for item in selection:
+                      print("INSPECT",item["index"],item["label"])
+                      results.append(await inspect_one(browser,item))
+                  await browser.close()
+              # Compare whether schema-ish response endpoints / obvious dataset markers look shared.
+              compact=[]
+              for r in results:
+                  compact.append({
+                      "index":r["index"],"label":r["label"],"response_count":r["response_count"],"terms":r["terms"],
+                      "response_urls":sorted({x["url"] for x in r["responses"]}),
+                      "snippets":r["schema_snippets"][:20],
+                  })
+              report={
+                  "source_page":PAGE,
+                  "iframe_count":len(iframes),
+                  "labels":labels,
+                  "results":results,
+                  "compact":compact,
+                  "privacy":"No PowerBI access/embed token or cookies persisted; public report token redacted from artifact.",
+                  "purpose":"Determine whether public DFe reports expose municipality and CNAE/NCM within a common schema, without inferring values from store counts."
+              }
+              (OUT/"schema_discovery.json").write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding="utf-8")
+              print("SBMI_DFE_POWERBI_SCHEMA_BEGIN")
+              print(json.dumps(compact,ensure_ascii=False,indent=2)[:150000])
+              print("SBMI_DFE_POWERBI_SCHEMA_END")
+          asyncio.run(main())
+          PY
+          python /tmp/discover.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dfe-powerbi-schema-discovery-v1
+          path: artifacts/dfe_powerbi_schema/
+          if-no-files-found: error
+          retention-days: 30

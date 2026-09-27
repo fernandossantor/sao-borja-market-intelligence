@@ -1,0 +1,165 @@
+name: federal-civil-payroll-verified-units-sao-borja
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/federal-civil-payroll-verified-units-sao-borja.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/federal-civil-payroll-verified-units-sao-borja.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official CGU SIAPE archive
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/federal_civil_payroll_verified
+          URL='https://dadosabertos-download.cgu.gov.br/PortalDaTransparencia/saida/servidores/202607_Servidores_SIAPE.zip'
+          curl -fL --retry 3 --retry-delay 5 --max-time 900 "$URL"             -o artifacts/federal_civil_payroll_verified/siape.zip
+          sha256sum artifacts/federal_civil_payroll_verified/siape.zip > artifacts/federal_civil_payroll_verified/source_sha256.txt
+
+      - name: Aggregate verified local units
+        run: |
+          cat > /tmp/agg_verified.py <<'PY'
+          import csv,io,json,re,unicodedata,zipfile
+          from collections import defaultdict
+          from pathlib import Path
+
+          ROOT=Path("artifacts/federal_civil_payroll_verified")
+          def norm(s):
+              s=unicodedata.normalize("NFKD",str(s or ""))
+              s="".join(c for c in s if not unicodedata.combining(c))
+              return re.sub(r"\s+"," ",s).strip().upper()
+          def n(v):
+              s=str(v or "").strip()
+              if not s:return None
+              s=s.replace(".","").replace(",",".")
+              try:return float(s)
+              except:return None
+
+          with zipfile.ZipFile(ROOT/"siape.zip") as zf:
+              cad=[x for x in zf.namelist() if x.lower().endswith("cadastro.csv")][0]
+              rem=[x for x in zf.namelist() if x.lower().endswith("remuneracao.csv")][0]
+              groups=defaultdict(set)
+              row_meta={}
+              with zf.open(cad) as raw:
+                  rd=csv.DictReader(io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline=""),delimiter=";")
+                  for r in rd:
+                      uid=(r.get("Id_SERVIDOR_PORTAL") or "").strip()
+                      if not uid: continue
+                      ul=norm(r.get("UORG_LOTACAO")); ue=norm(r.get("UORG_EXERCICIO"))
+                      ol=norm(r.get("ORG_LOTACAO")); oe=norm(r.get("ORG_EXERCICIO"))
+                      st=norm(r.get("SITUACAO_VINCULO"))
+                      matches=[]
+
+                      # UNIPAMPA: local campus subtree is explicitly coded by CAMPSB in UORG_EXERCICIO.
+                      if "UNIVERSIDADE FEDERAL DO PAMPA" in oe and ue.startswith("CAMPSB"):
+                          matches.append("UNIPAMPA_CAMPSB_EXERCICIO")
+
+                      # IFFar: local lotation + local campus exercise. Six clearly central/external exercise destinations are excluded.
+                      if "INSTITUTO FEDERAL FARROUPILHA" in ol and ul=="CAMPUS SAO BORJA":
+                          central_or_external = (
+                              oe!="INSTITUTO FEDERAL FARROUPILHA" or
+                              ue in {
+                                "GABINETE DO(A) REITOR(A)","AUDITORIA INTERNA",
+                                "DIRETORIA DE ASSISTENCIA ESTUDANTIL","DIRETORIA DE EDUCACAO A DISTANCIA",
+                                "DIRETORIA DE TECNOLOGIA DA INFORMACAO"
+                              }
+                          )
+                          matches.append("IFFAR_CAMPUS_LOTACAO")
+                          if not central_or_external:
+                              matches.append("IFFAR_CAMPUS_EXERCICIO_LOCAL")
+
+                      if ue=="APS B SAO BORJA" and "INSTITUTO NACIONAL DO SEGURO SOCIAL" in oe:
+                          matches.append("INSS_APS_SAO_BORJA")
+                      if ue in {"SERV VIG AGROP INTERN DE SAO BORJA","VIGIAGRO EM SAO BORJA"} and "AGRICULTURA" in oe:
+                          matches.append("MAPA_VIGIAGRO_SAO_BORJA")
+                      if "IRF/SBA/INSPETORIA RFB EM SAO BORJA" in ue:
+                          matches.append("RFB_INSPETORIA_SAO_BORJA")
+
+                      for g in matches: groups[g].add(uid)
+                      if matches:
+                          row_meta[uid]={"status":st,"uorg_exercicio":ue,"org_exercicio":oe}
+
+              rem_cols=[
+                "REMUNERAÇÃO BÁSICA BRUTA (R$)","GRATIFICAÇÃO NATALINA (R$)","FÉRIAS (R$)",
+                "OUTRAS REMUNERAÇÕES EVENTUAIS (R$)","REMUNERAÇÃO APÓS DEDUÇÕES OBRIGATÓRIAS (R$)",
+                "TOTAL DE VERBAS INDENIZATÓRIAS (R$)(*)"
+              ]
+              remap={}
+              wanted=set().union(*groups.values()) if groups else set()
+              with zf.open(rem) as raw:
+                  rd=csv.DictReader(io.TextIOWrapper(raw,encoding="latin-1",errors="replace",newline=""),delimiter=";")
+                  for r in rd:
+                      uid=(r.get("Id_SERVIDOR_PORTAL") or "").strip()
+                      if uid in wanted:
+                          remap[uid]={c:n(r.get(c)) for c in rem_cols}
+
+          def agg(ids):
+              sums=defaultdict(float); valid=defaultdict(int); statuses=defaultdict(int)
+              for uid in ids:
+                  statuses[row_meta.get(uid,{}).get("status","")]+=1
+                  rr=remap.get(uid,{})
+                  for c in rem_cols:
+                      if rr.get(c) is not None:
+                          sums[c]+=rr[c]; valid[c]+=1
+              out={"unique_portal_ids":len(ids),"with_remuneration_record":sum(uid in remap for uid in ids)}
+              for c in rem_cols:
+                  out[f"sum__{c}"]=round(sums[c],2); out[f"valid__{c}"]=valid[c]
+              out["status_counts"]="; ".join(f"{k}:{v}" for k,v in sorted(statuses.items()))
+              return out
+
+          rows=[]
+          for g in sorted(groups):
+              rows.append({"criterion":g,**agg(groups[g])})
+
+          # Preferred verified-local civilian subtotal: one non-overlapping criterion per institution.
+          preferred=[
+             "UNIPAMPA_CAMPSB_EXERCICIO","IFFAR_CAMPUS_EXERCICIO_LOCAL",
+             "INSS_APS_SAO_BORJA","MAPA_VIGIAGRO_SAO_BORJA","RFB_INSPETORIA_SAO_BORJA"
+          ]
+          subtotal=set()
+          for g in preferred: subtotal |= groups.get(g,set())
+          rows.append({"criterion":"SUBTOTAL_CIVIL_FEDERAL_VERIFICADO_NAO_EXAUSTIVO",**agg(subtotal)})
+
+          keys=list(rows[0].keys()) if rows else ["criterion"]
+          with (ROOT/"verified_units_summary.csv").open("w",encoding="utf-8",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=keys); w.writeheader(); w.writerows(rows)
+
+          meta={
+            "source":"Portal da Transparência/CGU — Servidores SIAPE, competência 2026-07",
+            "geography":"São Borja/RS through audited organizational-unit rules",
+            "preferred_subtotal_rule":preferred,
+            "nature":"observed administrative records aggregated by audited UORG criteria",
+            "limitation":"Non-exhaustive: excludes Armed Forces, PF/PRF and any federal unit whose UORG has not yet been territorially reconciled. IFFar exercise-local rule is constructed from local lotation minus clearly central/external exercise destinations.",
+            "privacy":"No person-level output.",
+          }
+          (ROOT/"metadata.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2))
+          print((ROOT/"verified_units_summary.csv").read_text(encoding="utf-8"))
+          PY
+          python /tmp/agg_verified.py
+
+      - name: Remove source archive
+        run: rm -f artifacts/federal_civil_payroll_verified/siape.zip
+
+      - name: Upload aggregate
+        uses: actions/upload-artifact@v4
+        with:
+          name: federal-civil-payroll-verified-units-sao-borja
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/federal_civil_payroll_verified/

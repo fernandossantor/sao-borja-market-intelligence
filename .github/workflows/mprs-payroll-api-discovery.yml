@@ -1,0 +1,54 @@
+name: mprs-payroll-api-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/mprs-payroll-api-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/mprs-payroll-api-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect MPRS official payroll JavaScript for API/download routes
+        run: |
+          python - <<'PY'
+          import json,re,urllib3
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+          OUT=Path("artifacts/mprs_payroll_api_discovery"); OUT.mkdir(parents=True,exist_ok=True)
+          url="https://transparencia.mprs.mp.br/static/contracheque/contracheque.js"
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          r=s.get(url,timeout=60,verify=False); r.raise_for_status()
+          txt=r.text; (OUT/"contracheque.js").write_text(txt,encoding="utf-8")
+          strings=sorted(set(re.findall(r'["\']([^"\']{1,500})["\']',txt)))
+          likely=[x for x in strings if any(k in x.lower() for k in ("contracheque","remuner","download","grupo","folha","mes","ano","http","api","json","csv","lotacao"))]
+          snippets=[]
+          for needle in ["$http","download","remuneracao","grupo","folha","lotacao","contracheque"]:
+              for m in re.finditer(re.escape(needle),txt,re.I):
+                  snippets.append({"needle":needle,"snippet":txt[max(0,m.start()-1000):min(len(txt),m.end()+2200)]})
+                  if len(snippets)>250: break
+          out={"url":url,"bytes":len(r.content),"likely_strings":likely[:1000],"snippets":snippets[:250]}
+          (OUT/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(out,ensure_ascii=False,indent=2)[:120000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mprs-payroll-api-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/mprs_payroll_api_discovery/

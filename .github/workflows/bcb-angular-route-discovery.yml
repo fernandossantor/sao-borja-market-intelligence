@@ -1,0 +1,104 @@
+name: bcb-angular-route-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/bcb-angular-route-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/bcb-angular-route-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recursively inspect BCB Angular chunks for SICOR and ESTBAN routes
+        run: |
+          python - <<'PY'
+          import json,re
+          from collections import deque
+          from pathlib import Path
+          from urllib.parse import urljoin
+          import requests
+
+          outdir=Path("artifacts/bcb_angular_route_discovery"); outdir.mkdir(parents=True,exist_ok=True)
+          root="https://www.bcb.gov.br/"
+          pages=[
+            root+"estabilidadefinanceira/micrrural/",
+            root+"estatisticas/estatisticabancariamunicipios?modalAberto=baixar-arquivos",
+          ]
+          s=requests.Session(); s.headers.update({"User-Agent":"Mozilla/5.0 SBMI audit"})
+          seed=set()
+          for i,p in enumerate(pages):
+              r=s.get(p,timeout=60); r.raise_for_status()
+              (outdir/f"page_{i}.html").write_text(r.text,encoding="utf-8")
+              for pat in [r'<script[^>]+src=["\']([^"\']+\.js)["\']',r'<link[^>]+href=["\']([^"\']+\.js)["\']']:
+                  for u in re.findall(pat,r.text,re.I): seed.add(urljoin(root,u))
+
+          q=deque(sorted(seed)); seen=set(); records=[]
+          needles=("micrrural","estatisticabancariamunicipios","estban","mdcr","download","baixar arquivo","arquivo csv","\.zip","\.csv","\.gz","api/servico","site_conteudo_url")
+          while q and len(seen)<350:
+              u=q.popleft()
+              if u in seen: continue
+              seen.add(u)
+              try:
+                  resp=s.get(u,timeout=45)
+                  if resp.status_code!=200 or len(resp.content)>20_000_000: continue
+                  txt=resp.text
+                  # Recursively follow relative ES-module imports.
+                  for imp in re.findall(r'(?:from\s*)?["\'](\.\/[^"\']+\.js)["\']',txt):
+                      nu=urljoin(u,imp)
+                      if nu not in seen: q.append(nu)
+                  # Also dynamic import("chunk.js")
+                  for imp in re.findall(r'import\(["\']([^"\']+\.js)["\']\)',txt):
+                      nu=urljoin(u,imp)
+                      if nu not in seen: q.append(nu)
+
+                  low=txt.lower()
+                  found=[]
+                  for needle in needles:
+                      literal=needle.replace("\\","").lower()
+                      pos=0; n=0
+                      while True:
+                          i=low.find(literal,pos)
+                          if i<0 or n>=80: break
+                          found.append({"needle":literal,"snippet":txt[max(0,i-700):i+1800]})
+                          pos=i+len(literal); n+=1
+                  strings=sorted(set(re.findall(r'["\']([^"\']{1,700})["\']',txt)))
+                  likely=[x for x in strings if any(k in x.lower() for k in (
+                    "micrrural","estatisticabancariamunicipios","estban","mdcr","download","baixar",
+                    ".zip",".csv",".gz","api/servico","arquiv"
+                  ))][:1500]
+                  if found or likely:
+                      records.append({"asset":u,"bytes":len(resp.content),"snippets":found[:800],"likely_strings":likely})
+              except Exception as exc:
+                  records.append({"asset":u,"error":repr(exc)})
+
+          out={"pages":pages,"seed_assets":sorted(seed),"visited_assets":len(seen),"matches":records}
+          (outdir/"discovery.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps({"visited_assets":len(seen),"matched_assets":[r.get("asset") for r in records]},ensure_ascii=False,indent=2))
+          for rec in records:
+              print("\n###",rec.get("asset"))
+              for x in rec.get("likely_strings",[])[:200]: print("STR",x[:800])
+              for x in rec.get("snippets",[])[:100]:
+                  print("NEEDLE",x["needle"],x["snippet"][:2200].replace("\n"," "))
+          PY
+
+      - name: Upload discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: bcb-angular-route-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/bcb_angular_route_discovery/

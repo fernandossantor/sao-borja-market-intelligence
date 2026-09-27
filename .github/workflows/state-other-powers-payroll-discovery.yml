@@ -1,0 +1,129 @@
+name: state-other-powers-payroll-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/state-other-powers-payroll-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/state-other-powers-payroll-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Discover official TJRS and DPERS payroll data routes
+        run: |
+          python - <<'PY'
+          import json, re, urllib.parse, urllib3
+          from pathlib import Path
+          import requests
+
+          urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+          OUT=Path("artifacts/state_other_powers_payroll_discovery")
+          OUT.mkdir(parents=True,exist_ok=True)
+          s=requests.Session()
+          s.headers.update({"User-Agent":"Mozilla/5.0 SBMI territorial audit"})
+          keywords=("folha","remuner","pagamento","servid","pessoal","lotacao","lotação","municip","comarca","api","ajax","json","csv","xlsx","dados-abertos","dados_abertos","wp-json")
+          results={}
+
+          def fetch(url, verify=True, timeout=45):
+              return s.get(url,timeout=timeout,allow_redirects=True,verify=verify)
+
+          # TJRS: the public site embeds an official Swagger UI at adm-inter.
+          tj={"start_url":"https://adm-inter.tjrs.jus.br/public/api/transparencia/swagger-ui/index.html","probes":[],"documents":[],"errors":[]}
+          for u in [
+              tj["start_url"],
+              "https://adm-inter.tjrs.jus.br/public/api/transparencia/swagger-ui/swagger-config",
+              "https://adm-inter.tjrs.jus.br/public/api/transparencia/v3/api-docs",
+              "https://adm-inter.tjrs.jus.br/public/api/transparencia/v3/api-docs/swagger-config",
+              "https://adm-inter.tjrs.jus.br/public/api/transparencia/swagger-resources",
+          ]:
+              try:
+                  r=fetch(u,verify=True,timeout=60)
+                  tj["probes"].append({"url":u,"status":r.status_code,"content_type":r.headers.get("content-type"),"final_url":r.url,"bytes":len(r.content)})
+                  if r.status_code==200 and len(r.content)<10_000_000:
+                      txt=r.text
+                      low=txt.lower()
+                      if any(k in low for k in keywords):
+                          hits=[]
+                          for m in re.finditer("|".join(map(re.escape,keywords)),txt,re.I):
+                              hits.append(txt[max(0,m.start()-300):min(len(txt),m.end()+700)])
+                              if len(hits)>=80: break
+                          tj["documents"].append({"url":u,"hits":hits})
+                      safe_name=re.sub(r'[^A-Za-z0-9]+','_',urllib.parse.urlparse(u).path).strip('_')[:100] or "root"
+                      (OUT/f"tjrs_{safe_name}.txt").write_text(txt,encoding="utf-8",errors="ignore")
+              except Exception as e:
+                  tj["errors"].append({"url":u,"error":repr(e)})
+          results["TJRS"]=tj
+
+          # DPERS: current portal has a certificate chain that some runners do not validate;
+          # verify=False is used only to inspect the public official portal, and this is recorded.
+          dp={"start_url":"https://transparencia.defensoria.rs.def.br/","candidate_links":[],"script_candidates":[],"probes":[],"errors":[],"tls_note":"Public official portal fetched with TLS verification disabled because runner could not validate certificate chain."}
+          try:
+              r=fetch(dp["start_url"],verify=False,timeout=60)
+              dp["http_status"]=r.status_code; dp["final_url"]=r.url
+              r.raise_for_status()
+              html=r.text
+              (OUT/"dpers_start.html").write_text(html,encoding="utf-8",errors="ignore")
+              attrs=re.findall(r'''(?:href|src)\s*=\s*["']([^"'#]+)''',html,re.I)
+              links=[]
+              for raw in attrs:
+                  u=urllib.parse.urljoin(r.url,raw)
+                  if u.startswith(("http://","https://")) and any(k in u.lower() for k in keywords):
+                      links.append(u)
+              dp["candidate_links"]=sorted(set(links))[:500]
+              scripts=[]
+              for raw in re.findall(r'''<script[^>]+src\s*=\s*["']([^"']+)''',html,re.I):
+                  u=urllib.parse.urljoin(r.url,raw)
+                  if "defensoria.rs.def.br" in urllib.parse.urlparse(u).netloc:
+                      scripts.append(u)
+              for u in sorted(set(scripts))[:80]:
+                  try:
+                      rr=fetch(u,verify=False,timeout=45)
+                      if rr.status_code!=200 or len(rr.content)>5_000_000: continue
+                      txt=rr.text
+                      hits=[]
+                      for m in re.finditer("|".join(map(re.escape,keywords)),txt,re.I):
+                          hits.append(txt[max(0,m.start()-300):min(len(txt),m.end()+700)])
+                          if len(hits)>=50: break
+                      if hits: dp["script_candidates"].append({"url":u,"hits":hits})
+                  except Exception as e:
+                      dp["errors"].append({"url":u,"error":repr(e)})
+              base=f"{urllib.parse.urlparse(r.url).scheme}://{urllib.parse.urlparse(r.url).netloc}"
+              for suffix in ["/wp-json/","/api/","/dados-abertos/","/dados_abertos/","/gestao-de-pessoas","/remuneracao","/folha-de-pagamento"]:
+                  u=urllib.parse.urljoin(base,suffix)
+                  try:
+                      rr=fetch(u,verify=False,timeout=30)
+                      dp["probes"].append({"url":u,"status":rr.status_code,"content_type":rr.headers.get("content-type"),"final_url":rr.url,"bytes":len(rr.content)})
+                  except Exception as e:
+                      dp["probes"].append({"url":u,"error":repr(e)})
+          except Exception as e:
+              dp["errors"].append({"url":dp["start_url"],"error":repr(e)})
+          results["DPERS"]=dp
+
+          meta={
+            "purpose":"Identify machine-readable official payroll/remuneration routes for TJRS and DPERS before any territorial aggregation.",
+            "privacy":"No person-level payroll rows are exported. Output contains only URLs, endpoint metadata and technical snippets.",
+            "territorial_requirement":"Do not quantify São Borja unless an official field safely identifies comarca, lotação, unidade de exercício or equivalent.",
+            "results":results
+          }
+          (OUT/"discovery.json").write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding="utf-8")
+          print(json.dumps(meta,ensure_ascii=False,indent=2)[:120000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: state-other-powers-payroll-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/state_other_powers_payroll_discovery/

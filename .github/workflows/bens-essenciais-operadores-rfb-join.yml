@@ -1,0 +1,211 @@
+name: bens-essenciais-operadores-rfb-join
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/bens-essenciais-operadores-rfb-join.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  join:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    env:
+      COMPETENCE: '2026-08'
+      RFB_FILE_BASE: 'https://arquivos.receitafederal.gov.br/public.php/dav/files/gn672Ad4CF8N6TK/Dados/Cadastros/CNPJ'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install project
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Prepare target CNPJs and scanner
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/operator_join .data/tmp/rfb_targeted
+          cat > .data/tmp/rfb_targeted/operators.json <<'JSON'
+          [
+            {"source_row":2,"operador_fantasia":"Rede Vivo Supermercados","cnpj_unidade":"91292987000706"},
+            {"source_row":3,"operador_fantasia":"Peruzzo Supermercados XXIV","cnpj_unidade":"87397865003137"},
+            {"source_row":4,"operador_fantasia":"Peruzzo Supermercados XXIII","cnpj_unidade":"87397865003218"},
+            {"source_row":5,"operador_fantasia":"Supermercado Baklizi","cnpj_unidade":"00610350001737"},
+            {"source_row":6,"operador_fantasia":"Supermercado Nicoline","cnpj_unidade":"89835672003650"},
+            {"source_row":7,"operador_fantasia":"Mercado Gigante","cnpj_unidade":"89898753000170"},
+            {"source_row":8,"operador_fantasia":"Supermercado e Padaria Floresta","cnpj_unidade":"44399290000163"},
+            {"source_row":9,"operador_fantasia":"Mercado da Casa","cnpj_unidade":"01865820000109"},
+            {"source_row":10,"operador_fantasia":"Mercado Super Um","cnpj_unidade":"22653587000170"},
+            {"source_row":11,"operador_fantasia":"Mercado Super Bah","cnpj_unidade":"39501353000100"},
+            {"source_row":12,"operador_fantasia":"Lamana Mercado","cnpj_unidade":"89225544000246"},
+            {"source_row":13,"operador_fantasia":"Mercado Precioso","cnpj_unidade":"55330974000125"},
+            {"source_row":14,"operador_fantasia":"Mercado do Canto","cnpj_unidade":"01609364000136"},
+            {"source_row":15,"operador_fantasia":"Minimercado Ponto Bom","cnpj_unidade":"07254901000159"},
+            {"source_row":16,"operador_fantasia":"Mercado e Acougue Torres","cnpj_unidade":"64094757000174"},
+            {"source_row":17,"operador_fantasia":"Padaria Santa Rita","cnpj_unidade":"94404316000192"},
+            {"source_row":18,"operador_fantasia":"Mercado Santa Lúcia","cnpj_unidade":"07934366000187"},
+            {"source_row":19,"operador_fantasia":"Mercado Pe de Pano","cnpj_unidade":"32072452000175"},
+            {"source_row":20,"operador_fantasia":"Mercado Alaska","cnpj_unidade":"22963460000158"},
+            {"source_row":21,"operador_fantasia":"Nosso Mercado","cnpj_unidade":"04930281000132"},
+            {"source_row":22,"operador_fantasia":"Mercado Uniao","cnpj_unidade":"01578296000195"},
+            {"source_row":23,"operador_fantasia":"Mercado e Sorveteria Tribom","cnpj_unidade":"39365516000175"},
+            {"source_row":24,"operador_fantasia":"Compre Bem Mercado","cnpj_unidade":"53823094000165"},
+            {"source_row":25,"operador_fantasia":"Mercado do Boeiro","cnpj_unidade":"94430741000156"},
+            {"source_row":26,"operador_fantasia":"Mercado Guisolfi","cnpj_unidade":"43984027000179"},
+            {"source_row":27,"operador_fantasia":"Minimercado D'Gringa","cnpj_unidade":"51634027000177"},
+            {"source_row":28,"operador_fantasia":"Mercado Jl","cnpj_unidade":"17991032000107"},
+            {"source_row":29,"operador_fantasia":"Minimercado da Vila","cnpj_unidade":"47632242000161"},
+            {"source_row":30,"operador_fantasia":"Minimercado J.a","cnpj_unidade":"31778318000121"},
+            {"source_row":31,"operador_fantasia":"Mercado e Padaria Sm","cnpj_unidade":"30922573000133"},
+            {"source_row":32,"operador_fantasia":"Mini-Mercado Martins","cnpj_unidade":"21215999000166"},
+            {"source_row":34,"operador_fantasia":"Padaria Kitute","cnpj_unidade":"87580916000146"},
+            {"source_row":35,"operador_fantasia":"Padaria Donald","cnpj_unidade":"01584229000183"},
+            {"source_row":36,"operador_fantasia":"Padaria e Cafeteria Tres Irmaos","cnpj_unidade":"57090051000179"},
+            {"source_row":37,"operador_fantasia":"Padaria Nova","cnpj_unidade":"02585088000186"},
+            {"source_row":38,"operador_fantasia":"Padaria e Confeitaria Glacial","cnpj_unidade":"27063157000112"},
+            {"source_row":39,"operador_fantasia":"Padaria Vitória 2","cnpj_unidade":"66270792000122"},
+            {"source_row":40,"operador_fantasia":"Padaria Vitória","cnpj_unidade":"05196339000129"},
+            {"source_row":42,"operador_fantasia":"Padaria E Confeitaria Tia Lori","cnpj_unidade":"05579483000144"},
+            {"source_row":43,"operador_fantasia":"Casa da Carne Real","cnpj_unidade":"00958639000184"},
+            {"source_row":44,"operador_fantasia":"Açougue Dom Vitorio","cnpj_unidade":"32183512000127"},
+            {"source_row":45,"operador_fantasia":"Acougue Popular","cnpj_unidade":"39575019000100"},
+            {"source_row":46,"operador_fantasia":"Açougue e Minimercado Côza Gaúcha","cnpj_unidade":"13699717000115"},
+            {"source_row":47,"operador_fantasia":"Acougue e Mini Mercado Prenda","cnpj_unidade":"42809219000186"},
+            {"source_row":48,"operador_fantasia":"Açougue Morgental (Alimentos)","cnpj_unidade":"63154624000183"},
+            {"source_row":49,"operador_fantasia":"Mercado do Peixe","cnpj_unidade":"07445396000120"},
+            {"source_row":50,"operador_fantasia":"Armazém do peixe","cnpj_unidade":"49134931000171"},
+            {"source_row":51,"operador_fantasia":"Fruteira Serrana","cnpj_unidade":"08358482000168"},
+            {"source_row":52,"operador_fantasia":"Fl Hort Agro","cnpj_unidade":"36211275000111"},
+            {"source_row":53,"operador_fantasia":"Stok Center","cnpj_unidade":"92016757008842"},
+            {"source_row":54,"operador_fantasia":"Rancho Atacadista - Filial 25 (Rede Vivo Super Mercados)","cnpj_unidade":"91292987002598"},
+            {"source_row":55,"operador_fantasia":"Mercado CDV","cnpj_unidade":"42597504000180"}
+          ]
+          JSON
+
+          cat > .data/tmp/rfb_targeted/scan_one.py <<'PY'
+          import json
+          import sys
+          import zipfile
+          from pathlib import Path
+          import pandas as pd
+          from sbmi.cnpj_territorial_control import ESTABLISHMENT_COLUMNS, _full_cnpj
+          operators = json.loads(Path('.data/tmp/rfb_targeted/operators.json').read_text(encoding='utf-8'))
+          targets = {x['cnpj_unidade'] for x in operators}
+          roots = {x[:8] for x in targets}
+          zip_path = Path(sys.argv[1])
+          exact_out = Path('artifacts/operator_join/_exact_parts.csv')
+          matrix_out = Path('artifacts/operator_join/_matrix_parts.csv')
+          def append(frame, path):
+              if not frame.empty:
+                  frame.to_csv(path, mode='a', index=False, header=not path.exists())
+          with zipfile.ZipFile(zip_path) as zf:
+              for member in [m for m in zf.namelist() if not m.endswith('/')]:
+                  with zf.open(member) as fh:
+                      for chunk in pd.read_csv(fh, sep=';', header=None, names=ESTABLISHMENT_COLUMNS, dtype='string', encoding='latin1', keep_default_na=False, na_filter=False, chunksize=250000, low_memory=False):
+                          sub = chunk.loc[chunk['cnpj_basico'].isin(roots)].copy()
+                          if sub.empty: continue
+                          sub['cnpj'] = _full_cnpj(sub)
+                          append(sub[sub['cnpj'].isin(targets)].copy(), exact_out)
+                          append(sub[sub['identificador_matriz_filial'] == '1'].copy(), matrix_out)
+          PY
+
+      - name: Download municipalities and scan official establishment files sequentially
+        shell: bash
+        run: |
+          set -euo pipefail
+          raw='.data/tmp/rfb_targeted'
+          : > artifacts/operator_join/RFB_SHA256SUMS.txt
+          : > artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
+          download_rfb() {
+            local file="$1"; local out="$2"
+            local url="${RFB_FILE_BASE}/${COMPETENCE}/${file}"
+            echo "${file}|${url}" >> artifacts/operator_join/RFB_DOWNLOAD_SOURCE.txt
+            curl --fail --location --retry 8 --retry-all-errors --retry-delay 10 --retry-max-time 900 --connect-timeout 45 --max-time 1800 --output "$out" "$url"
+            test -s "$out"
+            unzip -tq "$out" >/dev/null
+            sha256sum "$out" >> artifacts/operator_join/RFB_SHA256SUMS.txt
+          }
+          download_rfb 'Municipios.zip' "$raw/Municipios.zip"
+          for i in {0..9}; do
+            file="Estabelecimentos${i}.zip"; out="$raw/$file"
+            echo "Downloading and scanning $file from official RFB Nextcloud public DAV file route"
+            download_rfb "$file" "$out"
+            python "$raw/scan_one.py" "$out"
+            rm -f "$out"
+            df -h .
+          done
+
+      - name: Build exact official RFB operator matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import unicodedata
+          from pathlib import Path
+          import pandas as pd
+          from sbmi.cnpj_territorial_control import _read_municipalities
+          base = Path('artifacts/operator_join')
+          operators = pd.DataFrame(json.loads(Path('.data/tmp/rfb_targeted/operators.json').read_text(encoding='utf-8')))
+          targets=set(operators.cnpj_unidade); roots={x[:8] for x in targets}
+          if len(operators)!=52 or operators.cnpj_unidade.nunique()!=52: raise SystemExit('Expected exactly 52 unique documentary-ready CNPJs')
+          exact_path=base/'_exact_parts.csv'; matrix_path=base/'_matrix_parts.csv'
+          exact=pd.read_csv(exact_path,dtype=str,keep_default_na=False) if exact_path.exists() else pd.DataFrame()
+          matrices=pd.read_csv(matrix_path,dtype=str,keep_default_na=False) if matrix_path.exists() else pd.DataFrame()
+          if not exact.empty: exact=exact.drop_duplicates(subset=['cnpj'])
+          if not matrices.empty: matrices=matrices.drop_duplicates(subset=['cnpj'])
+          counts=matrices.groupby('cnpj_basico').size() if not matrices.empty else pd.Series(dtype=int)
+          if (counts>1).any(): raise SystemExit(f'More than one official matrix establishment found: {counts[counts>1].to_dict()}')
+          municipalities=_read_municipalities(Path('.data/tmp/rfb_targeted/Municipios.zip'))
+          def norm(value):
+              return ''.join(c for c in unicodedata.normalize('NFKD', str(value)) if not unicodedata.combining(c)).upper().strip()
+          sao_borja=municipalities.loc[municipalities['municipio_nome'].map(norm).eq('SAO BORJA')]
+          if len(sao_borja)!=1: raise SystemExit(f'Expected one official TOM row for SAO BORJA, found {len(sao_borja)}')
+          sao_borja_tom=str(sao_borja.iloc[0]['municipio'])
+          mun_map=municipalities.set_index('municipio')['municipio_nome'].to_dict()
+          exact_cols=['cnpj','cnpj_basico','cnpj_ordem','cnpj_dv','identificador_matriz_filial','nome_fantasia','situacao_cadastral','data_situacao_cadastral','cnae_fiscal_principal','uf','municipio','bairro','cep']
+          matrix_cols=['cnpj_basico','cnpj','situacao_cadastral','uf','municipio']
+          ex=exact[exact_cols].copy() if not exact.empty else pd.DataFrame(columns=exact_cols)
+          mx=matrices[matrix_cols].copy() if not matrices.empty else pd.DataFrame(columns=matrix_cols)
+          mx=mx.rename(columns={'cnpj':'cnpj_matriz_rfb','situacao_cadastral':'situacao_matriz_rfb','uf':'uf_matriz_rfb','municipio':'municipio_matriz_tom_rfb'})
+          joined=operators.merge(ex,how='left',left_on='cnpj_unidade',right_on='cnpj',validate='one_to_one').merge(mx,how='left',on='cnpj_basico',validate='many_to_one')
+          joined['municipio_estabelecimento_rfb']=joined['municipio'].map(mun_map); joined['municipio_matriz_rfb']=joined['municipio_matriz_tom_rfb'].map(mun_map)
+          joined['matriz_filial_oficial_rfb']=joined['identificador_matriz_filial'].map({'1':'MATRIZ','2':'FILIAL'}).fillna('NAO_LOCALIZADO')
+          joined['status_join_rfb']='NAO_LOCALIZADO_RFB_2026_08'; joined.loc[joined['cnpj'].fillna('')!='','status_join_rfb']='MATCH_EXATO_RFB'
+          joined['controle_territorial_rfb']='INDETERMINADO'
+          found=joined.status_join_rfb.eq('MATCH_EXATO_RFB'); m=joined.identificador_matriz_filial.eq('1'); f=joined.identificador_matriz_filial.eq('2')
+          establishment_known=joined.municipio.fillna('').ne(''); matrix_known=joined.municipio_matriz_tom_rfb.fillna('').ne('')
+          joined.loc[found&m&establishment_known&joined.municipio.eq(sao_borja_tom),'controle_territorial_rfb']='MATRIZ_LOCAL'
+          joined.loc[found&m&establishment_known&~joined.municipio.eq(sao_borja_tom),'controle_territorial_rfb']='MATRIZ_FORA_DE_SAO_BORJA'
+          joined.loc[found&f&matrix_known&joined.municipio_matriz_tom_rfb.eq(sao_borja_tom),'controle_territorial_rfb']='FILIAL_DE_MATRIZ_LOCAL'
+          joined.loc[found&f&matrix_known&~joined.municipio_matriz_tom_rfb.eq(sao_borja_tom),'controle_territorial_rfb']='FILIAL_DE_MATRIZ_EXTERNA'
+          joined.loc[found&f&~matrix_known,'controle_territorial_rfb']='FILIAL_MATRIZ_NAO_LOCALIZADA'
+          joined['competencia_rfb']='2026-08'; joined['fonte_rfb']='Receita Federal do Brasil — Dados Abertos CNPJ — Estabelecimentos e Municípios — compartilhamento público oficial Nextcloud/DAV'; joined['natureza_dado_rfb']='observado'
+          cols=['source_row','operador_fantasia','cnpj_unidade','status_join_rfb','situacao_cadastral','data_situacao_cadastral','cnae_fiscal_principal','matriz_filial_oficial_rfb','cnpj_matriz_rfb','situacao_matriz_rfb','municipio_estabelecimento_rfb','uf','municipio_matriz_rfb','uf_matriz_rfb','controle_territorial_rfb','nome_fantasia','bairro','cep','competencia_rfb','fonte_rfb','natureza_dado_rfb']
+          joined[cols].to_csv(base/'operadores_bens_essenciais_rfb_join_v004.csv',index=False)
+          joined[joined.status_join_rfb.ne('MATCH_EXATO_RFB')][cols].to_csv(base/'operadores_bens_essenciais_rfb_unmatched_v004.csv',index=False)
+          summary={'competence':'2026-08','documentary_ready_cnpjs':52,'exact_rfb_matches_national_establishments':int(joined.status_join_rfb.eq('MATCH_EXATO_RFB').sum()),'not_located_rfb_2026_08':int(joined.status_join_rfb.ne('MATCH_EXATO_RFB').sum()),'matrix_records_found_for_target_roots':int(matrices.cnpj_basico.nunique()) if not matrices.empty else 0,'target_roots':len(roots),'sao_borja_tom_from_official_municipios':sao_borja_tom,'control_status_counts':{str(k):int(v) for k,v in joined.controle_territorial_rfb.value_counts(dropna=False).items()},'cadastral_status_counts':{str(k):int(v) for k,v in joined.situacao_cadastral.value_counts(dropna=False).items()},'method':'Exact full-CNPJ scan of official RFB Estabelecimentos 2026-08. Matrix/branch uses only official identificador_matriz_filial; matrix municipality comes from the official matrix establishment row for the same root; São Borja TOM code is resolved from official Municipios.zip. No /0001, name, address or other heuristic is used to determine matrix status.','source_scope':'Receita Federal do Brasil — Dados Abertos CNPJ — official Nextcloud/DAV public file route; Estabelecimentos0..9.zip + Municipios.zip, competência 2026-08','limitations':['This 52-CNPJ subset is a documentary operator subset, not an exhaustive census of all food retail establishments.','Control status is not market share, sales participation, profit remittance, retention or leakage.','Two current inventory rows remain without documentary CNPJ and are outside this exact join.']}
+          (base/'operadores_bens_essenciais_rfb_join_summary_v004.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2),encoding='utf-8')
+          print(json.dumps(summary,ensure_ascii=False,indent=2))
+          exact.to_csv(base/'rfb_target_exact_rows_v004.csv',index=False); matrices.to_csv(base/'rfb_target_matrix_rows_v004.csv',index=False)
+          PY
+          rm -f artifacts/operator_join/_exact_parts.csv artifacts/operator_join/_matrix_parts.csv
+
+      - name: Upload operator join outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bens-essenciais-operadores-rfb-join-v004
+          path: artifacts/operator_join/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,112 @@
+name: rs-powerbi-open-data-network-discovery
+
+on:
+  push:
+    branches:
+      - feature/cnpj-territorial-control-v1
+    paths:
+      - ".github/workflows/rs-powerbi-open-data-network-discovery.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/rs-powerbi-open-data-network-discovery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --quiet playwright
+          python -m playwright install --with-deps chromium >/dev/null
+
+      - name: Capture public PowerBI open-data network responses without tokens
+        run: |
+          cat > /tmp/capture.py <<'PY'
+          import asyncio,json,re
+          from pathlib import Path
+          from playwright.async_api import async_playwright
+
+          OUT=Path("artifacts/rs_powerbi_network"); OUT.mkdir(parents=True,exist_ok=True)
+          TARGET="https://www.transparencia.rs.gov.br/dados-abertos/dados-transparencia-rs/dados/"
+
+          def clean_text(s):
+              # Remove obvious bearer/embed token-like values if they ever appear in a body.
+              s=re.sub(r'Bearer\s+[A-Za-z0-9._~+/=-]+','Bearer <REDACTED>',s,flags=re.I)
+              s=re.sub(r'("?(?:accessToken|token|embedToken)"?\s*[:=]\s*")[^"]+(")',r'\1<REDACTED>\2',s,flags=re.I)
+              return s
+
+          async def main():
+              records=[]
+              texts=[]
+              async with async_playwright() as p:
+                  browser=await p.chromium.launch(headless=True)
+                  page=await browser.new_page(viewport={"width":1600,"height":1000})
+
+                  async def handle_response(resp):
+                      u=resp.url
+                      if not any(k in u.lower() for k in ("querydata","modelsandexploration","metadata","explore","download","export")):
+                          return
+                      rec={"url":u.split("?")[0],"status":resp.status,"content_type":resp.headers.get("content-type")}
+                      try:
+                          body=await resp.text()
+                          body=clean_text(body)
+                          rec["body_head"]=body[:120000]
+                          rec["body_len"]=len(body)
+                      except Exception as exc:
+                          rec["body_error"]=repr(exc)
+                      records.append(rec)
+
+                  page.on("response",handle_response)
+                  await page.goto(TARGET,wait_until="domcontentloaded",timeout=120000)
+                  await page.wait_for_timeout(30000)
+
+                  for fr in page.frames:
+                      try:
+                          txt=await fr.locator("body").inner_text(timeout=5000)
+                          if txt:
+                              texts.append({"url":fr.url.split("?")[0],"text":clean_text(txt[:100000])})
+                      except Exception:
+                          pass
+                  await browser.close()
+
+              # Keep only useful response bodies, prioritizing ones that mention personnel/files.
+              useful=[]
+              for r in records:
+                  b=(r.get("body_head") or "")
+                  score=sum(1 for k in ("Pessoal","pessoal","Executivo","arquivo","Arquivo",".csv",".CSV","download","Download") if k in b)
+                  r["relevance_score"]=score
+                  useful.append(r)
+              useful.sort(key=lambda x:(-x["relevance_score"],x.get("url","")))
+              out={
+                  "target":TARGET,
+                  "response_count":len(records),
+                  "responses":useful[:120],
+                  "frame_texts":texts,
+                  "privacy":"No headers/cookies/access tokens are persisted. Bodies are token-redacted and truncated.",
+              }
+              (OUT/"network.json").write_text(json.dumps(out,ensure_ascii=False,indent=2),encoding="utf-8")
+              print(json.dumps({"response_count":len(records),"top":[{"url":r["url"],"score":r["relevance_score"],"len":r.get("body_len")} for r in useful[:20]]},ensure_ascii=False,indent=2))
+              for t in texts:
+                  if any(k in t["text"].lower() for k in ("pessoal","arquivo","csv")):
+                      print("--- FRAME",t["url"],"---")
+                      print(t["text"][:30000])
+          asyncio.run(main())
+          PY
+          python /tmp/capture.py
+
+      - name: Upload network discovery
+        uses: actions/upload-artifact@v4
+        with:
+          name: rs-powerbi-open-data-network-discovery
+          retention-days: 30
+          if-no-files-found: error
+          path: artifacts/rs_powerbi_network/

@@ -73,6 +73,18 @@ A v029 não foi reaberta nem convertida em v030 por esta revisão editorial.
 - Caderno-Base v028: read-only.
 - Síntese Executiva v003: preservada como produto do ciclo anterior à consolidação conjuntural final.
 
+## PDFs de distribuição
+
+| Produto | PDF Drive | Páginas | QA |
+|---|---|---:|---|
+| Caderno Geral v008 | `1WBJB6zaY97oPZSo4TCZktPM2RRK-UM04` | 114 | PASS |
+| Bens Essenciais v006 | `1zBGv6B5P9CGisjLyUwHNk1EqjEPGQr8E` | 42 | PASS |
+| Saúde/Higiene v006 | `1MFPWpiUaC3tlm1Qa5DqeFx6KegySxcIo` | 39 | PASS |
+| Bens Não Essenciais v006 | `1KkTMDDnEL_6GKjcqPeSPOR3WITjh6-uA` | 43 | PASS |
+| Alimentação/Serviços v006 | `1G9vnQqn2UEghqzArWaHpVvVhCR9dkEZf` | 44 | PASS |
+
+O QA de distribuição não identificou páginas em branco ou falhas visuais bloqueadoras; as seções de metodologia e de integração das séries recentes foram inspecionadas por renderização amostral.
+
 ## Governança
 
 PR #41 deve permanecer **aberto, draft e sem merge**.
@@ -80,4 +92,4 @@ PR #41 deve permanecer **aberto, draft e sem merge**.
 Checkpoint desta consolidação:
 `docs/caderno_base/checkpoint_20260927_consolidacao_publicacao_cadernos_v001.md`.
 
-A próxima alteração de conteúdo deve ocorrer apenas por evidência material nova, correção documentada ou abertura explícita de novo ciclo analítico.
+Estado da frente: **CONCLUÍDA / PASS**. Os cinco cadernos v008/v006 são a camada corrente de consumo/publicação; a v029 continua sendo o baseline técnico congelado. Nova alteração substantiva deve ocorrer apenas por evidência material nova, correção documentada ou abertura explícita de novo ciclo analítico.

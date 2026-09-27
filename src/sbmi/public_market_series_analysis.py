@@ -323,6 +323,59 @@ def build_taxonomy_gap_prefix(unmapped: pd.DataFrame) -> tuple[pd.DataFrame, dic
     }
 
 
+def build_taxonomy_gap_ncm29(
+    unmapped: pd.DataFrame,
+) -> tuple[pd.DataFrame, dict[str, object]]:
+    """Prioriza o gap do capítulo 29 por valor, sem inferir classificação setorial."""
+    frame = unmapped.copy()
+    frame["ncm8"] = frame["ncm8"].astype("string").str.zfill(8)
+    composition = frame.loc[
+        frame["series"].eq("radar_composicao_mercado") & frame["ncm8"].str.startswith("29")
+    ].copy()
+    composition["valor_publicado"] = pd.to_numeric(
+        composition["valor_publicado"], errors="raise"
+    )
+    composition = composition.sort_values(
+        ["valor_publicado", "ncm8"], ascending=[False, True]
+    ).reset_index(drop=True)
+
+    total_prefix29 = float(composition["valor_publicado"].sum())
+    total_composition_gap = float(
+        frame.loc[frame["series"].eq("radar_composicao_mercado"), "valor_publicado"].sum()
+    )
+    composition["pct_valor_prefixo29"] = (
+        composition["valor_publicado"] / total_prefix29 * 100.0
+    )
+    composition["pct_valor_gap_composicao"] = (
+        composition["valor_publicado"] / total_composition_gap * 100.0
+    )
+    composition["pct_acumulado_prefixo29"] = composition[
+        "pct_valor_prefixo29"
+    ].cumsum()
+    composition["ordem_prioridade_valor"] = composition.index + 1
+
+    def count_to_threshold(threshold: float) -> int:
+        reached = composition.index[
+            composition["pct_acumulado_prefixo29"].ge(threshold)
+        ]
+        return int(reached[0] + 1) if len(reached) else int(len(composition))
+
+    return composition, {
+        "ncm8": int(composition["ncm8"].nunique()),
+        "rows": int(composition["rows"].sum()),
+        "value": total_prefix29,
+        "pct_composition_unmapped_value": (
+            total_prefix29 / total_composition_gap * 100.0 if total_composition_gap else 0.0
+        ),
+        "ncm8_to_50pct_value": count_to_threshold(50.0),
+        "ncm8_to_80pct_value": count_to_threshold(80.0),
+        "ncm8_to_90pct_value": count_to_threshold(90.0),
+        "ncm8_to_95pct_value": count_to_threshold(95.0),
+        "ncm8_to_99pct_value": count_to_threshold(99.0),
+        "classification_rule": "priorização monetária; nenhuma imputação de setor/grupo",
+    }
+
+
 def _validation_row(check: str, value: object, passed: bool, note: str) -> dict[str, object]:
     return {"check": check, "value": value, "status": "PASS" if passed else "FAIL", "note": note}
 
@@ -363,6 +416,7 @@ def build_public_market_series_analysis(
     cesta_yoy, cesta_dist, cesta_h1, cesta_meta = build_cesta_yoy(cesta)
     radar_panel, radar_meta = build_radar_sector_panel(radar_group, radar_coverage)
     gap_prefix, gap_meta = build_taxonomy_gap_prefix(unmapped)
+    gap_ncm29, gap_ncm29_meta = build_taxonomy_gap_ncm29(unmapped)
 
     outputs = {
         "dfe_sao_borja_painel_mensal_2024_2026.csv": dfe_panel,
@@ -372,6 +426,7 @@ def build_public_market_series_analysis(
         "cesta_fronteira_oeste_h1_2026_vs_2025.csv": cesta_h1,
         "radar_rs_benchmark_setor_status_mensal.csv": radar_panel,
         "radar_taxonomia_gap_prefixo2.csv": gap_prefix,
+        "radar_taxonomia_gap_ncm29_priorizacao.csv": gap_ncm29,
     }
     for name, frame in outputs.items():
         frame.to_csv(target / name, index=False, encoding="utf-8", float_format="%.6f")
@@ -433,6 +488,18 @@ def build_public_market_series_analysis(
             gap_meta["composition_prefix29_pct_unmapped_value"] > 99.0,
             "Concentração observada da lacuna monetária da Composição no prefixo NCM 29.",
         ),
+        _validation_row(
+            "gap_ncm29_unique_ncm8",
+            gap_ncm29_meta["ncm8"],
+            gap_ncm29_meta["ncm8"] == 1132,
+            "Universo auditado de NCM8 do prefixo 29 ausentes da taxonomia canônica.",
+        ),
+        _validation_row(
+            "gap_ncm29_value",
+            round(gap_ncm29_meta["value"], 2),
+            round(gap_ncm29_meta["value"], 2) == 5705019857.0,
+            "Valor publicado não suprimido auditado do gap NCM 29 na Composição.",
+        ),
     ]
     validation = pd.DataFrame(validations)
     validation.to_csv(target / "validation.csv", index=False, encoding="utf-8")
@@ -447,6 +514,7 @@ def build_public_market_series_analysis(
         "cesta_h1": cesta_meta,
         "radar": radar_meta,
         "taxonomy_gap": gap_meta,
+        "taxonomy_gap_ncm29": gap_ncm29_meta,
         "governance": {
             "dfe_models_not_summed_for_market_share": True,
             "cesta_distribution_not_inflation_index": True,
@@ -467,6 +535,7 @@ def build_public_market_series_analysis(
             ["dfe_rule", "modelos separados", "governance"],
             ["cesta_rule", "variações relativas por produto; sem índice ponderado", "governance"],
             ["radar_rule", "benchmark estadual publicado não suprimido", "governance"],
+            ["taxonomy_gap_ncm29_rule", "priorizar por valor; não imputar setor/grupo", "governance"],
         ],
         columns=["field", "value", "class"],
     )

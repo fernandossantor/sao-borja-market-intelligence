@@ -4,6 +4,7 @@ import pandas as pd
 
 from sbmi.public_market_series_analysis import (
     build_dfe_monthly_panel,
+    build_taxonomy_gap_ncm29,
     build_taxonomy_gap_prefix,
 )
 
@@ -53,3 +54,24 @@ def test_taxonomy_gap_prefix_does_not_impute_groups() -> None:
     row29 = summary.loc[summary["prefixo2"].eq("29")].iloc[0]
     assert row29["ncm8_unicos"] == 2
     assert round(meta["composition_prefix29_pct_unmapped_value"], 6) == round(300 / 310 * 100, 6)
+
+def test_taxonomy_gap_ncm29_prioritizes_value_without_classification() -> None:
+    frame = pd.DataFrame(
+        {
+            "series": ["radar_composicao_mercado"] * 4,
+            "ncm8": ["29000001", "29000002", "29000003", "61000001"],
+            "first_month": ["2024-07"] * 4,
+            "last_month": ["2026-08"] * 4,
+            "rows": [10, 20, 30, 5],
+            "rows_corte_sigilo": [0, 1, 2, 0],
+            "metrica_valor": ["vlr_nominal_publicado_nao_sigilo"] * 4,
+            "valor_publicado": [600.0, 300.0, 100.0, 500.0],
+        }
+    )
+    detail, meta = build_taxonomy_gap_ncm29(frame)
+    assert detail["ncm8"].tolist() == ["29000001", "29000002", "29000003"]
+    assert round(detail.iloc[0]["pct_valor_prefixo29"], 6) == 60.0
+    assert round(detail.iloc[1]["pct_acumulado_prefixo29"], 6) == 90.0
+    assert meta["ncm8"] == 3
+    assert meta["ncm8_to_80pct_value"] == 2
+    assert "setor" not in detail.columns

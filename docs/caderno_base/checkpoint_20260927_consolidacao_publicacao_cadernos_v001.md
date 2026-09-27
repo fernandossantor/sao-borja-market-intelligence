@@ -113,6 +113,31 @@ PR #41 permanece:
 
 Nenhum merge, retarget ou fechamento foi autorizado.
 
-## Próximo passo
+## QA de distribuição concluído
 
-A etapa seguinte desta mesma frente é apenas de entrega/QA final: registrar os cinco cadernos como camada corrente de publicação, atualizar manifesto/README e controles de rastreabilidade, e exportar versões de distribuição. Qualquer nova investigação de mercado deve ser tratada como ciclo analítico separado.
+Os cinco Google Docs consolidados foram exportados para PDF e submetidos a QA estrutural/visual:
+
+| Produto | PDF Drive | Páginas | Resultado |
+|---|---|---:|---|
+| Caderno Geral v008 | `1WBJB6zaY97oPZSo4TCZktPM2RRK-UM04` | 114 | PASS |
+| Bens Essenciais v006 | `1zBGv6B5P9CGisjLyUwHNk1EqjEPGQr8E` | 42 | PASS |
+| Saúde/Higiene v006 | `1MFPWpiUaC3tlm1Qa5DqeFx6KegySxcIo` | 39 | PASS |
+| Bens Não Essenciais v006 | `1KkTMDDnEL_6GKjcqPeSPOR3WITjh6-uA` | 43 | PASS |
+| Alimentação/Serviços v006 | `1G9vnQqn2UEghqzArWaHpVvVhCR9dkEZf` | 44 | PASS |
+
+Controles do QA:
+- arquivos abrem e não estão criptografados;
+- não foram detectadas páginas em branco;
+- não foram detectadas páginas com conteúdo textual residual incompatível com a paginação;
+- foram renderizadas e inspecionadas as seções novas de séries públicas e metodologia nos cinco produtos;
+- não foi identificado clipping, sobreposição ou falha visual bloqueadora nas páginas-alvo.
+
+A planilha técnica v029 foi atualizada nas abas `Resumo_v029`, `Rastreabilidade_v029`, `Entregaveis_v029`, `QA_argumentativo_v029`, `Auditoria_publicacao_v029` e `Fechamento_v029`, preservando a v029 como baseline congelado e registrando v008/v006 como camada corrente de publicação.
+
+## Decisão de fechamento desta frente
+
+A consolidação dos cinco cadernos para consumo/publicação está **CONCLUÍDA / PASS**.
+
+Não há pendência editorial, metodológica ou de exportação que impeça a distribuição dos cinco cadernos. Nova alteração substantiva deve decorrer de evidência material nova, correção documentada ou abertura explícita de novo ciclo analítico.
+
+A consolidação **não** reabre a v029, **não** cria v030 e **não** autoriza merge do PR #41.

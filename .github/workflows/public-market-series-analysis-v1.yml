@@ -10,7 +10,7 @@ permissions:
   actions: read
 
 env:
-  SOURCE_RUN_ID: "36279321664"
+  SOURCE_RUN_ID: "36326283761"
   SOURCE_ARTIFACT: "sbmi-public-market-series-curated-v1"
   EXECUTION_ID: "public-market-series-analysis-v001"
 

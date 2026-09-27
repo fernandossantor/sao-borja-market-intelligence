@@ -313,7 +313,16 @@ def build_taxonomy_gap_prefix(unmapped: pd.DataFrame) -> tuple[pd.DataFrame, dic
     summary["pct_valor_nao_classificado"] = summary["valor_publicado"] / totals * 100.0
     comp = summary.loc[summary["series"].eq("radar_composicao_mercado")]
     prefix29 = comp.loc[comp["prefixo2"].eq("29")]
+    prefix00 = comp.loc[comp["prefixo2"].eq("00")]
     return summary.sort_values(["series", "valor_publicado"], ascending=[True, False]), {
+        "composition_unmapped_ncm8": int(comp["ncm8_unicos"].sum()),
+        "composition_unmapped_rows": int(comp["rows"].sum()),
+        "composition_unmapped_value": float(comp["valor_publicado"].sum()),
+        "composition_prefix00_ncm8": int(prefix00["ncm8_unicos"].sum()),
+        "composition_prefix00_value": float(prefix00["valor_publicado"].sum()),
+        "composition_prefix00_pct_unmapped_value": float(
+            prefix00["pct_valor_nao_classificado"].sum()
+        ),
         "composition_prefix29_ncm8": int(prefix29["ncm8_unicos"].sum()),
         "composition_prefix29_rows": int(prefix29["rows"].sum()),
         "composition_prefix29_value": float(prefix29["valor_publicado"].sum()),
@@ -483,22 +492,30 @@ def build_public_market_series_analysis(
             "Benchmark por grupos deve cobrir mais de 99% do valor publicado não suprimido.",
         ),
         _validation_row(
-            "gap_prefix29_value_share_pct",
-            round(gap_meta["composition_prefix29_pct_unmapped_value"], 6),
-            gap_meta["composition_prefix29_pct_unmapped_value"] > 99.0,
-            "Concentração observada da lacuna monetária da Composição no prefixo NCM 29.",
+            "gap_composition_unmapped_ncm8",
+            gap_meta["composition_unmapped_ncm8"],
+            gap_meta["composition_unmapped_ncm8"] == 1074,
+            "Gap residual após correção da taxonomia completa do Radar.",
         ),
         _validation_row(
-            "gap_ncm29_unique_ncm8",
-            gap_ncm29_meta["ncm8"],
-            gap_ncm29_meta["ncm8"] == 1132,
-            "Universo auditado de NCM8 do prefixo 29 ausentes da taxonomia canônica.",
+            "gap_composition_unmapped_value",
+            round(gap_meta["composition_unmapped_value"], 2),
+            round(gap_meta["composition_unmapped_value"], 2) == 2074800.0,
+            "Valor publicado não suprimido residual fora da taxonomia corrigida.",
         ),
         _validation_row(
-            "gap_ncm29_value",
-            round(gap_ncm29_meta["value"], 2),
-            round(gap_ncm29_meta["value"], 2) == 5705019857.0,
-            "Valor publicado não suprimido auditado do gap NCM 29 na Composição.",
+            "gap_prefix00_value_share_pct",
+            round(gap_meta["composition_prefix00_pct_unmapped_value"], 6),
+            gap_meta["composition_prefix00_pct_unmapped_value"] > 98.0,
+            "O residual monetário é dominado por códigos prefixados 00, tratados como exceção de qualidade e não imputados.",
+        ),
+        _validation_row(
+            "gap_prefix29_eliminated",
+            gap_meta["composition_prefix29_ncm8"],
+            gap_meta["composition_prefix29_ncm8"] == 0
+            and gap_ncm29_meta["ncm8"] == 0
+            and round(gap_ncm29_meta["value"], 2) == 0.0,
+            "A lacuna artificial no NCM 29 deve desaparecer após completar o grupo de fronteira Químicos Orgânicos.",
         ),
     ]
     validation = pd.DataFrame(validations)

@@ -14,7 +14,7 @@ Baseline: Caderno-Base Territorial v029 + planilha técnica v029 + Registro Meto
 
 ## Resultado
 
-**PASS SUBSTANTIVO / PASS COM AJUSTES OBRIGATÓRIOS PARA PUBLICAÇÃO.**
+**PASS FINAL — DOCS PUBLICÁVEIS.**
 
 Não foi identificado erro crítico em:
 - números centrais;
@@ -135,10 +135,51 @@ Não é necessário reabrir a v029 nem executar pesquisa primária.
 
 O conjunto é **substantivamente coerente e fiel à base**. Não há erro crítico identificado.
 
-**A publicação deve aguardar a remediação A1–A4.** Depois dessas correções e de QA pontual das páginas modificadas, o status pode ser promovido a **PASS FINAL DE PUBLICAÇÃO**.
+**A1–A4 foram remediados nos cinco Google Docs e a conferência textual pontual foi concluída. O conjunto está liberado para publicação em formato Doc.**
 
 ## Governança
 
 PR #41 deve permanecer **open / draft / unmerged**.
 
 Nenhum merge, retarget ou fechamento está autorizado.
+
+
+## Remediação concluída — 27/09/2026
+
+### A1 — resolvido
+Foram inseridas referências oficiais da Receita Estadual/SEFAZ-RS para Documentos Eletrônicos/DFe, Preços Dinâmicos da Receita Estadual e Radar do Mercado, conforme o uso efetivo em cada caderno.
+
+### A2 — resolvido
+Os cinco cadernos receberam, na metodologia, um **Quadro de sustentação — séries públicas recentes** com indicador, período, geografia, resultado, natureza e limitação.
+
+### A3 — resolvido
+No Caderno Geral v008, o rótulo de 54,46% do VAB de 2021 foi corrigido para **terciário amplo — comércio, serviços e administração pública**. O valor numérico permaneceu inalterado.
+
+### A4 — resolvido
+As referências bibliográficas passaram a usar o título final **Caderno-Base Territorial — São Borja — v029 — congelamento — 20260927**. A variante remanescente no Caderno Geral também foi saneada, assim como o título do Registro Metodológico.
+
+## Uso de inteligência artificial generativa
+
+Foi incluída nos cinco cadernos uma subseção metodológica específica.
+
+- Ferramenta: ChatGPT.
+- Modelo: GPT-5.6 Sol.
+- Proprietário/desenvolvedor: OpenAI.
+- Referência temporal: 27/09/2026.
+
+A IAG foi utilizada para organização e confronto de evidências, apoio à verificação aritmética e de consistência, teste de cadeias argumentativas, redação/revisão editorial, documentação e rastreabilidade. Não foi tratada como fonte empírica ou bibliográfica, não autorizou a criação de números, categorias ou séries, e não substituiu a validação humana.
+
+A reprodutibilidade permanece ancorada nas fontes, planilhas, scripts, arquivos, commits e regras versionadas, e não na reprodução literal de respostas generativas.
+
+Referência oficial:
+OPENAI. GPT-5.6: inteligência de fronteira que acompanha a sua ambição. 9 jul. 2026. https://openai.com/pt-BR/index/gpt-5-6/. Acesso em: 27 set. 2026.
+
+## Estado pós-remediação
+
+- A1–A4: **RESOLVIDOS**.
+- Transparência sobre IAG: **INCORPORADA**.
+- QA textual pontual: **PASS**.
+- PDFs: **não gerados**, conforme solicitação do usuário.
+- Caderno-Base v029: **permanece congelado**.
+- v030: **não criada**.
+- PR #41: **open / draft / unmerged**.
